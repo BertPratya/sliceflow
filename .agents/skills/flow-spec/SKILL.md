@@ -1,6 +1,6 @@
 ---
 name: flow-spec
-description: Turns an idea into an approved spec: interview the human, write spec.md, run the spec check, get approval. Use when starting a new feature or slice, when a slice is in brainstorm or spec, or when an approved spec must change.
+description: Turns an idea into an approved spec: interview the human, write spec.md, run the spec check, get approval. Use when starting a new feature or slice, when a slice is in spec, or when an approved spec must change.
 ---
 
 # flow-spec
@@ -11,6 +11,11 @@ this folder wherever a step names a `flow` command.
 To change a spec that is already approved, use `change.md` instead.
 
 ## 1. Is it a slice?
+
+If the human has a problem or a vague idea, not yet a feature, explore it
+first, before creating anything (case C in step 3). Brainstorming happens
+outside `flow`. "Not worth building" and "several slices" are fine results:
+then nothing is created, and ideas go to `backlog.md`.
 
 Check the idea against `AGENTS.md` section 1. If it is a small change,
 say so and stop. If it looks bigger than one slice (more than about
@@ -55,10 +60,10 @@ Start from where the human is. Read their first message:
 - **They have a goal but no steps (B):** propose a main path from the code
   and the goal. At each real choice, show the options and your
   recommendation. Then interview.
-- **They have a problem or a vague idea (C):** talk about the problem first:
-  who has it, what they do today, what hurts. Offer 2-3 genuinely different
-  approaches with their trade-offs. Help them pick, then continue as B.
-  "Not worth building" and "split into several slices" are fine results.
+- **They have a problem or a vague idea (C):** this happens in step 1,
+  before the slice exists. Talk about the problem first: who has it, what
+  they do today, what hurts. Offer 2-3 genuinely different approaches with
+  their trade-offs. Help them pick, then continue as B.
 
 If unclear, ask once: "Do you already have a flow in mind, or should I
 propose one?" People may switch for one part of the feature.
@@ -120,7 +125,8 @@ played back a short summary, and the human says it matches what they mean.
 ## 4. Write the spec
 
 Fill `spec.md` from the template, following the rules in its comments.
-The ones most often missed:
+When you fill a section, delete its guidance comment: every reader pays for
+it, and the template keeps the guidance. The ones most often missed:
 - What, never how. No endpoints, tables, libraries, or file names.
 - The walkthrough shows real output, not "an error is shown".
 - Every requirement is testable, in one of the EARS forms, with a `Check:` line.
@@ -141,14 +147,18 @@ Done when: `flow validate` passes and you found nothing to guess.
 ## 6. Spec check
 
 Run `flow doc submit spec`. This starts the spec check: a fresh
-plan reviewer writes up to 5 questions.
+plan reviewer lists every real gap as a question, most important first.
 
 When the questions are back, do not show them yet. Ask the human to read
 the spec first. Show the questions after they say they have read it.
 A list of questions shown first makes people stop reading closely.
 
-Answer the questions with the human, as one more interview round.
-Update the spec, and run `flow validate` again.
+Sort the questions. A fact the code or docs can answer: answer it yourself
+and tell the human in one line. A decision: ask the human, in rounds of at
+most about 5, most important first, each with your recommendation.
+Write the answers into the spec after each round, and run `flow validate` again.
+If the answers added new requirements, the spec check runs again, on the
+new requirements only.
 
 Done when: every question is answered and the spec is updated.
 

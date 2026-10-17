@@ -22,15 +22,17 @@ mode has no task branches: run one task at a time, in the slice worktree. Then:
 
 1. **Start a worker** with the tool the stack profile sets for it: your own
    subagent if it is your tool, otherwise that tool's command line
-   (e.g. `codex exec "…"`). Use this prompt:
+   (e.g. `codex exec -C <slice worktree> --sandbox workspace-write "…"`). Use this prompt:
    *"You are the worker. Read `workflow/roles/worker.md` and follow it.
+   Work only in `<absolute path of the slice worktree>`. All paths are relative to it.
    Your task: `slices/<slice>/tasks/NN-*.md`."*
    In round 2 and later, add: *"Fix the findings in `reviews/task-NN-<round>.md` first."*
    If the task was unblocked, add the unblock note to the prompt.
 2. **Read its `RESULT:` line.**
    - `blocked`: handle it as in step 3 of `SKILL.md`.
    - `review`: record the worker's finding lines (`<id>: fixed | deferred | wontfix`)
-     in `status.md`, then go on.
+     in `status.md`, then go on. A high finding marked wontfix, or deferred
+     without naming a later task: treat the task as `blocked`.
 3. **Run the auto-fix commands, then the checks, yourself** (`AGENTS.md` section 9),
    for the parts the task touched.
    If they fail, add 1 to attempt and send the worker back with the errors.
@@ -48,6 +50,17 @@ mode has no task branches: run one task at a time, in the slice worktree. Then:
 
 Repeat until every task is done or waiting on the human.
 
+## Other commands by hand
+
+- **`flow check --base`:** in the main checkout, on the base branch, run the
+  task checks from `AGENTS.md` section 9. No auto-fix.
+- **`flow task unblock <slice>/<task>`:** set the task's status to `todo`
+  (or `in_progress` if work was kept), attempt to 0, and put your note in the
+  next worker's prompt. Add a Log line.
+- **Interrupted:** save the uncommitted work on a branch:
+  `git switch -c backup/NNNN-NN`, commit, then `git switch <slice branch>`.
+  Set the task back to `todo`.
+
 ## Step 4 by hand: integration review
 
 1. Update the slice branch: `git merge <base branch>`. On a conflict, leave
@@ -61,6 +74,7 @@ Repeat until every task is done or waiting on the human.
    A failure becomes a fix task: back to step 2.
 3. Start it with `flow-review` (kind `integration`, target the whole slice).
 4. For each high or medium finding, write a new fix task in `tasks/` from
-   the task template, and go back to step 2.
+   the task template, whose Goal names the finding ID and quotes it
+   (e.g. `integration-1/F2`). Go back to step 2.
 
 The update in step 6 of `SKILL.md` works the same way.

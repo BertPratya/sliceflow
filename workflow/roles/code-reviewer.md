@@ -32,10 +32,11 @@ your review file. `flow` has already created it and filled the header.
 - the diff of the whole slice against the base branch
 - all tasks, and all findings that are still deferred
 
-> **Bootstrap mode** (no `flow` yet): the lead tells you the review file path
-> and the commits to review. Read the task file, `spec.md`, `plan.md`, the
-> linked project files, and earlier reviews in `reviews/`. The worker's
-> "Assumed" notes are in the commit messages.
+> **Bootstrap mode** (no `flow` yet): the lead tells you the slice worktree,
+> the review file path, and the commits to review. Read the task file,
+> `spec.md`, `plan.md`, the linked project files, earlier reviews in
+> `reviews/`, and the notes on earlier findings in `status.md` → Findings.
+> The worker's "Assumed" notes are in the commit messages.
 
 ## Check, in this order
 
@@ -71,6 +72,8 @@ For every finding the worker marked fixed, wontfix, or deferred:
 **verified**, or **reopened** with the reason. Write it in "Previous findings".
 Check the code itself. Do not trust the worker's note alone.
 A finding deferred to a later task: verify only if that task really covers it.
+Add a new finding only if it is high, or was caused by a fix.
+Otherwise the rounds never end.
 
 If the round fixed a merge conflict, also check that nothing from the
 other tasks on the slice branch was lost or undone.

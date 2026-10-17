@@ -31,13 +31,15 @@ Run `flow brief plan-reviewer <slice>/<review>`. It gives you:
 - what `flow validate` already checked, so you do not repeat it
 - earlier findings, with the lead's notes (round 2 and later)
 
-> **Bootstrap mode** (no `flow` yet): the lead tells you the review kind,
-> the review file path, and the track. Read `spec.md`, and for a plan review
-> also `plan.md`, every file in `tasks/`, the project files in the plan's
-> `touches`, and earlier reviews in `reviews/`.
+> **Bootstrap mode** (no `flow` yet): the lead tells you the slice worktree,
+> the review kind, the review file path, and the track. Read `spec.md`, and
+> for a plan review also `plan.md`, every file in `tasks/`, the project files
+> in the plan's `touches`, earlier reviews in `reviews/`, and the notes on
+> earlier findings in `status.md` → Findings.
 >
-> Also do what `flow validate` would do. Report each problem as a high finding
-> (in a spec check: as a question):
+> Also do what `flow validate` would do. Report each problem as a high finding.
+> A problem in the spec itself goes under "Needs human decision" in a plan
+> review, and is a question in a spec check:
 > - every requirement is `- **R<n>.** …` with a `Check:` line (unit, api, e2e, manual)
 > - numbers are unique, and none from the last approved spec is missing
 >   (`history/spec/`), as the numbering rules in the spec template say
@@ -50,8 +52,10 @@ Read the spec as a worker would: only what is written.
 For a change to an approved spec, the brief names the changed requirements.
 Check only those, and what they affect.
 
-Find the most important gaps, and write them as questions under
-"Needs human decision". At most 5, most important first. Look for:
+Find every real gap, and write each one as a question under
+"Needs human decision", most important first. There is no limit: the lead
+asks the human in rounds. A gap is real only if you can say what a worker
+would have to guess without the answer. Look for:
 
 - a requirement that cannot be tested, or can be read two ways
 - missing failure paths, limits, empty states, permissions
@@ -101,6 +105,9 @@ If you find nothing important, say so in the Summary.
 For every finding the lead marked fixed, wontfix, or deferred:
 **verified**, or **reopened** with the reason. Check the documents
 themselves, not only the lead's note.
+
+Add a new finding only if it is high, or was caused by a fix.
+Otherwise the rounds never end.
 
 ### How to write findings
 

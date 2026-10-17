@@ -17,8 +17,8 @@ If unsure, ask the human. If a small change grows into a feature, stop and sugge
 A slice is one feature in `slices/NNNN-<name>/`, on its own branch and worktree (section 10). Read and edit its files in that worktree, not in the main checkout.
 
 ```
-brainstorm → spec → plan → ready → implementing → integration → preview → done
-                                     any phase → blocked | cancelled
+spec → plan → ready → implementing → integration → preview → done
+                       any phase → blocked | cancelled
 ```
 
 When each phase starts: `workflow/formats/lifecycle.md`.
@@ -50,7 +50,7 @@ The lead proposes a track in `plan.md`. The human approves it with the plan.
 
 | | simple | complex |
 |---|---|---|
-| Spec check | short: up to 5 questions, before the human approves the spec | same |
+| Spec check | every real gap as a question, before the human approves the spec; the lead asks them in rounds | same |
 | Plan review | light: checks 1-4 in `workflow/roles/plan-reviewer.md` | full |
 | Task review | core tasks only | every task |
 | Integration review | always | always |
@@ -78,7 +78,7 @@ If you are the main chat agent, you are the lead. Read your role file before sta
 
 ## 5. Stop rules
 
-Stop, mark the task `blocked`, and tell the human in plain words when:
+Stop, mark the task (for a plan or integration review: the slice) `blocked`, and tell the human in plain words when:
 
 - a task fails its checks 3 times since its last review
 - a review (plan, task, or integration) still does not pass after 3 rounds
@@ -101,7 +101,7 @@ Stop, mark the task `blocked`, and tell the human in plain words when:
 | Skill | Use when |
 |---|---|
 | `flow-setup` | checking whether a repo is ready for the workflow, and setting up what is missing: workflow files, checks, test dependencies, hooks, CI |
-| `flow-spec` | brainstorming a feature and writing its spec |
+| `flow-spec` | turning an idea into an approved spec |
 | `flow-plan` | writing plan, contract, and tasks, and getting them reviewed |
 | `flow-implement` | running the tasks with workers and reviewers |
 | `flow-review` | starting a review (spec, plan, task, or whole slice) in a fresh context, and acting on its verdict |
@@ -174,7 +174,7 @@ Test dependencies (checks start these themselves; never shared services):
 Known gaps (chosen in setup; revisit when possible):
 
 - Workflow files (Markdown) have no automatic checks. Reviewers check them by hand. Chosen by bert-pratya, 2026-10-17.
-- No pre-commit hook and no CI job yet: errors are found only by the checks a worker runs. Slice 0001's setup task adds them. Chosen by bert-pratya, 2026-10-17.
+- No pre-commit hook and no CI job yet: errors are found only by the checks a worker runs. Tracked in `backlog.md`, for the first CLI slice. Chosen by bert-pratya, 2026-10-17.
 
 ## 10. Project rules
 
@@ -185,10 +185,10 @@ Known gaps (chosen in setup; revisit when possible):
 - Task branch: `task/NNNN-NN` from the slice branch, worktree `.flow/worktrees/task-NNNN-NN/`
 - Small changes: `fix/<short-name>` from `main`
 - After the human approves the result: the agent merges into `main` and pushes to `origin`
-- Remotes: `origin` is private and gets the full history. `public` gets only releases: never push to it. At a release, the human asks, and the project is pushed there as one squashed commit. A local pre-push hook refuses anything else.
+- Remotes: `origin` is private and gets the full history. `public` gets only releases: never push to it. At a release, the human asks, and the project is pushed there as one squashed commit. A local pre-push hook refuses anything else (it lives only in `.git/hooks/`: install it again after cloning).
 - Slices update from `main` before the integration review, and again just before merging. A conflict becomes a fix task.
 - Parallel slices: merge one at a time.
-- Commits: one per task, plus one per fix round, message `NNNN/NN: <what changed>`
+- Commits: `flow` commits after every command that changes something: `NNNN: <what happened>`, and task work as `NNNN/NN: <what changed>`. Nobody commits slice files by hand (bootstrap mode: the lead does, at the same moments).
 
 ### Other rules
 

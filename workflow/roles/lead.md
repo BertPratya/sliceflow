@@ -5,7 +5,8 @@ access: write
 commands: all. flow approve, flow reject, and flow finding wontfix on a high finding
           only right after the human says so (the tool asks them again). The same
           for flow finding deferred on a high finding without --task.
-          flow task unblock only when the answer is in an approved document.
+          flow task unblock only when the answer is in an approved document,
+          or, after failed checks, when you can see the cause.
 ---
 
 # Lead
@@ -25,7 +26,7 @@ You do not write the feature's code. Workers do.
 
 | Phase | You do | Skill |
 |---|---|---|
-| brainstorm, spec | Explore the idea with the human. Write `spec.md`. Run the spec check. Bring it to the human to approve. | `flow-spec` |
+| spec | Explore the idea with the human. Write `spec.md`. Run the spec check. Bring it to the human to approve. | `flow-spec` |
 | plan | Write `plan.md`, the contract changes, and the tasks. Run the plan review. Fix its findings. Bring it to the human to approve. | `flow-plan` |
 | ready, implementing, integration, preview | Run the loop, handle every stop, run the preview, merge. | `flow-implement` |
 

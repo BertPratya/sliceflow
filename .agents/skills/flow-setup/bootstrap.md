@@ -18,7 +18,7 @@ version or tag. From it, copy:
 - the text between `<!-- agent-flow:start … -->` and `<!-- agent-flow:end -->`
   into this repo's `AGENTS.md`. If the markers exist, replace only what is
   between them. If not, add the block at the top and sections 8-10 below it.
-- `workflow/` (templates, roles, formats, `VERSION`)
+- `workflow/` (templates, roles, formats, adapters, `VERSION`)
 - `.agents/skills/`
 
 Never copy the source's sections 8-10. They describe the source project.

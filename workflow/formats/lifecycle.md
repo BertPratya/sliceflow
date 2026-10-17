@@ -5,16 +5,17 @@ How slice phases, documents, tasks, findings, and checks change status, and how 
 ## Slice phases
 
 ```
-brainstorm → spec → plan → ready → implementing → integration → preview → done
-                                     any phase → blocked | cancelled
+spec → plan → ready → implementing → integration → preview → done
+                       any phase → blocked | cancelled
 ```
 
 The phase changes only when its event happens. `flow` sets it (bootstrap mode: the lead, at the same moment).
 
+Brainstorming is not a phase. Exploring a vague idea, or the whole system, happens before a slice exists, outside `flow`. A slice is created when the idea is one clear feature.
+
 | Phase | Starts when | What happens in it |
 |---|---|---|
-| brainstorm | `flow slice new` | Talking about the idea. No spec yet. |
-| spec | the first spec draft is written | The spec, the spec check, the human's approval. |
+| spec | `flow slice new` | The interview, the spec, the spec check, the human's approval. |
 | plan | the human approves the spec | The plan and tasks, the plan review, the human's approval. |
 | ready | the human approves the plan | Waiting for `flow run` (a stacked slice also waits until the earlier slice is merged). |
 | implementing | the first worker starts | Workers build, reviewers check, `flow` merges tasks. |
@@ -31,13 +32,17 @@ The phase changes only when its event happens. `flow` sets it (bootstrap mode: t
 Applies to `spec.md`, `plan.md`, and a slice's change to a contract or other project file.
 
 ```
-draft → in_review → approved
+draft → in_review → awaiting_approval → approved
 ```
 
-- Rejected, or edited while in review: back to draft.
-- Edited after approval: the status becomes `changed`, then changed → in_review → approved. Every change needs a new approval.
+The status shows who has the ball: `draft` the lead, `in_review` the reviewer, `awaiting_approval` the human.
+
+- `flow` sets the status when the review is submitted: no questions or findings → awaiting_approval; questions or findings → back to draft.
+- Spec, submitted again after answering its spec check: no new requirements → awaiting_approval directly (no new reviewer); new requirements → in_review, and the check covers only the new ones.
+- Plan, submitted again after fixing findings: always in_review (the next round verifies the fixes).
+- Only an `awaiting_approval` document can be approved. Rejected: back to draft.
+- Edited after approval: the status becomes `changed`, then it is submitted again as above. Every change needs a new approval.
 - A contract counts as edited when the slice's change to the file no longer matches the last approved patch in `history/contract/`.
-- A spec edited to answer its spec check can be approved directly. The spec check has only one round.
 - The plan, its tasks, and the slice's contract changes are approved together, with one approval. `flow` still records and snapshots each one.
 - A fix task added after the plan is approved (from the integration review, a failing slice check, a conflict, or the preview) needs no new approval when it covers only requirements in the approved spec and changes no plan, contract, or decision. The lead tells the human about each one in one line. Anything else is a plan change (`flow-plan` → `change.md`).
 
@@ -53,7 +58,7 @@ todo → in_progress → in_review → done
 - Simple track, non-core task: in_progress → done when checks pass.
 - done means merged into the slice branch (see "Branches and worktrees").
 - The merge fails (a conflict, or checks fail after the rebase): back to in_progress, for the same worker. Not a failure: it does not count toward attempt or the stop rules.
-- A stop rule hits: blocked. The lead resolves it when the answer is already in an approved document; otherwise the human does. Then back to todo or in_progress.
+- A stop rule hits: blocked. The lead resolves it when the answer is already in an approved document, or, after failed checks, when it can see the cause; otherwise the human does. Then back to todo or in_progress. Unblocking sets attempt to 0.
 - Interrupted: back to todo. The work stays on its task branch (bootstrap mode: on a backup branch). An interruption is not a failure.
 - Removed by a re-plan: cancelled.
 - done is final. A problem found later becomes a new fix task.
@@ -68,9 +73,10 @@ Branch names and the worktree folder are in the git policy (`AGENTS.md` section 
 - A stacked slice can be specced and planned, but it waits ("waiting for NNNN", calculated) until the earlier slice is merged. Then it updates from the base branch, and `flow run` can start it.
 - If the earlier slice's plan or contract changes after the stacked slice's plan is approved, the stacked plan is stale. The lead checks what is affected; a needed change is a plan change (`flow-plan` → `change.md`).
 - If the earlier slice is cancelled, the stacked slice moves onto the base branch and goes back to phase plan.
-- `flow slice move <slice> --after <NNNN | base>` moves a slice that holds only documents (phase brainstorm, spec, or plan). After that, no moving.
+- `flow slice move <slice> --after <NNNN | base>` moves a slice that holds only documents (phase spec or plan). After that, no moving.
 - `flow validate` warns when two unmerged slices change the same file from their plans' `touches` and neither is stacked on the other.
 - When a task starts, `flow` creates its task branch from the newest slice branch, in its own worktree. The worker works only there.
+- When the worker finishes (`flow task review`), `flow` commits its work on the task branch: `NNNN/NN: <what changed>`, with the "Assumed" note in the body.
 - A task starts when every task in its `depends_on` is done, its `touches` do not overlap a running task's, and a worker slot is free (a `flow run` setting, default 1). Tasks whose `touches` overlap never run at the same time: the lower number goes first.
 - When a task passes its review (or its checks, if it needs no review), `flow run` merges it. One task at a time:
   1. Rebase the task branch onto the newest slice branch.
@@ -86,8 +92,14 @@ Branch names and the worktree folder are in the git policy (`AGENTS.md` section 
 ## Findings
 
 ```
-open → fixed | wontfix | deferred (worker) → verified | reopened (reviewer)
+open → fixed | wontfix | deferred (fixer) → verified | reopened (reviewer)
 ```
+
+The fixer is the worker for a task review, the lead for a plan review, and the fix task's worker for an integration review. Every change is recorded by a `flow` command; the Findings list in `status.md` is generated from it, never edited.
+
+- Closed means verified: the reviewer accepted the fix, the wontfix, or the deferral.
+- A deferred finding stays visible ("deferred → task 05") until that task is done and its review, or the integration review, verifies it.
+- Low findings: marking them is optional. When the slice is done, unmarked lows close as "left as is" and are listed once in the slice's final summary. Lows titled "later" go to `backlog.md`.
 
 - Only a human can mark a high finding wontfix.
 - A high finding can be deferred only to a later task in the same slice that is not done yet (`--task <NN>`). Deferring it out of the slice (backlog, a later slice) needs the human, like wontfix.
@@ -122,7 +134,7 @@ Checks are self-contained:
 
 Running checks:
 
-- `flow check` first runs the auto-fix commands (stack profile) for the parts a task touched, then the task checks, and records the result. `flow check --base` never auto-fixes. `flow check --slice` runs the task checks for every part the slice touched, then the slice checks. `flow check --base` runs the task checks on the base branch.
+- `flow check` first runs the auto-fix commands (stack profile) for the parts a task touched, then the task checks, and records the result. `flow check --slice` runs the task checks for every part the slice touched, then the slice checks. `flow check --base` runs the task checks on the base branch, without auto-fix.
 - A task moves to review or done only after `flow check` passes. While working you may run single tests. Only `flow check` counts.
 - If the checks already fail on the base branch, report it. It does not count against the task.
 - Every part a task touches must have checks before coding starts. If a slice adds a new part, its first task sets up the checks for it.

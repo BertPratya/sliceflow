@@ -21,12 +21,19 @@ Done when: all of these are true.
 
 ## 2. Run the loop
 
-- **Claude Code:** run `flow run` as a background command. You are woken when it exits.
-- **Cursor, or any tool without background commands:** run `flow run --detach`,
-  then `flow wait`. If it says "still running", run `flow wait` again.
-  While waiting, only wait.
+Start it right after the human approves the plan, without asking. Wait
+only if the slice is stacked and the earlier slice is not merged, or the
+human said to hold.
 
-Done when: `flow run` has exited and you have its report.
+Run `flow run <slice> --detach`, then `flow wait <slice>` (in Claude Code,
+as a background command). `flow wait` returns when the run ends, or on an
+alert. While waiting, only wait.
+
+On an alert that a worker is over its time limit: if it is still active,
+run `flow wait` again. If it has been silent, or you are unsure, stop it
+(`flow task stop <slice>/<task>`) or ask the human.
+
+Done when: the run has ended and you have its report.
 
 ## 3. Handle the stop
 

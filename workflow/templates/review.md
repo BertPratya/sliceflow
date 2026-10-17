@@ -2,7 +2,7 @@
 review: {{review}}            # <kind>-<target>-<round> (integration: integration-<round>), same as the file name
 slice: {{slice}}
 kind: {{kind}}                # spec | plan | task | integration
-target: {{target}}            # e.g. { spec: R001 }, { plan: R001 }, { task: "02", commit: a1b2c3d }
+target: {{target}}            # e.g. { spec: R001 }, { plan: R001 }, { task: "02", commits: [a1b2c3d] }
 round: {{round}}
 reviewer: {{reviewer}}        # role (tool), e.g. code-reviewer (codex)
 # --- managed by flow, do not edit ---
@@ -23,14 +23,26 @@ submitted_at: none
      - else                                    → pass  (low findings alone pass)
 
      Spec reviews are short: fill only Summary and "Needs human decision"
-     (at most 5 questions). Write "(none)" in the other sections.
+     (every real gap, most important first). Write "(none)" in the other sections.
+
+     flow reads only these lines, so keep their exact form (case does not matter):
+     - finding headings: ### F1 [high|medium|low] title
+     - "Previous findings" lines: - <review>/F1: verified | reopened. why
+     - "Requirements check" lines: - R1: ok | fails, see F2 | manual
+     - whether "Needs human decision" is empty
+     flow submit refuses a file it cannot read, and says which line to fix.
 
      Report real problems only. Do not invent issues to look thorough.
      If everything is fine, say so and leave Findings as "(none)".
      Sections that do not apply: write "(none)". -->
 
 ## Summary
-<!-- 1-3 sentences. Overall impression, and the main problem if there is one. -->
+<!-- 1-3 sentences. Overall impression, and the main problem if there is one.
+
+     Example:
+     The task covers R5 and R6 and the tests are real. One high problem:
+     an expired code returns 500 instead of 410 (F1). -->
+
 
 ## Previous findings
 <!-- Round 2 and later. Every finding from the last round that the worker
@@ -68,5 +80,11 @@ submitted_at: none
      - R4: manual, goes to the preview checklist -->
 
 ## Needs human decision
-<!-- Questions only the human can answer, and why each one matters.
-     Mostly for plan reviews. Anything here makes the verdict needs_human. -->
+<!-- Questions only the human can answer. Each one says what is unclear,
+     and what a worker would have to guess without the answer.
+     In a spec check, every gap goes here. Anything here makes the verdict needs_human.
+
+     Example:
+     - Q1. What happens when the code expires while the user is approving?
+       R7 and R9 do not say. A worker would have to guess: cancel, or retry. -->
+

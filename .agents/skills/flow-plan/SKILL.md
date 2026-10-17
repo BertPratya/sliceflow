@@ -33,7 +33,10 @@ Done when: you can name every part that will change, and how each one is tested 
 ## 3. Settle the hard decisions with the human
 
 Make small technical choices yourself, and record each one as a TD.
-Ask the human only about a decision that is all three:
+The human decides how involved they are: if they want to settle more of
+the plan with you, play back the approach, the flows, and the task split
+for their agreement before you write the tasks. By default, ask the human
+only about a decision that is all three:
 - **hard to reverse:** changing it later is expensive
 - **surprising:** a future reader would ask "why this way?"
 - **a real trade-off:** there are genuine alternatives
@@ -57,12 +60,14 @@ Done when: every risky unknown has a result written as a TD.
 ## 5. Write plan.md
 
 Fill `plan.md` from the template, following the rules in its comments.
+When you fill a section, delete its guidance comment. The template keeps it.
 The ones most often missed:
 - The plan never adds scope. Anything not in the spec needs a spec change (`flow-spec`).
 - Every flow and shared rule starts with `Covers: R…`.
 - Interfaces list and link the contract files. They never copy them.
 - Every decision says why, and the main option rejected.
-- `touches` lists every project file the slice changes.
+- `touches` lists every contract, data model, or other living doc the slice
+  changes (`AGENTS.md` section 2). Code goes in the tasks' `touches`.
 - If the slice depends on a known gap (e.g. database tests are skipped), say how
   the affected requirements are checked instead, usually in the preview.
 
@@ -80,6 +85,8 @@ Done when: every Interface in the plan matches the contract files.
 ## 7. Split into tasks
 
 Write one file per task, `tasks/NN-<short-name>.md`, from the task template.
+Delete each guidance comment once its section is filled: workers and
+reviewers read task files many times.
 
 - **Order:** setup first (checks for any new part, see `workflow/formats/lifecycle.md`),
   then contract, backend, frontend, integration, docs. A `contract` task
@@ -112,10 +119,16 @@ Done when: `flow validate` passes and no task needs guessing.
 Run `flow doc submit plan`. This starts the plan review: a fresh plan
 reviewer checks the spec, plan, contracts, and tasks together.
 
-You wrote the plan, so you fix its findings. For each one run
-`flow finding fixed | deferred | wontfix` with a note. Then submit again
-for the next round. Questions under "Needs human decision" go to the human.
-A spec problem needs `flow-spec` (`change.md`).
+You wrote the plan, so you fix its findings. Fix a finding alone when it
+needs no decision from the human. Take it to the human, with your
+recommendation, when it is under "Needs human decision", when the fix is a
+hard decision (the test in step 3), or when you want to mark a high finding
+wontfix or defer it out of the slice. A spec problem needs `flow-spec` (`change.md`).
+
+For each finding run `flow finding fixed | deferred | wontfix` with a note.
+Then submit again for the next round. In round 2 and later, the reviewer
+checks your fixes, and adds a new finding only if it is high or was caused
+by a fix.
 
 Done when: the review passes.
 

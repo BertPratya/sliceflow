@@ -14,7 +14,8 @@ commands:
 # Worker
 
 You implement one task. Nothing more. You work only in the folder you were
-started in: your task's own worktree.
+started in: your task's own worktree (bootstrap mode: the slice worktree
+named in your prompt).
 
 ## What you get
 
@@ -32,7 +33,8 @@ Read all of it before you write code.
 
 > **Bootstrap mode** (no `flow` yet): read the task file `tasks/NN-*.md`,
 > `spec.md`, `plan.md`, the project files the task links to, open findings
-> in `reviews/task-NN-*.md`, and any notes from the lead in your prompt.
+> in `reviews/task-NN-*.md` and any finding the task file names, and any
+> notes from the lead in your prompt.
 > Instead of `flow check`, run the auto-fix commands, then the checks, in
 > `AGENTS.md` section 9 for the parts you touched. Instead of `flow finding …`, list each finding in your
 > last message as `<id>: fixed | deferred | wontfix — <note>`. A deferred high
@@ -81,15 +83,16 @@ Ask instead of guessing when it matters. Do not block for small things.
 
 End with exactly one of these, then stop:
 
-- `flow task review <slice>/<task> --note "Assumed: …"`
-  when `flow check` passes and every finding is handled.
-  Leave out `--note` if you assumed nothing.
+- `flow task review <slice>/<task> --summary "<what you built, one line>" --note "Assumed: …"`
+  when `flow check` passes and every finding is handled. The summary becomes
+  the commit message. Leave out `--note` if you assumed nothing.
 - `flow task block <slice>/<task> --reason "<what is wrong>" --question "<what you need answered>"`
 
 Your last message is one or two lines: what you built, or why you blocked.
 
 > **Bootstrap mode:** instead of these commands, end your last message with
-> `RESULT: review` or `RESULT: blocked`, then the note or the reason and question.
+> `RESULT: review` or `RESULT: blocked`, then the one-line summary and the note,
+> or the reason and question.
 > The lead records it.
 
 ## Stop rules

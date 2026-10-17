@@ -34,14 +34,21 @@ Record the new status and your note in the Findings table of `status.md`.
 
 ## `flow approve plan`
 
-Only after the human has just said they approve:
+Only when the plan is `awaiting_approval`, and the human has just said they approve:
 1. Set the plan header: `status: approved`, `revision: R<next>`,
    `approved_at` (now, UTC), `approved_by` (the human's name).
-2. Copy the plan to `history/plan/R<next>.md`.
-3. Save the slice's contract changes: `git diff <base branch> -- <files in touches>`
+   `R<next>` is the next revision, 3 digits: R001, R002, …
+2. Copy the plan to `history/plan/R<next>.md`, and `tasks/` to
+   `history/plan/R<next>-tasks/`.
+3. Save the slice's contract changes:
+   `git diff $(git merge-base <base branch> HEAD) -- <files in touches>`
    into `history/contract/R<next>.patch`.
 4. Commit: `NNNN: plan R<next> approved`.
 5. Set the phase in `status.md` to `ready`.
+
+## `flow reject plan`
+
+Set the plan header `status: draft`, and add a Log line with the reason.
 
 ## `flow diff plan`
 
