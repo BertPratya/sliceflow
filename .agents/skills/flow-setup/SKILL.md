@@ -63,7 +63,7 @@ Do what the human chose, in this order. Skip what is already ok.
    or `flow init`: the `AGENTS.md` block between the `agent-flow` markers,
    `workflow/`, and `.agents/skills/`. Never touch sections 8-10 when updating.
 2. **`AGENTS.md` sections 8-10:** project, stack profile (parts, connections,
-   tools per role, always allowed files, checks with tiers, test dependencies,
+   tools per role, always allowed files, auto-fix commands, checks with tiers, test dependencies,
    known gaps), and project rules with the git policy.
 3. **Tool adapters** for the tools the team uses, as `workflow/adapters/README.md` says.
 4. **Hooks and CI:** pre-commit runs `flow sync` and `flow validate`; Stop hooks

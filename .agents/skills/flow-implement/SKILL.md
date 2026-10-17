@@ -13,9 +13,11 @@ this folder for steps 2 and 4.
 
 - The plan is approved, with its tasks. `flow validate` passes.
 - The slice branch exists, as the git policy says (`AGENTS.md` section 10).
+- A stacked slice: the earlier slice is merged, and this slice has been
+  updated from the base branch. If not, tell the human it is waiting, and stop.
 - `flow check --base` passes. If the base branch already fails, tell the human and stop.
 
-Done when: all three are true.
+Done when: all of these are true.
 
 ## 2. Run the loop
 

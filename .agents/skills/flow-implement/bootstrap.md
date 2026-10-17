@@ -31,7 +31,8 @@ mode has no task branches: run one task at a time, in the slice worktree. Then:
    - `blocked`: handle it as in step 3 of `SKILL.md`.
    - `review`: record the worker's finding lines (`<id>: fixed | deferred | wontfix`)
      in `status.md`, then go on.
-3. **Run the project checks yourself** (`AGENTS.md` section 9), for the parts the task touched.
+3. **Run the auto-fix commands, then the checks, yourself** (`AGENTS.md` section 9),
+   for the parts the task touched.
    If they fail, add 1 to attempt and send the worker back with the errors.
    After 3 failures since the last review, the task is blocked.
 4. **Check the changed files** are inside the task's `touches`, plus the

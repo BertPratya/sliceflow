@@ -16,8 +16,16 @@ Check the idea against `AGENTS.md` section 1. If it is a small change,
 say so and stop. If it looks bigger than one slice (more than about
 25-30 requirements), propose how to split it.
 
-Run `flow slice new <name>`. It creates the slice branch, its worktree, the
-folder, and `spec.md` from the template. From now on, work in that worktree.
+Before creating it, run `flow status` to list the slices not merged yet.
+If the new slice needs something from one of them (its code, a contract,
+the data model, or a decision), propose stacking it on that slice: it can
+be planned now, but built only after that slice is merged. Otherwise it
+starts from the base branch. The human confirms.
+(`workflow/formats/lifecycle.md` → Branches and worktrees.)
+
+Run `flow slice new <name>`, with `--after <NNNN>` when stacked. It creates
+the slice branch, its worktree, the folder, and `spec.md` from the template.
+From now on, work in that worktree.
 
 Done when: the human agrees it is one slice, and the slice folder exists.
 

@@ -19,6 +19,8 @@ Check by hand:
 - each task's requirements match the spec word for word
 - `depends_on` has no loops and names real tasks
 - each task's `touches` is inside the code folders, and never includes a file in the plan's `touches`
+- warning: another unmerged slice changes a file in the plan's `touches`, and
+  neither slice is stacked on the other (read the plans in the other slice worktrees)
 - Open questions in the plan is empty
 
 ## `flow doc submit plan`

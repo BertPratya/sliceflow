@@ -24,6 +24,8 @@ Facts are your job. Look up:
 - how those parts are tested today
 - the project's contracts and data model
 - earlier slices' technical decisions (TD…), so you do not contradict them by accident
+- if the slice is stacked: the earlier slice's plan and contracts on this
+  branch. Record its plan revision in `based_on` (`after`).
 - the test dependencies and known gaps in the stack profile
 
 Done when: you can name every part that will change, and how each one is tested today.

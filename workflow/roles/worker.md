@@ -33,8 +33,8 @@ Read all of it before you write code.
 > **Bootstrap mode** (no `flow` yet): read the task file `tasks/NN-*.md`,
 > `spec.md`, `plan.md`, the project files the task links to, open findings
 > in `reviews/task-NN-*.md`, and any notes from the lead in your prompt.
-> Instead of `flow check`, run the checks in `AGENTS.md` section 9 for the
-> parts you touched. Instead of `flow finding …`, list each finding in your
+> Instead of `flow check`, run the auto-fix commands, then the checks, in
+> `AGENTS.md` section 9 for the parts you touched. Instead of `flow finding …`, list each finding in your
 > last message as `<id>: fixed | deferred | wontfix — <note>`. A deferred high
 > finding names the later task, e.g. `deferred — task 05`. The lead records them.
 

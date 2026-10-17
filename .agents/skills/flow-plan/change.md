@@ -1,8 +1,9 @@
 # flow-plan: changing an approved plan
 
 Use this when the plan is already approved and something must change:
-the spec changed, a worker or reviewer found the plan wrong, or the human
-changed a decision. A fix task that only fixes existing requirements does
+the spec changed, a worker or reviewer found the plan wrong, the human
+changed a decision, or the slice this one is stacked on changed its plan
+or contract. A fix task that only fixes existing requirements does
 not need this (`workflow/formats/lifecycle.md` → Documents).
 
 1. **Write down the reason** in one or two sentences. It goes with the approval.

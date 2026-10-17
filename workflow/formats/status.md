@@ -17,7 +17,7 @@
 
 The sections always appear in this order. A section with nothing in it says "(none)".
 
-1. **Header.** Slice ID and title, then phase, track, branch, and last update time (UTC).
+1. **Header.** Slice ID and title, then phase, track, branch, the slice it is stacked on (if any, e.g. `After: 0001 (waiting until merged)`), and last update time (UTC).
 2. **Needs human.** Everything waiting on a person: blocked tasks with the reason, reviews with verdict `needs_human`, documents waiting for approval, and high findings a worker asked to mark wontfix. One line each.
 3. **Documents.** `spec.md`, `plan.md`, and every project file in the plan's `touches`. Status, revision, and who approved it and when.
 4. **Tasks.** A progress line, then one row per task, in task order.

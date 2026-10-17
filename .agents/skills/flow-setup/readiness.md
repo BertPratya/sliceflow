@@ -32,7 +32,8 @@ Levels:
 | Item | Level | If not ok |
 |---|---|---|
 | Every part has checks for format, lint, types (where the language has them), test, build | recommended | 1. Use the existing tool (Makefile, package script). 2. Add a standard tool: a new dependency, so the human must agree. 3. Skip: reviewers look for those mistakes by hand, which is less reliable. |
-| Checks pass on the base branch | required | The human fixes it, as a small change or a slice. Slices cannot start on a failing base: every task would fail for reasons it did not cause. |
+| Auto-fix commands for every formatter and linter that can fix (e.g. `gofmt -w`, `eslint --fix`, `prettier --write`) | recommended | Add them to the stack profile. `flow check` runs them before the checks. If skipped: workers fix formatting by hand, and checks fail more often. |
+| Checks pass on the base branch | required | Parts that do not exist yet are skipped (`workflow/formats/lifecycle.md` → Checks). Otherwise the human fixes it, as a small change or a slice. Slices cannot start on a failing base: every task would fail for reasons it did not cause. |
 | Slow tests (end-to-end, browser) are in the `slice` tier | recommended | Move them. If skipped: every task waits for them. |
 | Checks are safe to run twice at the same time: free ports, unique container names, own temp folders | optional | Fix the checks. Test it by running the task checks in two worktrees at once. If skipped: `flow` runs one task at a time. |
 

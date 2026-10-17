@@ -16,7 +16,7 @@ The phase changes only when its event happens. `flow` sets it (bootstrap mode: t
 | brainstorm | `flow slice new` | Talking about the idea. No spec yet. |
 | spec | the first spec draft is written | The spec, the spec check, the human's approval. |
 | plan | the human approves the spec | The plan and tasks, the plan review, the human's approval. |
-| ready | the human approves the plan | Waiting for `flow run`. |
+| ready | the human approves the plan | Waiting for `flow run` (a stacked slice also waits until the earlier slice is merged). |
 | implementing | the first worker starts | Workers build, reviewers check, `flow` merges tasks. |
 | integration | all tasks are done | Update from the base branch, slice checks, integration review. |
 | preview | the integration review passes | The human tries the slice. |
@@ -64,6 +64,12 @@ todo → in_progress → in_review → done
 Branch names and the worktree folder are in the git policy (`AGENTS.md` section 10).
 
 - `flow slice new` creates the slice branch and its worktree. The slice's documents, state, and finished tasks live there.
+- A new slice starts from the base branch. `flow slice new <name> --after <NNNN>` starts it from that slice's branch instead (stacking), when it needs something from that unmerged slice: its code, a contract, the data model, or a decision. The lead proposes it; the human confirms. A slice stacks on at most one other slice. If it needs two, write its spec now and plan it after one of them is merged.
+- A stacked slice can be specced and planned, but it waits ("waiting for NNNN", calculated) until the earlier slice is merged. Then it updates from the base branch, and `flow run` can start it.
+- If the earlier slice's plan or contract changes after the stacked slice's plan is approved, the stacked plan is stale. The lead checks what is affected; a needed change is a plan change (`flow-plan` → `change.md`).
+- If the earlier slice is cancelled, the stacked slice moves onto the base branch and goes back to phase plan.
+- `flow slice move <slice> --after <NNNN | base>` moves a slice that holds only documents (phase brainstorm, spec, or plan). After that, no moving.
+- `flow validate` warns when two unmerged slices change the same file from their plans' `touches` and neither is stacked on the other.
 - When a task starts, `flow` creates its task branch from the newest slice branch, in its own worktree. The worker works only there.
 - A task starts when every task in its `depends_on` is done, its `touches` do not overlap a running task's, and a worker slot is free (a `flow run` setting, default 1). Tasks whose `touches` overlap never run at the same time: the lower number goes first.
 - When a task passes its review (or its checks, if it needs no review), `flow run` merges it. One task at a time:
@@ -116,7 +122,8 @@ Checks are self-contained:
 
 Running checks:
 
-- `flow check` runs the task checks for the parts a task touched, and records the result. `flow check --slice` runs the task checks for every part the slice touched, then the slice checks. `flow check --base` runs the task checks on the base branch.
+- `flow check` first runs the auto-fix commands (stack profile) for the parts a task touched, then the task checks, and records the result. `flow check --base` never auto-fixes. `flow check --slice` runs the task checks for every part the slice touched, then the slice checks. `flow check --base` runs the task checks on the base branch.
 - A task moves to review or done only after `flow check` passes. While working you may run single tests. Only `flow check` counts.
 - If the checks already fail on the base branch, report it. It does not count against the task.
 - Every part a task touches must have checks before coding starts. If a slice adds a new part, its first task sets up the checks for it.
+- A part whose folders (stack profile) do not exist yet has nothing to check: its checks are skipped. The task that creates the part makes its checks pass.

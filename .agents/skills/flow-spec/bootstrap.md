@@ -14,13 +14,19 @@ first spec draft, `plan` when the human approves the spec.
 1. Find the highest slice number in `slices/` on the base branch and in the
    names of `slice/*` branches. The new slice is the next one, 4 digits: `0007-<name>`.
 2. Create the branch and worktree the git policy names (`AGENTS.md` section 10):
-   `git worktree add <worktree folder> -b <slice branch> <base branch>`.
+   `git worktree add <worktree folder> -b <slice branch> <start>`.
+   `<start>` is the base branch, or the earlier slice's branch when stacked.
    Do every following step, and all later work on the slice, in that worktree.
 3. Create `slices/NNNN-<name>/` with `tasks/`, `reviews/`, and `history/`.
 4. Copy `workflow/templates/spec.md` to `spec.md`. Fill `slice`, `title`,
    and `created` (today, UTC).
-5. Create `status.md` with the header (phase `brainstorm`) and every other
-   section "(none)".
+5. Create `status.md` with the header (phase `brainstorm`, and `After: NNNN`
+   when stacked) and every other section "(none)".
+
+## `flow slice move <slice> --after <NNNN | base>`
+
+Only in phase brainstorm, spec, or plan. In the slice worktree:
+`git rebase --onto <new start> <old start>`. Update `After:` in `status.md`.
 
 ## `flow validate`
 

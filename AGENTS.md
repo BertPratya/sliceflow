@@ -1,6 +1,6 @@
 # AGENTS.md
 
-<!-- agent-flow:start v0.1.0 -->
+<!-- agent-flow:start v0.2.0 -->
 <!-- Reusable workflow block. Same in every repo. Do not edit per project. -->
 
 ## 1. How we work

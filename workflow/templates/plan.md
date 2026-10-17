@@ -2,7 +2,7 @@
 slice: {{slice}}
 title: {{title}}
 created: {{date}}
-based_on: { spec: {{spec_revision}} }
+based_on: { spec: {{spec_revision}} }   # stacked slice, also: after: { slice: "0001", plan: R1 }
 track: {{track}}              # simple | complex
 touches:                      # project files this slice changes (contract, data model, ...)
   # - api/openapi.yaml
