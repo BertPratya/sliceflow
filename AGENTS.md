@@ -143,11 +143,18 @@ Always allowed in any task (no need to list in `touches`):
 - Generated code: `internal/api/gen/`, `web/src/api/gen/`
 - Lock files: `go.sum`, `web/package-lock.json`, only when `go.mod` / `package.json` did not change
 
+Auto-fix, run by `flow check` before the checks, for the parts a change touches. They change only layout, or apply fixes the tool marks as safe:
+
+| Part | Folder | Command |
+|---|---|---|
+| Go | `.` | `gofmt -w cmd internal` |
+| Web | `web/` | `npx eslint --fix .` |
+
 Checks, for the parts a change touches:
 
 | Part | Tier | Folder | Command | Passes when |
 |---|---|---|---|---|
-| Go | task | `.` | `gofmt -l .` | it prints nothing |
+| Go | task | `.` | `gofmt -l cmd internal` | it prints nothing |
 | Go | task | `.` | `go vet ./...` | exit code 0 |
 | Go | task | `.` | `go test ./...` | exit code 0 |
 | Web | task | `web/` | `npx tsc --noEmit` | exit code 0 |
@@ -164,14 +171,17 @@ Test dependencies (checks start these themselves; never shared services):
 | Git repositories | CLI, dashboard | yes | temporary repos created by the tests |
 | GitHub API | dashboard (later) | fake | fake server in the tests |
 
-Known gaps (chosen in setup; revisit when possible): (none)
+Known gaps (chosen in setup; revisit when possible):
+
+- Workflow files (Markdown) have no automatic checks. Reviewers check them by hand. Chosen by bert-pratya, 2026-10-17.
+- No pre-commit hook and no CI job yet: errors are found only by the checks a worker runs. Slice 0001's setup task adds them. Chosen by bert-pratya, 2026-10-17.
 
 ## 10. Project rules
 
 ### Git policy
 
 - Base branch: `main`
-- Slice branch: `slice/NNNN-<name>` from `main`, worktree `.flow/worktrees/NNNN-<name>/`
+- Slice branch: `slice/NNNN-<name>` from `main` (or from another slice's branch when stacked, `--after`), worktree `.flow/worktrees/NNNN-<name>/`
 - Task branch: `task/NNNN-NN` from the slice branch, worktree `.flow/worktrees/task-NNNN-NN/`
 - Small changes: `fix/<short-name>` from `main`
 - After the human approves the result: the agent merges into `main` and pushes to `origin`
@@ -182,6 +192,7 @@ Known gaps (chosen in setup; revisit when possible): (none)
 
 ### Other rules
 
+- Until the first release of `flow`, this repo always runs in bootstrap mode, even when a `flow` binary exists. Never use `flow` to manage this repo's slices. Use it only in tests, on temporary repos.
 - Write in plain, simple English. Short sentences.
 - Keep everything generic. No company names, internal URLs, or secrets in this repo.
 - Shared Go logic goes in `internal/`, not `cmd/`. The CLI and the dashboard must use the same packages to read and validate files.
