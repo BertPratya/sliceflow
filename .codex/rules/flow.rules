@@ -1,0 +1,19 @@
+# agent-flow: commands only a human may confirm.
+
+prefix_rule(
+    pattern = ["flow", "approve"],
+    decision = "prompt",
+    justification = "Only a human approves.",
+)
+
+prefix_rule(
+    pattern = ["flow", "reject"],
+    decision = "prompt",
+    justification = "Only a human rejects.",
+)
+
+prefix_rule(
+    pattern = ["flow", "finding", "wontfix"],
+    decision = "prompt",
+    justification = "Only a human may mark a high finding wontfix.",
+)

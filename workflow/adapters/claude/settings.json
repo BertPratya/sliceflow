@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(flow approve:*)",
+      "Bash(flow reject:*)",
+      "Bash(flow finding wontfix:*)"
+    ]
+  }
+}

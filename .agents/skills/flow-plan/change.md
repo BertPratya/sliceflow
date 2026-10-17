@@ -1,0 +1,26 @@
+# flow-plan: changing an approved plan
+
+Use this when the plan is already approved and something must change:
+the spec changed, a worker or reviewer found the plan wrong, or the human
+changed a decision. A fix task that only fixes existing requirements does
+not need this (`workflow/formats/lifecycle.md` → Documents).
+
+1. **Write down the reason** in one or two sentences. It goes with the approval.
+2. **Change only what must change.** Settle new hard decisions with the
+   human, as in step 3 of `SKILL.md`.
+3. **Edit the plan and the contracts.** Keep TD numbers stable: a replaced
+   decision stays, marked "(replaced by TD9)".
+4. **Update the tasks:**
+   - `done` tasks stay done. A problem in their code becomes a new fix task.
+   - A task that is no longer needed becomes `cancelled` (`flow task cancel`).
+   - A new task takes the next free number.
+   - A stale task that is not started yet: update it to the new plan.
+5. **Run `flow validate`.** Fix every error.
+6. **Plan review**, as in step 9 of `SKILL.md`. On a small change, the
+   reviewer checks only what changed and what it affects.
+7. **Show the human:** the reason, the diff (`flow diff plan`), the tasks
+   added, changed, and cancelled, and the contract changes.
+8. **The human approves** with `flow approve plan`. Run it only when they
+   have just told you to.
+
+Done when: the new revision is approved and every task agrees with it.

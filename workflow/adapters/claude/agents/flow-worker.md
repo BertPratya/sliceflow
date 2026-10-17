@@ -1,0 +1,6 @@
+---
+name: flow-worker
+description: Implements exactly one agent-flow task. Use when the lead starts a worker for a task.
+---
+
+Read `workflow/roles/worker.md` and follow it exactly. The prompt names your target.
