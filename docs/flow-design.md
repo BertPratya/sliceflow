@@ -1148,3 +1148,41 @@ cancelled): `flow` does not change 0003 by itself. It shows
   plan change first, if 0003 needed something from 0002).
 - **Cancel 0003 too.**
 - **Leave it waiting,** if 0002 may be reopened.
+
+---
+
+## 3. The slices (decided, the human, 2026-10-19)
+
+How the design is cut:
+
+1. **Each slice gives something to try:** a real command, run on a test
+   repo in the preview.
+2. **The order of the workflow:** each slice uses the one before it.
+3. Each slice stays under about 25-30 requirements (AGENTS.md).
+
+| # | Slice | What you can do after it | Design |
+|---|---|---|---|
+| 0001 | slice and events | create a slice (`flow slice new`) and see it (`flow status`); every event in `.events.jsonl`, `status.md` written from it | 1.13, 2.1 |
+| 0002 | spec | take a spec from draft to approved: `spec validate`, `submit` (review off for now), `approve`, `reject`, history with fingerprints | 2.2 |
+| 0003 | plan | take a plan and its tasks to approved: `plan validate`, `task sync`, `brief`, one history folder per revision; the slice is ready to build | 2.3 |
+| 0004 | agents | `flow` starts agents itself: the Claude Code adapter, the permission layers, settings per role, `flow wait`; first use: the spec check and the plan review on submit | 1.9, 1.12c |
+| 0005 | the run | `flow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; when stuck, the task goes to "Needs you" | 2.4 |
+| 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue (rebase and check again), conflicts | 2.4 |
+| 0007 | reliability | a run survives a killed `flow`, a lost network, a stuck agent: heartbeats, time limits per role, retries for passing failures, checking the log against reality on restart | 1.7, 2.4 |
+| 0008 | cases and the lead | stops go to the right level: the case shape, routing by kind, the chat lead through `flow wait`, the fallback lead, `--human` | 1.6, 1.12c |
+| 0009 | finish | the full path to `main`: integration review, preview, `slice approve`, update from `main`, merge into `main` (one slice at a time), backlog, `slice done` | 2.5 |
+| 0010 | stacking and cancel | design ahead (`after:`), stale plans, the automatic update and start; cancel and reopen | 2.6, 2.7 |
+| 0011 | Codex | a second agent tool; proves the adapter shape | 1.9 |
+| 0012 | configurable steps | level 2: pick and order the built-in steps (simple settings come earlier, with each slice) | 1.10 |
+
+- **0009 is the first release.** After it `flow` runs the whole workflow,
+  and this repo can switch from agent-flow's skills to `flow` itself.
+- **Lowering the risk early:** the plan of 0004 starts with a small
+  experiment: `claude -p` with a fixed permission list on a test repo, on
+  Linux and Windows, before the tasks are written.
+- **Not chosen: a walking skeleton** (a thin version of the whole path
+  first, then thicker). The risky parts (agents headless, permissions,
+  processes on Windows) do not change slices 0001-0003.
+- **To the backlog:** the web dashboard, a Channels doorbell, a cost limit,
+  building on top of a slice not merged yet (2.6, point 5), the Codex app
+  server, a general engine.
