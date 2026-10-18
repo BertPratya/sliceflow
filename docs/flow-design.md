@@ -313,7 +313,16 @@ Before the plan, look closer at ORCH-like tools, to borrow ideas.
 **Decided (the human, 2026-10-18):** build `flow` first, as a specific engine
 for this workflow. A general engine is a later, optional project.
 
-### 1.12 Not clear yet
+### 1.12 Who runs `flow` (from the human, 2026-10-18)
+
+The **lead** runs the `flow` commands, not the human. The human works with
+the lead in the chat. `flow` is designed for the lead to use.
+
+Lead's note: so every `flow` output is read first by an AI agent. It must
+be exact and complete (what happened, what is next, why it stopped), and
+still plain enough for the human to read when they look.
+
+### 1.13 Not clear yet
 
 To come back to when the processes are designed:
 
@@ -339,3 +348,50 @@ To come back to when the processes are designed:
 - Compiled AI: Deterministic Code Generation for LLM-Based Workflow Automation: https://arxiv.org/pdf/2604.05150
 - Bernstein docs, Deterministic vs. LLM-Based Orchestration: https://bernstein.readthedocs.io/en/latest/architecture/orchestration-approaches/
 - Agentic fail-safes need deterministic modes: https://dev.to/omnithium/the-t-mobile-outage-lesson-why-agentic-fail-safes-need-sos-mode-determinism-1chm
+
+---
+
+## 2. The processes
+
+One section per process, in order. Each says what `flow` does, its commands,
+its events, and what it shows.
+
+### 2.1 Create a slice
+
+**From the human (2026-10-18):**
+
+1. The lead runs `flow new slice` with the slice name. `flow` gives it the
+   next number: `NNNN-<name>`.
+2. `flow` creates the slice's branch and its worktree in `.flow/worktrees/`.
+3. `flow` copies the spec template into the slice.
+4. `flow` creates the files that record the slice's status.
+
+**Lead's view, to talk about** (not decided):
+
+- **Command form.** `flow new slice <name>` (verb first) or
+  `flow slice new <name>` (noun first, as in the sketch). Noun first groups
+  the commands by what they act on: `flow slice new | list | cancel | done`,
+  `flow task …`, `flow review …`. Tools like `gh pr create` and
+  `git worktree add` work this way. Either works; we pick one for all commands.
+- **`.flow/` for all local state.** Worktrees, locks, logs, and live agent
+  state all go under `.flow/`: one folder, one line in `.gitignore`.
+  The workflow files today say `.worktrees/`; they change with this design.
+- **The status files.** This is where the open point "where status lives"
+  is decided. Three options:
+  - A. An event log only (`events.jsonl`). `flow status` and the dashboard
+    read it. In git, nobody can read the status without `flow`.
+  - B. An event log, plus a `status.md` that `flow` writes from it after
+    every step. Readable on GitHub and in a pull request. Never edited by hand.
+  - C. A `status.md` kept by hand (the workflow files today).
+  Lead's recommendation: B.
+- **Checks before it creates anything** (from the sketch): the repo is set
+  up, the name is valid (lowercase letters, digits, hyphens), the name is not
+  taken, the git user name is set. If one fails, nothing is created.
+- **All or nothing.** If a step fails halfway, `flow` undoes what it did and
+  says why.
+- **Output.** The slice ID, branch, worktree, the files it created, and the
+  next step.
+- **Commit.** On the slice branch: `NNNN: new slice`.
+- **Event:** `slice.created` { slice, title, after, by, at }.
+- **The same number on two machines** (sketch H11): `flow` sees only the
+  branches it knows. Two people offline can get the same number. Open.
