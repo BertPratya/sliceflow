@@ -891,3 +891,56 @@ Open: what a fallback lead may do, and what it must leave to the human.
 - **Push. Decided (the human, 2026-10-18):** not part of the workflow.
   The workflow ends with the merge into `main`; pushing is outside it.
 - **Events:** `preview.started`, `slice.approved`, `slice.done`.
+
+### 2.6 Design ahead: stacked slices
+
+**From the human (2026-10-18):** while 0002 is in implement, the human
+wants to design the spec of 0003, or even 0004. They do not want to wait
+until 0002 is finished and merged.
+
+**Research (2026-10-18):**
+
+- **Dual-track agile** (Jeff Patton and others): design ("discovery") runs
+  ahead of building ("delivery"), at the same time, in one team. Design does
+  not have to be finished for everything before building starts. The common
+  trouble: design cannot keep up with building. With AI workers that build
+  fast, that trouble is even bigger, so designing ahead is the right goal.
+- **Stacked pull requests** (Graphite, GitHub stacks, gh-stack): code built
+  on top of an unmerged branch. When the lower branch changes, every branch
+  above it must be moved on top again ("restack"). Done by hand it is
+  "tedious and error-prone"; tools do it automatically. Advice: keep stacks
+  short. After the lower branch is merged, move only the upper branch's own
+  commits onto the new base.
+
+**Lead's view, to talk about** (not decided):
+
+Two different things wait on 0002, and only one of them has to:
+
+| | Design (spec, plan) | Build (implement) |
+|---|---|---|
+| What it changes | only files in the slice's own folder | code |
+| Needs 0002's code? | no: it needs 0002's approved spec and plan | yes |
+| Can run while 0002 is in implement? | yes, always | A: no, waits for the merge. B: yes, on top of 0002's branch |
+
+Proposal:
+
+1. **Design ahead, always.** 0003 and 0004 can be created, specified, and
+   planned at any time. A stacked slice records what it waits for:
+   `after: 0002`. Its branch starts from `main`: it only holds its own
+   documents until it builds, so it never needs to be moved while designing.
+2. **The plan reviewer reads 0002's approved spec and plan** (and contract
+   changes) as the base 0003 builds on.
+3. **If 0002's plan changes after 0003's plan was approved**, `flow` marks
+   0003's plan "stale: 0002 changed", and it is checked and approved again
+   (check X3 in the workflow files today).
+4. **Build after the merge (A), automatically.** When 0002 is merged into
+   `main`, `flow` moves 0003's branch on top of `main` and starts its run by
+   itself (if 0003's plan is approved). 0004 follows 0003 the same way.
+5. **Build on top (B) later, as a setting**, if the waiting turns out to be
+   too slow. It costs a restack every time 0002 changes, and rework when
+   0002's preview finds a problem.
+
+Why A first: the human's time (design, approval, preview) is the slow part,
+and designing ahead keeps it busy. Building is fast with AI workers, so
+waiting for the merge costs little. B adds restacks, rework, and harder
+recovery.
