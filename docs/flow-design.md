@@ -697,6 +697,46 @@ implement:
   integration_review: on
 ```
 
+**Decided (the human, 2026-10-18):** the final review of the whole slice
+runs even when task reviews are off. On by default, with its own setting.
+
 **Integration (7).** From the workflow files today, before the final
 review: update the slice from `main`, then run the slice checks. Then the
 final review. Fix tasks from it run like any task.
+
+**A merge conflict (from the human, 2026-10-18).** Example: `A → B → D`,
+`C → D`. C merges first. Then B merges, and there is a conflict. Who solves
+it: the lead, or B's worker?
+
+**Lead's view, to talk about** (not decided): **B's worker solves it.**
+
+- The task being merged owns the conflict. B is the one that does not fit
+  the newest slice branch yet. Merge queues work the same way: a change
+  that no longer fits goes back to its author, not to the people who merged
+  before it.
+- Not the lead: the lead does not write code, and it does not know B's work.
+  It stays the fallback.
+
+What `flow` does:
+
+1. It tries to put B's work on top of the newest slice branch (with A and C).
+   Conflict.
+2. It stops the attempt. The slice branch and B's branch stay as they were.
+3. It starts a worker on B, with a conflict brief: the files in conflict,
+   what C changed and why (C's task), and the rule "keep what both tasks
+   meant to do". Resuming B's last session is a good choice here: that
+   worker already knows B's work.
+4. The worker solves it, runs the checks, and hands in. Then the merge is
+   tried again.
+
+Limits and the ladder:
+
+- A failed merge does not count against the worker's check failures.
+- After the merge limit (for example 2 failed merges in a row): the lead.
+  A conflict between two tasks that ran at the same time means their
+  `touches` overlapped without anyone knowing, or a dependency is missing
+  (B should have waited for C). That is a plan problem, so it can go on to
+  the human.
+
+Open: after a conflict is solved, does the task need a review again, or are
+passing checks enough (the final review sees the whole slice anyway)?
