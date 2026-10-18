@@ -168,33 +168,70 @@ flow  ──can't──▶  lead  ──can't──▶  human
 
 When each level hands it on, and how, is not defined yet.
 
-**Lead's proposal, to talk about** (not decided: the limits, the case, and
-the table below are all open):
+**Research (2026-10-18):**
 
-Each level has a clear job and a limit:
+- **Grade by what a mistake costs, not by how hard the problem is.**
+  AI-agent autonomy frameworks (LoopRails, tiered-risk models, the "levels
+  of autonomy" paper) map every action to a risk level before the agent
+  runs. Low risk: act and log. Higher: act and alert. Highest: ask first.
+- **One-way and two-way doors** (Bezos): a decision that is easy to undo
+  should be made fast, low down. One that is hard to undo goes up, and is
+  made slowly. The test: "if this is wrong, how hard is it to change back?"
+- **Escalate to someone who can decide.** Escalation fails when it goes to
+  someone without the authority to approve: it only adds delay.
+- **Enforce the limits from outside the agent.** An agent can "promote
+  itself" (Cloud Security Alliance). What an agent may do must be checked
+  by the system, not left to the agent's instructions.
+- **On-call practice** (incident.io, PagerDuty-style policies): at most 3
+  levels; a timer on each level; a short automatic wait first for problems
+  that often fix themselves (a network blip); one case per problem, not a
+  flood of alerts.
 
-| Level | Handles | Limit before it climbs |
-|---|---|---|
-| flow | anything with a fixed rule: retry, a new worker for a fix round, merge again after a conflict | the counters (for example 3 failed checks, 3 review rounds, 2 failed merges) |
-| lead | a question whose answer is in an approved document; a failure whose cause it can see | one try per stop (to be decided) |
-| human | anything that changes an approved document, accepts a risk, or needs something new (a dependency, a secret, a CI change) | none: the human decides |
+**Lead's recommendation** (not decided):
 
-Rules for every climb:
+1. **The test for every stop: can it be undone, and does it stay inside
+   what the human approved?**
+   - Yes → the lowest level that can do it decides.
+   - No → the human. Changing an approved spec, plan, or contract; accepting
+     a risk (a high finding left unfixed); anything new (a dependency, a
+     secret, a CI change); merging into `main`.
+   In this workflow almost everything can be undone: work lives on branches,
+   and every step is in the event log.
+2. **Route by kind, do not always climb.** A stop goes straight to the
+   lowest level that has the authority. A reviewer's question for the human
+   goes to the human, not through the lead first: the lead could not decide
+   it, and passing it through costs time and tokens.
+3. **Each level tries once.** `flow` uses its counters. The lead gets one
+   try per case. If the same problem comes back after the lead's fix, it
+   goes to the human. No loops.
+4. **`flow` enforces what the lead may do.** When `flow` starts a fallback
+   lead, it marks it as such. `flow` refuses commands only the human may
+   cause: approve, reject, accept a high finding, cancel. The chat lead may
+   run them only with the human's words (`--human "approved, go"`), which go
+   into the event.
+5. **Every case has the same shape:** what stopped; the evidence (the last
+   lines of a log, the findings); what was tried; the options, with a
+   recommendation; and what happens meanwhile ("the run goes on with tasks
+   03 and 05").
+6. **The human is not paged.** Cases for the human wait in one "Needs you"
+   list at the top of `status.md`, the dashboard, and `flow status`. The run
+   goes on with everything that does not depend on them. When a chat lead
+   is open, it tells the human.
 
-- It carries a **case**: what stopped, what was tried, and the options. The
-  next level never starts from nothing.
-- No work is lost. The task's work stays committed on its branch.
-- While one task waits, the run goes on with tasks that do not depend on it.
-- The lead acts only through `flow` commands, so the state stays correct.
+**Who handles what:**
 
-The four examples, under this proposal:
-
-| What happens | Who handles it |
-|---|---|
-| A task's checks fail 3 times | flow stops the task → lead looks at the log: cause visible → hint and retry; else → human |
-| A worker asks "the spec doesn't say what happens on an empty list" | lead: answer in the spec or plan → it answers; else → human (it is a spec decision) |
-| A reviewer finds a serious problem | flow: a new worker fixes it (fix round). After 3 rounds without a pass → lead → human |
-| Two tasks conflict at merge | flow: a new worker merges again. After 2 failed merges → lead (usually wrong `touches` or `depends_on`) |
+| Stop | flow | lead | human |
+|---|---|---|---|
+| Passing failure (network, rate limit, the tool crashed) | waits and retries | — | told if it lasts (for example 30 min): the lead cannot fix a network |
+| Checks fail (counter, for example 3) | new attempt | cause visible → a hint, retry once | cause unclear, or the hint did not help |
+| Worker question | — | answer in an approved document → answers | a new decision (often a spec or plan change) |
+| Review round limit (task, plan, final) | fix rounds | prepares the case (the human's choice, 2.4) | decides |
+| Merge fails (counter, for example 2) | merges again with a worker | widens `touches` inside the rules, or finds a missing dependency | anything that changes the plan |
+| Agent over its time limit | — | continue, restart, or stop (2.4) | if the lead stops it for good |
+| Reviewer: "needs the human" | — | — | decides |
+| High finding to leave unfixed, or moved out of the slice | — | — | decides |
+| New dependency, secret, CI change | — | — | decides |
+| `flow` itself broken (a bad event log, an internal error) | stops safely | must not repair the log by hand | decides |
 
 ### 1.7 Monitoring, reliability, parallel slices (from the human, 2026-10-18)
 
