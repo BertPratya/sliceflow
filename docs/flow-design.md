@@ -432,8 +432,8 @@ its events, and what it shows.
 2. `flow spec validate` checks the format, like a compiler: the headings
    are there, the format follows the template. If something is wrong, it
    says what. (The exact format rules are refined later, in a slice.)
-3. When the draft is finished, the lead runs a command that says so
-   (name not decided).
+3. When the draft is finished, the lead runs `flow spec submit`
+   (decided, the human, 2026-10-18).
 4. Then, depending on the settings:
    - **With a review:** `flow` starts a reviewer. It looks for unclear
      points and conflicts. If it finds any, they are written down, and the
@@ -450,7 +450,7 @@ its events, and what it shows.
   Without a review: draft → awaiting approval. The reviewer finds open
   points: back to draft. The status lives in the event log, not in the
   spec's header.
-- **"The draft is finished": `flow spec submit`.** It runs
+- **"The draft is finished": `flow spec submit`** (name decided). It runs
   `flow spec validate` first and refuses if the format is broken, so the
   check can never be skipped. Then it starts the reviewer, or goes straight
   to awaiting approval.
