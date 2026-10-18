@@ -491,6 +491,26 @@ dashboard page served on the human's own computer is fine.
 - **Later, maybe:** a Channels doorbell for Claude Code, when Channels is
   stable. An extra, not the base.
 
+**The lead tool only matters for the doorbell** (the human, 2026-10-19).
+The lead just runs commands, so the lead side needs no adapter.
+
+- **Claude Code:** `flow wait` runs in the background, and Claude Code wakes
+  the lead when it ends.
+- **Cursor:** no reliable wake-up yet. No sign that Cursor wakes the agent
+  when a background command ends; users report the agent keeps checking the
+  output instead (polling), and long foreground commands hit Cursor's own
+  time limits. So a Cursor lead does not listen during the run: cases for a
+  lead go to a fallback lead (Codex), cases for the human wait in "Needs
+  you", and the lead runs `flow status` when the human comes back. Nothing
+  in `flow` changes for this.
+- **Cursor, later maybe:** its "stop" hook runs when the agent ends its turn
+  and can send the next message. It could run `flow wait` and send the
+  case. Known bugs (unstable, and on Windows the message may not arrive),
+  so it is not the base.
+- One guide for the lead on using `flow` can serve every lead tool: Cursor
+  also loads skills from `.agents/skills/`, `.claude/skills/`, and
+  `.codex/skills/`.
+
 ```
 lead:  flow spec validate          → "ok" after a second. Done.
 lead:  flow run                    → "run started: 0001, 6 tasks", returns at once.
@@ -1165,21 +1185,30 @@ How the design is cut:
 | 0001 | slice and events | create a slice (`flow slice new`) and see it (`flow status`); every event in `.events.jsonl`, `status.md` written from it | 1.13, 2.1 |
 | 0002 | spec | take a spec from draft to approved: `spec validate`, `submit` (review off for now), `approve`, `reject`, history with fingerprints | 2.2 |
 | 0003 | plan | take a plan and its tasks to approved: `plan validate`, `task sync`, `brief`, one history folder per revision; the slice is ready to build | 2.3 |
-| 0004 | agents | `flow` starts agents itself: the Claude Code adapter, the permission layers, settings per role, `flow wait`; first use: the spec check and the plan review on submit | 1.9, 1.12c |
+| 0004 | agents | `flow` starts agents itself: the Codex adapter, the permission layers, settings per role, `flow wait`; first use: the spec check and the plan review on submit | 1.9, 1.12c |
 | 0005 | the run | `flow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; when stuck, the task goes to "Needs you" | 2.4 |
 | 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue (rebase and check again), conflicts | 2.4 |
 | 0007 | reliability | a run survives a killed `flow`, a lost network, a stuck agent: heartbeats, time limits per role, retries for passing failures, checking the log against reality on restart | 1.7, 2.4 |
 | 0008 | cases and the lead | stops go to the right level: the case shape, routing by kind, the chat lead through `flow wait`, the fallback lead, `--human` | 1.6, 1.12c |
 | 0009 | finish | the full path to `main`: integration review, preview, `slice approve`, update from `main`, merge into `main` (one slice at a time), backlog, `slice done` | 2.5 |
 | 0010 | stacking and cancel | design ahead (`after:`), stale plans, the automatic update and start; cancel and reopen | 2.6, 2.7 |
-| 0011 | Codex | a second agent tool; proves the adapter shape | 1.9 |
+| 0011 | Claude Code | a second agent tool; proves the adapter shape | 1.9 |
 | 0012 | configurable steps | level 2: pick and order the built-in steps (simple settings come earlier, with each slice) | 1.10 |
 
 - **0009 is the first release.** After it `flow` runs the whole workflow,
   and this repo can switch from agent-flow's skills to `flow` itself.
+- **Codex first (the human, 2026-10-19).** Codex is the agent tool `flow`
+  starts in both of the human's setups: a Cursor lead with Codex agents, and
+  a Claude Code lead with Codex agents. So 0004 builds the Codex adapter,
+  and Claude Code comes in 0011.
 - **Lowering the risk early:** the plan of 0004 starts with a small
-  experiment: `claude -p` with a fixed permission list on a test repo, on
-  Linux and Windows, before the tasks are written.
+  experiment: `codex exec` with approvals off and the `workspace-write`
+  sandbox on a test repo, on Linux and Windows (a reported bug refuses
+  writes on native Windows), before the tasks are written.
+- **Codex points for 0004** (settled there): reviewers run in the
+  `read-only` sandbox and `flow` writes the review file from their last
+  message; the sandbox has no network, so `flow` runs the setup commands
+  before the worker starts; `codex exec resume` needs its flags again.
 - **Not chosen: a walking skeleton** (a thin version of the whole path
   first, then thicker). The risky parts (agents headless, permissions,
   processes on Windows) do not change slices 0001-0003.
