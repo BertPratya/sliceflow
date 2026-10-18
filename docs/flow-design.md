@@ -582,3 +582,46 @@ Research (2026-10-18):
 **Different from the spec:** the reviewer gives findings to fix (high,
 medium, low), not only questions. The lead fixes them and submits again, up
 to the round limit.
+
+**Approving the plan, and what goes into history (research, 2026-10-18):**
+
+The command is `flow plan approve`: the same thing that was submitted is
+approved. There is no `flow task approve`: tasks are approved with the plan.
+
+Should the task files be copied into history too? What other tools do:
+
+- **GitHub** (branch protection, "dismiss stale approvals"): an approval
+  belongs to the exact content that was approved. When new code is pushed,
+  the approval is dropped, and someone must approve again.
+- **Terraform** (saved plans): the reviewed plan is saved as a file, and
+  `apply` carries out exactly that file. A guide warns that if the source
+  changes after the plan was saved, nobody may notice, so it should be
+  checked.
+
+Both say the same thing: an approval must be tied to the exact content, all
+of it. The tasks are part of what the human approved. If a task file could
+change after approval without anyone noticing, the approval would mean
+nothing for that task.
+
+**Lead's proposal** (not decided):
+
+- `flow plan approve` keeps one folder per approved revision:
+
+  ```
+  .history/plan/R001/
+    plan.md
+    tasks/01-event-log.md
+    tasks/02-slice-new.md
+    contracts.patch        (the slice's contract changes)
+  ```
+
+- The `plan.approved` event stores a fingerprint (hash) of each file, so a
+  changed copy, or a changed task after approval, is found at once.
+- Why copy, when git already has the history? A copy can be read without
+  git commands, shows on GitHub, and survives a squash merge (which removes
+  the commit where the approval happened).
+- Copies are small Markdown files; the cost is low.
+- A fix task added after approval (from the integration review or the
+  preview) is recorded as an event, not as a new plan revision. It needs no
+  new approval when it only covers approved requirements (the rule in the
+  workflow files today).
