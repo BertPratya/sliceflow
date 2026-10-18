@@ -40,8 +40,9 @@ Today the **lead** (the main chat agent) orchestrates the pipeline: it reads
 the status, decides the next step, starts workers and reviewers, runs the
 checks, updates the status, and commits.
 
-**The workflow runs from spec to preview** (the human, 2026-10-18). What
-comes after, such as pushing to a remote, is outside it.
+**The workflow runs from creating the slice branch to merging it into
+`main`** (the human, 2026-10-18). What comes after, such as pushing to a
+remote, is outside it.
 
 The new idea: **the pipeline orchestrates itself.** `flow` holds the
 control flow. The lead is a **fallback**, called only when `flow` cannot go
@@ -866,5 +867,5 @@ Open: what a fallback lead may do, and what it must leave to the human.
 - **The things to try** come from the requirements checked `manual` in the
   spec, so the list is made by `flow`, not written by hand.
 - **Push. Decided (the human, 2026-10-18):** not part of the workflow.
-  The workflow runs from spec to preview; pushing is outside it.
+  The workflow ends with the merge into `main`; pushing is outside it.
 - **Events:** `preview.started`, `slice.approved`, `slice.done`.
