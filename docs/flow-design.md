@@ -422,3 +422,58 @@ its events, and what it shows.
 - **Event:** `slice.created` { slice, title, after, by, at }.
 - **The same number on two machines** (sketch H11): `flow` sees only the
   branches it knows. Two people offline can get the same number. Open.
+
+### 2.2 Write and approve the spec
+
+**From the human (2026-10-18):**
+
+1. The human and the lead write the spec together. Its status is **draft**
+   until it is finished.
+2. `flow spec validate` checks the format, like a compiler: the headings
+   are there, the format follows the template. If something is wrong, it
+   says what. (The exact format rules are refined later, in a slice.)
+3. When the draft is finished, the lead runs a command that says so
+   (name not decided).
+4. Then, depending on the settings:
+   - **With a review:** `flow` starts a reviewer. It looks for unclear
+     points and conflicts. If it finds any, they are written down, and the
+     lead is told.
+   - **Without a review:** the lead reports to the human.
+5. No open points → status **awaiting approval**. It waits for the human.
+6. The human may read the spec or not. They tell the lead "approved".
+7. The lead runs the approve command. The slice enters the **plan** phase.
+8. Every approval keeps a copy: `.history/spec/`. History is read-only.
+
+**Lead's view, to talk about** (not decided):
+
+- **Spec statuses.** draft → in review → awaiting approval → approved.
+  Without a review: draft → awaiting approval. The reviewer finds open
+  points: back to draft. The status lives in the event log, not in the
+  spec's header.
+- **"The draft is finished": `flow spec submit`.** It runs
+  `flow spec validate` first and refuses if the format is broken, so the
+  check can never be skipped. Then it starts the reviewer, or goes straight
+  to awaiting approval.
+- **Validate like a compiler.** Each problem on one line:
+  `spec.md:42: error: R7 has no Check: line`. Errors (broken) block
+  submit. Warnings (not finished yet, for example open questions) are fine
+  while drafting, but block submit too.
+- **Where the reviewer writes.** A review file in the slice's `reviews/`
+  folder. `flow` reads it, records `review.submitted`, and tells the lead:
+  "3 open points". The lead answers facts itself and brings decisions to
+  the human, updates the spec, and submits again.
+- **Approve.** `flow spec approve`, run by the lead only right after the
+  human says so. The event records who approved and the human's words.
+  `flow spec reject` sends it back to draft, with the reason.
+- **Read-only history.** File permissions do not travel in git and work
+  differently on Windows, so "read-only" must be a check: the approval
+  event stores a fingerprint (hash) of the copy, and `flow` reports any
+  history file that no longer matches.
+- **A pattern:** files that only `flow` writes start with a dot
+  (`.events.jsonl`, `.history/`). Files people and agents write do not
+  (`spec.md`, `reviews/`).
+- **Changed after approval.** `flow` sees `spec.md` differ from the last
+  copy in `.history/`: status **changed**. It is submitted and approved again.
+- **Setting:** `spec.review: on | off`.
+- **Events:** `spec.submitted`, `review.started`, `review.submitted`,
+  `spec.approved`, `spec.rejected`.
