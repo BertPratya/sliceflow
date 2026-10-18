@@ -362,7 +362,8 @@ To come back to when the processes are designed:
 
 - The full list of lifecycle states, and what moves a slice between them.
 - When and how each level of the ladder hands on (1.6).
-- What the lead receives when it is called, and what it may do.
+- What the lead receives when it is called, and what it may do. Also what
+  a fallback lead (started by `flow`, 2.4) may do alone.
 - Which run choice is the default (1.5).
 - Is the agents view needed (1.7)?
 - A web dashboard and the rule "flow makes no network calls": a local page
@@ -370,6 +371,9 @@ To come back to when the processes are designed:
 - How agents get permissions when nobody is there to click "allow" (1.9).
 - How configurable the workflow is: levels 1-2 or more (1.10).
 - Exit codes: the sketch says two different things (step 18 and step 27).
+- The full list of events and what each one holds; what `status.md` and the
+  dashboard show (after the overview pass).
+- Who pushes to `origin`: `git push` is a network call (2.5).
 
 ---
 
@@ -827,3 +831,32 @@ So there are two kinds of lead:
   limit (`limits.lead`).
 
 Open: what a fallback lead may do, and what it must leave to the human.
+
+### 2.5 Preview and finish
+
+**From the human (2026-10-18):** as the workflow files describe it today:
+
+1. **Show the result.** What the feature does now, how to run it, a list of
+   things to try by hand, and what was parked for later. With the run
+   choice "preview prepared" (1.5), `flow` prepares this before the human
+   looks: for example a test repo and the list of things to try.
+2. **The human tries it.** A problem → fix tasks, and the run starts again
+   (implement). Something new → a spec change, not a fix.
+3. **The human approves the result.**
+4. **Finish.** Update the slice from `main` once more (checks again; a
+   conflict → a fix task, then the final review and preview again). Merge
+   into `main`. Parked items go to `backlog.md`. The slice is **done**, and
+   its worktree is removed.
+
+**Lead's view, to talk about** (not decided):
+
+- **Commands**, following the same pattern as spec and plan:
+  `flow slice approve` records the human's approval of the result (only
+  right after they say so, with their words). `flow slice done` does the
+  finish: update from `main`, checks, merge into `main` (one slice at a
+  time, like the task merge queue), backlog, remove the worktree.
+- **The things to try** come from the requirements checked `manual` in the
+  spec, so the list is made by `flow`, not written by hand.
+- **Push.** `git push` is a network call, and `flow` makes none. So the lead
+  pushes, or the rule says that `flow` may run `git push`. Open.
+- **Events:** `preview.started`, `slice.approved`, `slice.done`.
