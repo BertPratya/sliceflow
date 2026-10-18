@@ -754,3 +754,54 @@ ask.**
 - The worker's hand-in note goes along as information for the reviewer, but
   it does not decide. An agent judging its own change is not reliable, and
   this is a fact code can measure (the hybrid rule, 1.3).
+
+**Conflicts are visible, and do not block (from the human, 2026-10-18).**
+A conflict is shown to the human (dashboard, `flow status`), but the run
+keeps going.
+
+Lead's notes:
+
+- A conflict is a step that matters, so it is an event in the slice's log:
+  `task.merge_conflict` { task, with, files, attempt }. Solved:
+  `task.merged` as usual.
+- `status.md` and the dashboard show it while it lasts, for example:
+  `B: merge conflict with C (internal/slice/new.go), worker solving it, try 1 of 2`.
+- The merge queue does not wait for B: the next task that is ready merges.
+  Other tasks keep running.
+
+**Watching a long run (from the human, 2026-10-18).** The implement phase
+runs the longest, so it must be reliable:
+
+- `flow` checks often that the run is still healthy.
+- There is a time limit. Over it, the lead looks at what happened and
+  decides what to do.
+
+**Lead's view, to talk about** (not decided):
+
+Who checks what:
+
+| What can go wrong | Who notices | How |
+|---|---|---|
+| An agent is dead (its program ended without a result) | the `flow` run | the program's exit |
+| An agent is alive but silent (no output for a long time) | the `flow` run | the time since its last event |
+| An agent is busy, but takes too long | the `flow` run | the time since it started |
+| The `flow` run itself died (killed, computer restarted) | the next `flow` command (`flow status`, the dashboard, `flow run`) | the run writes "alive at <time>" into `.flow/` every few seconds; too old, or its process is gone → "the run stopped at 14:02, last step: task B review". `flow run` continues from the log. |
+
+Two kinds of time limit (in `flow.yaml`):
+
+```yaml
+limits:
+  agent_silent_minutes: 15    # no output at all: probably stuck
+  agent_minutes: 60           # still working, but long
+```
+
+- Over a limit, `flow` does not stop the agent by itself. It tells the lead,
+  with a case: which task, how long, the last activity, the last lines of
+  output, the cost so far.
+- The lead decides: let it continue, stop it and start a fresh worker, or
+  stop it and ask the human.
+- An idea for later: a cost limit per task, so a stuck agent cannot burn
+  tokens without end.
+
+Open: what if the lead is not there? The lead is a chat session. If it is
+closed, nobody receives the case.
