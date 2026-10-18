@@ -40,6 +40,9 @@ Today the **lead** (the main chat agent) orchestrates the pipeline: it reads
 the status, decides the next step, starts workers and reviewers, runs the
 checks, updates the status, and commits.
 
+**The workflow runs from spec to preview** (the human, 2026-10-18). What
+comes after, such as pushing to a remote, is outside it.
+
 The new idea: **the pipeline orchestrates itself.** `flow` holds the
 control flow. The lead is a **fallback**, called only when `flow` cannot go
 on by itself. The goal is a workflow that is efficient and automatic.
@@ -322,6 +325,14 @@ Lead's note: so every `flow` output is read first by an AI agent. It must
 be exact and complete (what happened, what is next, why it stopped), and
 still plain enough for the human to read when they look.
 
+### 1.12b No data out (decided, the human, 2026-10-18)
+
+The old rule "`flow` makes no network calls" is removed. The new rule:
+**`flow` itself sends no data to any outside service** (no telemetry, no
+uploads, no calls home). It runs local programs: git, the check commands,
+the agent tools. What those programs send is theirs, not `flow`'s. A
+dashboard page served on the human's own computer is fine.
+
 ### 1.13 Where and how events are kept (decided, the human, 2026-10-18)
 
 **The source of truth.** Each slice has one event log:
@@ -366,14 +377,11 @@ To come back to when the processes are designed:
   a fallback lead (started by `flow`, 2.4) may do alone.
 - Which run choice is the default (1.5).
 - Is the agents view needed (1.7)?
-- A web dashboard and the rule "flow makes no network calls": a local page
-  is not an outside call, but the rule should say so.
 - How agents get permissions when nobody is there to click "allow" (1.9).
 - How configurable the workflow is: levels 1-2 or more (1.10).
 - Exit codes: the sketch says two different things (step 18 and step 27).
 - The full list of events and what each one holds; what `status.md` and the
   dashboard show (after the overview pass).
-- Who pushes to `origin`: `git push` is a network call (2.5).
 
 ---
 
@@ -857,6 +865,6 @@ Open: what a fallback lead may do, and what it must leave to the human.
   time, like the task merge queue), backlog, remove the worktree.
 - **The things to try** come from the requirements checked `manual` in the
   spec, so the list is made by `flow`, not written by hand.
-- **Push.** `git push` is a network call, and `flow` makes none. So the lead
-  pushes, or the rule says that `flow` may run `git push`. Open.
+- **Push. Decided (the human, 2026-10-18):** not part of the workflow.
+  The workflow runs from spec to preview; pushing is outside it.
 - **Events:** `preview.started`, `slice.approved`, `slice.done`.
