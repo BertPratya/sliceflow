@@ -787,12 +787,23 @@ Who checks what:
 | An agent is busy, but takes too long | the `flow` run | the time since it started |
 | The `flow` run itself died (killed, computer restarted) | the next `flow` command (`flow status`, the dashboard, `flow run`) | the run writes "alive at <time>" into `.flow/` every few seconds; too old, or its process is gone → "the run stopped at 14:02, last step: task B review". `flow run` continues from the log. |
 
-Two kinds of time limit (in `flow.yaml`):
+**Decided (the human, 2026-10-18):** a time limit is **per agent run**, not
+per task or per slice. Each role has its own: a worker and a reviewer have
+separate limits. Each fresh worker in a fix round starts its own clock.
+
+Lead's proposal: two kinds of limit per role (in `flow.yaml`):
 
 ```yaml
 limits:
-  agent_silent_minutes: 15    # no output at all: probably stuck
-  agent_minutes: 60           # still working, but long
+  worker:
+    minutes: 60           # still working, but long
+    silent_minutes: 15    # no output at all: probably stuck
+  reviewer:
+    minutes: 20
+    silent_minutes: 10
+  lead:                   # a lead that flow starts itself (open, see below)
+    minutes: 20
+    silent_minutes: 10
 ```
 
 - Over a limit, `flow` does not stop the agent by itself. It tells the lead,
