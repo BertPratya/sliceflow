@@ -544,9 +544,9 @@ Research (2026-10-18):
 
 **Lead's view, to talk about** (not decided):
 
-- **One truth for the structure.** If the list is in `plan.md` and also in
-  each task file's header, there are two copies that can drift. Proposal:
-  the structure (number, name, covers, depends on, touches, risk) lives
+- **One truth for the structure. Decided (the human, 2026-10-18).** If the
+  list is in `plan.md` and also in each task file's header, there are two
+  copies that can drift. So the structure (number, name, covers, depends on, touches, risk) lives
   only in the plan's task list. A task file holds only its content (what
   to build, "Done when"). `flow brief` puts the two together for the worker.
 - **A form `flow` can read exactly.** A Markdown table is easy to break by
