@@ -310,6 +310,9 @@ No existing tool matches this workflow. The closest ones, by kind:
 
 Before the plan, look closer at ORCH-like tools, to borrow ideas.
 
+**Decided (the human, 2026-10-18):** build `flow` first, as a specific engine
+for this workflow. A general engine is a later, optional project.
+
 ### 1.12 Not clear yet
 
 To come back to when the processes are designed:
