@@ -142,7 +142,8 @@ flow  ──can't──▶  lead  ──can't──▶  human
 
 When each level hands it on, and how, is not defined yet.
 
-**Lead's proposal, to talk about** (not agreed):
+**Lead's proposal, to talk about** (not decided: the limits, the case, and
+the table below are all open):
 
 Each level has a clear job and a limit:
 
@@ -169,7 +170,67 @@ The four examples, under this proposal:
 | A reviewer finds a serious problem | flow: a new worker fixes it (fix round). After 3 rounds without a pass → lead → human |
 | Two tasks conflict at merge | flow: a new worker merges again. After 2 failed merges → lead (usually wrong `touches` or `depends_on`) |
 
-### 1.7 Not clear yet
+### 1.7 Monitoring, reliability, parallel slices (from the human, 2026-10-18)
+
+**Monitoring.** A dashboard, read-only first. It shows the progress of each
+slice: what is happening now, which step, failures, what is blocked, and why.
+
+**Agents.** Maybe also every AI agent that is running: who is working now,
+on what. (The human is not sure yet if this is needed.)
+
+**Reliability.** `flow` must handle stopping unexpectedly: the program is
+killed, the computer restarts, or an agent stops (for example the internet
+connection drops while a worker is working). The human must see that it
+stopped, and why. If possible, the system recovers by itself.
+
+**Parallel slices.** Slices that can run at the same time should run at the
+same time.
+
+**Lead's proposal, to talk about** (not decided):
+
+One design choice carries all four: **`flow` writes down every step before
+and after it does it** (an event log). The dashboard reads that log. Recovery
+reads that log. Nothing else is needed for either.
+
+1. **Event log.** `task.started` is written before the worker starts;
+   `task.handed_in` after. On restart, anything started but not finished was
+   interrupted. (Durable execution systems like Temporal work this way.)
+2. **Check reality on restart.** `flow` compares the log with what is
+   really there: branches, worktrees, commits, running processes. It repairs
+   the difference: resume, restart the task (its work is kept on the branch),
+   or report it. (Kubernetes works this way: "what should be" against "what is".)
+3. **Heartbeat.** While an agent runs, `flow` records that it is alive and
+   when it last did something. Dead or silent too long → `flow` knows, and
+   says so.
+4. **Two kinds of failure.**
+   - *Passing* (network down, rate limit, the agent tool crashed): `flow`
+     waits and retries by itself. It does not count as the task failing.
+   - *Real* (checks fail, review fails): the counters and the ladder (1.6).
+5. **Two kinds of state.**
+   - *History* (what happened to the slice): kept with the slice, in git.
+   - *Live* (which process runs, last heartbeat): local only, not in git.
+6. **Agents view.** `flow` starts every agent itself, so it already knows
+   who runs where. Recording it costs little: role, slice, task, tool and
+   model, started, last activity.
+7. **Parallel slices.** Each slice has its own run and its own lock.
+   Merges into `main` still happen one at a time.
+8. **Dashboard.** First `flow status` in the terminal (with a live mode).
+   A web view later, reading the same data.
+
+What is easy, and what is hard:
+
+| Part | Effort | Why |
+|---|---|---|
+| Event log, `flow status` | easy | append a line, read the lines |
+| Agents view | easy | `flow` starts every agent anyway |
+| Detect a stop, show the reason | medium | the reason depends on what the agent tool reports (exit code, last output) |
+| Recover after `flow` itself is killed | medium | every step must be safe to run twice; check reality on restart |
+| Silent agent (alive but stuck) | medium | needs a time limit and an activity check |
+| Parallel slices | medium | locks, and merging into `main` one at a time |
+| Processes on Windows, macOS, Linux | medium | starting, watching, and stopping processes differs per system |
+| Recover every case by itself | hard | start with: detect, report, and one command to resume; add automatic recovery case by case |
+
+### 1.8 Not clear yet
 
 To come back to when the processes are designed:
 
@@ -177,6 +238,9 @@ To come back to when the processes are designed:
 - When and how each level of the ladder hands on (1.6).
 - What the lead receives when it is called, and what it may do.
 - Which run choice is the default (1.5).
+- Is the agents view needed (1.7)?
+- A web dashboard and the rule "flow makes no network calls": a local page
+  is not an outside call, but the rule should say so.
 
 ---
 
