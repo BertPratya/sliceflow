@@ -557,16 +557,27 @@ Research (2026-10-18):
   wrote, and reports a task file whose task left the list (it does not
   delete it). A name for that: `flow task sync`.
 
-**The order (lead's proposal):**
+**The whole plan process, step by step (lead's proposal, 2026-10-18):**
 
-1. The lead writes `plan.md`. `flow plan validate` checks it.
-2. When the plan is finished, one command creates all task files from the
-   plan's task list. The lead fills each one.
-3. `flow plan submit` validates everything together: plan, tasks, contract
-   changes, conflicts with other slices. Then the reviewer (if on).
-4. One review and one approval for the plan and its tasks together. The
-   reviewer checks that the tasks really match the plan. Two separate
-   approvals would cost the human twice and split that check.
+| # | Who | Command | What happens | Plan status |
+|---|---|---|---|---|
+| 1 | lead | (writes) | `plan.md` with its task list, and the contract changes | draft |
+| 2 | lead | `flow plan validate` | checks the plan and its task list; repeat until clean | draft |
+| 3 | lead | `flow task sync` | creates the task files from the task list | draft |
+| 4 | lead | (writes) | fills each task file: what to build, "Done when" | draft |
+| 5 | lead | `flow plan validate` | checks plan, task list, task files, and contract changes together | draft |
+| 6 | lead | `flow plan submit` | validates again (refuses if broken), then starts the reviewer, or skips it when review is off | in review |
+| 7 | reviewer | (writes, then hands in) | one review file with findings: high, medium, low, and questions for the human | in review |
+| 8 | `flow` | — | reads the review: no high or medium findings, no questions → pass; else → back to the lead | awaiting approval, or draft |
+| 9 | lead | (fixes) + marks each finding | fixed, wontfix, or deferred, each with a note; decisions go to the human | draft |
+| 10 | lead | `flow plan submit` | next round: the reviewer checks the fixes (up to the round limit, then the human decides) | in review |
+| 11 | human | says "approved" | | awaiting approval |
+| 12 | lead | `flow plan approve` | copies the plan, task files, and contract changes to `.history/plan/`; the slice is **ready** | approved |
+
+- **One submit for the plan and its tasks:** `flow plan submit`, not a
+  separate `flow task submit`. They are reviewed and approved together.
+- **`flow task submit` is kept for the implement phase:** a worker hands
+  in its finished task with it.
 
 **Different from the spec:** the reviewer gives findings to fix (high,
 medium, low), not only questions. The lead fixes them and submits again, up
