@@ -26,6 +26,11 @@ We go through the workflow one process at a time. For each process:
 
 When every process is designed, we cut the workflow into slices.
 
+**How deep this document goes. Decided (the human, 2026-10-19):** this
+document settles the principles: who decides what, and how the parts fit
+together. The deep details (exact counters, timers, fields, messages, flags)
+are settled in each slice's spec, when that slice is built.
+
 ---
 
 ## 1. The big picture
@@ -166,8 +171,6 @@ flow  ──can't──▶  lead  ──can't──▶  human
    it, it does.
 3. **human:** if the lead can't, or it needs a person, it goes to the human.
 
-When each level hands it on, and how, is not defined yet.
-
 **Research (2026-10-18):**
 
 - **Grade by what a mistake costs, not by how hard the problem is.**
@@ -187,7 +190,9 @@ When each level hands it on, and how, is not defined yet.
   that often fix themselves (a network blip); one case per problem, not a
   flood of alerts.
 
-**Lead's recommendation** (not decided):
+**Decided (the human, 2026-10-19):** the six points below. The details (the
+exact rows of the table, the counters, the timers) are settled in the slice
+that builds each part (section 0).
 
 1. **The test for every stop: can it be undone, and does it stay inside
    what the human approved?**
@@ -218,7 +223,7 @@ When each level hands it on, and how, is not defined yet.
    goes on with everything that does not depend on them. When a chat lead
    is open, it tells the human.
 
-**Who handles what:**
+**Who handles what** (a first version; each slice settles its rows):
 
 | Stop | flow | lead | human |
 |---|---|---|---|
@@ -429,19 +434,23 @@ not in git and is not a source of truth for the slice.
 
 ### 1.14 Not clear yet
 
-To come back to when the processes are designed:
+**Principles, to settle here** (they cut across slices):
 
-- The full list of lifecycle states, and what moves a slice between them.
-- When and how each level of the ladder hands on (1.6).
-- What the lead receives when it is called, and what it may do. Also what
-  a fallback lead (started by `flow`, 2.4) may do alone.
+- How a case reaches the chat lead, and how `flow` knows a chat lead is
+  there to take it (2.4). What the lead receives and may do is in 1.6,
+  points 4 and 5.
+- How agents get permissions when nobody is there to click "allow" (1.9).
+
+**Details, settled in the slice that builds them** (section 0):
+
+- The exact lifecycle moves (the lifecycle itself is decided: 1.4).
 - Which run choice is the default (1.5).
 - Is the agents view needed (1.7)?
-- How agents get permissions when nobody is there to click "allow" (1.9).
 - How configurable the workflow is: levels 1-2 or more (1.10).
 - Exit codes: the sketch says two different things (step 18 and step 27).
-- The full list of events and what each one holds; what `status.md` and the
-  dashboard show (after the overview pass).
+- Each event's fields, and what `status.md` and the dashboard show. Each
+  process in section 2 already names its events; the first slice settles
+  the fields every event shares.
 
 ---
 
@@ -898,7 +907,8 @@ So there are two kinds of lead:
 - **A fallback lead:** started by `flow` for one case, with its own time
   limit (`limits.lead`).
 
-Open: what a fallback lead may do, and what it must leave to the human.
+What a fallback lead may do, and what it must leave to the human: decided in
+1.6, point 4.
 
 ### 2.5 Preview and finish
 
