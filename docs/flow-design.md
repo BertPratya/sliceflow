@@ -477,3 +477,62 @@ its events, and what it shows.
 - **Setting:** `spec.review: on | off`.
 - **Events:** `spec.submitted`, `review.started`, `review.submitted`,
   `spec.approved`, `spec.rejected`.
+
+### 2.3 Write and approve the plan
+
+**From the human (2026-10-18):**
+
+- It works like the spec (2.2): draft, validate, submit, review (if on),
+  awaiting approval, approve, a copy in `.history/`.
+- The difference: more files, most of all the task files.
+- Open: how task files are made. Today the lead writes them by hand. Idea:
+  the plan is settled first, then a command creates the task files, the lead
+  fills them, submits, and the reviewer reviews.
+
+**Research: three ways to make task files (2026-10-18)**
+
+| | A. The agent writes each file from nothing | B. `flow` copies a blank template, the agent fills it | C. The agent names the task, `flow` fills the fixed parts, the agent writes only the rest |
+|---|---|---|---|
+| Agent's work per task | 1 write, but it types everything: header, headings, copied text | read the template, then several edits | 1 command, then 1 write of the free text |
+| Wasted output | headers, headings, and requirement text copied from the spec | little | none |
+| Format errors | likely: wrong number, wrong header, a requirement copied with a word changed | fewer | almost none: `flow` writes the fixed parts |
+| Checks needed | many (T1-T6 today) | some | few: `flow` refuses a bad task when it is created |
+
+What the sources say:
+
+- Output (what the agent types) is the slow and costly part. Typing text
+  that is always the same is waste.
+- Models are bad at copying text exactly, even when it is right in front of
+  them. Over a long text, a small error rate per word adds up. The advice:
+  let a tool do the copying.
+- Editing a file in many small places is also error-prone, and every edit is
+  one more round trip. So B is often not faster than A.
+
+**Lead's recommendation: C, and do not copy the requirements at all.**
+
+- **Do not copy what already exists.** Today each task file copies its
+  requirements word for word from the spec, and a check (T5) makes sure the
+  copy is exact. Instead, the task file only names them (`covers: R3, R5`).
+  When a worker starts, `flow brief` shows the text from the approved spec.
+  One source of truth, no copy that can drift, and check T5 goes away.
+- **`flow task new` creates a task** with what `flow` can know or check:
+  the next number, the file name, the header (covers, depends on, touches,
+  risk), and the headings. It refuses at once if a covered requirement or a
+  task it depends on does not exist, or if it makes a loop.
+- **The lead writes only what needs judgment:** what to build, and "Done
+  when" (the tests that prove it).
+
+**The order (lead's proposal):**
+
+1. The lead writes `plan.md`. `flow plan validate` checks it.
+2. When the plan is finished, the lead creates the tasks with
+   `flow task new`, and fills each one.
+3. `flow plan submit` validates everything together: plan, tasks, contract
+   changes, conflicts with other slices. Then the reviewer (if on).
+4. One review and one approval for the plan and its tasks together. The
+   reviewer checks that the tasks really match the plan. Two separate
+   approvals would cost the human twice and split that check.
+
+**Different from the spec:** the reviewer gives findings to fix (high,
+medium, low), not only questions. The lead fixes them and submits again, up
+to the round limit.
