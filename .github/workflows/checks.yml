@@ -1,0 +1,40 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  go:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip when there is no Go code yet
+        id: go
+        shell: bash
+        run: if [ -f go.mod ]; then echo "present=true" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-go@v5
+        if: steps.go.outputs.present == 'true'
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        if: steps.go.outputs.present == 'true'
+        shell: bash
+        run: |
+          dirs=""
+          for d in cmd internal; do [ -d "$d" ] && dirs="$dirs $d"; done
+          [ -z "$dirs" ] || { out=$(gofmt -l $dirs); [ -z "$out" ] || { echo "$out"; exit 1; }; }
+      - name: go vet
+        if: steps.go.outputs.present == 'true'
+        run: go vet ./...
+      - name: go test
+        if: steps.go.outputs.present == 'true'
+        run: go test ./...
+      - name: go build
+        if: steps.go.outputs.present == 'true'
+        run: go build ./...

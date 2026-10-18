@@ -106,92 +106,97 @@ Stop, mark the task (for a plan or integration review: the slice) `blocked`, and
 
 ## 8. Project
 
-agent-flow is a spec-driven workflow for AI coding agents. It has three parts: the workflow files (this file, skills, roles, templates), a `flow` CLI that records workflow state, and a read-only web dashboard.
+flow is a command-line tool that runs the agent-flow workflow. It starts workers and reviewers, runs the checks, merges tasks, and keeps each slice's status, so the lead does not do each step by hand. It works on Windows, macOS, and Linux.
 
-We build agent-flow using its own workflow.
+The first slices build the backend: the orchestration pipeline.
 
 ## 9. Stack profile
 
-| Part | Folder | Tech |
+Parts:
+
+| Part | Folders | Tech |
 |---|---|---|
-| CLI + shared packages | `cmd/flow/`, `internal/` | Go |
-| Dashboard backend | `cmd/dashboard/` | Go, reuses `internal/` |
-| Dashboard frontend | `web/` | React + Vite + TypeScript |
-| File formats | `schemas/` | JSON Schema |
-| Workflow files | `workflow/`, `.agents/skills/` | Markdown |
+| CLI | `cmd/flow/`, `internal/` | Go |
+| Workflow files | `AGENTS.md`, `workflow/`, `.agents/skills/` | Markdown |
 
-Connections:
-
-| From → To | Contract |
-|---|---|
-| Dashboard frontend → dashboard backend | `contract/dashboard-api.yaml` (OpenAPI) |
+Connections: (none)
 
 Tools per role (the lead is the tool you chat in):
 
-| Role | Tool |
-|---|---|
-| Worker | Codex |
-| Code reviewer | Claude Code |
-| Plan reviewer | Claude Code |
+| Role | Tool | How to start |
+|---|---|---|
+| Lead | Claude Code (Opus 5.5) | the chat |
+| Worker | Claude Code (Sonnet 5.5, high effort) | subagent (Agent tool): type `flow-worker`, model `sonnet`, effort `high`, the prompt from `flow-implement` step 2. If the session did not start in this repo, `flow-worker` is not loaded: use type `general-purpose`; the prompt names the role file anyway. |
+| Code reviewer | Claude Code (Opus 5.5, high effort) | subagent (Agent tool): type `flow-code-reviewer` or `flow-plan-reviewer`, model `opus`, effort `high`, the prompt from `flow-review` step 3. Same fallback to `general-purpose`. |
+| Plan reviewer | Claude Code (Opus 5.5, high effort) | subagent (Agent tool): type `flow-code-reviewer` or `flow-plan-reviewer`, model `opus`, effort `high`, the prompt from `flow-review` step 3. Same fallback to `general-purpose`. |
+
+Setup (run in each new task or update worktree, for the parts it touches): (none)
 
 Always allowed in any task (no need to list in `touches`):
 
-- Generated code: `internal/api/gen/`, `web/src/api/gen/`
-- Lock files: `go.sum`, `web/package-lock.json`, only when `go.mod` / `package.json` did not change
+- Lock files: `go.sum`, only when `go.mod` did not change
 
-Auto-fix, run by `flow check` before the checks, for the parts a change touches. They change only layout, or apply fixes the tool marks as safe:
+Auto-fix (runs before the checks):
 
 | Part | Folder | Command |
 |---|---|---|
-| Go | `.` | `gofmt -w cmd internal` |
-| Web | `web/` | `npx eslint --fix .` |
+| CLI | `.` | `gofmt -w cmd internal` |
 
-Checks, for the parts a change touches:
+Checks:
 
 | Part | Tier | Folder | Command | Passes when |
 |---|---|---|---|---|
-| Go | task | `.` | `gofmt -l cmd internal` | it prints nothing |
-| Go | task | `.` | `go vet ./...` | exit code 0 |
-| Go | task | `.` | `go test ./...` | exit code 0 |
-| Web | task | `web/` | `npx tsc --noEmit` | exit code 0 |
-| Web | task | `web/` | `npx eslint .` | exit code 0 |
-| Web | task | `web/` | `npx vitest run` | exit code 0 |
-| Web | task | `web/` | `npx vite build` | exit code 0 |
+| CLI | task | `.` | `gofmt -l cmd internal` | it prints nothing |
+| CLI | task | `.` | `go vet ./...` | exit code 0 |
+| CLI | task | `.` | `go test ./...` | exit code 0 |
+| CLI | task | `.` | `go build ./...` | exit code 0 |
 
-Tiers: `task` runs on every `flow check`. `slice` runs once all tasks are done, before the integration review.
+Run locally (for the preview; run in the slice worktree):
+
+| Part | Folder | Command |
+|---|---|---|
+| CLI | `.` | `go run ./cmd/flow <command>`, against a temporary test repo |
 
 Test dependencies (checks start these themselves; never shared services):
 
 | Dependency | Used by | In checks | How |
 |---|---|---|---|
-| Git repositories | CLI, dashboard | yes | temporary repos created by the tests |
-| GitHub API | dashboard (later) | fake | fake server in the tests |
+| Git repositories | CLI | yes | temporary repos created by the tests |
 
 Known gaps (chosen in setup; revisit when possible):
 
-- Workflow files (Markdown) have no automatic checks. Reviewers check them by hand. Chosen by bert-pratya, 2026-10-17.
-- No pre-commit hook and no CI job yet: errors are found only by the checks a worker runs. Tracked in `backlog.md`, for the first CLI slice. Chosen by bert-pratya, 2026-10-17.
+- Workflow files (Markdown) have no automatic checks. Reviewers check them by hand. Chosen by bert-pratya, 2026-10-18.
+- No Stop hooks: the role files and the pre-commit hook already require the checks. Chosen by bert-pratya, 2026-10-18.
+
+Hooks and CI:
+
+- Pre-commit hook: `.githooks/pre-commit` runs the Go checks when a commit includes Go files. Turn it on once per clone: `git config core.hooksPath .githooks`.
+- CI: `.github/workflows/checks.yml` runs the task checks on Linux, Windows, and macOS, on every push to `main` and every pull request.
 
 ## 10. Project rules
 
 ### Git policy
 
 - Base branch: `main`
-- Slice branch: `slice/NNNN-<name>` from `main` (or from another slice's branch when stacked, `--after`), worktree `.flow/worktrees/NNNN-<name>/`
-- Task branch: `task/NNNN-NN` from the slice branch, worktree `.flow/worktrees/task-NNNN-NN/`
+- Slice branch: `slice/NNNN-<name>` from `main` (or from another slice's branch when stacked), worktree `.worktrees/NNNN-<name>/`
+- Task branch: `task/NNNN-NN` from the newest slice branch, worktree `.worktrees/task-NNNN-NN/`
+- Update branch: `update/NNNN` from the newest slice branch, worktree `.worktrees/update-NNNN/` (to update a slice from `main`)
 - Small changes: `fix/<short-name>` from `main`
-- After the human approves the result: the agent merges into `main` and pushes to `origin`
-- Remotes: `origin` is private and gets the full history. `public` gets only releases: never push to it. At a release, the human asks, and the project is pushed there as one squashed commit. A local pre-push hook refuses anything else (it lives only in `.git/hooks/`: install it again after cloning).
-- Slices update from `main` before the integration review, and again just before merging. A conflict becomes a fix task.
+- After the human approves the result: the lead merges into `main` and pushes to `origin`.
+- Remote: `origin` is private and holds the full history.
+- Slices update from `main` before the integration review, and again just before merging, in an update worktree.
 - Parallel slices: merge one at a time.
-- Commits: `flow` commits after every command that changes something: `NNNN: <what happened>`, and task work as `NNNN/NN: <what changed>`. Nobody commits slice files by hand (bootstrap mode: the lead does, at the same moments).
+- Commits: the lead commits after every step that changes something: `NNNN: <what happened>`, and task work as `NNNN/NN: <summary>`.
 
 ### Other rules
 
-- Until the first release of `flow`, this repo always runs in bootstrap mode, even when a `flow` binary exists. Never use `flow` to manage this repo's slices. Use it only in tests, on temporary repos.
-- Write in plain, simple English. Short sentences.
-- Keep everything generic. No company names, internal URLs, or secrets in this repo.
-- Shared Go logic goes in `internal/`, not `cmd/`. The CLI and the dashboard must use the same packages to read and validate files.
-- Every change that adds behavior adds a test for it.
-- `flow` makes no network calls. It reads and writes repo files and runs git and the check commands. (The dashboard's GitHub access, later, is the one exception, and it is off by default.)
-- `flow` works on Windows, macOS, and Linux. Test path, line-ending, and process handling on all three. Run each check as a separate command, not as a shell string.
+How work is done in this project. Each rule names who follows it and when.
+
+- Everyone: write in plain, simple English. Short sentences.
+- Everyone: keep everything generic. No company names, internal URLs, or secrets in this repo.
+- Lead: until flow's first release, run this repo with agent-flow's skills. Use the `flow` binary only in tests, on temporary repos, never to manage this repo's slices.
+- Lead, planning: shared Go logic goes in `internal/`, not `cmd/`.
+- Worker: every change that adds behavior adds a test for it.
+- Worker: `flow` makes no network calls. It reads and writes repo files and runs git and the check commands.
+- Worker: run each check or git command as a separate process with its own arguments, never as one shell string.
+- Worker: paths, line endings, and process handling must work on Windows, macOS, and Linux.
