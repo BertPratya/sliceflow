@@ -326,8 +326,6 @@ still plain enough for the human to read when they look.
 
 To come back to when the processes are designed:
 
-- Where status lives: the event log (1.7) or a hand-kept `status.md`
-  (the workflow files today).
 - The full list of lifecycle states, and what moves a slice between them.
 - When and how each level of the ladder hands on (1.6).
 - What the lead receives when it is called, and what it may do.
@@ -360,7 +358,7 @@ its events, and what it shows.
 
 **From the human (2026-10-18):**
 
-1. The lead runs `flow new slice` with the slice name. `flow` gives it the
+1. The lead runs `flow slice new` with the slice name. `flow` gives it the
    next number: `NNNN-<name>`.
 2. `flow` creates the slice's branch and its worktree in `.flow/worktrees/`.
 3. `flow` copies the spec template into the slice.
@@ -368,25 +366,20 @@ its events, and what it shows.
 
 **Lead's view, to talk about** (not decided):
 
-- **Command form.** `flow new slice <name>` (verb first) or
-  `flow slice new <name>` (noun first, as in the sketch). Noun first groups
-  the commands by what they act on: `flow slice new | list | cancel | done`,
-  `flow task …`, `flow review …`. Tools like `gh pr create` and
-  `git worktree add` work this way. Either works; we pick one for all commands.
+- **Command form. Decided (the human, 2026-10-18):** `flow <noun> <verb>`,
+  for every command: `flow slice new | list | cancel | done`, `flow task …`,
+  `flow review …`. Like `gh pr create` and `git worktree add`.
 - **`.flow/` for all local state.** Worktrees, locks, logs, and live agent
   state all go under `.flow/`: one folder, one line in `.gitignore`.
   The workflow files today say `.worktrees/`; they change with this design.
-- **The status files.** This is where the open point "where status lives"
-  is decided. Three options:
-  - A. An event log only (`events.jsonl`). `flow status` and the dashboard
-    read it. In git, nobody can read the status without `flow`.
-  - B. An event log, plus a `status.md` that `flow` writes from it after
-    every step. Readable on GitHub and in a pull request. Never edited by hand.
-  - C. A `status.md` kept by hand (the workflow files today).
-  Lead's recommendation: B.
-- **Checks before it creates anything** (from the sketch): the repo is set
-  up, the name is valid (lowercase letters, digits, hyphens), the name is not
-  taken, the git user name is set. If one fails, nothing is created.
+- **The status files. Decided (the human, 2026-10-18):** an event log
+  (`events.jsonl`) is the truth. After every step, `flow` writes a
+  `status.md` from it, readable on GitHub and in a pull request, never edited
+  by hand. (Rejected: the event log only, which nobody can read without
+  `flow`; a hand-kept `status.md`, which can drift.)
+- **Checks before it creates anything.** A technical detail: the lead
+  proposes the list in this slice's spec (the sketch has a first list).
+  If one fails, nothing is created.
 - **All or nothing.** If a step fails halfway, `flow` undoes what it did and
   says why.
 - **Output.** The slice ID, branch, worktree, the files it created, and the
