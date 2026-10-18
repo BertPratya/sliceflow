@@ -957,7 +957,8 @@ recovery.
 - Everything else stays as it is. With no agent running, there is nothing
   more to do.
 
-**Lead's view, to talk about** (not decided):
+**Decided (the human, 2026-10-18):** the points below, and the stacked case.
+(The slice number point was explained on request; see below.)
 
 - **Cancelled is a mark on top of the phase, like blocked** (1.4):
   "implement (cancelled)". The phase never changes, so "where it was" is
@@ -979,5 +980,11 @@ recovery.
 - **Events:** `slice.cancelled` { by, reason, at }, `slice.reopened`,
   `task.interrupted` { task, at }.
 
-Open: a slice stacked on the cancelled one (0003 waits for 0002, and 0002 is
-cancelled).
+**A slice stacked on a cancelled one** (0003 waits for 0002, and 0002 is
+cancelled): `flow` does not change 0003 by itself. It shows
+"0003 waiting: 0002 was cancelled", and the human chooses:
+
+- **Move 0003 onto `main`:** the dependency is removed (maybe with a spec or
+  plan change first, if 0003 needed something from 0002).
+- **Cancel 0003 too.**
+- **Leave it waiting,** if 0002 may be reopened.
