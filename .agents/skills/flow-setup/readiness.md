@@ -1,6 +1,6 @@
 # flow-setup: readiness items
 
-What `flow doctor` checks, how important each item is, and the usual
+What setup checks, how important each item is, and the usual
 options when it is not ok. Adapt the options to what you find.
 
 Levels:
@@ -15,8 +15,8 @@ Levels:
 | Git repository with a base branch | required | Create it, or the human names the base branch. |
 | `git config user.name` and `user.email` set | required | The human sets them. Approvals and commits need a name. |
 | A remote | recommended | Add one. If skipped: no push, no CI, slices merge locally only. |
-| `slices/`, `backlog.md`, `.gitattributes`, and `.flow/` in `.gitignore` | required | Create them. `.flow/` holds the worktrees and the run lock. |
-| Test runners and linters skip `.flow/` | recommended | Add `.flow/` to their ignore settings. The `go` command skips it already; `gofmt -l .` does not. If skipped: running them in the main checkout also runs the copies in every worktree. |
+| `slices/`, `backlog.md`, `.gitattributes`, and `.worktrees/` in `.gitignore` | required | Create them. `.worktrees/` holds the slice, task, and update worktrees. |
+| Test runners and linters skip `.worktrees/` | recommended | Add `.worktrees/` to their ignore settings. The `go` command skips it already; `gofmt -l .` does not. If skipped: running them in the main checkout also runs the copies in every worktree. |
 
 ## Workflow files
 
@@ -24,18 +24,17 @@ Levels:
 |---|---|---|
 | `AGENTS.md` block, `workflow/`, `.agents/skills/` | required | Copy them from the source. |
 | Same version as the source (`workflow/VERSION`) | recommended | Update the block, `workflow/`, and skills. Sections 8-10 stay. If skipped: newer rules and fixes are missing. |
-| `AGENTS.md` sections 8-10 filled | required | Fill them (steps 3-4). |
-| `flow` CLI installed | optional | Install it. If skipped: bootstrap mode, slower and less strict. |
+| `AGENTS.md` sections 8-10 filled, from `workflow/templates/project.md` | required | Fill them (steps 3-4). |
 
 ## Checks
 
 | Item | Level | If not ok |
 |---|---|---|
 | Every part has checks for format, lint, types (where the language has them), test, build | recommended | 1. Use the existing tool (Makefile, package script). 2. Add a standard tool: a new dependency, so the human must agree. 3. Skip: reviewers look for those mistakes by hand, which is less reliable. |
-| Auto-fix commands for every formatter and linter that can fix (e.g. `gofmt -w`, `eslint --fix`, `prettier --write`) | recommended | Add them to the stack profile. `flow check` runs them before the checks. If skipped: workers fix formatting by hand, and checks fail more often. |
+| Auto-fix commands for every formatter and linter that can fix (e.g. `gofmt -w`, `eslint --fix`, `prettier --write`) | recommended | Add them to the stack profile. They run before the checks. If skipped: workers fix formatting by hand, and checks fail more often. |
 | Checks pass on the base branch | required | Parts that do not exist yet are skipped (`workflow/formats/lifecycle.md` → Checks). Otherwise the human fixes it, as a small change or a slice. Slices cannot start on a failing base: every task would fail for reasons it did not cause. |
+| Checks are safe to run at the same time in two worktrees: free ports, unique container names, own temp folders | recommended | Fix the checks. Test it by running the task checks in two worktrees at once. If skipped: tasks run in parallel, but the lead runs the full checks one task at a time, so workers may still see random failures from each other. |
 | Slow tests (end-to-end, browser) are in the `slice` tier | recommended | Move them. If skipped: every task waits for them. |
-| Checks are safe to run twice at the same time: free ports, unique container names, own temp folders | optional | Fix the checks. Test it by running the task checks in two worktrees at once. If skipped: `flow` runs one task at a time. |
 
 ## Test dependencies
 
@@ -62,7 +61,7 @@ Usual options when tests use a shared service, or cannot reach one:
 | Item | Level | If not ok |
 |---|---|---|
 | Adapters for each tool the team uses | required | Create them. Without them, that tool does not load the workflow. |
-| `flow approve`, `flow reject`, high `wontfix` set to "always ask" in each tool (or "deny" where the tool's ask is unreliable, see `workflow/adapters/README.md`) | required | Set it. This is what makes "only a human approves" hold. |
-| Pre-commit hook | recommended | Add it. If skipped: format and status errors are found later, in CI. |
-| Stop hooks running `flow check` | optional | Add them for tools that support them. If skipped: the role files and CI still require checks. |
-| CI job: task checks and `flow validate` | recommended | Add it, with the human's OK. If skipped: a skipped hook lets errors reach the base branch. |
+| Every role has a tested "How to start" in the stack profile | recommended | Find it and try it once (setup step 3). If left empty: the lead finds and tries it the first time it needs that role, and writes it in. |
+| Pre-commit hook | recommended | Add it. If skipped: format errors and failing tests are found later, in CI. |
+| Stop hooks running the task checks | optional | Add them for tools that support them. If skipped: the role files and CI still require checks. |
+| CI job running the task checks | recommended | Add it, with the human's OK. If skipped: a skipped hook lets errors reach the base branch. |

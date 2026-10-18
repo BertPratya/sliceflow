@@ -6,8 +6,11 @@ description: Turns an approved spec into an approved plan, contract changes, and
 # flow-plan
 
 You are the lead. Follow these steps in order. Each step ends when its
-"Done when" is true. If `flow` does not exist yet, use `bootstrap.md` in
-this folder wherever a step names a `flow` command.
+"Done when" is true. After every step that changes something, update the
+slice's `status.md`, add a Log line, and commit
+(`workflow/roles/lead.md` → Keeping the status).
+Also follow the project rules for the lead and for Everyone
+(`AGENTS.md` section 10 → Other rules).
 To change a plan that is already approved, use `change.md` instead.
 
 ## 1. Check it is ready
@@ -88,36 +91,48 @@ Write one file per task, `tasks/NN-<short-name>.md`, from the task template.
 Delete each guidance comment once its section is filled: workers and
 reviewers read task files many times.
 
-- **Order:** setup first (checks for any new part, see `workflow/formats/lifecycle.md`),
-  then contract, backend, frontend, integration, docs. A `contract` task
-  builds what comes from the contract files (generated code, contract tests),
-  never the files themselves.
-- **Size:** one task is one reviewable commit, at most about 15-20 tests.
 - **Self-contained:** a worker reads only the task file and what it links to.
   If it would need this conversation, the task is incomplete.
 - **Coverage:** every requirement is covered by at least one task. Every
   requirement a task covers has at least one row in its "Done when".
 - **Copies:** requirements in a task are copied word for word from the spec.
-- **`touches`:** narrow. On the complex track, backend and frontend go in separate tasks.
-- **`risk: core`:** anything touching auth, stored data, money, concurrency, or a contract.
+- **`touches`:** narrow.
 - **`depends_on`:** only real dependencies: tasks whose result this task needs.
-  `flow` may run tasks with no dependency between them at the same time,
-  unless their `touches` overlap. `depends_on` also marks stale tasks.
+  A task never depends on a later-numbered task. Tasks without a dependency
+  between them may run at the same time.
+  `depends_on` also marks stale tasks.
+- **Checks first:** a part the slice adds gets its checks in its first task
+  (see `workflow/formats/lifecycle.md` → Checks).
+
+**Defaults.** A project rule for the lead about splitting (`AGENTS.md`
+section 10 → Other rules) replaces the matching default:
+
+- **Order:** setup, then contract, backend, frontend, integration, docs. A
+  `contract` task builds what comes from the contract files (generated code,
+  contract tests), never the files themselves.
+- **Size:** one task is one reviewable commit, at most about 15-20 tests.
+- **Parts:** on the complex track, backend and frontend go in separate tasks.
+- **`risk: core`:** anything touching auth, stored data, money, concurrency, or a contract.
 
 Done when: every requirement is covered by a task, and every task follows the rules above.
 
 ## 8. Self-check
 
-Run `flow validate`. Fix every error it reports.
-Then read each task once as a worker would: only the task and what it links to.
-Anything a worker would have to guess, fix now.
+Run the plan, task, and across-slice checks in `workflow/formats/document-checks.md`.
+Fix every error. Then read each task once as a worker would: only the task
+and what it links to. Anything a worker would have to guess, fix now.
 
-Done when: `flow validate` passes and no task needs guessing.
+Done when: no errors and no warnings are left, and no task needs guessing.
 
 ## 9. Plan review
 
-Run `flow doc submit plan`. This starts the plan review: a fresh plan
-reviewer checks the spec, plan, contracts, and tasks together.
+Submit the plan: set its status to `in_review` in `status.md`, commit
+`NNNN: plan submitted for review`, and start the plan review with
+`flow-review` (kind `plan`, target `R<next>`, the next revision: R001, R002, …).
+A fresh plan reviewer checks the spec, plan, contracts, and tasks together.
+When the review ends: `changes` or `needs_human` → plan back to `draft`;
+`pass` → `awaiting_approval` (low findings alone pass; you may still fix
+them before the approval, without a new review).
 
 You wrote the plan, so you fix its findings. Fix a finding alone when it
 needs no decision from the human. Take it to the human, with your
@@ -125,8 +140,9 @@ recommendation, when it is under "Needs human decision", when the fix is a
 hard decision (the test in step 3), or when you want to mark a high finding
 wontfix or defer it out of the slice. A spec problem needs `flow-spec` (`change.md`).
 
-For each finding run `flow finding fixed | deferred | wontfix` with a note.
-Then submit again for the next round. In round 2 and later, the reviewer
+For each finding, record fixed, deferred, or wontfix with a note in
+`status.md` → Findings. Then submit again for the next round (always
+`in_review`: the reviewer verifies your fixes). In round 2 and later, the reviewer
 checks your fixes, and adds a new finding only if it is high or was caused
 by a fix.
 
@@ -142,7 +158,20 @@ Show the human a short summary:
 - the risks
 
 Show the full documents or the diff when asked.
-The human approves with `flow approve plan`. It approves the plan, the tasks,
-and the contract changes together. Run it only when they have just told you to.
+
+One approval covers the plan, the tasks, and the contract changes. Only when
+the plan is `awaiting_approval` and the human has just said they approve:
+1. In `status.md` → Documents: status `approved`, revision `R<next>`,
+   approved at (now, UTC) and by (the human's name).
+2. Copy the plan to `history/plan/R<next>.md`, and `tasks/` to
+   `history/plan/R<next>-tasks/`.
+3. Save the slice's contract changes:
+   `git diff --output=history/contract/R<next>.patch $(git merge-base <start> HEAD) HEAD -- <files in the plan's touches>`,
+   where `<start>` is the base branch, or the earlier slice's branch while stacked.
+   Use `--output`, not `>`: on Windows, `>` can change the file's encoding.
+4. Set the phase to `ready`.
+5. Commit: `NNNN: plan R<next> approved ("<the human's words>")`.
+
+If the human rejects it: back to `draft`, with their reason in the Log.
 
 Done when: the plan is approved. Continue with `flow-implement`.

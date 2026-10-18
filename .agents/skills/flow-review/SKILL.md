@@ -6,8 +6,10 @@ description: Starts a review in a fresh context and reports the result: spec che
 # flow-review
 
 You start the review. A fresh reviewer does it. Follow these steps in order.
-If `flow` does not exist yet, use `bootstrap.md` in this folder wherever a
-step names a `flow` command.
+After every step that changes something, update `status.md`, add a Log
+line, and commit (`workflow/roles/lead.md` → Keeping the status).
+Also follow the project rules for the lead and for Everyone
+(`AGENTS.md` section 10 → Other rules).
 
 ## 1. Pick the kind
 
@@ -22,8 +24,13 @@ Done when: you know the kind and the target.
 
 ## 2. Create the review file
 
-Run `flow review start <kind> <slice>/<target>`. It creates
-`reviews/<kind>-<target>-<round>.md` from the template and fills the header.
+1. **Round:** 1 + the number of earlier reviews of the same kind and target in `reviews/`.
+   A task review file is created and committed in the task worktree, on the
+   task branch. All other review files go in the slice worktree.
+2. Copy `workflow/templates/review.md` to `reviews/<kind>-<target>-<round>.md`
+   (integration: `reviews/integration-<round>.md`).
+3. Fill the header: review, slice, kind, target, round, reviewer (role and
+   tool), and the title. For a task, put the commits to review in `target`.
 
 Done when: the review file exists with its header filled.
 
@@ -32,28 +39,50 @@ Done when: the review file exists with its header filled.
 Never review in your own context. You wrote or ran the work, so you
 share its blind spots.
 
-Use the tool the project sets for the role (stack profile in `AGENTS.md`).
-If it is your own tool, start a subagent. If it is another tool, start it
-through that tool's command line (e.g. `codex exec "…"`, `claude -p "…"`).
-If the project sets none, use your own subagent.
+Start the reviewer the way the stack profile's "How to start" column says
+(`AGENTS.md` section 9). Whatever the way: a fresh context, the prompt below, it works only in the
+folder the prompt names, and only its `RESULT` block comes back to you.
+Never read its whole conversation.
 
-The prompt is always:
+The prompt:
 
     You are the <role>. Read workflow/roles/<role>.md and follow it.
-    Run `flow brief <role> <slice>/<review>`.
+    Work only in <absolute path of the worktree: the task's for a task review, otherwise the slice's>.
+    All paths are relative to it.
+    This is a <kind> review. Your review file: <path>.
+    <task review: Review commits <hashes> of task <NN>.>
+    <integration review: Review the diff of <slice branch> against <base branch>.
+     Merges with conflicts: <commits, from the Log>.>
+    <plan review: The track is <track>.>
+    <spec check of a change: Only R<n>, R<n> changed. Check them and what they affect.>
 
-Done when: the reviewer has ended and the review is submitted.
-If it ended without submitting, start it once more. If that fails too,
-tell the human.
+Done when: the reviewer has ended with `RESULT: submitted`.
+If it ended without it, start it once more. If that fails too, tell the human.
 
-## 4. Act on the verdict
+## 4. Read the review and set the verdict
+
+1. Check the lines you read have their exact form (the note at the top of
+   the review template). If one cannot be read, start the reviewer again
+   with the line to fix. After two failed tries, tell the human.
+2. Set the verdict, by the rule in the template: anything under "Needs human decision" → `needs_human`;
+   else any high or medium finding, new or reopened → `changes`; else `pass`.
+3. Record the verdict (with the time, UTC) in a Log line, and every finding in `status.md` → Findings: new ones
+   `open`, earlier ones `verified` or `reopened`.
+4. Spec or plan review: set the document's status, as `workflow/formats/lifecycle.md`
+   → Documents says: `pass` → `awaiting_approval`; `changes` or `needs_human` → `draft`.
+5. Commit: `NNNN: review <review> (<verdict>)`. The review file goes on the
+   branch where it was created; `status.md` only ever on the slice branch.
+
+Done when: the verdict is set, recorded, and committed.
+
+## 5. Act on the verdict
 
 | Verdict | Next |
 |---|---|
-| `pass` | The work moves on: spec or plan to approval, task to done, slice to preview. |
+| `pass` | The work moves on: spec or plan to approval, task to the merge, slice to preview. |
 | `changes`, task | The worker gets another round (`flow-implement`). |
 | `changes`, plan | You fix the findings (`flow-plan`, step 9). |
-| `changes`, integration | `flow` turns the findings into fix tasks (`flow-implement`). |
+| `changes`, integration | Each high or medium finding becomes a fix task (`flow-implement`). |
 | `needs_human` | Ask the human each question, in plain words. |
 
 For a spec check, hold the questions until the human has read the spec

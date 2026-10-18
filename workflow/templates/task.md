@@ -2,7 +2,7 @@
 task: "{{task}}"
 slice: {{slice}}
 title: {{title}}
-layer: {{layer}}              # setup | contract | backend | frontend | integration | docs
+layer: {{layer}}              # default: setup | contract | backend | frontend | integration | docs (a project rule may name others)
 depends_on: []                # tasks whose result this one needs, e.g. ["01", "03"]
 covers: []                    # spec requirements, e.g. [R5, R6]
 risk: normal                  # core | normal | low  (core = always code-reviewed)
@@ -12,12 +12,7 @@ touches:                      # files and folders this task may change. Keep it 
   # - internal/server/server.go                 one file
   # - internal/server/db/migrations/0002_*.sql  pattern
   # Generated code and lock files listed in the stack profile are always allowed.
-  # Unrelated areas, or both backend and frontend on the complex track? Split the task.
-# --- managed by flow, do not edit ---
-status: todo                  # todo | in_progress | in_review | done | blocked | cancelled
-attempt: 0
-review_round: 0
-updated: none
+  # Unrelated areas? Split the task. More split rules: flow-plan step 7 and the project's rules.
 ---
 
 # Task {{task}}: {{title}}
@@ -26,8 +21,8 @@ updated: none
      spec.md, plan.md, the project files it links to, and the code.
      If it needs earlier conversation to understand, this file is incomplete.
 
-     One task = one reviewable commit. More than about 15-20 tests in
-     "Done when", or "touches" spread over many unrelated folders? Split it. -->
+     One task = one reviewable commit. Size: the default in flow-plan step 7,
+     unless a project rule replaces it. -->
 
 ## Goal
 <!-- 2-4 sentences. What exists after this task that did not exist before.

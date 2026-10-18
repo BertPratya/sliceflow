@@ -1,2 +1,2 @@
-# flow's local files: worktrees and the run lock.
-.flow/
+# Slice, task, and update worktrees.
+.worktrees/

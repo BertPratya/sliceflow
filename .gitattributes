@@ -1,4 +1,4 @@
-# Two slices adding events to the same file: keep both sides' lines.
-slices/*/events.jsonl merge=union
 # Same line endings on Windows, macOS, and Linux.
 *.md text eol=lf
+*.patch text eol=lf
+*.go text eol=lf
