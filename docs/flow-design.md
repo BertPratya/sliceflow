@@ -118,6 +118,28 @@ The workflow files today list 7 phases (spec, plan, ready, implementing,
 integration, preview, done). They mix phases and states. The new design
 keeps them apart.
 
+**The slice lifecycle. Decided (the human, 2026-10-18):**
+
+```
+spec → plan → implement → preview → done
+```
+
+- **No "running" state.** Whether a run is going is shown by the status of
+  each task in the implement phase.
+- **No "ready" state.** "Ready" means the spec and the plan are both
+  approved. It is worked out from that, not stored.
+- **A blocked slice remembers where it was,** so it can go back there. It
+  must be recoverable (1.7).
+
+Lead's notes, to talk about (not decided):
+
+- So **blocked is a mark on top of the phase**, not a phase of its own: for
+  example "implement (blocked: plan review failed 3 rounds)". When it is
+  solved, the mark goes away, and the phase is still there.
+- Worked-out states ("ready", "running") are computed from the event log
+  when shown. This keeps one source of truth (1.13).
+- Cancelled: not talked about yet.
+
 ### 1.5 One autonomous run (from the human, 2026-10-18)
 
 After the human approves the plan, `flow` runs by itself. How far it goes is
