@@ -318,10 +318,53 @@ Today the lead starts them as subagents inside its own chat. In the hybrid,
 `flow` starts each one as a separate program, using the agent tool's
 non-interactive mode (for example `claude -p`, `codex exec`).
 
-**Lead's notes, to talk about** (not decided):
+**Permissions. Decided (the human, 2026-10-19).** Nobody is there to click
+"allow" (sketch H4).
 
-- **Permissions.** Nobody is there to click "allow". What each agent may do
-  must be set before it starts (sketch H4).
+Research (2026-10-19):
+
+- Claude Code (`claude -p`): allow and deny rules for one run (`--settings`);
+  the `dontAsk` mode refuses everything not on the list instead of asking.
+  Codex (`codex exec`): approval policy `never`.
+- A sandbox (limits set by the operating system): Claude Code has one on
+  macOS, Linux, and WSL2, not on native Windows. Codex has `workspace-write`
+  (with a reported bug on native Windows).
+- Rules alone have holes: a blocked command run by its full path or inside
+  `sh -c`, or a script that opens files itself. Only a sandbox closes them.
+- "Skip all prompts" is used inside throwaway containers: the container is
+  the safety. A worktree protects nothing outside its own folder.
+- A real case: an autonomous setup pushed to `main` by accident, because the
+  new branch inherited `main` as its push target.
+
+Decided: three layers.
+
+1. **A fixed list per role**, set by `flow` before each agent starts.
+   Everything else is refused, not asked, so an agent never waits for a click.
+
+   | Role | May | May not |
+   |---|---|---|
+   | Worker | read the repo, edit files in its own worktree, run the setup, auto-fix, and check commands | commit, merge, push: `flow` does all git work |
+   | Reviewer | read everything, write only its own review file | change any code |
+   | Fallback lead | read, run `flow` commands (`flow` still refuses approve, reject, cancel: 1.6) | edit code, git |
+
+2. **A sandbox on top, where the system has one:** writes only inside the
+   worktree, network only to hosts the project lists (for example its
+   package registry).
+3. **`flow` checks the result after the agent ends**, on every system: only
+   files in the task's `touches` changed; no approved document, `.history/`,
+   or event log was touched. A failed check is a case.
+
+- On native Windows there is no sandbox for Claude Code, so layers 1 and 3
+  are the protection.
+- When the agent needs something that was refused, it says so in its result
+  ("blocked: needs network for `go mod download`"). That is a case, routed
+  by the ladder (1.6). Often it is a new dependency, which goes to the human.
+- "Skip all prompts" only as a setting the human turns on, for running
+  `flow` inside a container or a virtual machine.
+- The exact lists, flags, and hosts are settled in the slice (section 0).
+
+**Lead's notes, details for the slice:**
+
 - **Result and reason.** The tool's exit code and last output tell `flow`
   whether the agent finished, failed, or hit a limit. JSON output also gives
   cost and turns.
@@ -495,9 +538,9 @@ not in git and is not a source of truth for the slice.
 
 ### 1.14 Not clear yet
 
-**Principles, to settle here** (they cut across slices):
-
-- How agents get permissions when nobody is there to click "allow" (1.9).
+**Principles, to settle here** (they cut across slices): none left.
+Settled on 2026-10-19: how cases reach the lead (1.12c), and permissions for
+agents nobody watches (1.9).
 
 **Details, settled in the slice that builds them** (section 0):
 
