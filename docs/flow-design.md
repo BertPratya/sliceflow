@@ -322,7 +322,43 @@ Lead's note: so every `flow` output is read first by an AI agent. It must
 be exact and complete (what happened, what is next, why it stopped), and
 still plain enough for the human to read when they look.
 
-### 1.13 Not clear yet
+### 1.13 Where and how events are kept (open, 2026-10-18)
+
+Decided so far: an event log is the truth, and `flow` writes `status.md`
+from it. Not decided: where the log lives, and in what form.
+
+**Where.** Three options:
+
+| | A. With the slice, in git | B. Local only, in `.flow/` | C. Both, split by kind |
+|---|---|---|---|
+| What | one log per slice, committed on the slice branch | one store on this computer, not in git | slice history in git (A); live events local (B) |
+| Survives a lost computer | yes, once pushed | no | history yes; live events no (not needed) |
+| Another session or machine sees it | yes | only this computer | history yes |
+| Reviewable in a pull request | yes | no | yes |
+| Noise | a commit for every small event (heartbeats, retries) | none | only real steps are committed |
+| Dashboard across slices | reads every slice's branch | reads one place | reads `.flow/` plus each slice |
+
+Lead's recommendation: C. "Slice history" is the steps that matter later:
+created, approved, task started and done, review submitted. "Live events"
+are what matter only while running: an agent's heartbeat, a retry after a
+network error, which process runs where.
+
+**How (form).** Three options:
+
+- **A text file, one event per line** (JSON Lines). Simple, readable,
+  works in git and on every system. `flow` only adds lines at the end.
+- **A small database file** (SQLite). Good for queries and many writers at
+  once. But it is binary (bad in git) and a new dependency.
+- **Git commits as events** (the event in the commit message). No extra
+  file. But task branches are rebased at merge, which rewrites those commits.
+
+Lead's recommendation: one event per line, for both kinds.
+
+**Safe on a crash** (any option): `flow` writes "starting X" before it does
+X, and "X done" after. A half-written last line (the program died while
+writing) is skipped when reading, and reported.
+
+### 1.14 Not clear yet
 
 To come back to when the processes are designed:
 
@@ -373,7 +409,7 @@ its events, and what it shows.
   state all go under `.flow/`: one folder, one line in `.gitignore`.
   The workflow files today say `.worktrees/`; they change with this design.
 - **The status files. Decided (the human, 2026-10-18):** an event log
-  (`events.jsonl`) is the truth. After every step, `flow` writes a
+  is the truth (where and how it is kept: open, see 1.13). After every step, `flow` writes a
   `status.md` from it, readable on GitHub and in a pull request, never edited
   by hand. (Rejected: the event log only, which nobody can read without
   `flow`; a hand-kept `status.md`, which can drift.)
