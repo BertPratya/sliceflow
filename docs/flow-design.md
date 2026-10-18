@@ -738,5 +738,19 @@ Limits and the ladder:
   (B should have waited for C). That is a plan problem, so it can go on to
   the human.
 
-Open: after a conflict is solved, does the task need a review again, or are
-passing checks enough (the final review sees the whole slice anyway)?
+**Decided (the human, 2026-10-18):** after a conflict is solved, passing
+checks are enough. The final review sees the whole slice anyway. Exception:
+if solving it changed more than the fit, the task review runs again (when
+task reviews are on).
+
+How `flow` knows (lead's proposal, not decided): **it measures, it does not
+ask.**
+
+- `flow` compares B's change before and after the conflict was solved (git
+  can compare two versions of the same change: `git range-diff`).
+- Only the files that were in conflict changed → it was the fit. Checks are
+  enough.
+- Any other file changed too → more than the fit. Review again.
+- The worker's hand-in note goes along as information for the reviewer, but
+  it does not decide. An agent judging its own change is not reliable, and
+  this is a fact code can measure (the hybrid rule, 1.3).
