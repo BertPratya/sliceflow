@@ -197,6 +197,6 @@ How work is done in this project. Each rule names who follows it and when.
 - Lead: until flow's first release, run this repo with agent-flow's skills. Use the `flow` binary only in tests, on temporary repos, never to manage this repo's slices.
 - Lead, planning: shared Go logic goes in `internal/`, not `cmd/`.
 - Worker: every change that adds behavior adds a test for it.
-- Worker: `flow` makes no network calls. It reads and writes repo files and runs git and the check commands.
+- Worker: `flow` itself sends no data to any outside service: no telemetry, no uploads, no calls home. It reads and writes repo files, and runs local programs: git, the check commands, and the agent tools. What those programs send is theirs, not `flow`'s.
 - Worker: run each check or git command as a separate process with its own arguments, never as one shell string.
 - Worker: paths, line endings, and process handling must work on Windows, macOS, and Linux.
