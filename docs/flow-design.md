@@ -138,7 +138,7 @@ Lead's notes, to talk about (not decided):
   solved, the mark goes away, and the phase is still there.
 - Worked-out states ("ready", "running") are computed from the event log
   when shown. This keeps one source of truth (1.13).
-- Cancelled: not talked about yet.
+- Cancelled: a mark like blocked, recoverable (2.7).
 
 ### 1.5 One autonomous run (from the human, 2026-10-18)
 
@@ -958,7 +958,6 @@ recovery.
   more to do.
 
 **Decided (the human, 2026-10-18):** the points below, and the stacked case.
-(The slice number point was explained on request; see below.)
 
 - **Cancelled is a mark on top of the phase, like blocked** (1.4):
   "implement (cancelled)". The phase never changes, so "where it was" is
@@ -973,7 +972,10 @@ recovery.
 - **Kept:** the slice branch, every task branch, the event log, `.history/`,
   reviews. **Removed:** the worktrees in `.flow/`, to free disk space; they
   can be made again from the branches on reopen.
-- **The slice number is never used again.**
+- **The slice number is never used again.** The number is in the branch
+  name, the commits, the event log, `.history/`, other slices' `after:` and
+  decisions, and the backlog. A new slice with the same number would make
+  all of those point to two slices. It also keeps reopening possible.
 - **Stopping without cancelling is a different thing:** `flow run stop`
   stops the run (agents interrupted, work saved) but the slice is not
   cancelled. For "pause for now", not "we do not want this".
