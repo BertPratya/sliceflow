@@ -515,18 +515,53 @@ What the sources say:
   copy is exact. Instead, the task file only names them (`covers: R3, R5`).
   When a worker starts, `flow brief` shows the text from the approved spec.
   One source of truth, no copy that can drift, and check T5 goes away.
-- **`flow task new` creates a task** with what `flow` can know or check:
-  the next number, the file name, the header (covers, depends on, touches,
-  risk), and the headings. It refuses at once if a covered requirement or a
-  task it depends on does not exist, or if it makes a loop.
 - **The lead writes only what needs judgment:** what to build, and "Done
   when" (the tests that prove it).
+
+**Agreed (the human, 2026-10-18):** option C, and requirements are named,
+not copied.
+
+**All tasks at once, from the plan (from the human, 2026-10-18):**
+
+The lead writes the plan with a **task list**: every task, what it depends
+on, and which requirements it covers. Every requirement must appear. Then
+one `flow` command creates **all** the task files from that list.
+
+Research (2026-10-18):
+
+- **Plan everything first, then build, is as good as step by step.** A 2026
+  study of tool-using agents found no accuracy gain from planning step by
+  step instead of planning the whole thing first. Another found step by step
+  only 3 points better, at almost 6 times the cost. A full plan first is
+  also what the human approves, so it must exist anyway.
+- **Other tools do the same.** Task Master keeps one list of all tasks with
+  their dependencies (`tasks.json`), and one command generates the task
+  files from it. GitHub Spec Kit writes all tasks in one list too.
+- **Seeing the whole list at once allows checks no single file can do:**
+  every requirement is covered, no dependency loops, no two tasks that run
+  at the same time touch the same files. `flow` checks them before any file
+  exists.
+
+**Lead's view, to talk about** (not decided):
+
+- **One truth for the structure.** If the list is in `plan.md` and also in
+  each task file's header, there are two copies that can drift. Proposal:
+  the structure (number, name, covers, depends on, touches, risk) lives
+  only in the plan's task list. A task file holds only its content (what
+  to build, "Done when"). `flow brief` puts the two together for the worker.
+- **A form `flow` can read exactly.** A Markdown table is easy to break by
+  hand. A small fenced block in `plan.md` (for example YAML) is exact and
+  still readable.
+- **Safe to run again.** Plans change. The command can run any time: it
+  creates the files that are missing, never overwrites content the lead
+  wrote, and reports a task file whose task left the list (it does not
+  delete it). A name for that: `flow task sync`.
 
 **The order (lead's proposal):**
 
 1. The lead writes `plan.md`. `flow plan validate` checks it.
-2. When the plan is finished, the lead creates the tasks with
-   `flow task new`, and fills each one.
+2. When the plan is finished, one command creates all task files from the
+   plan's task list. The lead fills each one.
 3. `flow plan submit` validates everything together: plan, tasks, contract
    changes, conflicts with other slices. Then the reviewer (if on).
 4. One review and one approval for the plan and its tasks together. The
