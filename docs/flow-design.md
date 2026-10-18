@@ -945,3 +945,39 @@ Why A first: the human's time (design, approval, preview) is the slow part,
 and designing ahead keeps it busy. Building is fast with AI workers, so
 waiting for the merge costs little. B adds restacks, rework, and harder
 recovery.
+
+### 2.7 Cancel a slice
+
+**From the human (2026-10-18):**
+
+- Cancelling stops everything that is running, and remembers where the slice
+  was. The history stays, so it is **recoverable**.
+- The slice's status is **cancelled**.
+- An agent that was running gets the status **interrupted**.
+- Everything else stays as it is. With no agent running, there is nothing
+  more to do.
+
+**Lead's view, to talk about** (not decided):
+
+- **Cancelled is a mark on top of the phase, like blocked** (1.4):
+  "implement (cancelled)". The phase never changes, so "where it was" is
+  never lost. `flow slice reopen` removes the mark, and the slice goes on
+  from there.
+- **Commands:** `flow slice cancel --reason "…"` (only when the human says
+  so, with their words in the event) and `flow slice reopen`.
+- **Before an agent is stopped, its work is saved** on its task branch.
+  The task is marked interrupted. On reopen, an interrupted task goes back
+  to todo, and its work is still on its branch (the rule in the workflow
+  files today: an interruption is not a failure).
+- **Kept:** the slice branch, every task branch, the event log, `.history/`,
+  reviews. **Removed:** the worktrees in `.flow/`, to free disk space; they
+  can be made again from the branches on reopen.
+- **The slice number is never used again.**
+- **Stopping without cancelling is a different thing:** `flow run stop`
+  stops the run (agents interrupted, work saved) but the slice is not
+  cancelled. For "pause for now", not "we do not want this".
+- **Events:** `slice.cancelled` { by, reason, at }, `slice.reopened`,
+  `task.interrupted` { task, at }.
+
+Open: a slice stacked on the cancelled one (0003 waits for 0002, and 0002 is
+cancelled).
