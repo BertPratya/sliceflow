@@ -97,14 +97,28 @@ The fallback rule: `flow` calls the lead only when a step needs judgment and
 no worker or reviewer owns it. The lead acts through `flow` commands, so the
 state stays correct.
 
-### 1.4 Not clear yet
+### 1.4 Phases and lifecycle (from the human, 2026-10-18)
+
+Two different things, not to be mixed:
+
+- **Phases** are the big picture: what kind of work is going on.
+  There are 4: **spec, plan, implement, preview.**
+- **Lifecycle states** say where a slice is. They are not phases.
+  - **ready** means "ready to implement": the plan is approved, nothing has
+    started yet.
+  - **done** means the slice is finished and merged.
+  - Others (for example blocked, cancelled) are states too.
+- **Integration** is a step inside the implement phase, not a phase of its own.
+
+The workflow files today list 7 phases (spec, plan, ready, implementing,
+integration, preview, done). They mix phases and states. The new design
+keeps them apart.
+
+### 1.5 Not clear yet
 
 To come back to when the processes are designed:
 
-- How the 4 phases map to the 7 phases in the workflow files today
-  (spec, plan, ready, implementing, integration, preview, done). A first
-  reading: ready ends the plan, integration ends the implement phase, done
-  ends the preview.
+- The full list of lifecycle states, and what moves a slice between them.
 - When `flow` calls the lead: the exact list of stops.
 - What the lead receives when it is called, and what it may do.
 
