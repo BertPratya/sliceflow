@@ -912,7 +912,8 @@ until 0002 is finished and merged.
   short. After the lower branch is merged, move only the upper branch's own
   commits onto the new base.
 
-**Lead's view, to talk about** (not decided):
+**Decided (the human, 2026-10-18):** points 1-4 below. Point 5 is for later,
+only if waiting turns out to be too slow.
 
 Two different things wait on 0002, and only one of them has to:
 
@@ -921,8 +922,6 @@ Two different things wait on 0002, and only one of them has to:
 | What it changes | only files in the slice's own folder | code |
 | Needs 0002's code? | no: it needs 0002's approved spec and plan | yes |
 | Can run while 0002 is in implement? | yes, always | A: no, waits for the merge. B: yes, on top of 0002's branch |
-
-Proposal:
 
 1. **Design ahead, always.** 0003 and 0004 can be created, specified, and
    planned at any time. A stacked slice records what it waits for:
@@ -934,8 +933,10 @@ Proposal:
    0003's plan "stale: 0002 changed", and it is checked and approved again
    (check X3 in the workflow files today).
 4. **Build after the merge (A), automatically.** When 0002 is merged into
-   `main`, `flow` moves 0003's branch on top of `main` and starts its run by
-   itself (if 0003's plan is approved). 0004 follows 0003 the same way.
+   `main`, `flow` updates 0003's branch from the local `main` (no remote is
+   involved). 0003 holds only its own documents, so this cannot conflict.
+   The checks run once, then `flow` starts 0003's run by itself (if its
+   plan is approved). 0004 follows 0003 the same way.
 5. **Build on top (B) later, as a setting**, if the waiting turns out to be
    too slow. It costs a restack every time 0002 changes, and rework when
    0002's preview finds a problem.
