@@ -230,10 +230,87 @@ What is easy, and what is hard:
 | Processes on Windows, macOS, Linux | medium | starting, watching, and stopping processes differs per system |
 | Recover every case by itself | hard | start with: detect, report, and one command to resume; add automatic recovery case by case |
 
-### 1.8 Not clear yet
+### 1.8 Who is the lead (from the human, 2026-10-18)
+
+The human works in two ways. The brainstorm, spec, plan, and tasks are
+written in one chat session. Then the implement phase runs either:
+
+- in **the same session**, or
+- in **a new session**, which gets the current status and context first.
+
+This does not need its own design. `flow` keeps the state in files, so any
+session can be the lead. We design `flow`, not the session.
+
+### 1.9 How `flow` starts and ends agents (from the human, 2026-10-18)
+
+To consider: how `flow` starts the workers and reviewers, and cleans up
+after them.
+
+Today the lead starts them as subagents inside its own chat. In the hybrid,
+`flow` starts each one as a separate program, using the agent tool's
+non-interactive mode (for example `claude -p`, `codex exec`).
+
+**Lead's notes, to talk about** (not decided):
+
+- **Permissions.** Nobody is there to click "allow". What each agent may do
+  must be set before it starts (sketch H4).
+- **Result and reason.** The tool's exit code and last output tell `flow`
+  whether the agent finished, failed, or hit a limit. JSON output also gives
+  cost and turns.
+- **Per role.** Tool, model, and effort per role come from the settings.
+- **Ending.** Stop the whole process (with its children) on every system,
+  save the work on the task branch, remove the worktree when the task is done.
+
+### 1.10 A configurable workflow (from the human, 2026-10-18)
+
+The workflow should be configurable. For example, a project that does not
+need reviews turns them off, or changes the order of steps.
+
+**Lead's proposal, to talk about** (not decided). Three levels of "configurable":
+
+| Level | Example | Effort |
+|---|---|---|
+| 1. Settings | limits, run reach, review on or off | easy |
+| 2. Steps from a fixed set | per phase, pick and order built-in steps, each with a condition | medium |
+| 3. Any workflow | your own steps, states, and scripts | hard: this is building a general workflow engine |
+
+Proposal: levels 1 and 2. Level 3 breaks the reliability promise (1.7):
+`flow` can only recover a step safely if it knows what the step does.
+
+A level 2 example:
+
+```yaml
+implement:
+  steps: [build, check, review, merge]
+  review: core          # always | core | never
+preview:
+  prepare: true
+```
+
+### 1.11 Build or reuse? (research, 2026-10-18)
+
+No existing tool matches this workflow. The closest ones, by kind:
+
+| Kind | Example | What it has | What it lacks |
+|---|---|---|---|
+| Spec-driven kits | GitHub Spec Kit | the same phases (specify, plan, tasks, implement), Markdown per feature | no orchestration: the chat agent runs each step, like today |
+| Agent orchestrators | ORCH, Orca, and similar | parallel agents in git worktrees, a task state machine, review | no spec or plan approvals, no escalation ladder |
+| Workflow engines | Temporal, GitHub Actions | durable steps, retries, recovery | a server or the cloud; nothing about agents, specs, or approvals |
+
+**Lead's recommendation:** build `flow`, but reuse what exists:
+- the agent tools themselves (we never build an agent),
+- git for branches, worktrees, and merges,
+- the ideas: durable steps (Temporal), task state machines (ORCH),
+  spec files (Spec Kit).
+
+Before the plan, look closer at ORCH-like tools, to borrow ideas.
+
+### 1.12 Not clear yet
 
 To come back to when the processes are designed:
 
+- Where status lives: the event log (1.7) or a hand-kept `status.md`
+  (the workflow files today).
 - The full list of lifecycle states, and what moves a slice between them.
 - When and how each level of the ladder hands on (1.6).
 - What the lead receives when it is called, and what it may do.
@@ -241,6 +318,9 @@ To come back to when the processes are designed:
 - Is the agents view needed (1.7)?
 - A web dashboard and the rule "flow makes no network calls": a local page
   is not an outside call, but the rule should say so.
+- How agents get permissions when nobody is there to click "allow" (1.9).
+- How configurable the workflow is: levels 1-2 or more (1.10).
+- Exit codes: the sketch says two different things (step 18 and step 27).
 
 ---
 
