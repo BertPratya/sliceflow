@@ -5,18 +5,15 @@ kind: {{kind}}                # spec | plan | task | integration
 target: {{target}}            # e.g. { spec: R001 }, { plan: R001 }, { task: "02", commits: [a1b2c3d] }
 round: {{round}}
 reviewer: {{reviewer}}        # role (tool), e.g. code-reviewer (codex)
-# --- managed by flow, do not edit ---
-verdict: none                 # pass | changes | needs_human, set on submit
-submitted_at: none
 ---
 
 # Review: {{title}}
 
-<!-- flow creates this file and fills the header. You write the sections below.
-     When done, run: flow review submit {{slice}}/{{review}}
-     After submit the file is locked. Never edit it again.
+<!-- The lead creates this file and fills the header. You write the sections below.
+     When done, end your last message with: RESULT: submitted
+     The file is locked once the lead sets the verdict. Never edit it after that.
 
-     flow sets the verdict from what you write:
+     The lead sets the verdict from what you write:
      - "Needs human decision" is not empty     → needs_human
      - else any high or medium finding,
        new or reopened                         → changes
@@ -25,12 +22,13 @@ submitted_at: none
      Spec reviews are short: fill only Summary and "Needs human decision"
      (every real gap, most important first). Write "(none)" in the other sections.
 
-     flow reads only these lines, so keep their exact form (case does not matter):
+     The lead reads these lines to set the verdict and record findings,
+     so keep their exact form (case does not matter):
      - finding headings: ### F1 [high|medium|low] title
      - "Previous findings" lines: - <review>/F1: verified | reopened. why
      - "Requirements check" lines: - R1: ok | fails, see F2 | manual
      - whether "Needs human decision" is empty
-     flow submit refuses a file it cannot read, and says which line to fix.
+     If a line cannot be read, the lead sends the file back with the line to fix (at most twice).
 
      Report real problems only. Do not invent issues to look thorough.
      If everything is fine, say so and leave Findings as "(none)".

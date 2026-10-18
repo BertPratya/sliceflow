@@ -7,11 +7,6 @@ track: {{track}}              # simple | complex
 touches:                      # project files this slice changes (contract, data model, ...)
   # - api/openapi.yaml
   # - design/data-model.md
-# --- managed by flow, do not edit ---
-status: draft
-revision: none
-approved_at: none
-approved_by: none
 ---
 
 # Plan: {{title}}

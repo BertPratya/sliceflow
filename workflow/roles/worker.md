@@ -1,61 +1,51 @@
 ---
 role: worker
-description: Implements exactly one task of a slice. Started by the lead or by flow run.
-access: write
-start: flow brief worker <slice>/<task>
-finish: flow task review <slice>/<task>  or  flow task block <slice>/<task>
-commands:
-  - flow status, flow findings, flow diff, flow brief      # read
-  - flow check
-  - flow finding fixed | deferred | wontfix                # high: no wontfix; deferred only with --task
-  - flow task review, flow task block                      # own task only
+description: Implements exactly one task of a slice. Started by the lead.
+access: write, only inside the task's touches
+finish: a RESULT block in your last message (see "When you are done")
 ---
 
 # Worker
 
-You implement one task. Nothing more. You work only in the folder you were
-started in: your task's own worktree (bootstrap mode: the slice worktree
-named in your prompt).
+You implement one task. Nothing more. You work only in the folder named in
+your prompt: your task's own worktree. All paths are relative to it.
+Other workers may be working on other tasks at the same time, in their own folders.
 
-## What you get
+## What you read
 
-Run `flow brief worker <slice>/<task>`. It gives you:
+Your prompt names your task. Read, before you write code:
 
-- the task file
-- the spec requirements the task covers
+In the slice folder `slices/<slice>/`:
+- the task file `tasks/NN-*.md`
+- the spec requirements it covers, in `spec.md` (if the task's copy differs, the spec wins)
+- open findings, in the review file your prompt names, and any finding the task file names
+
+And:
 - the plan sections and project files the task links to
-- open findings from earlier reviews (round 2 and later)
-- the conflicting files, if `flow` could not merge your task into the slice branch
-- notes from the lead, if the task was unblocked
-- the checks that will run
-
-Read all of it before you write code.
-
-> **Bootstrap mode** (no `flow` yet): read the task file `tasks/NN-*.md`,
-> `spec.md`, `plan.md`, the project files the task links to, open findings
-> in `reviews/task-NN-*.md` and any finding the task file names, and any
-> notes from the lead in your prompt.
-> Instead of `flow check`, run the auto-fix commands, then the checks, in
-> `AGENTS.md` section 9 for the parts you touched. Instead of `flow finding …`, list each finding in your
-> last message as `<id>: fixed | deferred | wontfix — <note>`. A deferred high
-> finding names the later task, e.g. `deferred — task 05`. The lead records them.
+- what your prompt adds: notes from the lead, and a short handoff from the previous attempt
+  (its summary, "Assumed" note, and changed files)
+- the checks for the parts you touch (`AGENTS.md` section 9)
+- the project rules for the worker and for Everyone (`AGENTS.md` section 10 → Other rules)
 
 ## Do
 
-1. **Fix merge conflicts and findings first**, if the brief lists any.
-   For a conflict: the slice branch already has other finished tasks.
-   Keep their changes as they are, and make your task fit them.
-   For each finding run:
-   - `flow finding fixed <id> --note "<what you changed>"`
-   - `flow finding deferred <id> --task <NN> --note "<why there>"`: a later task
-     in this slice will fix it. For a high finding, this is the only way to defer.
-   - `flow finding deferred <id> --note "<where it goes>"` (medium and low only)
-   - `flow finding wontfix <id> --reason "<why>"` (medium and low only)
+1. **Fix findings first**, if there are any. Decide for each one:
+   - **fixed:** you changed the code
+   - **deferred → task NN:** a later task in this slice will fix it. For a high finding, this is the only way to defer.
+   - **deferred:** to the slice's Parked list, which the lead keeps (medium and low only)
+   - **wontfix:** with the reason (medium and low only)
 2. **Build what the Goal says.** Write every test in "Done when".
 3. **Change only the files in `touches`**, plus the generated code and
-   lock files the stack profile always allows.
-4. **Run `flow check`** until it passes. While working you may run single
-   tests to go faster. Only `flow check` counts.
+   lock files the stack profile always allows. If your prompt says to
+   resolve a merge conflict, do only that: skip step 2, edit exactly the
+   files it names, and keep the changes from both sides. For lock files
+   and generated code, run the install or generate command instead of
+   merging them by hand. When updating a
+   slice from the base branch, there is no task file: read only the
+   conflicting files and what they need.
+4. **Run the checks** until they pass: the auto-fix commands, then the
+   checks, for the parts you touched (`AGENTS.md` section 9). While working,
+   single tests are fine. Only a full run of the checks counts.
 5. **Finish**, see below.
 
 ## When something is unclear
@@ -73,29 +63,32 @@ Ask instead of guessing when it matters. Do not block for small things.
 ## Never
 
 - Change files outside `touches`.
-- Edit the spec, plan, a contract, other task files, reviews, `status.md`,
-  `events.jsonl`, or `history/`.
+- Edit the spec, plan, a contract, other task files, reviews, `status.md`, or `history/`.
 - Delete, skip, or weaken a test to make checks pass.
-- Commit, merge, or push. `flow` does that.
+- Commit, merge, or push. The lead does that.
 - Work on any other task.
 
 ## When you are done
 
-End with exactly one of these, then stop:
+End your last message with exactly one of these blocks, then stop.
 
-- `flow task review <slice>/<task> --summary "<what you built, one line>" --note "Assumed: …"`
-  when `flow check` passes and every finding is handled. The summary becomes
-  the commit message. Leave out `--note` if you assumed nothing.
-- `flow task block <slice>/<task> --reason "<what is wrong>" --question "<what you need answered>"`
+When the checks pass and every finding is handled:
 
-Your last message is one or two lines: what you built, or why you blocked.
+```
+RESULT: review
+SUMMARY: <what you built, one line; it becomes the commit message>
+ASSUMED: <small choices you made, or "none">
+FINDINGS:
+- task-04-1/F1: fixed. <what you changed>
+- task-04-1/F2: deferred → task 05. <why there>
+```
 
-> **Bootstrap mode:** instead of these commands, end your last message with
-> `RESULT: review` or `RESULT: blocked`, then the one-line summary and the note,
-> or the reason and question.
-> The lead records it.
+Leave out `FINDINGS:` in round 1.
 
-## Stop rules
+When you cannot go on:
 
-`flow check` counts failures for you. After the 3rd failure since the last
-review, it marks the task blocked. When that happens, stop.
+```
+RESULT: blocked
+REASON: <what is wrong>
+QUESTION: <what you need answered>
+```

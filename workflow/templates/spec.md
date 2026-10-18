@@ -2,11 +2,6 @@
 slice: {{slice}}
 title: {{title}}
 created: {{date}}
-# --- managed by flow, do not edit ---
-status: draft
-revision: none
-approved_at: none
-approved_by: none
 ---
 
 # Spec: {{title}}
@@ -57,8 +52,8 @@ approved_by: none
         - **R5.** (removed in R002: replaced by R20)
      4. Changed wording keeps the number if the intent is the same.
         If the intent changes, remove the old one and add a new number.
-     5. Use exactly the format above. `flow validate` checks it and refuses
-        a spec that breaks these rules.
+     5. Use exactly the format above. The document checks
+        (`workflow/formats/document-checks.md`) refuse a spec that breaks these rules.
 
      More than about 25-30 requirements? Consider splitting the slice. -->
 

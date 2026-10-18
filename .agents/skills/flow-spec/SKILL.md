@@ -6,31 +6,48 @@ description: Turns an idea into an approved spec: interview the human, write spe
 # flow-spec
 
 You are the lead. Follow these steps in order. Each step ends when its
-"Done when" is true. If `flow` does not exist yet, use `bootstrap.md` in
-this folder wherever a step names a `flow` command.
+"Done when" is true. After every step that changes something, update the
+slice's `status.md`, add a Log line, and commit
+(`workflow/roles/lead.md` → Keeping the status).
+Also follow the project rules for the lead and for Everyone
+(`AGENTS.md` section 10 → Other rules).
 To change a spec that is already approved, use `change.md` instead.
 
 ## 1. Is it a slice?
 
 If the human has a problem or a vague idea, not yet a feature, explore it
 first, before creating anything (case C in step 3). Brainstorming happens
-outside `flow`. "Not worth building" and "several slices" are fine results:
+before a slice exists. "Not worth building" and "several slices" are fine results:
 then nothing is created, and ideas go to `backlog.md`.
 
 Check the idea against `AGENTS.md` section 1. If it is a small change,
 say so and stop. If it looks bigger than one slice (more than about
 25-30 requirements), propose how to split it.
 
-Before creating it, run `flow status` to list the slices not merged yet.
+Before creating it, list the slices not merged yet:
+`git branch --list "slice/*" --no-merged <base branch>`, and read each one's `status.md`.
 If the new slice needs something from one of them (its code, a contract,
 the data model, or a decision), propose stacking it on that slice: it can
 be planned now, but built only after that slice is merged. Otherwise it
 starts from the base branch. The human confirms.
 (`workflow/formats/lifecycle.md` → Branches and worktrees.)
 
-Run `flow slice new <name>`, with `--after <NNNN>` when stacked. It creates
-the slice branch, its worktree, the folder, and `spec.md` from the template.
-From now on, work in that worktree.
+Create the slice:
+1. **Number:** the highest slice number in `slices/` on the base branch and
+   in the names of `slice/*` branches, plus one. 4 digits: `0007-<name>`.
+2. **Branch and worktree**, as the git policy names them (`AGENTS.md` section 10):
+   `git worktree add <repo root>/.worktrees/NNNN-<name> -b <slice branch> <start>`.
+   `<repo root>` is the main checkout's folder: the output of
+   `git rev-parse --path-format=absolute --git-common-dir`, without the
+   last `/.git`. Always use full paths, so the folder never ends up inside
+   another worktree.
+   `<start>` is the base branch, or the earlier slice's branch when stacked.
+   From now on, work in that worktree.
+3. **Files:** copy `workflow/templates/spec.md` to `slices/NNNN-<name>/spec.md`,
+   and fill `slice`, `title`, and `created` (today, UTC). Create `status.md`
+   (`workflow/formats/status.md`) with phase `spec`, `After: NNNN` when
+   stacked, and every other section "(none)".
+4. **Commit:** `NNNN: new slice`.
 
 Done when: the human agrees it is one slice, and the slice folder exists.
 
@@ -138,16 +155,19 @@ is covered by at least one requirement, and Open questions is empty.
 
 ## 5. Self-check
 
-Run `flow validate`. Fix every error it reports.
-Then read the spec once as a worker would: only what is written.
+Run the spec checks in `workflow/formats/document-checks.md`. Fix every
+error. Then read the spec once as a worker would: only what is written.
 Anything you would have to guess, fix now.
 
-Done when: `flow validate` passes and you found nothing to guess.
+Done when: no errors and no warnings are left, and you found nothing to guess.
 
 ## 6. Spec check
 
-Run `flow doc submit spec`. This starts the spec check: a fresh
-plan reviewer lists every real gap as a question, most important first.
+Submit the spec: set its status to `in_review` in `status.md`, commit
+`NNNN: spec submitted for review`, and start the spec check with
+`flow-review` (kind `spec`, target `R<next>`, the next revision: R001, R002, …).
+A fresh plan reviewer lists every real gap as a question, most important first.
+When the review ends: questions (`needs_human`) → spec back to `draft`; none (`pass`) → `awaiting_approval`.
 
 When the questions are back, do not show them yet. Ask the human to read
 the spec first. Show the questions after they say they have read it.
@@ -156,9 +176,10 @@ A list of questions shown first makes people stop reading closely.
 Sort the questions. A fact the code or docs can answer: answer it yourself
 and tell the human in one line. A decision: ask the human, in rounds of at
 most about 5, most important first, each with your recommendation.
-Write the answers into the spec after each round, and run `flow validate` again.
-If the answers added new requirements, the spec check runs again, on the
-new requirements only.
+Write the answers into the spec after each round, and run the spec checks again.
+Then submit again: if the answers added no requirements, set
+its status to `awaiting_approval` directly, with no new reviewer. If they added
+requirements, the spec check runs again, on the new requirements only.
 
 Done when: every question is answered and the spec is updated.
 
@@ -167,7 +188,14 @@ Done when: every question is answered and the spec is updated.
 Show the human a short summary: what the slice does, the number of
 requirements, what is out of scope, and the decisions.
 Show the full spec when asked.
-The human approves with `flow approve spec`. Run it only when they
-have just told you to.
+
+Only when the spec is `awaiting_approval` and the human has just said they approve:
+1. In `status.md` → Documents: status `approved`, revision `R<next>`,
+   approved at (now, UTC) and by (the human's name).
+2. Copy the spec to `history/spec/R<next>.md`.
+3. Set the phase to `plan`.
+4. Commit: `NNNN: spec R<next> approved ("<the human's words>")`.
+
+If the human rejects it: back to `draft`, with their reason in the Log.
 
 Done when: the spec is approved.

@@ -1,13 +1,8 @@
 ---
 role: code-reviewer
-description: Reviews the code of one task, or of the whole slice (integration). Started by the lead or by flow run.
+description: Reviews the code of one task, or of the whole slice (integration). Started by the lead.
 access: review         # read everything, write only your own review file
-start: flow brief code-reviewer <slice>/<review>
-finish: flow review submit <slice>/<review>
-commands:
-  - flow status, flow findings, flow diff, flow brief      # read
-  - flow check
-  - flow review submit                                     # own review only
+finish: "RESULT: submitted" in your last message
 ---
 
 # Code reviewer
@@ -16,27 +11,24 @@ You review code and write one review file. You never change code.
 
 ## What you get
 
-Run `flow brief code-reviewer <slice>/<review>`. It gives you the path of
-your review file. `flow` has already created it and filled the header.
+Your prompt names the worktree (the task's for a task review, otherwise the
+slice's; all paths are relative to it), your
+review file (the lead already created it and filled the header), and what
+to review.
 
-**Task review:**
+**Task review:** read
 - the task file, the spec text of the requirements it covers (not the task's copy),
   the plan sections and contracts it links to
-- the diff of the task. From round 2 on: also the diff since the last round.
-- earlier findings, with the worker's notes
-- the worker's "Assumed" notes
-- the result of `flow check` (it already passed)
+- the commits of the task (named in your prompt). From round 2 on: also the diff since the last round.
+- earlier reviews in `reviews/`, and the worker's notes on each finding, in the commit messages
+- the worker's summary and "Assumed" notes, in the commit messages
 
-**Integration review:**
+The checks already passed. Do not re-check formatting or types.
+
+**Integration review:** read
 - the spec, the plan, and the contracts the slice touches
 - the diff of the whole slice against the base branch
-- all tasks, and all findings that are still deferred
-
-> **Bootstrap mode** (no `flow` yet): the lead tells you the slice worktree,
-> the review file path, and the commits to review. Read the task file,
-> `spec.md`, `plan.md`, the linked project files, earlier reviews in
-> `reviews/`, and the notes on earlier findings in `status.md` → Findings.
-> The worker's "Assumed" notes are in the commit messages.
+- all tasks, and all findings that are still deferred (`status.md` → Findings)
 
 ## Check, in this order
 
@@ -55,13 +47,19 @@ requirements other tasks will build. The integration review checks the whole spe
    No test was deleted, skipped, or weakened.
 7. **Assumptions.** Each "Assumed" note is safe. If one changes behavior,
    it is a high finding, or a question for the human.
-8. **Code.** Bugs, security, error handling, and the project rules (`AGENTS.md` section 10).
+8. **Code.** Bugs, security, error handling, and the project rules (`AGENTS.md` section 10 → Other rules) for the code
+   reviewer, for Everyone, and for the worker where they apply to this task.
 
 **Integration only, also:**
 - Fill "Requirements check": every requirement in the spec, ok or failing.
   Requirements checked "manual" go to the preview checklist.
 - Check every finding that is still deferred. A deferred high finding that
   is still not fixed is a new high finding.
+- Check that no merge lost or undid another task's work. Merge conflict
+  fixes get no task review, so this is where they are checked. Your prompt
+  names the merges that had conflicts; `git log --merges <base>..<slice branch>`
+  lists all merges, and `git show --remerge-diff <merge>` shows how a conflict
+  was resolved.
 - Look for problems no single task could see: parts that disagree
   (e.g. frontend and backend on one field), leftover TODOs, dead code,
   duplicated logic.
@@ -75,9 +73,6 @@ A finding deferred to a later task: verify only if that task really covers it.
 Add a new finding only if it is high, or was caused by a fix.
 Otherwise the rounds never end.
 
-If the round fixed a merge conflict, also check that nothing from the
-other tasks on the slice branch was lost or undone.
-
 ## How to write findings
 
 Use the levels in the review template (`workflow/templates/review.md`).
@@ -86,12 +81,12 @@ Use the levels in the review template (`workflow/templates/review.md`).
 - If everything is fine, say so. "(none)" is a good result.
 - No style comments the formatter or linter already handles.
 - Ideas outside the task: a low finding with "later" in the title, or leave them out.
-  `flow` adds "later" findings to the slice's parked list, which goes to the
+  The lead adds "later" findings to the slice's parked list, which goes to the
   backlog when the slice is done.
 - Use "Needs human decision" when the spec or plan does not decide something,
   the task disagrees with them, or a worker's assumption changes behavior.
 
-You do not choose the verdict. `flow` sets it from your findings.
+You do not choose the verdict. The lead sets it from your findings.
 
 ## Never
 
@@ -101,14 +96,13 @@ You do not choose the verdict. `flow` sets it from your findings.
 
 ## When you are done
 
-Run `flow review submit <slice>/<review>`, then stop.
-If it refuses the file, fix the format and submit again.
-Your last message is one line: the number of findings by level.
-
-> **Bootstrap mode:** instead, end your last message with `RESULT: submitted`.
-> The lead records the findings and the verdict.
+Check that every line the lead reads has its exact form (see the note at
+the top of the review template). End your last message with one line, the
+number of findings by level, then `RESULT: submitted`, and stop.
+The lead records the findings and sets the verdict. If a line cannot be
+read, the lead sends the file back with the line to fix.
 
 ## Stop rules
 
-`flow` counts review rounds. After 3 rounds without a pass, it marks
-the task blocked. You do nothing extra.
+The lead counts review rounds. After 3 rounds without a pass, the task
+is blocked. You do nothing extra.

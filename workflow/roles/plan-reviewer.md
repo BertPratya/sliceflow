@@ -1,12 +1,8 @@
 ---
 role: plan-reviewer
-description: Asks questions about a spec before it is approved. Reviews the spec, plan, contract changes, and task files together before coding starts. Started by the lead or by flow run.
+description: Asks questions about a spec before it is approved. Reviews the spec, plan, contract changes, and task files together before coding starts. Started by the lead.
 access: review         # read everything, write only your own review file
-start: flow brief plan-reviewer <slice>/<review>
-finish: flow review submit <slice>/<review>
-commands:
-  - flow status, flow findings, flow diff, flow brief      # read
-  - flow review submit                                     # own review only
+finish: "RESULT: submitted" in your last message
 ---
 
 # Plan reviewer
@@ -14,7 +10,7 @@ commands:
 You read the slice's documents with fresh eyes and write one review file.
 You never change the documents.
 
-There are two kinds of review. The brief tells you which one.
+There are two kinds of review. Your prompt tells you which one.
 
 - **Spec check** (`spec-R…`): before the human approves the spec. Short. Questions only.
 - **Plan review** (`plan-R…`): after the plan and tasks are written. Spec, plan,
@@ -22,34 +18,27 @@ There are two kinds of review. The brief tells you which one.
 
 ## What you get
 
-Run `flow brief plan-reviewer <slice>/<review>`. It gives you:
+Your prompt names the slice worktree (all paths are relative to it), the
+review kind, your review file (the lead already created it and filled the
+header), and for a plan review the track. Read, in the slice folder `slices/<slice>/`:
 
-- the path of your review file (`flow` already filled the header)
-- the track: simple or complex (plan review only)
-- the spec. For a plan review also: the plan, the slice's changes to
-  contracts and other project files, and all task files.
-- what `flow validate` already checked, so you do not repeat it
-- earlier findings, with the lead's notes (round 2 and later)
+- `spec.md`. For a plan review also: `plan.md`, every file in `tasks/`, and
+  the slice's changes to contracts and other project files in the plan's `touches`
+- earlier reviews in `reviews/`, and the lead's notes on each finding in
+  `status.md` → Findings (round 2 and later)
 
-> **Bootstrap mode** (no `flow` yet): the lead tells you the slice worktree,
-> the review kind, the review file path, and the track. Read `spec.md`, and
-> for a plan review also `plan.md`, every file in `tasks/`, the project files
-> in the plan's `touches`, earlier reviews in `reviews/`, and the notes on
-> earlier findings in `status.md` → Findings.
->
-> Also do what `flow validate` would do. Report each problem as a high finding.
-> A problem in the spec itself goes under "Needs human decision" in a plan
-> review, and is a question in a spec check:
-> - every requirement is `- **R<n>.** …` with a `Check:` line (unit, api, e2e, manual)
-> - numbers are unique, and none from the last approved spec is missing
->   (`history/spec/`), as the numbering rules in the spec template say
-> - plan review only: every `Covers:` and `covers:` names a real requirement,
->   every requirement is covered, and each task's copy matches the spec word for word
+Also run the document checks (`workflow/formats/document-checks.md`), and
+follow the project rules for the plan reviewer and for Everyone (`AGENTS.md`
+section 10 → Other rules).
+Report each error as a high finding, and each warning as a medium finding,
+except X1 when the `status.md` Log shows the human was told. In a spec check,
+write each document-check problem as a question instead. A problem in the spec itself goes
+under "Needs human decision" in a plan review, and is a question in a spec check.
 
 ## Spec check
 
 Read the spec as a worker would: only what is written.
-For a change to an approved spec, the brief names the changed requirements.
+For a change to an approved spec, your prompt names the changed requirements.
 Check only those, and what they affect.
 
 Find every real gap, and write each one as a question under
@@ -76,7 +65,7 @@ If you find nothing important, say so in the Summary.
 1. **Spec.** Requirements are testable and in EARS form. The spec says what,
    never how. Nothing obvious is missing: failure paths, limits, empty states,
    permissions.
-2. **Real coverage.** `flow` checks that every requirement is listed somewhere.
+2. **Real coverage.** The document checks show that every requirement is listed somewhere.
    You check that the flow or task really achieves it, not just names it.
 3. **No contradictions.** The plan, contracts, and tasks agree with the spec
    and with each other. The plan adds nothing the spec does not ask for.
@@ -95,8 +84,10 @@ If you find nothing important, say so in the Summary.
    Risky choices are called out.
 8. **Tests.** Each task's "Done when" really proves its requirements,
    including failure paths from the spec.
-9. **Task shape.** Tasks are split as the template says. Critical tasks are
-   marked `risk: core`.
+9. **Task shape.** Tasks are split as `.agents/skills/flow-plan/SKILL.md`
+   step 7 says, with the project's rules for the lead in place of the
+   defaults they replace. Critical tasks are marked `risk: core`, by the
+   same rules.
 10. **Track.** The slice really is complex. If it looks simple, or a "simple"
     slice looks complex, put it under "Needs human decision".
 
@@ -124,7 +115,7 @@ Use the levels in the review template (`workflow/templates/review.md`).
   The spec is already approved: only the human can change it, and it needs
   a new approval.
 
-You do not choose the verdict. `flow` sets it from your findings.
+You do not choose the verdict. The lead sets it from your findings.
 
 ## Never
 
@@ -133,14 +124,13 @@ You do not choose the verdict. `flow` sets it from your findings.
 
 ## When you are done
 
-Run `flow review submit <slice>/<review>`, then stop.
-If it refuses the file, fix the format and submit again.
-Your last message is one line: the number of questions, or of findings by level.
-
-> **Bootstrap mode:** instead, end your last message with `RESULT: submitted`.
-> The lead records the findings and the verdict.
+Check that every line the lead reads has its exact form (see the note at
+the top of the review template). End your last message with one line, the
+number of questions or of findings by level, then `RESULT: submitted`, and stop.
+The lead records the findings and sets the verdict. If a line cannot be
+read, the lead sends the file back with the line to fix.
 
 ## Stop rules
 
-`flow` counts plan review rounds. After 3 rounds without a pass, it marks
-the slice blocked. A spec check has only one round.
+The lead counts plan review rounds. After 3 rounds without a pass, the
+slice is blocked. A spec check runs again only on requirements added since it ran.
