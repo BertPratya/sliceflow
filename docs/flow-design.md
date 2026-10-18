@@ -398,6 +398,67 @@ uploads, no calls home). It runs local programs: git, the check commands,
 the agent tools. What those programs send is theirs, not `flow`'s. A
 dashboard page served on the human's own computer is fine.
 
+### 1.12c How the lead runs commands, and how cases reach it (decided, the human, 2026-10-19)
+
+**Research (2026-10-19):** how other agent pipelines reach a coordinator agent.
+
+- **Two directions.** Agents that `flow` starts itself (workers, reviewers,
+  a fallback lead): `flow` owns the process and reads its output as it
+  comes (Claude Code `stream-json`, Codex JSON events; the Codex app server
+  even sends approval requests and pauses until they are answered). The
+  chat lead: the human started it, so `flow` can neither read it nor write
+  into it. Only this direction is a problem.
+- **Gas Town:** a message is stored as mail (`gt mail`), and a "nudge" typed
+  into the agent's terminal wakes it. Their rule: mail first, then nudge.
+- **Claude Code agent teams:** inbox files. Bug reports: delays of 5-62
+  minutes, and reports lost behind "idle" notices.
+- **Claude Code background commands** wake the session once, when they end.
+  Bug reports: the wake-up sometimes fails.
+- **Claude Code Channels** push events straight into a running session. But
+  they are a research preview, Claude only, and events are dropped silently
+  when the channel is not loaded.
+- **What they share:** the message lives in a file (a mailbox), and a
+  separate small signal wakes the agent (a doorbell). The doorbell can fail,
+  so nothing depends on it.
+
+**Decided: three kinds of commands.**
+
+| Kind | Examples | How long | How the lead uses it |
+|---|---|---|---|
+| Quick | `spec validate`, `slice new`, `spec approve`, `status` | seconds | runs it, waits, reads the result |
+| Starts agents | `spec submit`, `plan submit`, `flow run` | minutes to hours | `flow` starts the work in its own process and returns at once |
+| The doorbell | `flow wait` | until something needs the lead or the human | runs it in the background; the agent tool wakes the lead when it ends |
+
+- **The work runs in its own process.** It must outlive the chat: closing a
+  terminal must not stop a run. Waiting on it in the chat would also block
+  the chat (and Claude Code stops a foreground command after 10 minutes).
+- **The mailbox** is the event log and the "Needs you" list (1.6, point 6).
+  Every case is written there first.
+- **The doorbell** is `flow wait` (the name is settled in the slice). It ends
+  when a case needs the lead or the human, when a review is done, or when
+  the run ends, and prints what happened. The agent tool then wakes the
+  session that started it, so `flow` never looks for a session. It is not
+  polling: the lead uses no tokens while it waits.
+- **Who is listening.** While `flow wait` runs, it leaves a "listening" mark
+  in `.flow/`. That is how `flow` knows a chat lead is there.
+- **The safety net.** A case has one owner at a time. If nobody is listening,
+  or the chat lead does not take a case in time, `flow` gives it to a
+  fallback lead (2.4). No case is stuck because a wake-up failed or the chat
+  closed.
+- **Later, maybe:** a Channels doorbell for Claude Code, when Channels is
+  stable. An extra, not the base.
+
+```
+lead:  flow spec validate          → "ok" after a second. Done.
+lead:  flow run                    → "run started: 0001, 6 tasks", returns at once.
+lead:  flow wait  (in background)  → nothing yet. The lead goes quiet.
+...    the run works for an hour. The lead uses no tokens.
+flow:  task 04 fails its checks 3 times → writes a case.
+       flow wait prints the case and ends.
+       the agent tool wakes the lead.
+lead:  handles the case, runs flow wait again.
+```
+
 ### 1.13 Where and how events are kept (decided, the human, 2026-10-18)
 
 **The source of truth.** Each slice has one event log:
@@ -436,9 +497,6 @@ not in git and is not a source of truth for the slice.
 
 **Principles, to settle here** (they cut across slices):
 
-- How a case reaches the chat lead, and how `flow` knows a chat lead is
-  there to take it (2.4). What the lead receives and may do is in 1.6,
-  points 4 and 5.
 - How agents get permissions when nobody is there to click "allow" (1.9).
 
 **Details, settled in the slice that builds them** (section 0):
@@ -461,6 +519,14 @@ not in git and is not a source of truth for the slice.
 - Compiled AI: Deterministic Code Generation for LLM-Based Workflow Automation: https://arxiv.org/pdf/2604.05150
 - Bernstein docs, Deterministic vs. LLM-Based Orchestration: https://bernstein.readthedocs.io/en/latest/architecture/orchestration-approaches/
 - Agentic fail-safes need deterministic modes: https://dev.to/omnithium/the-t-mobile-outage-lesson-why-agentic-fail-safes-need-sos-mode-determinism-1chm
+
+For 1.12c:
+
+- Claude Code, Channels reference: https://code.claude.com/docs/en/channels-reference.md
+- Gas Town, AGENTS.md (nudge and mail): https://github.com/gastownhall/gastown/blob/main/AGENTS.md
+- Agent teams mailbox delays (bug report): https://claudeissues.com/issue/76500-bug-agent-teams-mailbox-5-62-min-turn-boundary-delays-lost-final-reports-idle-no
+- Background task wake-up not happening (bug report): https://claudeissues.com/issue/21048-bug-background-task-completion-notification-not-appearing-activating-claude
+- OpenAI, Unlocking the Codex harness: https://openai.com/index/unlocking-the-codex-harness
 
 ---
 
@@ -906,6 +972,8 @@ So there are two kinds of lead:
 - **The chat lead:** the session the human talks to (1.8).
 - **A fallback lead:** started by `flow` for one case, with its own time
   limit (`limits.lead`).
+
+How `flow` knows a chat lead is there, and how a case reaches it: 1.12c.
 
 What a fallback lead may do, and what it must leave to the human: decided in
 1.6, point 4.
