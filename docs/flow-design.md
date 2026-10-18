@@ -1226,6 +1226,15 @@ How the design is cut:
 - **Not chosen: a walking skeleton** (a thin version of the whole path
   first, then thicker). The risky parts (agents headless, permissions,
   processes on Windows) do not change slices 0001-0003.
-- **To the backlog:** the web dashboard, a Channels doorbell, a cost limit,
-  building on top of a slice not merged yet (2.6, point 5), the Codex app
-  server, a general engine.
+- **To the backlog:** the web dashboard, a Channels doorbell, a Cursor
+  stop-hook doorbell, a cost limit, building on top of a slice not merged
+  yet (2.6, point 5), the Codex app server, a general engine.
+- **Later: tervi** (the human's other project: run coding agents from a
+  browser). Deferred by the human, 2026-10-19. When it comes back: tervi
+  reads `flow`, and `flow` never sends anything to tervi (1.12b). It needs
+  output other programs can rely on: the event log and a `--json` form of
+  `flow status`, documented and versioned.
+- **Open for 0009: pull requests.** Projects that merge through pull
+  requests (tervi, and likely the human's work) need either "`flow` merges
+  locally" or "`flow` stops at approved, and the lead opens a pull request".
+  Push stays outside the workflow (2.5).
