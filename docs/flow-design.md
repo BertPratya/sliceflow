@@ -114,13 +114,69 @@ The workflow files today list 7 phases (spec, plan, ready, implementing,
 integration, preview, done). They mix phases and states. The new design
 keeps them apart.
 
-### 1.5 Not clear yet
+### 1.5 One autonomous run (from the human, 2026-10-18)
+
+After the human approves the plan, `flow` runs by itself. How far it goes is
+**configurable**, with two choices:
+
+- **To preview:** build every task, review it, merge it, run the
+  integration review, then wait for the human at preview.
+- **Preview prepared:** the same, and `flow` also prepares the preview for
+  the human (for example a test repo and the list of things to try).
+
+There is no "build only" choice. The run is autonomous, so it always goes at
+least as far as preview.
+
+### 1.6 The escalation ladder (from the human, 2026-10-18)
+
+When something goes wrong during a run, it climbs 3 levels:
+
+```
+flow  ──can't──▶  lead  ──can't──▶  human
+```
+
+1. **flow:** if `flow` can handle it, it does.
+2. **lead:** if not, `flow` sends it to the lead. If the lead can handle
+   it, it does.
+3. **human:** if the lead can't, or it needs a person, it goes to the human.
+
+When each level hands it on, and how, is not defined yet.
+
+**Lead's proposal, to talk about** (not agreed):
+
+Each level has a clear job and a limit:
+
+| Level | Handles | Limit before it climbs |
+|---|---|---|
+| flow | anything with a fixed rule: retry, a new worker for a fix round, merge again after a conflict | the counters (for example 3 failed checks, 3 review rounds, 2 failed merges) |
+| lead | a question whose answer is in an approved document; a failure whose cause it can see | one try per stop (to be decided) |
+| human | anything that changes an approved document, accepts a risk, or needs something new (a dependency, a secret, a CI change) | none: the human decides |
+
+Rules for every climb:
+
+- It carries a **case**: what stopped, what was tried, and the options. The
+  next level never starts from nothing.
+- No work is lost. The task's work stays committed on its branch.
+- While one task waits, the run goes on with tasks that do not depend on it.
+- The lead acts only through `flow` commands, so the state stays correct.
+
+The four examples, under this proposal:
+
+| What happens | Who handles it |
+|---|---|
+| A task's checks fail 3 times | flow stops the task → lead looks at the log: cause visible → hint and retry; else → human |
+| A worker asks "the spec doesn't say what happens on an empty list" | lead: answer in the spec or plan → it answers; else → human (it is a spec decision) |
+| A reviewer finds a serious problem | flow: a new worker fixes it (fix round). After 3 rounds without a pass → lead → human |
+| Two tasks conflict at merge | flow: a new worker merges again. After 2 failed merges → lead (usually wrong `touches` or `depends_on`) |
+
+### 1.7 Not clear yet
 
 To come back to when the processes are designed:
 
 - The full list of lifecycle states, and what moves a slice between them.
-- When `flow` calls the lead: the exact list of stops.
+- When and how each level of the ladder hands on (1.6).
 - What the lead receives when it is called, and what it may do.
+- Which run choice is the default (1.5).
 
 ---
 
