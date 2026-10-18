@@ -626,3 +626,77 @@ Details (lead's notes):
   preview) is recorded as an event, not as a new plan revision. It needs no
   new approval when it only covers approved requirements (the rule in the
   workflow files today).
+
+### 2.4 Implement: the autonomous run
+
+**From the human (2026-10-18):**
+
+1. **Pick a task** whose dependencies are all done.
+2. **Start a worker** with its prompt. Not through a desktop app: through a
+   command-line agent, for example the Claude Code CLI or the Codex app
+   server. Building on those should make tracking and recovery easier.
+3. **Each worker has its own worktree.** Example: `A → B → D`, `C → D`.
+   A and C have no dependencies, so they start together (up to the worker
+   limit in `flow.yaml`). A starts from the slice branch. When A is done, it
+   is merged into the slice branch. B then starts from the slice branch with
+   A in it. C may start from the slice branch before or after A or B is
+   merged; both are fine.
+4. **Only one task merges into the slice branch at a time** (no race).
+5. **Failed review:** back to a worker. The number of review rounds has a
+   limit. Over it: `flow` reports to the lead, and the lead tells the human
+   what they need to decide.
+6. **Task review is configurable** in `flow.yaml`. A simple project can
+   turn it off, to save tokens.
+7. **Integration:** when all tasks are done, a final review of the whole
+   slice. When it passes, the slice enters the preview phase.
+
+**Lead's view, to talk about** (not decided):
+
+**Starting agents (2).** Yes, a command-line agent is the right base.
+
+| | Claude Code `claude -p` | Codex `codex exec --json` | Codex app server |
+|---|---|---|---|
+| How it runs | one program run per job, then it exits | one program run per job, then it exits | a program that stays running; `flow` talks to it (JSON-RPC) |
+| What `flow` sees | a stream of events (`--output-format stream-json`): start, each message and tool use, a final result with cost | a stream of events: thread, turn, item (command, file change), failed | the same events, plus approval requests, and `flow` can interrupt |
+| Recovery | a session ID; `--resume <id>` continues it | the thread can be resumed | `thread/resume` |
+
+Both tools give a stream of events and a session to resume. That is what
+tracking and recovery need. Proposal: one small **adapter** per tool in
+`flow`, all with the same shape (start, events, result, resume, stop).
+Start with the one-run-per-job mode of each tool (simplest); the Codex app
+server can come later through the same adapter, if its extra control
+(interrupt, approvals) is needed.
+
+**Worktrees (3).** Yes, one per running task. Two rules make the example
+work:
+
+- **Start from the newest slice branch.** When a task starts, its branch is
+  made from the slice branch as it is at that moment. B starts after A is
+  merged, so it has A.
+- **Bring it up to date at merge, and check again.** C may have started
+  before A was merged. At merge, `flow` puts C's work on top of the newest
+  slice branch (with A, maybe B), runs the checks again, and only then
+  merges. A conflict, or failing checks, goes back to a worker.
+- Also: two tasks that change the same files (`touches`) do not run at the
+  same time. Fewer conflicts.
+
+**One merge at a time (4).** Yes: a merge queue with a lock. This is the
+"not rocket science rule" (bors, GitHub merge queue): only merge what passed
+the checks on the exact result of the merge.
+
+**Failed review (5).** Proposal: a **fresh worker** for each fix round (new
+context, as the sketch settled), with the findings and what the last worker
+did. The round limit hits: the lead does not try to fix it; it prepares a
+case for the human: what was found, what was tried, the options.
+
+**Configurable reviews (6):**
+
+```yaml
+implement:
+  task_review: never      # always | core | never
+  integration_review: on
+```
+
+**Integration (7).** From the workflow files today, before the final
+review: update the slice from `main`, then run the slice checks. Then the
+final review. Fix tasks from it run like any task.
