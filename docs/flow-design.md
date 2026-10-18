@@ -277,6 +277,11 @@ need reviews turns them off, or changes the order of steps.
 Proposal: levels 1 and 2. Level 3 breaks the reliability promise (1.7):
 `flow` can only recover a step safely if it knows what the step does.
 
+Later, level 3 stays possible (lead's note): build the steps inside `flow` as
+separate units, each with the same shape (what it reads, what it writes, its
+events, safe to run twice). Then a general engine is a later step: open that
+shape to steps a project writes itself. Specific first, general later.
+
 A level 2 example:
 
 ```yaml
