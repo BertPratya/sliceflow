@@ -801,7 +801,7 @@ limits:
   reviewer:
     minutes: 20
     silent_minutes: 10
-  lead:                   # a lead that flow starts itself (open, see below)
+  lead:                   # a fallback lead that flow starts itself
     minutes: 20
     silent_minutes: 10
 ```
@@ -814,5 +814,16 @@ limits:
 - An idea for later: a cost limit per task, so a stuck agent cannot burn
   tokens without end.
 
-Open: what if the lead is not there? The lead is a chat session. If it is
-closed, nobody receives the case.
+**When no lead session is there. Decided (the human, 2026-10-18):** `flow`
+starts a fresh lead agent itself, the same way it starts a worker. It gets
+the case, handles it, and ends. If it cannot handle it, the case goes on to
+the human, as the ladder says (1.6): the task is blocked and waits, and the
+run goes on with other tasks.
+
+So there are two kinds of lead:
+
+- **The chat lead:** the session the human talks to (1.8).
+- **A fallback lead:** started by `flow` for one case, with its own time
+  limit (`limits.lead`).
+
+Open: what a fallback lead may do, and what it must leave to the human.
