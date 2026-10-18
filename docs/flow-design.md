@@ -1209,6 +1209,20 @@ How the design is cut:
   `read-only` sandbox and `flow` writes the review file from their last
   message; the sandbox has no network, so `flow` runs the setup commands
   before the worker starts; `codex exec resume` needs its flags again.
+- **Lessons from another of the human's projects**, which already runs Codex
+  workers by hand (input for 0004, 2026-10-19):
+  - The sandbox makes git's own files read-only, so a worker cannot commit.
+    This fits: `flow` does all git work.
+  - Tool caches outside the worktree are read-only too (Go's build cache
+    had to be moved per worktree, with `GOCACHE`).
+  - The sandbox blocks even `localhost`, so tests that use a local database
+    fail. Codex's network switch is all or nothing.
+  - Test services (a database) are started outside the sandbox, before the
+    worker starts.
+  - "Model at capacity" fails at once: wait a minute and start again, up to
+    3 times. A passing failure (1.7).
+  - Codex's helper processes can outlive the worktree and break a later
+    worktree at the same path: stop them before removing it (1.9, "Ending").
 - **Not chosen: a walking skeleton** (a thin version of the whole path
   first, then thicker). The risky parts (agents headless, permissions,
   processes on Windows) do not change slices 0001-0003.
