@@ -603,9 +603,8 @@ of it. The tasks are part of what the human approved. If a task file could
 change after approval without anyone noticing, the approval would mean
 nothing for that task.
 
-**Lead's proposal** (not decided):
-
-- `flow plan approve` keeps one folder per approved revision:
+**Decided (the human, 2026-10-18):** `flow plan approve` saves the plan, the
+task files, and the contract changes together, one folder per revision:
 
   ```
   .history/plan/R001/
@@ -614,6 +613,8 @@ nothing for that task.
     tasks/02-slice-new.md
     contracts.patch        (the slice's contract changes)
   ```
+
+Details (lead's notes):
 
 - The `plan.approved` event stores a fingerprint (hash) of each file, so a
   changed copy, or a changed task after approval, is found at once.
