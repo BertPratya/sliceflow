@@ -560,8 +560,8 @@ not in git and is not a source of truth for the slice.
 
 - **Files people read, approve, or edit:** Markdown. A small YAML header
   holds the fields `flow` needs (`spec.md`, `plan.md`, reviews). Task files
-  are Markdown only (2.3). Exact fields inside a document go in one YAML
-  block (the task list in `plan.md`, 2.3).
+  are Markdown only (section 2.3, the plan). Exact fields inside a document
+  go in one YAML block (the task list in `plan.md`, section 2.3).
 - **Files only `flow` writes:** JSON Lines for machines (`.events.jsonl`),
   Markdown for people (`status.md`).
 - **Settings:** YAML, read strictly (`flow.yaml`).
@@ -577,7 +577,8 @@ Why (research, 2026-10-19):
 - Any format can be broken by an edit without anyone noticing: a renamed
   heading, a wrong indent, `01` read as a number. So accuracy comes from
   rules, not from the format:
-  1. `flow` writes the fixed parts. Agents write only free text (2.3).
+  1. `flow` writes the fixed parts. Agents write only free text (option C
+     in section 2.3, the plan).
   2. Each fact has one copy. Requirements are named, not copied.
   3. `flow` reads every file strictly: typed fields, unknown keys refused,
      a check before submit.
@@ -805,7 +806,8 @@ Research (2026-10-18):
   to build, "Done when"). `flow brief` puts the two together for the worker.
 - **A form `flow` can read exactly.** A Markdown table is easy to break by
   hand. A small fenced block in `plan.md` (for example YAML) is exact and
-  still readable. The research in 1.13b supports this.
+  still readable. The research in section 1.13b (file formats) supports
+  this.
 - **Safe to run again.** Plans change. The command can run any time: it
   creates the files that are missing, never overwrites content the lead
   wrote, and reports a task file whose task left the list (it does not
