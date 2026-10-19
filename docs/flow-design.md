@@ -525,7 +525,7 @@ lead:  handles the case, runs flow wait again.
 ### 1.13 Where and how events are kept (decided, the human, 2026-10-18)
 
 **The source of truth.** Each slice has one event log:
-`slices/NNNN-<name>/.events.jsonl`, one event per line. It is the only
+`slices/<name>/.events.jsonl`, one event per line. It is the only
 source of truth for the slice.
 
 - Only `flow` writes it. Not the human, not the lead, not any agent.
@@ -593,7 +593,8 @@ files are small). The exact form of each file is settled in its slice.
 
 **Principles, to settle here** (they cut across slices): none left.
 Settled on 2026-10-19: how cases reach the lead (1.12c), permissions for
-agents nobody watches (1.9), and file formats (1.13b).
+agents nobody watches (1.9), file formats (1.13b), and slice IDs
+without a number (2.1).
 
 **Details, settled in the slice that builds them** (section 0):
 
@@ -647,8 +648,9 @@ its events, and what it shows.
 
 **From the human (2026-10-18):**
 
-1. The lead runs `flow slice new` with the slice name. `flow` gives it the
-   next number: `NNNN-<name>`.
+1. The lead runs `flow slice new` with the slice name. The name is the
+   slice ID, with no number (changed by the human on 2026-10-19, see
+   "Slice ID" below).
 2. `flow` creates the slice's branch and its worktree in `.flow/worktrees/`.
 3. `flow` copies the spec template into the slice.
 4. `flow` creates the files that record the slice's status.
@@ -673,10 +675,23 @@ its events, and what it shows.
   says why.
 - **Output.** The slice ID, branch, worktree, the files it created, and the
   next step.
-- **Commit.** On the slice branch: `NNNN: new slice`.
+- **Commit.** On the slice branch: `<name>: new slice`.
 - **Event:** `slice.created` { slice, title, after, by, at }.
-- **The same number on two machines** (sketch H11): `flow` sees only the
-  branches it knows. Two people offline can get the same number. Open.
+- **Slice ID: the name only. Decided (the human, 2026-10-19):** no
+  running number. The slice ID is the name, for example `device-pairing`:
+  branch `slice/device-pairing`, folder `slices/device-pairing/`, commits
+  `device-pairing: …`. Task numbers inside a slice (01, 02) stay: one lead
+  writes them, so they cannot clash.
+  Why: a number is picked by counting the slices this clone can see. Two
+  people offline, or two clones, get the same number, and nothing stops
+  them. Without a number, two different features never clash. Two slices
+  with the same name clash loudly: git refuses the second push of the
+  same branch name, or the merge shows a conflict in the slice folder.
+  The cost: a name is never used again (2.7), and the order of slices
+  comes from the created time in the event log, not from a number.
+  This repo's own slices (0001-0010, section 3) keep their numbers: they
+  are made with agent-flow's skills until the first release.
+  (Replaces the open item "the same number on two machines", sketch H11.)
 
 ### 2.2 Write and approve the spec
 
@@ -1149,7 +1164,7 @@ Two different things wait on 0002, and only one of them has to:
 
 1. **Design ahead, always.** 0003 and 0004 can be created, specified, and
    planned at any time. A stacked slice records what it waits for:
-   `after: 0002`. Its branch starts from `main`: it only holds its own
+   `after:` and that slice's name. Its branch starts from `main`: it only holds its own
    documents until it builds, so it never needs to be moved while designing.
 2. **The plan reviewer reads 0002's approved spec and plan** (and contract
    changes) as the base 0003 builds on.
@@ -1196,9 +1211,9 @@ recovery.
 - **Kept:** the slice branch, every task branch, the event log, `.history/`,
   reviews. **Removed:** the worktrees in `.flow/`, to free disk space; they
   can be made again from the branches on reopen.
-- **The slice number is never used again.** The number is in the branch
+- **The slice name is never used again.** The name is in the branch
   name, the commits, the event log, `.history/`, other slices' `after:` and
-  decisions, and the backlog. A new slice with the same number would make
+  decisions, and the backlog. A new slice with the same name would make
   all of those point to two slices. It also keeps reopening possible.
 - **Stopping without cancelling is a different thing:** `flow run stop`
   stops the run (agents interrupted, work saved) but the slice is not
