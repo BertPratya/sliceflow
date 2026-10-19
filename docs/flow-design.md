@@ -556,11 +556,44 @@ not in git and is not a source of truth for the slice.
 - If a log ever grows large, keep the computed status in `.flow/` and apply
   only the new events. Not needed at the start.
 
+### 1.13b File formats (decided, the human, 2026-10-19)
+
+- **Files people read, approve, or edit:** Markdown. A small YAML header
+  holds the fields `flow` needs (`spec.md`, `plan.md`, reviews). Task files
+  are Markdown only (section 2.3, the plan). Exact fields inside a document
+  go in one YAML block (the task list in `plan.md`, section 2.3).
+- **Files only `flow` writes:** JSON Lines for machines (`.events.jsonl`),
+  Markdown for people (`status.md`).
+- **Settings:** YAML, read strictly (`flow.yaml`).
+
+Why (research, 2026-10-19):
+
+- Top models understand Markdown, YAML, JSON, and XML about equally well.
+  Small models do not, and our files are small anyway.
+- Markdown costs the fewest tokens. YAML costs about 10% more, JSON about
+  35% more, XML the most.
+- Forcing a strict format makes the model's writing worse. Text inside JSON
+  is written worse, because of escaping.
+- Any format can be broken by an edit without anyone noticing: a renamed
+  heading, a wrong indent, `01` read as a number. So accuracy comes from
+  rules, not from the format:
+  1. `flow` writes the fixed parts. Agents write only free text (option C
+     in section 2.3, the plan).
+  2. Each fact has one copy. Requirements are named, not copied.
+  3. `flow` reads every file strictly: typed fields, unknown keys refused,
+     a check before submit.
+  4. State changes only through `flow` commands, never by editing a file.
+
+Not chosen: one format for everything (long text in YAML depends on its
+indents; Markdown alone cannot hold exact fields; JSON and XML cost more
+and are harder to read and write), and TOON (made for large tables; our
+files are small). The exact form of each file is settled in its slice.
+
 ### 1.14 Not clear yet
 
 **Principles, to settle here** (they cut across slices): none left.
-Settled on 2026-10-19: how cases reach the lead (1.12c), and permissions for
-agents nobody watches (1.9).
+Settled on 2026-10-19: how cases reach the lead (1.12c), permissions for
+agents nobody watches (1.9), and file formats (1.13b).
 
 **Details, settled in the slice that builds them** (section 0):
 
@@ -590,6 +623,18 @@ For 1.12c:
 - Agent teams mailbox delays (bug report): https://claudeissues.com/issue/76500-bug-agent-teams-mailbox-5-62-min-turn-boundary-delays-lost-final-reports-idle-no
 - Background task wake-up not happening (bug report): https://claudeissues.com/issue/21048-bug-background-task-completion-notification-not-appearing-activating-claude
 - OpenAI, Unlocking the Codex harness: https://openai.com/index/unlocking-the-codex-harness
+
+For 1.13b:
+
+- He et al., Does Prompt Formatting Have Any Impact on LLM Performance?: https://arxiv.org/abs/2411.10541
+- Kato and Kato, Which Algorithm Specification Formats Help Language Models Implement ML Algorithms?: https://arxiv.org/abs/2607.03158
+- Improving Agents, Which Nested Data Format Do LLMs Understand Best?: https://www.improvingagents.com/blog/best-nested-data-format/
+- Tam et al., Let Me Speak Freely? Format restrictions and LLM performance: https://arxiv.org/abs/2408.02442
+- Aider, LLMs are bad at returning code in JSON: https://aider.chat/2024/08/14/code-in-json.html
+- Anthropic, Prompting best practices (XML tags): https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/use-xml-tags
+- Kiro, Specs: https://kiro.dev/docs/specs/index
+- GitHub Spec Kit, tasks template: https://github.com/github/spec-kit/blob/main/templates/tasks-template.md
+- StrictYAML, Why implicit typing was removed: https://hitchdev.com/strictyaml/why/implicit-typing-removed/
 
 ---
 
@@ -761,7 +806,8 @@ Research (2026-10-18):
   to build, "Done when"). `flow brief` puts the two together for the worker.
 - **A form `flow` can read exactly.** A Markdown table is easy to break by
   hand. A small fenced block in `plan.md` (for example YAML) is exact and
-  still readable.
+  still readable. The research in section 1.13b (file formats) supports
+  this.
 - **Safe to run again.** Plans change. The command can run any time: it
   creates the files that are missing, never overwrites content the lead
   wrote, and reports a task file whose task left the list (it does not
