@@ -24,8 +24,8 @@ reviewer: {{reviewer}}
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the finding headings (### F1.), the labeled lines (Level:,
-     Where:, Breaks:, Why:, Fix:, Guess:), and the line forms in Previous
-     findings and Requirements check. Don't rename or reorder them. A
+     Where:, Breaks:, Why:, Fix:, Guess:), and the line forms in Tests,
+     Previous findings, and Requirements check. Don't rename or reorder them. A
      labeled line may go on over more lines: indent the extra lines 2
      spaces more than the label.
 
@@ -85,6 +85,24 @@ reviewer: {{reviewer}}
 - Ran: {{command (result)}}
 - Requirements: {{R1, R2}}
 
+## Tests
+
+<!-- Task reviews only. Other kinds: write None.
+     One line per test named in the task's Done when. Read each test,
+     and say whether it really proves what it claims:
+     - ok: it exists, checks the stated input and expected result, and
+       would fail if the code were broken.
+     - weak, see F2: it exists but would pass with broken code, or
+       checks less than Done when says. Add a finding.
+     - missing, see F3: it doesn't exist. Add a finding.
+
+     Example:
+     - `TestParseDueRejectsBadDate`: ok
+     - `TestDueUnknownTask`: weak, see F2
+     - `TestListSortsByDue`: missing, see F3 -->
+
+- `{{TestName}}`: {{ok, or: weak, see F2, or: missing, see F3}}
+
 ## Previous findings
 
 <!-- Round 2 and later. Every finding from the last round that was marked
@@ -126,8 +144,14 @@ reviewer: {{reviewer}}
        TD2), a task's Interfaces (task 02), or a project rule (name it).
        A decision without a number: name the document and section,
        e.g. docs/flow-design.md 2.3.
+       The work adds behavior nothing asks for? Write: scope, and what
+       it adds, e.g. Breaks: scope: adds --color, which no requirement
+       asks for. A scope finding is at least medium: the plan never adds
+       scope.
        Breaks nothing approved, e.g. a missing rule or a gap? Write:
-       nothing. Choose the level by its effect, as above.
+       nothing. Choose the level by its effect, as above. With Breaks:
+       nothing, a finding is medium only if Why: names an input and the
+       wrong result it gives. Otherwise it is low.
      - Why: what is wrong, and how you found it: the test you ran, or
        the line you read.
      - Fix: optional, one or two lines. No fix to suggest? Remove the

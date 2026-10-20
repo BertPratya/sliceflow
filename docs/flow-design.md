@@ -1266,6 +1266,16 @@ What a fallback lead may do, and what it must leave to the human: decided in
   The workflow ends with the merge into `main`; pushing is outside it.
 - **Events:** `preview.started`, `slice.approved`, `slice.done`.
 
+**Reviews check tests and scope (decided, the human, 2026-10-20).** The
+review template gets three rules. A task review lists each Done when test
+as `ok`, `weak`, or `missing` (Google's code review guide: "Will the tests
+actually fail when the code is broken?"). Behavior nothing asks for is a
+finding with `Breaks: scope: ...`, at least medium (Wang, Pradel, Liu:
+27.3% of behavior differences come from patches that "adapt more behavior"
+than the correct fix). A finding with `Breaks: nothing` is medium only when
+its `Why:` names an input and the wrong result it gives; otherwise it is
+low (Anthropic: "Chasing every finding leads to over-engineering").
+
 **The preview checks intent (decided, the human, 2026-10-20).** Besides one
 check per `manual` requirement and per success criterion, `flow` adds one
 preview check for the first scenario of each story, its main success case
