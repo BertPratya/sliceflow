@@ -922,6 +922,17 @@ above.
   `Scenario: S2` line under `Proves:`. `flow` checks that every scenario
   has at least one e2e test. Why: numbers by position shift when a
   scenario is added, and a free-text link cannot be checked.
+- **Every decision reaches a worker (decided, the human, 2026-10-20).**
+  A worker sees requirements and the plan items its task follows, not
+  decisions as such. So each spec decision has a `Rule:` line naming the
+  requirement that states it (`Rule: none` when it changes no behavior),
+  and `flow plan validate` checks the line and the requirement. Each
+  plan decision is named in at least one task's `follows`, or has a
+  `Plan only:` line with the reason; `flow` warns about one that is
+  neither, or both. A plan decision does not list its tasks: the link is
+  written once, on the task side. Research (2026-10-20): MAST, a study
+  of multi-agent failures, counts "disobey task specification" as 11.8%
+  of failures.
 - Open, for the implement slice: fix tasks added after approval (from the
   integration review or the preview). They would change an approved file,
   so they may need their own section or file.

@@ -24,7 +24,7 @@ touches:
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**TD1.**, **Q1.**), the labeled lines
-     (Covers:, Why:, Not chosen:, Replaces:), and the front matter.
+     (Covers:, Why:, Not chosen:, Replaces:, Plan only:), and the front matter.
      Don't rename or reorder them. A labeled line may go on over more lines:
      indent the extra lines 2 spaces more than the label.
 
@@ -186,6 +186,12 @@ Covers: {{R5}}
      - A decision that goes against a project rule says so in Why:.
      - Only technical decisions. Don't repeat the spec's decisions (SD1,
        ...); they are already approved.
+     - A worker sees a decision only when its task names it in follows
+       (in tasks.md). So every decision is named by at least one task.
+       A decision that no task's code depends on says why, in a
+       Plan only: line, e.g. Plan only: it picks a dependency; no task's
+       code depends on the choice. flow warns about a decision that is
+       neither followed nor plan only, and about one that is both.
 
      Example:
      - **TD1.** Store the due date as text in the form YYYY-MM-DD.

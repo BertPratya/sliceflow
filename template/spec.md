@@ -16,7 +16,7 @@ created: {{date}}
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**R1.**, **S1.**, **SD1.**, **SC1.**, **Q1.**), and the
-     labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:,
+     labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:, Rule:,
      Replaces:, Goes to:). Don't rename or reorder them. A labeled line
      may go on over more lines: indent the extra lines 2 spaces more than
      the label. Goes to: is the exception: it ends a one-line item.
@@ -227,13 +227,27 @@ created: {{date}}
      - Number them SD1, SD2, ...
      - Each one has the choice, Why:, and Not chosen: (the main other
        option, and why not).
+     - Each one has a Rule: line. A worker sees requirements, not
+       decisions. So a decision that changes what the feature does is
+       also written as a requirement, and Rule: names it, e.g. Rule: R11.
+       A decision that changes no behavior says Rule: none. flow checks
+       that every decision has this line, and that it names a real
+       requirement.
      - To replace a decision from an earlier slice, add Replaces: with
        that slice's name and the decision's number, e.g. device-pairing/SD3.
-       Otherwise remove the whole Replaces: line. -->
+       Otherwise remove the whole Replaces: line.
+
+     Example:
+     - **SD2.** A task due today is not overdue.
+       Why: the user still has the whole day to finish it.
+       Not chosen: overdue on the due date, because it warns people who
+         still have time.
+       Rule: R11 -->
 
 - **SD1.** {{The choice.}}
   Why: {{the reason}}
   Not chosen: {{the main other option, and why not}}
+  Rule: {{the requirement that states it, e.g. R11, or none}}
   Replaces: {{an earlier decision, e.g. device-pairing/SD3}}
 
 ## Assumptions
