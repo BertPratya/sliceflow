@@ -9,8 +9,9 @@ reviewer: {{reviewer}}
 
 <!-- HOW TO FILL THIS TEMPLATE
 
-     A review checks one thing: a spec, a plan with its tasks.md, one task,
-     or the whole slice (integration). flow creates this file and fills
+     A review checks one thing: a spec, a plan with its tasks.md and
+     preview.md, one task, or the whole slice (integration). flow
+     creates this file and fills
      the front matter. You write the sections below, then hand the review
      in through flow. After that the file is locked: never edit it again.
 
@@ -66,7 +67,8 @@ reviewer: {{reviewer}}
 
      - Commits: the commits reviewed (task and integration reviews).
      - Files read: the files you read, including ones the change uses.
-     - Ran: each command you ran, and its result.
+     - Ran: each command you ran, and its result. More than one: one
+       indented line per command under Ran:.
      - Requirements: the requirements you checked.
      - Interfaces: the names you checked against the task, if any.
      Leave out a line that doesn't apply.
@@ -122,6 +124,8 @@ reviewer: {{reviewer}}
        file:12-18. More than one place: separate them with commas.
      - Breaks: what it breaks: a requirement (R5), a decision (SD1,
        TD2), a task's Interfaces (task 02), or a project rule (name it).
+       A decision without a number: name the document and section,
+       e.g. docs/flow-design.md 2.3.
        Breaks nothing approved, e.g. a missing rule or a gap? Write:
        nothing. Choose the level by its effect, as above.
      - Why: what is wrong, and how you found it: the test you ran, or

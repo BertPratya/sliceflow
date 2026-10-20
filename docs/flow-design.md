@@ -896,8 +896,8 @@ above.
 |---|---|---|---|---|
 | 1 | lead | (writes) | `plan.md` and the contract changes, until its open questions are empty | draft |
 | 2 | lead | `flow plan validate` | checks the plan; repeat until clean | draft |
-| 3 | lead | (writes) | `tasks.md`: every task, with its structure and content | draft |
-| 4 | lead | `flow plan validate` | checks plan, tasks, and contract changes together; repeat until clean | draft |
+| 3 | lead | (writes) | `tasks.md`: every task, with its structure and content; and `preview.md`: how the human will try the slice | draft |
+| 4 | lead | `flow plan validate` | checks plan, tasks, preview, and contract changes together; repeat until clean | draft |
 | 5 | — | — | (no step: there is no task sync any more) | draft |
 | 6 | lead | `flow plan submit` | validates again (refuses if broken), then starts the reviewer, or skips it when review is off | in review |
 | 7 | reviewer | (writes, then hands in) | one review file with findings: high, medium, low, and questions for the human | in review |

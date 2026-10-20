@@ -24,8 +24,8 @@ touches:
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**TD1.**, **Q1.**), the labeled lines
-     (Covers:, Why:, Not chosen:, Replaces:), and the YAML blocks. Don't
-     rename or reorder them. A labeled line may go on over more lines:
+     (Covers:, Why:, Not chosen:, Replaces:), and the front matter.
+     Don't rename or reorder them. A labeled line may go on over more lines:
      indent the extra lines 2 spaces more than the label.
 
      - Replace every {{...}} with real text. The text inside says what

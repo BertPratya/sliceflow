@@ -51,11 +51,13 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        few hundred lines. Bigger? Split it into two tasks.
 
      Changing tasks:
-     - Task ids are two digits, 01, 02, ... in order. Once the plan is
-       approved, an id is never reused: a removed task leaves its number
-       unused, and a new task gets the next free number.
-     - To add, remove, rename, or reorder tasks, edit this file. There is
-       nothing else to update.
+     - Task ids are two digits: 01, 02, ... Before the first approval,
+       number them top to bottom. After it, never renumber and never
+       reuse an id: a removed task leaves its number unused, and a new
+       task goes at the end with the next free number. The order of work
+       comes from depends_on, not from the order in this file.
+     - To add, remove, or rename tasks, edit this file. There is nothing
+       else to update.
 
      Filling the template:
      - Replace every {{...}} with real text. flow fills slice and

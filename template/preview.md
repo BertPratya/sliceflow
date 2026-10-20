@@ -1,6 +1,6 @@
 ---
 slice: {{slice}}
-based_on: { spec: {{spec revision, e.g. R001}}, plan: {{plan revision, e.g. R001}} }
+based_on: { spec: {{spec revision, e.g. R001}} }
 ---
 
 <!-- HOW TO FILL THIS TEMPLATE
@@ -20,7 +20,7 @@ based_on: { spec: {{spec revision, e.g. R001}}, plan: {{plan revision, e.g. R001
      Expect: lines. You may add more checks; number them after the last.
 
      - Replace every {{...}} with real text. flow fills slice and
-       the revisions itself. If they still show {{...}}, fill them
+       based_on itself. If they still show {{...}}, fill them
        yourself.
      - Write plain English, short sentences. The human follows these
        steps by hand, so each step is one thing to do.
