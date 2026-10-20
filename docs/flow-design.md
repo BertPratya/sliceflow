@@ -978,6 +978,14 @@ above.
   rule that applies is missing. Research (2026-10-20): Spec Kit's plan
   template has a "Constitution Check" step, "GATE: Must pass before
   Phase 0 research".
+- **The plan says how each success criterion is reached (decided, the
+  human, 2026-10-20).** When the spec has success criteria, the plan's
+  Approach has one line per criterion: its number, the flows, decisions,
+  or shared rules that reach it, and how. `flow` checks that every
+  criterion has a line and that the names exist; the plan reviewer
+  judges whether the reasoning holds. Research (2026-10-20): Spec Kit's
+  analyze step flags "Success Criteria requiring buildable work ... not
+  reflected in tasks".
 - Open, for the implement slice: fix tasks added after approval (from the
   integration review or the preview). They would change an approved file,
   so they may need their own section or file.

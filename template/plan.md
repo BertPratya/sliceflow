@@ -69,6 +69,14 @@ touches:
      Each one needs the human's approval, so name it and say why it is
      needed. None? Write: New dependencies: None.
 
+     Then, only if the spec has success criteria: a Success criteria:
+     line, and under it one bullet per criterion. Each bullet starts with
+     the criterion's number and a colon, then the flows, decisions, or
+     shared rules that reach it, then a period and one or two sentences
+     on how. flow checks that every criterion has a bullet and that the
+     names exist; the plan reviewer checks that the reasoning holds.
+     No success criteria in the spec? Leave the line out.
+
      Example:
      The due date is a new optional field on a task. Sorting and the
      overdue mark happen when the list is printed.
@@ -78,7 +86,11 @@ touches:
      | Task store | internal/store/ | changed |
      | List command | cmd/todo/ | changed |
 
-     New dependencies: None. -->
+     New dependencies: None.
+
+     Success criteria:
+     - SC1: Flow 2, TD3. The run loop never calls the lead when a task
+       passes, and flow writes the merge messages itself. -->
 
 {{The whole idea in a few sentences.}}
 
@@ -87,6 +99,9 @@ touches:
 | {{part}} | {{folder}} | {{new, changed, or removed}} |
 
 New dependencies: {{None, or each one with why it is needed}}
+
+Success criteria:
+- {{SC1}}: {{Flow 2, TD3}}. {{How they reach it. Delete this line and the one above if the spec has no success criteria.}}
 
 ## Flows
 
