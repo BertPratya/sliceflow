@@ -15,6 +15,16 @@
      headings and the labeled lines (Proves:, Done in:). Don't rename or
      reorder them.
 
+     What to write here, and what to leave to the worker:
+     - Fix what others rely on: the files, the names and signatures
+       other tasks use, the order of the work, the rules, and the tests.
+       Tasks may run at the same time, so these must agree.
+     - Leave the code inside the functions to the worker: private
+       helpers, local names, loops, data structures, the test code. The
+       worker sees the real code; this file is written before it.
+     - Don't write code in this file. A signature is fine; a function
+       body is not.
+
      - Be concrete. Name real files, functions, types, and commands.
        "Add validation" is not enough; "add parseDue() in
        internal/task/due.go, which returns an error for a bad date" is.
