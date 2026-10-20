@@ -24,18 +24,17 @@ touches:
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**TD1.**, **Q1.**), the labeled lines
-     (Covers:, Project rule:, Why:, Not chosen:, Cost:, Replaces:,
-     Plan only:),
-     and the front matter.
-     Don't rename or reorder them. A labeled line may go on over more lines:
+     (Success criteria:, Covers:, Project rule:, Why:, Not chosen:, Cost:,
+     Replaces:, Plan only:), and the front matter. Don't rename or reorder
+     them. A labeled line may go on over more lines:
      indent the extra lines 2 spaces more than the label.
 
      - Replace every {{...}} with real text. The text inside says what
        goes there. flow fills slice, date, and based_on itself. If they
        still show {{...}}, fill them yourself.
      - Each section has a comment like this one with its rules. Follow it.
-     - Add ### subsections freely inside a section. The ## sections are
-       fixed.
+     - The ## sections are fixed. Add ### subsections freely, except in
+       Flows and Interfaces, which have their own ### rules.
      - Repeat a block as often as needed: flows, rules, decisions.
      - A required section with nothing to say gets one line: None.
      - Two sections are optional: Risks and rollout, and Parked. Delete
@@ -75,7 +74,7 @@ touches:
      the criterion's number and a colon, then the flows, decisions, or
      shared rules that reach it, then a period and one or two sentences
      on how. flow checks that every criterion has a bullet and that the
-     names exist; the plan reviewer checks that the reasoning holds.
+     names exist; the reasoning is checked in the plan review.
      No success criteria in the spec? Leave the line out.
 
      Example:
@@ -118,8 +117,9 @@ Success criteria:
      Shared rules also list each project rule this slice must handle
      (from AGENTS.md or the project's rules), and how the slice handles
      it. Such a rule has a Project rule: line quoting where it comes
-     from, and Covers: names the requirements it touches, or none. The
-     plan reviewer checks that no project rule that applies is missing.
+     from, and Covers: names the requirements it touches, or none. List
+     every project rule that applies: a missing one is a plan review
+     finding.
      Tasks name these rules in follows like any other, so they reach the
      worker.
 
@@ -199,14 +199,15 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
      One row per check kind the spec uses (unit, api, e2e). Say which
      test tools, fakes, and test data are used, and where the test files
      live. Each task puts its e2e tests in its own file, so say the
-     folder and the file name form, e.g. e2e/<task-name>_test.go. manual
+     folder and the file name form, e.g. e2e/<task_name>_test.go (the
+     task's name with - written as _, as Go file names usually are). manual
      checks are not listed here: they go in preview.md.
 
      Example:
      | Check | How |
      |---|---|
      | unit | Go tests; a fake clock for "today" |
-     | e2e | build the binary, run it in a temporary folder; one file per task: e2e/<task-name>_test.go | -->
+     | e2e | build the binary, run it in a temporary folder; one file per task: e2e/<task_name>_test.go | -->
 
 | Check | How |
 |---|---|
@@ -242,6 +243,7 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
   Why: {{the reason}}
   Not chosen: {{the main other option, and why not}}
   Cost: {{optional: the downside we accept, or delete this line}}
+  Plan only: {{why no task's code depends on it, or delete this line}}
   Replaces: {{an earlier decision, e.g. checkout/TD2}}
 
 ## Risks and rollout

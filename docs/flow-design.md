@@ -902,15 +902,14 @@ above.
 
 - All tasks live in one file, `tasks.md`, next to `plan.md`. Each task is
   one section: a `## Task 01: <name>` heading, a small YAML block with its
-  structure (covers, depends on, touches, risk), then its content (goal,
+  structure (covers, depends on, touches, follows, risk), then its content (goal,
   steps, files, interfaces, tests, out of scope). Structure and content of
   a task sit together, in one copy.
 - The lead writes `tasks.md` after the plan's design is done and its open
   questions are empty. The human approves `plan.md` and `tasks.md`
   together.
 - `flow brief` gives each worker only its own task's section (from its
-  heading to the next one), plus the exact text of the requirements it
-  covers.
+  heading to the next one), plus what "What the brief holds" below lists.
 - Changing tasks is editing one file: no command, no orphan files, no
   broken file names. Task ids are never reused once the plan is approved.
 - **The lead writes all of `tasks.md`, fixed parts included (decided, the
@@ -948,7 +947,8 @@ above.
   A worker sees requirements and the plan items its task follows, not
   decisions as such. So each spec decision has a `Rule:` line naming the
   requirement that states it (`Rule: none` when it changes no behavior),
-  and `flow plan validate` checks the line and the requirement. Each
+  and `flow spec validate` checks the line and the requirement (and
+  `flow plan validate` again). Each
   plan decision is named in at least one task's `follows`, or has a
   `Plan only:` line with the reason; `flow` warns about one that is
   neither, or both. A plan decision does not list its tasks: the link is
@@ -1010,7 +1010,7 @@ above.
 |---|---|---|---|---|
 | 1 | lead | (writes) | `plan.md` and the contract changes, until its open questions are empty | draft |
 | 2 | lead | `flow plan validate` | checks the plan; repeat until clean | draft |
-| 3 | lead | (writes) | `tasks.md`: every task, with its structure and content; and `preview.md`: how the human will try the slice | draft |
+| 3 | lead | (writes) | `tasks.md`: every task, with its structure and content; and fills `preview.md` (flow created it, with its fixed checks, when the spec was approved) | draft |
 | 4 | lead | `flow plan validate` | checks plan, tasks, preview, and contract changes together; repeat until clean | draft |
 | 5 | — | — | (no step: there is no task sync any more) | draft |
 | 6 | lead | `flow plan submit` | validates again (refuses if broken), then starts the reviewer, or skips it when review is off | in review |
@@ -1339,6 +1339,11 @@ low (Anthropic: "Chasing every finding leads to over-engineering").
 check per `manual` requirement and per success criterion, `flow` adds one
 preview check for the first scenario of each story, its main success case
 (`Covers: S1`). Its steps follow the scenario's exact command and output.
+The fixed checks come from the spec alone, so `flow` creates `preview.md`
+with them when the spec is approved; the lead fills the steps during the
+plan phase. A later spec approval adds checks for new items, never deletes
+the lead's text, and reports a check whose item was removed. In manual flow
+the lead writes the fixed checks by hand at the same moment.
 Why: tests prove the code does what the tasks say, not that the tasks say
 what the human meant; and a slice with no manual requirement would
 otherwise have an empty preview. Research (2026-10-20): Wang, Pradel, Liu,
@@ -1365,7 +1370,9 @@ always leads back to the source.
   A findings file would be a second copy of the state.
 - At `flow slice done`, `flow` also copies every finding deferred out of
   the slice into `backlog.md`, with its source, e.g.
-  `(from slices/due-dates/reviews/task-04-1.md F3, 2026-10-22)`. Low
+  `(from slices/due-dates/reviews/task-04-1.md F3, 2026-10-22)`, copied
+  as its title (the text after `### F3. `). An item with more lines is
+  joined into one line. Low
   findings that were never fixed are not copied: they were optional, and
   they stay in the review files.
 - `backlog.md` has a template: one bullet per item, on one line, ending

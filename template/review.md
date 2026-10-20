@@ -24,8 +24,9 @@ reviewer: {{reviewer}}
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the finding headings (### F1.), the labeled lines (Level:,
-     Where:, Breaks:, Why:, Fix:, Guess:), and the line forms in Tests,
-     Previous findings, and Requirements check. Don't rename or reorder them. A
+     Where:, Breaks:, Why:, Fix:, Guess:), the numbers (**Q1.**), and the
+     line forms in Tests, Previous findings, and Requirements check.
+     Don't rename or reorder them. A
      labeled line may go on over more lines: indent the extra lines 2
      spaces more than the label.
 
@@ -82,7 +83,8 @@ reviewer: {{reviewer}}
      - Interfaces: Format(tasks, today) matches the task -->
 
 - Files read: {{files}}
-- Ran: {{command (result)}}
+- Ran:
+  {{command (result), one per line}}
 - Requirements: {{R1, R2}}
 
 ## Tests
@@ -172,7 +174,7 @@ reviewer: {{reviewer}}
 
 Level: {{high, medium, or low}}
 Where: {{file:line, or the document and section}}
-Breaks: {{R5, TD2, task 02, a project rule, or nothing}}
+Breaks: {{R5, TD2, task 02, a project rule, scope: what it adds, or nothing}}
 Why: {{what is wrong, and how you found it}}
 Fix: {{optional: one or two lines}}
 
@@ -180,9 +182,12 @@ Fix: {{optional: one or two lines}}
 
 <!-- Integration reviews only. Other kinds: write None.
      Every requirement in the spec, checked against the finished slice.
+     (A review whose requirements were given with the request, not by a
+     spec, checks those instead.)
      One line each: ok, fails (with the finding), or manual (goes to the
      preview). A fails line names the high or medium findings that make
-     it fail. Only low findings against it? It is ok: write ok, see F7.
+     it fail; lows may follow, e.g. fails, see F3; also F7. Only low
+     findings against it? It is ok: write ok, see F7.
 
      Example:
      - R1: ok

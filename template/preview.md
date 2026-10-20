@@ -6,7 +6,9 @@ based_on: { spec: {{spec revision, e.g. R001}} }
 <!-- HOW TO FILL THIS TEMPLATE
 
      The preview file says how the human tries the slice at the preview.
-     It is written with the plan, and approved together with it.
+     flow creates it when the spec is approved (see below); the lead
+     fills it during the plan phase; the human approves it together with
+     the plan.
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the check numbers (### P1.), and the labeled lines
@@ -14,14 +16,22 @@ based_on: { spec: {{spec revision, e.g. R001}} }
      may go on over more lines: indent the extra lines 2 spaces more than
      the label.
 
-     flow writes the fixed part, each check with its Covers: line:
-     - one ### P check for the first scenario of each story in the spec,
-       its main success case, e.g. Covers: S1. Tests prove the code does
-       what the tasks say; this check lets the human see it does what
-       they meant.
-     - one for each requirement with Check: manual
-     - one for each success criterion (SC1, ...) You write the setup, the steps, and the
-     Expect: lines. You may add more checks; number them after the last.
+     The fixed part comes from the spec alone, so it is written as soon
+     as the spec is approved: flow creates this file then, with one
+     ### P check, its number, title, and Covers: line, for each of these:
+     - the first scenario of each story that is not removed, its main
+       success case, e.g. Covers: S1. Tests prove the code does what the
+       tasks say; this check lets the human see it does what they meant.
+     - each requirement with Check: manual.
+     - each success criterion (SC1, ...).
+     When the spec is approved again after a change, flow adds checks for
+     new items. It never deletes text you wrote, and it reports a check
+     whose item was removed. (In manual flow, the lead writes these
+     checks by hand, by the same rules, right after the spec is
+     approved.)
+
+     You write the setup, the steps, and the Expect: lines, during the
+     plan phase. You may add more checks; number them after the last.
 
      - Replace every {{...}} with real text. flow fills slice and
        based_on itself. If they still show {{...}}, fill them
@@ -54,8 +64,9 @@ based_on: { spec: {{spec revision, e.g. R001}} }
 
      - Covers: names what this check proves: scenarios (S1),
        requirements (R12), and success criteria (SC1). The first
-       scenario of each story, every requirement with Check: manual, and
-       every success criterion are in at least one Covers: line.
+       scenario of each story that is not removed, every requirement
+       with Check: manual, and every success criterion are in at least
+       one Covers: line.
      - For a scenario, the steps and Expect: lines follow the scenario's
        exact command and output.
      - Then numbered steps. Each step is one thing the human does, with

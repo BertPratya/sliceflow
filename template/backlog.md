@@ -16,6 +16,9 @@
      When a slice is done, flow adds three kinds of items here, word for
      word: the plan's Parked items, the spec's Out of scope items marked
      Goes to: the backlog, and every finding deferred out of the slice.
+     An item with more than one line is joined into one line, with one
+     space between the lines. A deferred finding is copied as its title:
+     the text after ### F1. in its review.
 
      flow adds new items at the end. It never reorders or rewrites the
      lines already here. People and the lead may add items by hand in
@@ -26,8 +29,8 @@
      - Overdue mark ignores the user's time zone. (from slices/due-dates/reviews/task-04-1.md F3, 2026-10-22)
      - A checker for the workflow files. (from setup, 2026-10-17)
 
-     Replace the {{...}} line with the first item, or delete it while the
-     backlog is empty. Delete this comment when the file has its first
-     item. -->
+     A new backlog.md holds only the heading # Backlog. This comment is
+     for reading the rules (e.g. with flow template show backlog); it is
+     not copied into the file. -->
 
 - {{The item.}} (from {{source}}, {{date}})

@@ -163,8 +163,8 @@ created: {{date}}
 
      - Number them R1, R2, ... from top to bottom.
      - When you are done, renumber them so they read R1, R2, ... from
-       top to bottom in this section, and update the scenario links to
-       match. You may renumber only before the spec is first approved.
+       top to bottom in this section, and update every link to match:
+       the Shows: lines and the decisions' Rule: lines. You may renumber only before the spec is first approved.
      - Group them under small headings, e.g. ### Starting, ### Errors.
      - Write each one in one of these forms (EARS):
        - When <trigger>, the <system> shall <response>.

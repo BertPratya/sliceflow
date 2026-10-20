@@ -21,8 +21,9 @@ based_on: { spec: {{spec revision, e.g. R001}} }
 
      flow reads this file. Keep every marker exactly as shown: the task
      headings (## Task 01: name), the ### headings inside a task, the
-     YAML block, and the labeled lines (Proves:, Scenario:, Done in:). Don't rename
-     or reorder them. A task's section runs from its ## Task heading to
+     YAML block, the labeled lines (Proves:, Scenario:, Done in:), and
+     the words creates, changes, and uses in Interfaces. Don't rename or
+     reorder them. A task's section runs from its ## Task heading to
      the next one. In Files, Interfaces, and Done when, put the path,
      name, or test name in `backticks`, then a colon. A labeled line may
      go on over more lines: indent the extra lines 2 spaces more than the
@@ -48,7 +49,8 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        another. Each task proves its own part.
      - A requirement with Check: manual is in a task's covers too: the
        task builds it, and preview.md proves it.
-     - Every scenario in the spec (S1, S2, ...) becomes at least one e2e
+     - Every scenario in the spec (S1, S2, ...) that is not removed
+       becomes at least one e2e
        test in some task's Done when, with the scenario's exact values
        and a Scenario: line. flow checks this.
      - No dependency loops.
@@ -78,7 +80,7 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        based_on itself. If they still show {{...}}, fill them yourself.
      - Copy the whole ## Task block once per task.
      - Each part has a comment like this one with its rules. Follow it.
-     - Three parts of a task are optional: Interfaces, Follow, and
+     - Three parts of a task are optional: Interfaces, Copy the style of, and
        Rules. Delete them when they don't apply. The other parts are
        required; one with nothing to say gets one line: None.
      - When you are done, delete every comment and check that nothing of
@@ -201,10 +203,11 @@ risk: {{core, normal, or low}}
 
 - `{{name or signature}}`: {{creates, changes, or uses; what it does; who else uses it}}
 
-### Follow
+### Copy the style of
 
 <!-- Optional. Existing code to copy the style from, so the new code
-     looks like the code around it.
+     looks like the code around it. (Not the same as follows: in the
+     YAML block, which names plan items.)
 
      Example:
      - Read flags the same way as cmd/todo/list.go does. -->
@@ -237,7 +240,9 @@ risk: {{core, normal, or low}}
      Which level:
      - A scenario from the spec becomes an e2e test with the scenario's
        exact values. Add a Scenario: line naming it, under Proves:, e.g.
-       Scenario: S2
+       Scenario: S2. The scenario must be in this task's brief: its
+       Shows: names a requirement in this task's covers. flow checks
+       this.
      - Every other case, e.g. edge cases and rule details, goes in a
        unit test. Keep e2e tests few; put tests as low as they can go.
 
