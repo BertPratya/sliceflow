@@ -933,6 +933,14 @@ above.
   written once, on the task side. Research (2026-10-20): MAST, a study
   of multi-agent failures, counts "disobey task specification" as 11.8%
   of failures.
+- **Test files belong to the task (decided, the human, 2026-10-20).** A
+  task's test files are in its `touches` and Files, like its code. Each
+  task puts its e2e tests in its own file (the plan's Testing section
+  says where), so parallel tasks never share a test file. `flow` checks
+  that each test named in Done when exists in a file inside the task's
+  `touches`; where the project's test tool reports test names (e.g.
+  `go test -json`), it also checks the test ran and passed. That second
+  check is optional per project.
 - Open, for the implement slice: fix tasks added after approval (from the
   integration review or the preview). They would change an approved file,
   so they may need their own section or file.

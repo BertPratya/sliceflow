@@ -92,8 +92,9 @@ based_on: { spec: {{spec revision, e.g. R001}} }
      - depends_on: ids of the tasks whose result this one needs, in
        quotes, e.g. ["01"]. Quotes are needed: without them YAML reads
        01 as a number. None: []
-     - touches: the files and folders this task may change. A folder
-       ends with /. Keep it narrow. flow rejects a change outside it.
+     - touches: the files and folders this task may change, its test
+       files included. A folder ends with /. Keep it narrow. flow
+       rejects a change outside it.
      - follows: the plan items this task must follow, by name: a
        decision (TD2), a shared rule or an interface by its heading
        (Locking, CLI), or Testing. flow checks each name exists, and puts
@@ -112,7 +113,8 @@ based_on: { spec: {{spec revision, e.g. R001}} }
      ```yaml
      covers: [R6, R7]
      depends_on: ["01"]
-     touches: [cmd/todo/list.go, internal/list/]
+     touches: [cmd/todo/list.go, cmd/todo/list_test.go, internal/list/,
+       e2e/list_by_due_date_test.go]
      follows: [TD1, Testing]
      risk: normal
      ``` -->
@@ -152,11 +154,16 @@ risk: {{core, normal, or low}}
 ### Files
 
 <!-- Every file this task creates or changes, with what goes in it.
-     All of them must be inside the task's touches.
+     All of them must be inside the task's touches. Test files count:
+     list them too. Each task puts its e2e tests in its own file, where
+     the plan's Testing section says e2e tests live, so tasks that run at
+     the same time never share a test file.
 
      Example:
-     - `internal/task/due.go`: new. parseDue() and its tests' helpers.
-     - `cmd/todo/add.go`: changed. The --due flag. -->
+     - `internal/task/due.go`: new. parseDue().
+     - `internal/task/due_test.go`: new. Unit tests for parseDue().
+     - `cmd/todo/add.go`: changed. The --due flag.
+     - `e2e/add_due_test.go`: new. The e2e tests for S1 and S2. -->
 
 - `{{path}}`: {{new or changed, and what goes in it}}
 
@@ -225,7 +232,9 @@ risk: {{core, normal, or low}}
      the e2e part still needs a test here.
 
      flow also runs all project checks before the task is handed in, so
-     don't list them here.
+     don't list them here. flow checks that each test named here exists
+     in a file inside the task's touches, and, where the project's test
+     tool reports test names, that it ran and passed.
 
      Existing tests must keep passing. Change an existing test only when
      this task changes what it tests, and list its file under Files.

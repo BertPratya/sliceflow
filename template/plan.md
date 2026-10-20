@@ -161,14 +161,16 @@ Covers: {{R5}}
      are done, so every task uses the same helpers.
 
      One row per check kind the spec uses (unit, api, e2e). Say which
-     test tools, fakes, and test data are used. manual checks are not
-     listed here: they go in preview.md.
+     test tools, fakes, and test data are used, and where the test files
+     live. Each task puts its e2e tests in its own file, so say the
+     folder and the file name form, e.g. e2e/<task-name>_test.go. manual
+     checks are not listed here: they go in preview.md.
 
      Example:
      | Check | How |
      |---|---|
      | unit | Go tests; a fake clock for "today" |
-     | e2e | build the binary, run it in a temporary folder | -->
+     | e2e | build the binary, run it in a temporary folder; one file per task: e2e/<task-name>_test.go | -->
 
 | Check | How |
 |---|---|
