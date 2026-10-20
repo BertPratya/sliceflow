@@ -26,9 +26,7 @@ based_on: { spec: {{spec revision, e.g. R001}} }
      - each success criterion (SC1, ...).
      When the spec is approved again after a change, flow adds checks for
      new items. It never deletes text you wrote, and it reports a check
-     whose item was removed. (In manual flow, the lead writes these
-     checks by hand, by the same rules, right after the spec is
-     approved.)
+     whose item was removed.
 
      You write the setup, the steps, and the Expect: lines, during the
      plan phase. You may add more checks; number them after the last.

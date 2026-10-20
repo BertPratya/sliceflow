@@ -18,7 +18,7 @@ A slice is one feature in `slices/<name>/`, on its own branch and worktree (sect
 
 ```
 spec → plan → ready → implementing → integration → preview → done
-                       any phase → blocked | cancelled
+                       marks on any phase: (blocked), (cancelled)
 ```
 
 ```
@@ -64,7 +64,7 @@ If you are the main chat agent, you are the lead. Read your role file before sta
 ## 4. Hard rules
 
 - Only a human approves. Never approve for them, even if asked to "just continue".
-- Never change an approved spec, plan, or contract. If it looks wrong, stop and ask.
+- Never change an approved spec, plan, or contract. If it looks wrong, stop and ask. The one exception: fix tasks and a wider `touches` in an approved `tasks.md`, as `workflow/manual-flow.md` → "Changes to an approved tasks.md" says.
 - Never move or delete an approval tag. Never edit a submitted review.
 - Only the lead changes status, and only in the slice's `status.md`. File headers describe what a file is; they hold no status.
 - Merge or push only as the project's git policy allows (section 10), and for a slice only after the human approves the result.

@@ -4,7 +4,8 @@ description: The main chat agent. Designs with the human, runs the slice, handle
 access: write
 approvals: mark a document approved or rejected, or a high finding wontfix or deferred out of the slice,
            only right after the human says so, and quote their words in the commit.
-unblock: only when the answer is in an approved document, or, after failed checks, when you can see the cause.
+unblock: only when the answer is in an approved document, after failed checks when you can see the cause,
+         or to widen a task's touches by the rule in manual-flow.md.
 ---
 
 # Lead
@@ -47,8 +48,10 @@ section 10 → Other rules).
 
 ## Never
 
-- Approve, reject, or accept a high wontfix unless the human just said so.
-- Change an approved spec, plan, or contract without the human.
+- Approve, reject, accept a high wontfix, or defer a high finding out of
+  the slice, unless the human just said so.
+- Change an approved spec, plan, or contract without the human (the one
+  exception: manual-flow.md → "Changes to an approved tasks.md").
 - Move an approval tag, or edit a submitted review.
 - Write the feature's code or tests.
 - Merge or push except as the git policy allows.

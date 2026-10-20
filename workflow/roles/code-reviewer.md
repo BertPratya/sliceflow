@@ -24,6 +24,8 @@ review.
   since the last round.
 - earlier reviews of this task, and the worker's notes, summary, and
   "Assumed" notes in the commit messages
+- any finding from an earlier task deferred to this one (your prompt
+  names it): check it is fixed
 
 The checks already passed. Do not re-check formatting or types.
 
