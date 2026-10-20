@@ -1230,6 +1230,28 @@ copying is rule work, and agents change words when they copy. The slice
 folder stays in `main` and slice names are never reused, so the link
 always leads back to the source.
 
+**Findings and the backlog (decided, the human, 2026-10-20).**
+
+- No separate findings file. A finding's text lives in its review file
+  (locked after hand-in), its state (fixed, wontfix, deferred, verified,
+  reopened) lives in the event log, and `status.md` shows the open ones.
+  A findings file would be a second copy of the state.
+- At `flow slice done`, `flow` also copies every finding deferred out of
+  the slice into `backlog.md`, with its source, e.g.
+  `(from slices/due-dates/reviews/task-04-1.md F3, 2026-10-22)`. Low
+  findings that were never fixed are not copied: they were optional, and
+  they stay in the review files.
+- `backlog.md` has a template: one bullet per item, on one line, ending
+  with `(from <source>, <date>)`. `flow` adds at the end and never
+  rewrites existing lines. What happens to a line that becomes a slice
+  is settled with "backlog to slice" (section 4).
+- Research (2026-10-20): the Scrum Guide calls the backlog "the single
+  source of work"; technical debt registers keep known weaknesses in "a
+  single, persistently maintained document"; GitHub keeps review
+  comments on the pull request with a resolved or unresolved state, and
+  code-checking tools track findings across runs as new, unchanged, or
+  absent, without a separate findings file.
+
 ### 2.6 Design ahead: stacked slices
 
 **From the human (2026-10-18):** while 0002 is in implement, the human
