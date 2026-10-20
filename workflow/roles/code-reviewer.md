@@ -33,6 +33,9 @@ The checks already passed. Do not re-check formatting or types.
 - the spec, the plan, and `tasks.md`
 - the diff of the whole slice against the base branch
 - every finding still deferred (`status.md` → Findings)
+- what changed in `tasks.md` since the plan's approval (your prompt gives
+  the command): it may hold only fix tasks at the end and wider `touches`.
+  Any other change is a high finding.
 
 Also follow the project rules for the code reviewer, for Everyone, and for
 the worker where they apply (`AGENTS.md` section 10 → Other rules).

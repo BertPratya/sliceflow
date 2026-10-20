@@ -43,6 +43,8 @@
      - done: reviewed (or not needed, for low risk) and merged into the
        slice branch.
      - blocked: stopped; the reason is under Needs human.
+     - cancelled: no longer needed after a plan change; its branch is
+       kept.
 
      Findings:
      - open: not fixed yet.

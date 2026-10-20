@@ -61,13 +61,15 @@ read its template again: a filled document no longer has the comments.
 | `plan` | the spec is approved |
 | `ready` | the plan is approved |
 | `implementing` | the first worker starts, and again for any fix task |
-| `integration` | every task is done |
+| `integration` | every task is done or cancelled |
 | `preview` | the integration review passes |
 | `done` | the human approved the result; set in the last commit before the merge |
 
-  **Marks** go in brackets after the phase, and keep it: `implementing
-  (blocked)` when the stop rules in `AGENTS.md` section 5 apply;
-  `implementing (cancelled)` when the human cancels.
+  **Marks** go in brackets after the phase, and keep it. The slice gets
+  `(blocked)` only when a plan or integration review fails 3 rounds, or the
+  human stops the whole slice, e.g. `plan (blocked)`. A single blocked task
+  is marked in the Tasks table, and other tasks go on. The slice gets
+  `(cancelled)` when the human cancels it, e.g. `implementing (cancelled)`.
 
 ## 1. Start a slice
 
@@ -240,7 +242,7 @@ worktree instead. Never skip the hook.
 
 ## 5. Integration
 
-When every task is done, set the phase to `integration`.
+When every task is done or cancelled, set the phase to `integration`.
 
 1. **Update from the base branch:**
    1. `git worktree add <repo root>/.worktrees/update-<name> -b update/<name> slice/<name>`.
@@ -252,15 +254,15 @@ When every task is done, set the phase to `integration`.
    3. There: run the setup commands and the checks. On a failure: if the
       merge brought changes in, a worker fixes it with the checks-failed
       line, then commit and check again; if it brought nothing in, the
-      slice itself is broken: remove the update worktree, and add a fix
-      task.
+      slice itself is broken: remove the update worktree and its branch
+      (`git branch -D update/<name>`), and add a fix task.
    4. In the slice worktree: `git merge --ff-only update/<name>`. Remove
       the update worktree and branch. As in 4.8, don't commit `status.md`
       during 5.1.1 to 5.1.4.
 2. **Integration review:** a review of kind `integration`. Each high or
    medium finding becomes a fix task (see "Changes to an approved
    tasks.md"). Then phase `implementing`, run the fix tasks as in step 4,
-   and when every task is done, come back to step 5. When the review
+   and when every task is done or cancelled, come back to step 5. When the review
    passes, set the phase to `preview`.
 
 ## 6. Preview
@@ -327,10 +329,12 @@ the words would change), then:
 | `spec` | the spec draft is ready | plan reviewer | the spec revision it would become, e.g. `R001` |
 | `plan` | plan, tasks, and preview are written | plan reviewer | the plan revision it would become |
 | `task` | a `core` or `normal` task passed its checks | code reviewer | the task id and its commits |
-| `integration` | every task is done | code reviewer | the slice |
+| `integration` | every task is done or cancelled | code reviewer | the slice |
 
-1. **The file:** `slices/<name>/reviews/<kind>-<target>-<round>.md` from
-   `templates/review.md` (integration: `slices/<name>/reviews/integration-<round>.md`).
+1. **The file:** in `slices/<name>/reviews/`, from `templates/review.md`:
+   `spec-R001-<round>.md`, `plan-R001-<round>.md`, `task-NN-<round>.md`, or
+   `integration-<round>.md`. A task review's commits go only in the front
+   matter's `target`.
    `<round>` is 1 plus the number of earlier reviews of the same kind and
    target. Fill the front matter. A task review file is created and
    committed in the task worktree, on the task branch; the others in the
@@ -347,7 +351,9 @@ the words would change), then:
        <plan review: Briefs over 1,500 words, with the reason: <list, or none>.
         Stacked on: <earlier slice>; read its approved spec and plan.>
        <integration review: Review the diff of slice/<name> against <base branch>.
-        Merges with conflicts: <commits, from the Log>.>
+        Merges with conflicts: <commits, from the Log>.
+        Check that git diff flow/<name>/plan/R<n> -- slices/<name>/tasks.md holds only
+        fix tasks at the end and wider touches.>
        <a changed document: Only <R…, S…, TD…> changed. Check them and what they affect.>
 
    If it ends without `RESULT: submitted`, start it once more. If that
@@ -357,8 +363,8 @@ the words would change), then:
    reopened → `changes`; else `pass`. Record it, and each finding's state,
    in `status.md` (on the slice branch). Commit the review file where it
    was created, and `status.md` on the slice branch:
-   `<name>: review <review> (<verdict>)`. For a task review, commit
-   `status.md` only after the task's merge, as in 4.8.
+   `<name>: review <review> (<verdict>)`. For a task review, don't commit
+   `status.md` while 4.8.1 to 4.8.3 run.
 4. A submitted review is never edited.
 
 ## Changes to an approved tasks.md
@@ -391,8 +397,8 @@ Only when the human agrees. Then:
    `changed` too. New scenarios, `manual` requirements, or success criteria
    get new preview checks (`templates/preview.md`). For tasks:
    - `done` tasks stay done; a problem in their code becomes a fix task
-   - a task no longer needed: `cancelled` in `status.md`; remove its
-     worktree and branch, with a Log line
+   - a task no longer needed: `cancelled` in `status.md`, with a Log line;
+     remove its worktree, and keep its branch (as Cancel does)
    - a new task takes the next free id
    - a task not started yet: update it to the new plan
    - a task with a branch: update it; after the approval, run
@@ -401,7 +407,9 @@ Only when the human agrees. Then:
    wording-only change (same meaning, no requirement, scenario, or
    decision added, changed, or removed) skips the review.
 5. **Show the human:** the reason, the diff against the last approval
-   (`git diff flow/<name>/<doc>/R<n> -- slices/<name>/<doc>.md`), what was
+   (spec: `git diff flow/<name>/spec/R<n> -- slices/<name>/spec.md`;
+   plan: `git diff flow/<name>/plan/R<n> -- slices/<name>/plan.md
+   slices/<name>/tasks.md slices/<name>/preview.md <touches files>`), what was
    added, changed, and removed, and the tasks it affects.
 6. **Approve again**, only right after the human says so: the next revision
    and a new tag.
@@ -414,8 +422,10 @@ Only when the human agrees. Then:
    (as in step 4, Interrupted).
 2. Add the mark: e.g. `implementing (cancelled)`, with a Log line holding
    the human's reason, in their words. Commit.
-3. Remove the worktrees: each task's, then the slice's. Keep everything
-   else: the slice branch, the task branches, the tags, the reviews.
+3. Remove the worktrees: each task's, then the slice's. Keep a task
+   worktree that holds uncommitted work (never `--force`), with a Log line
+   saying so; reopen reuses it. Keep everything else: the slice branch, the
+   task branches, the tags, the reviews.
 4. A slice stacked on this one: tell the human it waits on a cancelled
    slice. They choose: move it onto the base branch (maybe with a spec or
    plan change), cancel it too, or leave it waiting.
