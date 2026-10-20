@@ -17,10 +17,11 @@
      - plan: the plan, tasks, and preview are being written or reviewed.
      - ready: the plan is approved; building has not started.
      - implementing: workers are building tasks.
-     - integration: all tasks are done; the whole slice is being reviewed.
+     - integration: all tasks are done or cancelled; the whole slice is
+       being reviewed.
      - preview: the human is trying the slice.
-     - done: the human approved the result, and the slice is merged into
-       the base branch.
+     - done: the human approved the result; set in the last commit
+       before the merge into the base branch.
      Marks, in brackets after the phase, which stays as it was:
      - (blocked): stopped until a person decides something, e.g.
        implementing (blocked).

@@ -49,7 +49,7 @@ last line says where they are. Also read:
    resolve a merge conflict, do only that, keeping the changes from both
    sides.
 5. **Run the checks** until they pass: the auto-fix commands, then the
-   checks (`AGENTS.md` section 9). While working, single tests are fine.
+   task-tier checks (`AGENTS.md` section 9). While working, single tests are fine.
    Only a full run counts.
 6. **Finish**, see below.
 
