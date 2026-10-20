@@ -351,8 +351,8 @@ Decided: three layers.
    worktree, network only to hosts the project lists (for example its
    package registry).
 3. **`flow` checks the result after the agent ends**, on every system: only
-   files in the task's `touches` changed; no approved document, `.history/`,
-   or event log was touched. A failed check is a case.
+   files in the task's `touches` changed; no approved document or event log
+   was touched. A failed check is a case.
 
 - On native Windows there is no sandbox for Claude Code, so layers 1 and 3
   are the protection.
@@ -559,9 +559,9 @@ not in git and is not a source of truth for the slice.
 ### 1.13b File formats (decided, the human, 2026-10-19)
 
 - **Files people read, approve, or edit:** Markdown. A small YAML header
-  holds the fields `flow` needs (`spec.md`, `plan.md`, reviews). Task files
-  are Markdown only (section 2.3, the plan). Exact fields inside a document
-  go in one YAML block (the task list in `plan.md`, section 2.3).
+  holds the fields `flow` needs (`spec.md`, `plan.md`, `tasks.md`,
+  reviews). Exact fields inside a document go in a YAML block (one per
+  task in `tasks.md`, section 2.3).
 - **Files only `flow` writes:** JSON Lines for machines (`.events.jsonl`),
   Markdown for people (`status.md`).
 - **Settings:** YAML, read strictly (`flow.yaml`).
@@ -578,7 +578,8 @@ Why (research, 2026-10-19):
   heading, a wrong indent, `01` read as a number. So accuracy comes from
   rules, not from the format:
   1. `flow` writes the fixed parts. Agents write only free text (option C
-     in section 2.3, the plan).
+     in section 2.3, the plan). Exception: `tasks.md` (2.3, "Tasks in one
+     `tasks.md`").
   2. Each fact has one copy. Requirements are named, not copied.
   3. `flow` reads every file strictly: typed fields, unknown keys refused,
      a check before submit.
@@ -713,6 +714,7 @@ its events, and what it shows.
 6. The human may read the spec or not. They tell the lead "approved".
 7. The lead runs the approve command. The slice enters the **plan** phase.
 8. Every approval keeps a copy: `.history/spec/`. History is read-only.
+   (Replaced: history is kept in git, see "History in git" below.)
 
 **Lead's view, to talk about** (not decided):
 
@@ -745,6 +747,72 @@ its events, and what it shows.
 - **Changed after approval.** `flow` sees `spec.md` differ from the last
   copy in `.history/`: status **changed**. It is submitted and approved again.
 - **Setting:** `spec.review: on | off`.
+
+**Templates built into `flow` (decided, the human, 2026-10-20).** The
+document templates (spec, plan, tasks, preview, review, backlog) are part of
+the `flow` program, so they always match its validator. A repo needs no
+template files, and there is no override folder for now. Because a filled
+document no longer holds its rule comments, `flow` prints a template on
+request (a name like `flow template show spec`; settled in slice 0002, where
+the lead first needs it to change a spec).
+
+**Assumptions are facts, not choices (decided, the human, 2026-10-20).** In
+the spec, an assumption is a fact about the world (environment, other
+systems, users). A choice about the feature is a requirement, a decision,
+or an Open question; the spec reviewer checks this. An optional `Noticed:`
+line says how a wrong assumption would show. Why: an agent fills a gap with
+a guess more easily than it asks; written as an assumption, the guess skips
+the human, gets no test, and never reaches a worker. Research (2026-10-20):
+Ambig-SWE (Vijayvargiya et al.): "models struggle to distinguish between
+well-specified and underspecified instructions", and asking the user gives
+"up to 74%" better results.
+
+**Full EARS, exact values (decided, the human, 2026-10-20).** Spec
+requirements may use all EARS forms, including "Where <feature or setting
+is on>" and combined forms ("While ..., when ..."), as on the EARS author's
+page (https://alistairmavin.com/ears/). A requirement names exact values
+(the message, the limit, the exit code), because a worker sees its text.
+
+**An optional Cost: line on decisions (decided, the human, 2026-10-20).**
+Spec and plan decisions may have a `Cost:` line for the downside accepted
+with the choice. Research (2026-10-20): Nygard's original ADR article: "All
+consequences should be listed here, not just the 'positive' ones."
+
+**History in git (decided, the human, 2026-10-20).** This replaces the
+copies in `.history/` here and in 2.3, and the fingerprint check for them.
+
+- Each approval creates one git tag on the approved commit, e.g.
+  `flow/due-dates/spec/R001` and `flow/due-dates/plan/R001`. The approval
+  event records the same commit id.
+- Reading history is one step, however many commits came later. `flow`
+  wraps the git commands (names to settle in slice 0002), e.g. show the
+  spec as approved in R001, or the difference between R001 and R002.
+- An approved version cannot change: a commit is fixed, and `flow`
+  reports a tag that no longer points at the commit in its event.
+- A tag keeps its commit even after a squash merge or a deleted branch.
+- "Changed after approval", "no approved number disappears", and
+  "stale: the other slice's plan changed" compare with the tagged version.
+- The history is visible to anyone with git, without `flow` (decided, the
+  human, 2026-10-20):
+  - The tags are **annotated**, and their message holds the approval
+    record: what was approved, the revision, the date, and the human's
+    own words. `git show <tag>` shows it.
+  - `flow` turns on git's `push.followTags` setting in each clone it sets
+    up, so a plain `git push` also sends the approval tags. (A plain push
+    sends no tags otherwise, and the setting works only for annotated
+    tags.) `flow` still warns when approval tags are missing on the
+    remote.
+  - Others read history with plain git: `git tag -l "flow/<slice>/*"`,
+    `git show <tag>:<path>`, `git diff <tag> <tag>`, or the Tags page on
+    GitHub.
+  - For the finish slice: a tag whose commit is on no branch can be missed
+    by a plain `git fetch` (e.g. after a squash merge deletes the slice
+    branch). Merging slices with a merge commit keeps every approved
+    commit in `main`'s history.
+- Research (2026-10-20): GitHub Spec Kit and Kiro keep no snapshots; git
+  is the record. Spec Kit's "flow-forward" keeps a delivered feature's
+  files unchanged. Architecture Decision Records are never edited, only
+  superseded.
 - **Events:** `spec.submitted`, `review.started`, `review.submitted`,
   `spec.approved`, `spec.rejected`.
 
@@ -828,22 +896,130 @@ Research (2026-10-18):
   wrote, and reports a task file whose task left the list (it does not
   delete it). A name for that: `flow task sync`.
 
+**Tasks in one `tasks.md` (decided, the human, 2026-10-20).** This replaces
+the task list in `plan.md`, the separate task files, and `flow task sync`
+above.
+
+- All tasks live in one file, `tasks.md`, next to `plan.md`. Each task is
+  one section: a `## Task 01: <name>` heading, a small YAML block with its
+  structure (covers, depends on, touches, follows, risk), then its content (goal,
+  steps, files, interfaces, tests, out of scope). Structure and content of
+  a task sit together, in one copy.
+- The lead writes `tasks.md` after the plan's design is done and its open
+  questions are empty. The human approves `plan.md` and `tasks.md`
+  together.
+- `flow brief` gives each worker only its own task's section (from its
+  heading to the next one), plus what "What the brief holds" below lists.
+- Changing tasks is editing one file: no command, no orphan files, no
+  broken file names. Task ids are never reused once the plan is approved.
+- **The lead writes all of `tasks.md`, fixed parts included (decided, the
+  human, 2026-10-20).** The tasks are not known until the lead designs
+  them, so `flow` has no frame to write in advance. `flow plan validate`
+  checks every fixed part strictly and names the exact line: the
+  `## Task NN: <name>` headings, the YAML keys, the `###` headings, and
+  the labels. This is the one exception to "`flow` writes the fixed
+  parts" (1.13b), and it replaces option C for tasks.
+- Research (2026-10-20): GitHub Spec Kit and Kiro keep all tasks in one
+  `tasks.md`; Task Master keeps them in one `tasks.json`, and its separate
+  task files are generated from it, never edited. No tool splits a task's
+  structure and its hand-written content into different files.
+- **What the brief holds (decided, the human, 2026-10-20).** `flow brief`
+  follows links the lead wrote, and never guesses: the task's section;
+  the text of the requirements in its `covers`; the spec scenarios whose
+  `Shows:` names one of them; the spec's Key concepts; and the exact text
+  of the plan items named in the task's new `follows:` key (a decision
+  such as `TD2`, a shared rule or interface by its heading, or
+  `Testing`). `flow plan validate` checks each name exists. The brief
+  ends by saying where the full spec and plan are, so the worker can
+  open them if something is unclear. Rules in a task hold only rules
+  that exist nowhere else. Research (2026-10-20): a missed hand copy
+  lets the wrong thing be built while its tests pass; Anthropic's
+  multi-agent write-up: "Without detailed task descriptions, agents
+  duplicate work, leave gaps"; Anthropic's context guide: "the smallest
+  possible set of high-signal tokens".
+- **Stable scenario ids (decided, the human, 2026-10-20).** Spec
+  scenarios are numbered S1, S2, ... across the whole spec, with the same
+  rules as requirement numbers. An e2e test names its scenario in a
+  `Scenario: S2` line under `Proves:`. `flow` checks that every scenario
+  has at least one e2e test. Why: numbers by position shift when a
+  scenario is added, and a free-text link cannot be checked.
+- **Every decision reaches a worker (decided, the human, 2026-10-20).**
+  A worker sees requirements and the plan items its task follows, not
+  decisions as such. So each spec decision has a `Rule:` line naming the
+  requirement that states it (`Rule: none` when it changes no behavior),
+  and `flow spec validate` checks the line and the requirement (and
+  `flow plan validate` again). Each
+  plan decision is named in at least one task's `follows`, or has a
+  `Plan only:` line with the reason; `flow` warns about one that is
+  neither, or both. A plan decision does not list its tasks: the link is
+  written once, on the task side. Research (2026-10-20): MAST, a study
+  of multi-agent failures, counts "disobey task specification" as 11.8%
+  of failures.
+- **Test files belong to the task (decided, the human, 2026-10-20).** A
+  task's test files are in its `touches` and Files, like its code. Each
+  task puts its e2e tests in its own file (the plan's Testing section
+  says where), so parallel tasks never share a test file. `flow` checks
+  that each test named in Done when exists in a file inside the task's
+  `touches`; where the project's test tool reports test names (e.g.
+  `go test -json`), it also checks the test ran and passed. That second
+  check is optional per project.
+- **A task waits for the code it uses (decided, the human, 2026-10-20).**
+  When a task's Interfaces says it uses a name that another task creates
+  or changes, that task must be in its `depends_on` chain. `flow plan
+  validate` checks it, so the mistake shows while planning instead of at
+  the merge.
+- **Tests first (decided, the human, 2026-10-20).** A task's Steps start
+  by writing the Done when tests and seeing them fail, and end by running
+  them until they pass. `flow` cannot check the order (workers do not
+  commit along the way), so it is guidance in the template and in the
+  worker's instructions (slice 0004). Research (2026-10-20): Spec Kit's
+  tasks template: tests "must be written first and must fail before
+  implementation".
+- **The plan handles the project's rules (decided, the human,
+  2026-10-20).** The plan's Shared rules list each project rule the slice
+  must handle (from `AGENTS.md`), with a `Project rule:` line saying
+  where it comes from, and how the slice handles it. Tasks name them in
+  `follows`, so they reach the worker. The plan reviewer checks that no
+  rule that applies is missing. Research (2026-10-20): Spec Kit's plan
+  template has a "Constitution Check" step, "GATE: Must pass before
+  Phase 0 research".
+- **The plan says how each success criterion is reached (decided, the
+  human, 2026-10-20).** When the spec has success criteria, the plan's
+  Approach has one line per criterion: its number, the flows, decisions,
+  or shared rules that reach it, and how. `flow` checks that every
+  criterion has a line and that the names exist; the plan reviewer
+  judges whether the reasoning holds. Research (2026-10-20): Spec Kit's
+  analyze step flags "Success Criteria requiring buildable work ... not
+  reflected in tasks".
+- **A warning for long briefs (decided, the human, 2026-10-20).** Once
+  `tasks.md` exists, `flow plan validate` builds each task's brief and
+  warns when one is over a set size: about 1,500 words by default, a
+  setting in `flow.yaml`. It is a warning, not an error: it does not
+  block `flow plan submit`, and it goes to the plan reviewer, who judges
+  whether the length is justified. Before `tasks.md` exists there is no
+  brief, so there is no check. Research (2026-10-20): BMAD's plan
+  template: "Target: 900–1300 tokens ... Above 1600 = high risk of
+  context rot".
+- Open, for the implement slice: fix tasks added after approval (from the
+  integration review or the preview). They would change an approved file,
+  so they may need their own section or file.
+
 **The whole plan process, step by step (lead's proposal, 2026-10-18):**
 
 | # | Who | Command | What happens | Plan status |
 |---|---|---|---|---|
-| 1 | lead | (writes) | `plan.md` with its task list, and the contract changes | draft |
-| 2 | lead | `flow plan validate` | checks the plan and its task list; repeat until clean | draft |
-| 3 | lead | `flow task sync` | creates the task files from the task list | draft |
-| 4 | lead | (writes) | fills each task file: what to build, "Done when" | draft |
-| 5 | lead | `flow plan validate` | checks plan, task list, task files, and contract changes together | draft |
+| 1 | lead | (writes) | `plan.md` and the contract changes, until its open questions are empty | draft |
+| 2 | lead | `flow plan validate` | checks the plan; repeat until clean | draft |
+| 3 | lead | (writes) | `tasks.md`: every task, with its structure and content; and fills `preview.md` (flow created it, with its fixed checks, when the spec was approved) | draft |
+| 4 | lead | `flow plan validate` | checks plan, tasks, preview, and contract changes together; repeat until clean | draft |
+| 5 | — | — | (no step: there is no task sync any more) | draft |
 | 6 | lead | `flow plan submit` | validates again (refuses if broken), then starts the reviewer, or skips it when review is off | in review |
 | 7 | reviewer | (writes, then hands in) | one review file with findings: high, medium, low, and questions for the human | in review |
 | 8 | `flow` | — | reads the review: no high or medium findings, no questions → pass; else → back to the lead | awaiting approval, or draft |
 | 9 | lead | (fixes) + marks each finding | fixed, wontfix, or deferred, each with a note; decisions go to the human | draft |
 | 10 | lead | `flow plan submit` | next round: the reviewer checks the fixes (up to the round limit, then the human decides) | in review |
 | 11 | human | says "approved" | | awaiting approval |
-| 12 | lead | `flow plan approve` | copies the plan, task files, and contract changes to `.history/plan/`; the slice is **ready** | approved |
+| 12 | lead | `flow plan approve` | tags the commit that holds `plan.md`, `tasks.md`, `preview.md`, and the contract changes; the slice is **ready** | approved |
 
 - **One submit for the plan and its tasks:** `flow plan submit`, not a
   separate `flow task submit`. They are reviewed and approved together.
@@ -874,14 +1050,17 @@ of it. The tasks are part of what the human approved. If a task file could
 change after approval without anyone noticing, the approval would mean
 nothing for that task.
 
+(Replaced 2026-10-20 by "History in git" in 2.2: the approval tags the
+commit that holds all of these, instead of copying them.)
+
 **Decided (the human, 2026-10-18):** `flow plan approve` saves the plan, the
 task files, and the contract changes together, one folder per revision:
 
   ```
   .history/plan/R001/
     plan.md
-    tasks/01-event-log.md
-    tasks/02-slice-new.md
+    tasks.md               (was: tasks/01-event-log.md, ... before 2026-10-20)
+    preview.md
     contracts.patch        (the slice's contract changes)
   ```
 
@@ -918,6 +1097,21 @@ Details (lead's notes):
    what they need to decide.
 6. **Task review is configurable** in `flow.yaml`. A simple project can
    turn it off, to save tokens.
+
+**No track (decided, the human, 2026-10-20).** A slice has no
+simple/complex track. Every plan gets the full plan review. Task review
+follows each task's `risk` in `tasks.md`: `core` and `normal`
+tasks are reviewed, `low` tasks are not. The setting in point 6 can still
+turn task review off. Why: one less field for the human to choose, and a
+risky slice never gets a light review by mistake.
+
+**What each risk means (decided, the human, 2026-10-20).** `core`: other
+tasks build on it, it changes stored data or a file format, it touches
+security, or it changes a contract or a shared interface. `normal`: any
+other code change. `low`: no change in behavior (docs, a rename,
+comments). The plan reviewer checks each task's risk against these rules.
+Three levels stay, so a project can later review only `core` tasks to save
+tokens.
 7. **Integration:** when all tasks are done, a final review of the whole
    slice. When it passes, the slice enters the preview phase.
 
@@ -1131,6 +1325,67 @@ What a fallback lead may do, and what it must leave to the human: decided in
   The workflow ends with the merge into `main`; pushing is outside it.
 - **Events:** `preview.started`, `slice.approved`, `slice.done`.
 
+**Reviews check tests and scope (decided, the human, 2026-10-20).** The
+review template gets three rules. A task review lists each Done when test
+as `ok`, `weak`, or `missing` (Google's code review guide: "Will the tests
+actually fail when the code is broken?"). Behavior nothing asks for is a
+finding with `Breaks: scope: ...`, at least medium (Wang, Pradel, Liu:
+27.3% of behavior differences come from patches that "adapt more behavior"
+than the correct fix). A finding with `Breaks: nothing` is medium only when
+its `Why:` names an input and the wrong result it gives; otherwise it is
+low (Anthropic: "Chasing every finding leads to over-engineering").
+
+**The preview checks intent (decided, the human, 2026-10-20).** Besides one
+check per `manual` requirement and per success criterion, `flow` adds one
+preview check for the first scenario of each story, its main success case
+(`Covers: S1`). Its steps follow the scenario's exact command and output.
+The fixed checks come from the spec alone, so `flow` creates `preview.md`
+with them when the spec is approved; the lead fills the steps during the
+plan phase. A later spec approval adds checks for new items, never deletes
+the lead's text, and reports a check whose item was removed. In manual flow
+the lead writes the fixed checks by hand at the same moment.
+Why: tests prove the code does what the tasks say, not that the tasks say
+what the human meant; and a slice with no manual requirement would
+otherwise have an empty preview. Research (2026-10-20): Wang, Pradel, Liu,
+"Are 'Solved Issues' in SWE-bench Really Solved Correctly?": 29.6% of
+plausible patches "induce different behavior than the ground truth
+patches".
+
+**Parked items go to the backlog through `flow` (decided, the human,
+2026-10-20).** At `flow slice done`, `flow` copies two kinds of items into
+`backlog.md`, word for word: each bullet of the plan's Parked section, and
+each spec Out of scope item with `Goes to: the backlog`. Each line ends
+with where it came from and the date, e.g.
+`(from slices/due-dates/plan.md, 2026-10-20)`. An event records each
+copied item, so the step is done only once, even after a restart. Why:
+copying is rule work, and agents change words when they copy. The slice
+folder stays in `main` and slice names are never reused, so the link
+always leads back to the source.
+
+**Findings and the backlog (decided, the human, 2026-10-20).**
+
+- No separate findings file. A finding's text lives in its review file
+  (locked after hand-in), its state (fixed, wontfix, deferred, verified,
+  reopened) lives in the event log, and `status.md` shows the open ones.
+  A findings file would be a second copy of the state.
+- At `flow slice done`, `flow` also copies every finding deferred out of
+  the slice into `backlog.md`, with its source, e.g.
+  `(from slices/due-dates/reviews/task-04-1.md F3, 2026-10-22)`, copied
+  as its title (the text after `### F3. `). An item with more lines is
+  joined into one line. Low
+  findings that were never fixed are not copied: they were optional, and
+  they stay in the review files.
+- `backlog.md` has a template: one bullet per item, on one line, ending
+  with `(from <source>, <date>)`. `flow` adds at the end and never
+  rewrites existing lines. What happens to a line that becomes a slice
+  is settled with "backlog to slice" (section 4).
+- Research (2026-10-20): the Scrum Guide calls the backlog "the single
+  source of work"; technical debt registers keep known weaknesses in "a
+  single, persistently maintained document"; GitHub keeps review
+  comments on the pull request with a resolved or unresolved state, and
+  code-checking tools track findings across runs as new, unchanged, or
+  absent, without a separate findings file.
+
 ### 2.6 Design ahead: stacked slices
 
 **From the human (2026-10-18):** while 0002 is in implement, the human
@@ -1208,11 +1463,11 @@ recovery.
   The task is marked interrupted. On reopen, an interrupted task goes back
   to todo, and its work is still on its branch (the rule in the workflow
   files today: an interruption is not a failure).
-- **Kept:** the slice branch, every task branch, the event log, `.history/`,
-  reviews. **Removed:** the worktrees in `.flow/`, to free disk space; they
+- **Kept:** the slice branch, every task branch, the event log, the
+  approval tags, reviews. **Removed:** the worktrees in `.flow/`, to free disk space; they
   can be made again from the branches on reopen.
 - **The slice name is never used again.** The name is in the branch
-  name, the commits, the event log, `.history/`, other slices' `after:` and
+  name, the commits, the event log, the approval tags, other slices' `after:` and
   decisions, and the backlog. A new slice with the same name would make
   all of those point to two slices. It also keeps reopening possible.
 - **Stopping without cancelling is a different thing:** `flow run stop`
@@ -1244,8 +1499,8 @@ How the design is cut:
 | # | Slice | What you can do after it | Design |
 |---|---|---|---|
 | 0001 | slice and events | create a slice (`flow slice new`) and see it (`flow status`); every event in `.events.jsonl`, `status.md` written from it | 1.13, 2.1 |
-| 0002 | spec | take a spec from draft to approved: `spec validate`, `submit` (review off for now), `approve`, `reject`, history with fingerprints | 2.2 |
-| 0003 | plan | take a plan and its tasks to approved: `plan validate`, `task sync`, `brief`, one history folder per revision; the slice is ready to build | 2.3 |
+| 0002 | spec | take a spec from draft to approved: `spec validate`, `submit` (review off for now), `approve`, `reject`, history as git tags | 2.2 |
+| 0003 | plan | take a plan and its tasks to approved: `plan validate`, `brief`, history as git tags; the slice is ready to build | 2.3 |
 | 0004 | agents | `flow` starts agents itself: the Codex adapter, the permission layers, settings per role, `flow wait`; first use: the spec check and the plan review on submit | 1.9, 1.12c |
 | 0005 | the run | `flow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; when stuck, the task goes to "Needs you" | 2.4 |
 | 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue (rebase and check again), conflicts | 2.4 |
