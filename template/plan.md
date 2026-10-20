@@ -246,8 +246,18 @@ tasks:
 ## Parked
 
 <!-- Optional. Delete this section if not needed.
-     Ideas found while planning that belong to a later slice. They move
-     to the backlog when the slice is done. -->
+     Ideas found while planning that belong to a later slice.
+
+     When the slice is done, flow copies each idea into backlog.md, word
+     for word, with where it came from. So:
+     - One - bullet per idea. Start each idea with what it is.
+     - Lines indented under a bullet belong to that idea.
+     - No sub-bullets, headings, or code blocks.
+
+     Example:
+     - Show overdue tasks in red.
+     - A command that lists only overdue tasks.
+       It could also take a number of days. -->
 
 - {{An idea for later.}}
 

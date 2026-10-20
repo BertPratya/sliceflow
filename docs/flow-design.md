@@ -1138,6 +1138,17 @@ What a fallback lead may do, and what it must leave to the human: decided in
   The workflow ends with the merge into `main`; pushing is outside it.
 - **Events:** `preview.started`, `slice.approved`, `slice.done`.
 
+**Parked items go to the backlog through `flow` (decided, the human,
+2026-10-20).** At `flow slice done`, `flow` copies two kinds of items into
+`backlog.md`, word for word: each bullet of the plan's Parked section, and
+each spec Out of scope item with `Goes to: the backlog`. Each line ends
+with where it came from and the date, e.g.
+`(from slices/due-dates/plan.md, 2026-10-20)`. An event records each
+copied item, so the step is done only once, even after a restart. Why:
+copying is rule work, and agents change words when they copy. The slice
+folder stays in `main` and slice names are never reused, so the link
+always leads back to the source.
+
 ### 2.6 Design ahead: stacked slices
 
 **From the human (2026-10-18):** while 0002 is in implement, the human

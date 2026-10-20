@@ -188,7 +188,11 @@ created: {{date}}
      For each item, say where it goes:
      - a later slice (name it if you know it)
      - the backlog
-     - not planned: we decided not to do it -->
+     - not planned: we decided not to do it
+
+     One - bullet per item, ending with its Goes to: line. When the slice
+     is done, flow copies each item that goes to the backlog into
+     backlog.md, word for word, with where it came from. -->
 
 - {{What this slice does not do.}} Goes to: {{a later slice, the backlog, or not planned}}
 
