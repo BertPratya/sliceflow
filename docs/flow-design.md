@@ -998,6 +998,14 @@ follows each task's `risk` in `tasks.md`: `core` and `normal`
 tasks are reviewed, `low` tasks are not. The setting in point 6 can still
 turn task review off. Why: one less field for the human to choose, and a
 risky slice never gets a light review by mistake.
+
+**What each risk means (decided, the human, 2026-10-20).** `core`: other
+tasks build on it, it changes stored data or a file format, it touches
+security, or it changes a contract or a shared interface. `normal`: any
+other code change. `low`: no change in behavior (docs, a rename,
+comments). The plan reviewer checks each task's risk against these rules.
+Three levels stay, so a project can later review only `core` tasks to save
+tokens.
 7. **Integration:** when all tasks are done, a final review of the whole
    slice. When it passes, the slice enters the preview phase.
 

@@ -86,9 +86,13 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        01 as a number. None: []
      - touches: the files and folders this task may change. A folder
        ends with /. Keep it narrow. flow rejects a change outside it.
-     - risk: core, normal, or low. core and normal tasks are
-       code-reviewed. low tasks are not: use it only for small, safe
-       changes, e.g. docs or a rename.
+     - risk: core, normal, or low.
+       - core: other tasks build on it, it changes stored data or a file
+         format, it touches security, or it changes a contract or a
+         shared interface.
+       - normal: any other code change.
+       - low: no change in behavior, e.g. docs, a rename, or comments.
+       core and normal tasks are code-reviewed; low tasks are not.
 
      Example:
      ## Task 02: list-by-due-date
