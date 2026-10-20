@@ -767,6 +767,12 @@ Ambig-SWE (Vijayvargiya et al.): "models struggle to distinguish between
 well-specified and underspecified instructions", and asking the user gives
 "up to 74%" better results.
 
+**Full EARS, exact values (decided, the human, 2026-10-20).** Spec
+requirements may use all EARS forms, including "Where <feature or setting
+is on>" and combined forms ("While ..., when ..."), as on the EARS author's
+page (https://alistairmavin.com/ears/). A requirement names exact values
+(the message, the limit, the exit code), because a worker sees its text.
+
 **History in git (decided, the human, 2026-10-20).** This replaces the
 copies in `.history/` here and in 2.3, and the fingerprint check for them.
 

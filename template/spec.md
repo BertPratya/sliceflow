@@ -165,12 +165,18 @@ created: {{date}}
        top to bottom in this section, and update the scenario links to
        match. You may renumber only before the spec is first approved.
      - Group them under small headings, e.g. ### Starting, ### Errors.
-     - Write each one in one of these forms:
+     - Write each one in one of these forms (EARS):
        - When <trigger>, the <system> shall <response>.
        - If <bad situation>, then the <system> shall <response>.
        - While <state>, the <system> shall <response>.
+       - Where <feature or setting is on>, the <system> shall
+         <response>.
        - The <system> shall <response>.
+       Two keywords may be combined when a rule needs both, e.g.
+       While <state>, when <trigger>, the <system> shall <response>.
        For <system>, use the product's name, e.g. flow.
+     - Name exact values: the message printed, the limit, the exit
+       code. A worker sees this text, so "say so" is not enough.
      - One behavior per requirement.
      - Each one has a Check: line saying how it is tested. More than one
        is allowed, e.g. Check: unit, e2e.
@@ -191,7 +197,14 @@ created: {{date}}
      ### Errors
 
      - **R3.** If a slice with that name already exists, then flow shall
-       change nothing and say so.
+       change nothing and print "Error: slice <name> already exists.
+       Nothing was changed."
+       Check: e2e
+
+     ### Settings
+
+     - **R9.** Where task review is turned off, flow shall merge a task
+       without starting a reviewer.
        Check: e2e -->
 
 ### {{group name}}
