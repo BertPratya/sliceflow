@@ -2,7 +2,7 @@
 role: lead
 description: The main chat agent. Designs with the human, runs the slice, handles every stop, keeps the status, reports.
 access: write
-approvals: mark a document approved or rejected, or a high finding wontfix or deferred out of the slice,
+approvals: mark a document approved (or send it back to draft), or a high finding wontfix or deferred out of the slice,
            only right after the human says so, and quote their words in the commit.
 unblock: only when the answer is in an approved document, after failed checks when you can see the cause,
          or to widen a task's touches by the rule in manual-flow.md.
