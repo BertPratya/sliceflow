@@ -72,11 +72,16 @@
      same time, so they rely on these names being exactly right. Also
      list names from earlier tasks that this task must use.
 
+     Start each one with what this task does with it:
+     - creates: a new name.
+     - changes: an existing name gets a new signature or behavior.
+     - uses: a name from earlier tasks or existing code.
+
      Example:
      - func parseDue(s string) (string, error): creates. Task 02 uses it.
      - task.Task.Due: creates. Task 02 sorts by it. -->
 
-- `{{name or signature}}`: {{creates or uses; what it does; who else uses it}}
+- `{{name or signature}}`: {{creates, changes, or uses; what it does; who else uses it}}
 
 ## Follow
 
@@ -110,6 +115,9 @@
      flow also runs all project checks before the task is handed in, so
      don't list them here.
 
+     Existing tests must keep passing. Change an existing test only when
+     this task changes what it tests, and list its file under Files.
+
      Example:
      - TestParseDueRejectsBadDate: "25/10/2026" and "2026-02-30" return
        an error.
@@ -121,9 +129,10 @@
 ## Out of scope
 
 <!-- What this task must not do, even if it looks related, and where it
-     is done instead: another task, or a later slice.
+     is done instead. Done in: is a task, e.g. task 02, or: not in this
+     slice.
 
      Example:
      - Sorting by due date. Done in: task 02 -->
 
-- {{What this task must not do.}} Done in: {{task 03, or a later slice}}
+- {{What this task must not do.}} Done in: {{task 03, or: not in this slice}}

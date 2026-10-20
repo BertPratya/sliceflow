@@ -13,7 +13,9 @@ touches:
      (exact code, file-by-file steps) go in the task files.
 
      The plan never adds scope. Anything not in the spec needs a spec
-     change first.
+     change first. If the spec leaves out something the user sees (an
+     output layout, an exit code, a message), don't decide it here: add
+     an Open question, so the spec is changed.
 
      The human approves the plan. Write plain English, short sentences,
      one idea per sentence.
@@ -51,8 +53,9 @@ touches:
 <!-- The whole idea in a few sentences. A reader should understand the
      plan from this section alone.
 
-     Then a table of the parts that change. Change is one of: new,
-     changed, removed.
+     Then a table of the parts that change. A part is a module or
+     package, e.g. internal/store. Change is one of: new, changed,
+     removed.
 
      Then one line for new dependencies (libraries, tools, services).
      Each one needs the human's approval, so name it and say why it is
@@ -170,6 +173,8 @@ Covers: {{R5}}
        that slice's name and the decision's number, e.g. checkout/TD2.
        Otherwise remove the whole Replaces: line.
      - A decision that goes against a project rule says so in Why:.
+     - Only technical decisions. Don't repeat the spec's decisions (SD1,
+       ...); they are already approved.
 
      Example:
      - **TD1.** Store the due date as text in the form YYYY-MM-DD.
@@ -194,12 +199,16 @@ Covers: {{R5}}
      - name: short, lowercase, words joined by -. The task file is
        tasks/<id>-<name>.md.
      - covers: the spec requirements this task builds, e.g. [R1, R2].
-       Every requirement appears in at least one task.
+       Every requirement appears in at least one task. A requirement may
+       be in more than one task, when each task builds a part of it,
+       e.g. the rule in one task and the command in another. Each task
+       proves its own part.
      - depends_on: ids of the tasks whose result this one needs, e.g.
        ["01"]. No loops. Empty: []
      - touches: the files and folders this task may change. A folder
        ends with /. Keep it narrow. Two tasks that can run at the same
-       time never touch the same file.
+       time never touch the same file. Tasks that must change the same
+       file: order them with depends_on.
      - risk: core, normal, or low. core and normal tasks are
        code-reviewed. low tasks are not: use it only for small, safe
        changes, e.g. docs or a rename.
