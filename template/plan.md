@@ -1,6 +1,5 @@
 ---
 slice: {{slice}}
-title: {{title}}
 created: {{date}}
 based_on: { spec: {{spec revision, e.g. R001}} }
 touches:
@@ -24,7 +23,7 @@ touches:
      and the YAML blocks. Don't rename or reorder them.
 
      - Replace every {{...}} with real text. The text inside says what
-       goes there. flow fills slice, title, and date itself. If they
+       goes there. flow fills slice and date itself. If they
        still show {{...}}, fill them yourself.
      - Each section has a comment like this one with its rules. Follow it.
      - Add ### subsections freely inside a section. The ## sections are
@@ -45,7 +44,7 @@ touches:
      - touches: the project-level files this slice changes, e.g. a
        contract or the data model doc. None? Write: touches: [] -->
 
-# Plan: {{title}}
+# Plan
 
 ## Approach
 

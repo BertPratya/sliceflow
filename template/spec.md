@@ -16,6 +16,8 @@ created: {{date}}
      - Replace every {{...}} with real text. The text inside says what
        goes there. flow fills slice, title, and date itself. If they
        still show {{...}}, fill them yourself.
+     - The title of the slice lives only in this front matter. Don't
+       repeat it in a heading or in other files.
      - Each section has a comment like this one with its rules. Follow it.
      - Keep the sections in this order. Don't rename them.
      - Repeat a block as often as needed: stories, scenarios,
@@ -28,7 +30,7 @@ created: {{date}}
      - To change a spec later, read this template again first. The
        finished spec no longer has these rules in it. -->
 
-# Spec: {{title}}
+# Spec
 
 ## Summary
 

@@ -17,7 +17,7 @@ based_on: { spec: {{spec revision, e.g. R001}}, plan: {{plan revision, e.g. R001
      each with its Covers: line. You write the setup, the steps, and the
      Expect: lines. You may add more checks; number them after the last.
 
-     - Replace every {{...}} with real text. flow fills slice, title, and
+     - Replace every {{...}} with real text. flow fills slice and
        the revisions itself. If they still show {{...}}, fill them
        yourself.
      - Write plain English, short sentences. The human follows these
@@ -28,7 +28,7 @@ based_on: { spec: {{spec revision, e.g. R001}}, plan: {{plan revision, e.g. R001
        left.
      - Nothing to check by hand? Write None. under Checks. -->
 
-# Preview: {{title}}
+# Preview
 
 ## Setup
 
