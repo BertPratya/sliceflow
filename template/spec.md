@@ -17,17 +17,26 @@ created: {{date}}
 <!-- The problem it solves, who it is for, and why now. -->
 
 ## Success criteria
-<!-- How we know, after the slice is done, that it solved the problem.
+<!-- Optional. Use it only when the slice has a goal for the whole result
+     that no single requirement covers. Otherwise delete this section.
+
+     A requirement checks one part: one test of one behavior proves it.
+     A success criterion checks the whole result: you use the slice from
+     start to end, and maybe count or compare something (time, tokens,
+     steps). All requirements can pass while a success criterion fails.
+
      Numbered SC1, SC2, ... Each one is measurable, says nothing about
-     how it is built, and says how it is measured.
+     how it is built, and says how it is measured. The human checks them
+     at the preview.
 
-     - **SC1.** A new slice is ready to work on in one command, with no
-       manual step.
-       Measured: preview, by trying it on a test repo.
-     - **SC2.** The status of 50 slices shows in under 1 second.
-       Measured: e2e test.
+     - **SC1.** A plan with 5 tasks runs to the end with no action from
+       the lead, when no task fails.
+       Measured: preview, on a test repo.
+     - **SC2.** The lead uses fewer tokens per task than when running the
+       same slice by hand.
+       Measured: compare the usage of one run with a manual run.
 
-     Two to five is enough. -->
+     One to three is enough. -->
 
 ## User stories
 <!-- What the user does, as stories. This is the first thing a reviewer
