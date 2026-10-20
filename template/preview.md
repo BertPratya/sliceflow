@@ -11,7 +11,8 @@ based_on: { spec: {{spec revision, e.g. R001}}, plan: {{plan revision, e.g. R001
      flow reads this file. Keep every marker exactly as shown: the
      headings, the check numbers (### P1.), and the labeled lines
      (Covers:, Expect:). Don't rename or reorder them. A labeled line
-     may go on over more lines, indented by 2 spaces.
+     may go on over more lines: indent the extra lines 2 spaces more than
+     the label.
 
      flow writes the fixed part: one ### P check for each requirement
      with Check: manual, and one for each success criterion (SC1, ...),
@@ -26,8 +27,9 @@ based_on: { spec: {{spec revision, e.g. R001}}, plan: {{plan revision, e.g. R001
      - Results are not written here. The human reports them through flow,
        e.g. flow preview fail P2 "the date shows wrong".
      - When you are done, delete every comment and check that no {{ is
-       left. Inside a code block or `inline code`, they are real content,
-       not leftovers.
+       left. Every placeholder of this template counts, even inside
+       code. A {{ or a comment marker you write yourself inside a code
+       block or `inline code` is real content.
      - A section with nothing to say gets one line: None. E.g. nothing to
        check by hand: None. under both Setup and Checks. -->
 

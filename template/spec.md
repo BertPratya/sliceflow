@@ -7,8 +7,9 @@ created: {{date}}
 <!-- HOW TO FILL THIS TEMPLATE
 
      A spec says WHAT a feature does, never HOW it is built. No endpoints,
-     tables, libraries, or file names. Those go in plan.md. Commands,
-     flags, screens, and messages the user sees do belong here.
+     tables, libraries, or file names. Those go in plan.md. What the
+     user sees does belong here: commands, flags, screens, output layout,
+     messages, and exit codes. The plan may not decide these.
 
      The human approves the spec. Write plain English, short sentences,
      one idea per sentence.
@@ -17,7 +18,8 @@ created: {{date}}
      headings, the numbers (**R1.**, **SD1.**, **SC1.**, **Q1.**), and the
      labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:,
      Replaces:, Goes to:). Don't rename or reorder them. A labeled line
-     may go on over more lines, indented by 2 spaces.
+     may go on over more lines: indent the extra lines 2 spaces more than
+     the label. Goes to: is the exception: it ends a one-line item.
 
      - Replace every {{...}} with real text. The text inside says what
        goes there. flow fills slice, title, and date itself. If they
@@ -33,8 +35,9 @@ created: {{date}}
        Delete them when they don't apply.
      - When you are done, delete every comment and check that no {{ is
        left. A spec with a comment or a {{ left in it is not finished.
-       Inside a code block or `inline code`, they are real content, not
-       leftovers.
+       Every placeholder of this template counts, even inside code. A {{
+       or a comment marker you write yourself inside a code block or
+       `inline code` is real content.
      - To change a spec later, read this template again first. The
        finished spec no longer has these rules in it. -->
 

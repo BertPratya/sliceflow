@@ -9,7 +9,7 @@ reviewer: {{reviewer}}
 
 <!-- HOW TO FILL THIS TEMPLATE
 
-     A review checks one thing: a spec, a plan with its tasks, one task,
+     A review checks one thing: a spec, a plan with its tasks.md, one task,
      or the whole slice (integration). flow creates this file and fills
      the front matter. You write the sections below, then hand the review
      in through flow. After that the file is locked: never edit it again.
@@ -25,7 +25,8 @@ reviewer: {{reviewer}}
      headings, the finding headings (### F1.), the labeled lines (Level:,
      Where:, Breaks:, Why:, Fix:, Guess:), and the line forms in Previous
      findings and Requirements check. Don't rename or reorder them. A
-     labeled line may go on over more lines, indented by 2 spaces.
+     labeled line may go on over more lines: indent the extra lines 2
+     spaces more than the label.
 
      Report real problems only: things that break a requirement, a
      decision, an interface, or a project rule, or that are clearly wrong.
@@ -39,8 +40,10 @@ reviewer: {{reviewer}}
      - Replace every {{...}} with real text.
      - A section that doesn't apply gets one line: None.
      - When you are done, delete every comment and check that no {{ is
-       left. Inside a code block or `inline code`, they are real content,
-       not leftovers. To name them in plain text, use `inline code`. -->
+       left. Every placeholder of this template counts, even inside
+       code. A {{ or a comment marker you write yourself inside a code
+       block or `inline code` is real content. To name them in plain
+       text, use `inline code`. -->
 
 # Review
 
@@ -65,7 +68,7 @@ reviewer: {{reviewer}}
      - Files read: the files you read, including ones the change uses.
      - Ran: each command you ran, and its result.
      - Requirements: the requirements you checked.
-     - Interfaces: the names you checked against the task file, if any.
+     - Interfaces: the names you checked against the task, if any.
      Leave out a line that doesn't apply.
 
      Example:
@@ -74,7 +77,7 @@ reviewer: {{reviewer}}
        internal/task/overdue.go
      - Ran: go test ./internal/list/... (pass)
      - Requirements: R10
-     - Interfaces: Format(tasks, today) matches the task file -->
+     - Interfaces: Format(tasks, today) matches the task -->
 
 - Files read: {{files}}
 - Ran: {{command (result)}}
@@ -84,19 +87,22 @@ reviewer: {{reviewer}}
 
 <!-- Round 2 and later. Every finding from the last round that was marked
      fixed, wontfix, or deferred. One line each:
-     - <review>/F1: verified
-     - <review>/F2: reopened. why
+     - <review>/F1: verified (fixed)
+     - <review>/F2: verified (wontfix)
+     - <review>/F3: verified (deferred)
+     - <review>/F4: reopened. why
 
      verified means: a fixed finding is really fixed, or the reason given
-     for wontfix or deferred is acceptable. Otherwise: reopened.
+     for wontfix or deferred is acceptable. In brackets, say which one.
+     Otherwise: reopened.
 
      Example:
-     - task-04-1/F1: verified
+     - task-04-1/F1: verified (fixed)
      - task-04-1/F2: reopened. A done task due today still shows OVERDUE.
 
      Round 1: write None. -->
 
-- {{task-02-1/F1}}: {{verified, or: reopened. why}}
+- {{task-02-1/F1}}: {{verified (fixed, wontfix, or deferred), or: reopened. why}}
 
 ## Findings
 
@@ -147,7 +153,8 @@ Fix: {{optional: one or two lines}}
 <!-- Integration reviews only. Other kinds: write None.
      Every requirement in the spec, checked against the finished slice.
      One line each: ok, fails (with the finding), or manual (goes to the
-     preview). Only low findings against it? It is ok: write ok, see F7.
+     preview). A fails line names the high or medium findings that make
+     it fail. Only low findings against it? It is ok: write ok, see F7.
 
      Example:
      - R1: ok

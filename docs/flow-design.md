@@ -559,9 +559,9 @@ not in git and is not a source of truth for the slice.
 ### 1.13b File formats (decided, the human, 2026-10-19)
 
 - **Files people read, approve, or edit:** Markdown. A small YAML header
-  holds the fields `flow` needs (`spec.md`, `plan.md`, reviews). Task files
-  are Markdown only (section 2.3, the plan). Exact fields inside a document
-  go in one YAML block (the task list in `plan.md`, section 2.3).
+  holds the fields `flow` needs (`spec.md`, `plan.md`, `tasks.md`,
+  reviews). Exact fields inside a document go in a YAML block (one per
+  task in `tasks.md`, section 2.3).
 - **Files only `flow` writes:** JSON Lines for machines (`.events.jsonl`),
   Markdown for people (`status.md`).
 - **Settings:** YAML, read strictly (`flow.yaml`).
@@ -828,22 +828,47 @@ Research (2026-10-18):
   wrote, and reports a task file whose task left the list (it does not
   delete it). A name for that: `flow task sync`.
 
+**Tasks in one `tasks.md` (decided, the human, 2026-10-20).** This replaces
+the task list in `plan.md`, the separate task files, and `flow task sync`
+above.
+
+- All tasks live in one file, `tasks.md`, next to `plan.md`. Each task is
+  one section: a `## Task 01: <name>` heading, a small YAML block with its
+  structure (covers, depends on, touches, risk), then its content (goal,
+  steps, files, interfaces, tests, out of scope). Structure and content of
+  a task sit together, in one copy.
+- The lead writes `tasks.md` after the plan's design is done and its open
+  questions are empty. The human approves `plan.md` and `tasks.md`
+  together.
+- `flow brief` gives each worker only its own task's section (from its
+  heading to the next one), plus the exact text of the requirements it
+  covers.
+- Changing tasks is editing one file: no command, no orphan files, no
+  broken file names. Task ids are never reused once the plan is approved.
+- Research (2026-10-20): GitHub Spec Kit and Kiro keep all tasks in one
+  `tasks.md`; Task Master keeps them in one `tasks.json`, and its separate
+  task files are generated from it, never edited. No tool splits a task's
+  structure and its hand-written content into different files.
+- Open, for the implement slice: fix tasks added after approval (from the
+  integration review or the preview). They would change an approved file,
+  so they may need their own section or file.
+
 **The whole plan process, step by step (lead's proposal, 2026-10-18):**
 
 | # | Who | Command | What happens | Plan status |
 |---|---|---|---|---|
-| 1 | lead | (writes) | `plan.md` with its task list, and the contract changes | draft |
-| 2 | lead | `flow plan validate` | checks the plan and its task list; repeat until clean | draft |
-| 3 | lead | `flow task sync` | creates the task files from the task list | draft |
-| 4 | lead | (writes) | fills each task file: what to build, "Done when" | draft |
-| 5 | lead | `flow plan validate` | checks plan, task list, task files, and contract changes together | draft |
+| 1 | lead | (writes) | `plan.md` and the contract changes, until its open questions are empty | draft |
+| 2 | lead | `flow plan validate` | checks the plan; repeat until clean | draft |
+| 3 | lead | (writes) | `tasks.md`: every task, with its structure and content | draft |
+| 4 | lead | `flow plan validate` | checks plan, tasks, and contract changes together; repeat until clean | draft |
+| 5 | — | — | (no step: there is no task sync any more) | draft |
 | 6 | lead | `flow plan submit` | validates again (refuses if broken), then starts the reviewer, or skips it when review is off | in review |
 | 7 | reviewer | (writes, then hands in) | one review file with findings: high, medium, low, and questions for the human | in review |
 | 8 | `flow` | — | reads the review: no high or medium findings, no questions → pass; else → back to the lead | awaiting approval, or draft |
 | 9 | lead | (fixes) + marks each finding | fixed, wontfix, or deferred, each with a note; decisions go to the human | draft |
 | 10 | lead | `flow plan submit` | next round: the reviewer checks the fixes (up to the round limit, then the human decides) | in review |
 | 11 | human | says "approved" | | awaiting approval |
-| 12 | lead | `flow plan approve` | copies the plan, task files, and contract changes to `.history/plan/`; the slice is **ready** | approved |
+| 12 | lead | `flow plan approve` | copies `plan.md`, `tasks.md`, `preview.md`, and the contract changes to `.history/plan/`; the slice is **ready** | approved |
 
 - **One submit for the plan and its tasks:** `flow plan submit`, not a
   separate `flow task submit`. They are reviewed and approved together.
@@ -880,8 +905,8 @@ task files, and the contract changes together, one folder per revision:
   ```
   .history/plan/R001/
     plan.md
-    tasks/01-event-log.md
-    tasks/02-slice-new.md
+    tasks.md               (was: tasks/01-event-log.md, ... before 2026-10-20)
+    preview.md
     contracts.patch        (the slice's contract changes)
   ```
 
@@ -921,7 +946,7 @@ Details (lead's notes):
 
 **No track (decided, the human, 2026-10-20).** A slice has no
 simple/complex track. Every plan gets the full plan review. Task review
-follows each task's `risk` in the plan's task list: `core` and `normal`
+follows each task's `risk` in `tasks.md`: `core` and `normal`
 tasks are reviewed, `low` tasks are not. The setting in point 6 can still
 turn task review off. Why: one less field for the human to choose, and a
 risky slice never gets a light review by mistake.
@@ -1263,7 +1288,7 @@ How the design is cut:
 |---|---|---|---|
 | 0001 | slice and events | create a slice (`flow slice new`) and see it (`flow status`); every event in `.events.jsonl`, `status.md` written from it | 1.13, 2.1 |
 | 0002 | spec | take a spec from draft to approved: `spec validate`, `submit` (review off for now), `approve`, `reject`, history with fingerprints | 2.2 |
-| 0003 | plan | take a plan and its tasks to approved: `plan validate`, `task sync`, `brief`, one history folder per revision; the slice is ready to build | 2.3 |
+| 0003 | plan | take a plan and its tasks to approved: `plan validate`, `brief`, one history folder per revision; the slice is ready to build | 2.3 |
 | 0004 | agents | `flow` starts agents itself: the Codex adapter, the permission layers, settings per role, `flow wait`; first use: the spec check and the plan review on submit | 1.9, 1.12c |
 | 0005 | the run | `flow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; when stuck, the task goes to "Needs you" | 2.4 |
 | 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue (rebase and check again), conflicts | 2.4 |

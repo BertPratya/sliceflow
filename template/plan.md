@@ -9,8 +9,10 @@ touches:
 <!-- HOW TO FILL THIS TEMPLATE
 
      A plan says HOW the approved spec will be built: the parts that
-     change, the flows, the decisions, and the tasks. Building details
-     (exact code, file-by-file steps) go in the task files.
+     change, the flows, the interfaces, the data, the tests, and the
+     decisions. The tasks go in tasks.md, written after this plan is
+     designed and its Open questions say None. The human approves both
+     together.
 
      The plan never adds scope. Anything not in the spec needs a spec
      change first. If the spec leaves out something the user sees (an
@@ -23,8 +25,8 @@ touches:
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**TD1.**, **Q1.**), the labeled lines
      (Covers:, Why:, Not chosen:, Replaces:), and the YAML blocks. Don't
-     rename or reorder them. A labeled line may go on over more lines,
-     indented by 2 spaces.
+     rename or reorder them. A labeled line may go on over more lines:
+     indent the extra lines 2 spaces more than the label.
 
      - Replace every {{...}} with real text. The text inside says what
        goes there. flow fills slice, date, and based_on itself. If they
@@ -32,14 +34,15 @@ touches:
      - Each section has a comment like this one with its rules. Follow it.
      - Add ### subsections freely inside a section. The ## sections are
        fixed.
-     - Repeat a block as often as needed: flows, rules, decisions, tasks.
+     - Repeat a block as often as needed: flows, rules, decisions.
      - A required section with nothing to say gets one line: None.
      - Two sections are optional: Risks and rollout, and Parked. Delete
        them when they don't apply.
      - When you are done, delete every comment and check that no {{ is
        left. A plan with a comment or a {{ left in it is not finished.
-       Inside a code block or `inline code`, they are real content, not
-       leftovers.
+       Every placeholder of this template counts, even inside code. A {{
+       or a comment marker you write yourself inside a code block or
+       `inline code` is real content.
      - To change a plan later, read this template again first. The
        finished plan no longer has these rules in it.
 
@@ -191,64 +194,6 @@ Covers: {{R5}}
   Why: {{the reason}}
   Not chosen: {{the main other option, and why not}}
   Replaces: {{an earlier decision, e.g. checkout/TD2}}
-
-## Tasks
-
-<!-- The task list. flow creates one task file per task from this block,
-     and checks it before any file exists. This block is the only place
-     the task structure lives: the task files hold only what to build
-     and when it is done.
-
-     One YAML block, with one entry per task:
-     - id: two digits in quotes, "01", "02", ... in order. Quotes are
-       needed: without them YAML reads 01 as a number.
-     - name: short, lowercase, words joined by -. The task file is
-       tasks/<id>-<name>.md.
-     - covers: the spec requirements this task builds, e.g. [R1, R2].
-       Every requirement appears in at least one task. A requirement may
-       be in more than one task, when each task builds a part of it,
-       e.g. the rule in one task and the command in another. Each task
-       proves its own part. A requirement with Check: manual is in a
-       task's covers too: the task builds it, and preview.md proves it.
-     - depends_on: ids of the tasks whose result this one needs, e.g.
-       ["01"]. No loops. Empty: []
-     - touches: the files and folders this task may change. A folder
-       ends with /. Keep it narrow. Two tasks that can run at the same
-       time never touch the same file. Tasks that must change the same
-       file: order them with depends_on.
-     - risk: core, normal, or low. core and normal tasks are
-       code-reviewed. low tasks are not: use it only for small, safe
-       changes, e.g. docs or a rename.
-
-     One task is one reviewable commit. Too big to review in one go?
-     Split it.
-
-     Example:
-     ```yaml
-     tasks:
-       - id: "01"
-         name: store-due-dates
-         covers: [R1, R2]
-         depends_on: []
-         touches: [internal/store/]
-         risk: core
-       - id: "02"
-         name: list-by-due-date
-         covers: [R6, R7]
-         depends_on: ["01"]
-         touches: [cmd/todo/list.go, internal/list/]
-         risk: normal
-     ``` -->
-
-```yaml
-tasks:
-  - id: "01"
-    name: {{short-name}}
-    covers: [{{R1, R2}}]
-    depends_on: []
-    touches: [{{folder/ or file}}]
-    risk: {{core, normal, or low}}
-```
 
 ## Risks and rollout
 
