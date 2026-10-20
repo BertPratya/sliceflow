@@ -1,6 +1,6 @@
 # Tool adapters
 
-The workflow lives in `AGENTS.md`, `workflow/`, and `template/`. Adapters
+The workflow lives in `AGENTS.md`, `workflow/`, and `templates/`. Adapters
 only point each tool at it. They are copied to the paths below.
 
 | Tool | Copy | To | Does |

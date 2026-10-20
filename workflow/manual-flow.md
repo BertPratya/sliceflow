@@ -3,7 +3,7 @@
 flow-cli is built with its own workflow. Until flow's first version exists,
 the lead does by hand every step flow will do later: it keeps the state,
 checks the documents, builds each worker's brief, and creates the approval
-tags. The documents are already in flow's format (`template/`), so when
+tags. The documents are already in flow's format (`templates/`), so when
 flow is ready it takes over the same files.
 
 This guide is for the lead. The other roles have their own files in
@@ -34,13 +34,13 @@ slices/<name>/
   notes.md      optional: technical ideas from the spec talk; not approved
 ```
 
-**Templates:** `template/` holds one template per document. Each template's
+**Templates:** `templates/` holds one template per document. Each template's
 comments hold its rules. Before you write or change a document, read its
 template again: a filled document no longer has the comments.
 
 ## Status and commits
 
-- `status.md` follows `template/status.md`. Only the lead changes it. It is
+- `status.md` follows `templates/status.md`. Only the lead changes it. It is
   the only place where status lives: never in a document's header.
 - After every step that changes something: update `status.md`, add a Log
   line (time in UTC), and commit.
@@ -57,8 +57,8 @@ template again: a filled document no longer has the comments.
    slice needs one of them, it waits for it: `status.md` gets an `After:`
    line. The human confirms.
 3. **Create it:** `git worktree add <repo root>/.worktrees/<name> -b slice/<name> <base branch>`.
-   In that worktree: `slices/<name>/spec.md` from `template/spec.md` (fill
-   `slice`, `title`, `created`), and `status.md` from `template/status.md`
+   In that worktree: `slices/<name>/spec.md` from `templates/spec.md` (fill
+   `slice`, `title`, `created`), and `status.md` from `templates/status.md`
    (phase `spec`). Commit: `<name>: new slice`.
 
 ## 2. Spec
@@ -86,7 +86,7 @@ template again: a filled document no longer has the comments.
       Commit: `<name>: spec R<next> approved ("<the human's words>")`.
    2. Tag that commit, annotated, with the approval record:
       `git tag -a flow/<name>/spec/R<next> -m "spec R<next> of <name> approved by <who>, <date>. Their words: \"...\""`.
-   3. Create `preview.md` from `template/preview.md`, with its fixed checks:
+   3. Create `preview.md` from `templates/preview.md`, with its fixed checks:
       one for the first scenario of each story that is not removed, one per
       `manual` requirement, one per success criterion. Set the phase to
       `plan`. Commit.
@@ -199,7 +199,7 @@ failed check becomes a fix task. Something new is a spec change.
 Only after the human approves the result:
 
 1. Update from the base branch again, as in step 5.1.
-2. Copy into `backlog.md`, by `template/backlog.md`: the plan's Parked
+2. Copy into `backlog.md`, by `templates/backlog.md`: the plan's Parked
    items, the spec's Out of scope items marked `Goes to: the backlog`, and
    every finding deferred out of the slice (its title). Each line ends with
    its source and the date.
@@ -234,7 +234,7 @@ never from memory:
 | `integration` | every task is done | code reviewer |
 
 1. **The file:** `reviews/<kind>-<target>-<round>.md` from
-   `template/review.md` (integration: `reviews/integration-<round>.md`).
+   `templates/review.md` (integration: `reviews/integration-<round>.md`).
    Fill the front matter. A task review lives on the task branch; the
    others on the slice branch.
 2. **The reviewer:** a fresh context, never your own, as `AGENTS.md`

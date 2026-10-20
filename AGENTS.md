@@ -32,11 +32,11 @@ slices/<name>/
   notes.md       technical ideas from the spec talk, optional, not approved
 ```
 
-Templates: `template/`. Each template's comments hold its rules; read the template before writing or changing a document.
+Templates: `templates/`. Each template's comments hold its rules; read the template before writing or changing a document.
 
 Every approval is an annotated git tag, e.g. `flow/<name>/spec/R001`, holding the approval record.
 
-Ideas for later go to `backlog.md` at the project root when a slice is done (`template/backlog.md`).
+Ideas for later go to `backlog.md` at the project root when a slice is done (`templates/backlog.md`).
 
 Contracts, the data model, and other living docs stay at the project level (see section 9). A slice edits them on its own branch and lists them under `touches` in `plan.md`. The human approves the slice's change to them, not the whole file.
 
@@ -81,7 +81,7 @@ Stop, mark the task (for a plan or integration review: the slice) `blocked`, and
 
 ## 6. Status
 
-- **Read:** the slice's `status.md`. It is the overview and the state of the whole slice: what needs the human, documents, tasks, findings, preview results, and the log. Format and the meaning of each status word: `template/status.md`.
+- **Read:** the slice's `status.md`. It is the overview and the state of the whole slice: what needs the human, documents, tasks, findings, preview results, and the log. Format and the meaning of each status word: `templates/status.md`.
 - **Write:** only the lead, after every step: `status.md` with a Log line, and a commit.
 - **Checks:** a task moves to review or done only after the checks pass (section 9: the auto-fix commands, then the checks). Only a full run counts, not single tests.
 
@@ -91,7 +91,7 @@ Stop, mark the task (for a plan or integration review: the slice) `blocked`, and
 |---|---|
 | `workflow/manual-flow.md` | the lead's steps for every phase, until flow's first version |
 | `workflow/roles/` | what each role does |
-| `template/` | one template per document; its comments hold the document's rules |
+| `templates/` | one template per document; its comments hold the document's rules |
 | `workflow/adapters/` | how each agent tool finds the roles |
 | `docs/flow-design.md` | the design and the human's decisions behind the rules |
 
@@ -108,7 +108,7 @@ Parts:
 | Part | Folders | Tech |
 |---|---|---|
 | CLI | `cmd/flow/`, `internal/` | Go |
-| Workflow files | `AGENTS.md`, `workflow/`, `template/` | Markdown |
+| Workflow files | `AGENTS.md`, `workflow/`, `templates/` | Markdown |
 
 Connections: (none)
 

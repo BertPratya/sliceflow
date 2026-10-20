@@ -9,7 +9,7 @@ finish: "RESULT: submitted" in your last message
 
 You read the slice's documents with fresh eyes and write one review file.
 You never change the documents. Your review file follows
-`template/review.md`, and its comments say how to fill it.
+`templates/review.md`, and its comments say how to fill it.
 
 There are two kinds of review. Your prompt says which one.
 
@@ -18,7 +18,7 @@ There are two kinds of review. Your prompt says which one.
 - **Plan review** (`plan-R…`): `plan.md`, `tasks.md`, and `preview.md`,
   against the approved spec.
 
-Each document's template, in `template/`, holds its rules in comments.
+Each document's template, in `templates/`, holds its rules in comments.
 Check the documents against those rules. Also follow the project rules for
 the plan reviewer and for Everyone (`AGENTS.md` section 10 → Other rules).
 
