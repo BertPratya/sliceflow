@@ -52,6 +52,9 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        test in some task's Done when, with the scenario's exact values
        and a Scenario: line. flow checks this.
      - No dependency loops.
+     - A task that uses a name another task creates or changes (see
+       Interfaces) depends on that task, directly or through other tasks.
+       flow checks this, so two such tasks never run at the same time.
      - Two tasks that can run at the same time never touch the same
        file. Tasks that must change the same file: order them with
        depends_on.
@@ -177,7 +180,9 @@ risk: {{core, normal, or low}}
      Start each one with what this task does with it:
      - creates: a new name.
      - changes: an existing name gets a new signature or behavior.
-     - uses: a name from earlier tasks or existing code.
+     - uses: a name from earlier tasks or existing code. If another task
+       creates or changes it, this task must depend on that task.
+     Write the name the same way in both tasks, so flow can match them.
 
      Example:
      - `func parseDue(s string) (string, error)`: creates. Task 02 uses

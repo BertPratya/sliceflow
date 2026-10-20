@@ -941,6 +941,11 @@ above.
   `touches`; where the project's test tool reports test names (e.g.
   `go test -json`), it also checks the test ran and passed. That second
   check is optional per project.
+- **A task waits for the code it uses (decided, the human, 2026-10-20).**
+  When a task's Interfaces says it uses a name that another task creates
+  or changes, that task must be in its `depends_on` chain. `flow plan
+  validate` checks it, so the mistake shows while planning instead of at
+  the merge.
 - Open, for the implement slice: fix tasks added after approval (from the
   integration review or the preview). They would change an approved file,
   so they may need their own section or file.
