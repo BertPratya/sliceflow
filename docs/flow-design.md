@@ -578,7 +578,8 @@ Why (research, 2026-10-19):
   heading, a wrong indent, `01` read as a number. So accuracy comes from
   rules, not from the format:
   1. `flow` writes the fixed parts. Agents write only free text (option C
-     in section 2.3, the plan).
+     in section 2.3, the plan). Exception: `tasks.md` (2.3, "Tasks in one
+     `tasks.md`").
   2. Each fact has one copy. Requirements are named, not copied.
   3. `flow` reads every file strictly: typed fields, unknown keys refused,
      a check before submit.
@@ -882,6 +883,13 @@ above.
   covers.
 - Changing tasks is editing one file: no command, no orphan files, no
   broken file names. Task ids are never reused once the plan is approved.
+- **The lead writes all of `tasks.md`, fixed parts included (decided, the
+  human, 2026-10-20).** The tasks are not known until the lead designs
+  them, so `flow` has no frame to write in advance. `flow plan validate`
+  checks every fixed part strictly and names the exact line: the
+  `## Task NN: <name>` headings, the YAML keys, the `###` headings, and
+  the labels. This is the one exception to "`flow` writes the fixed
+  parts" (1.13b), and it replaces option C for tasks.
 - Research (2026-10-20): GitHub Spec Kit and Kiro keep all tasks in one
   `tasks.md`; Task Master keeps them in one `tasks.json`, and its separate
   task files are generated from it, never edited. No tool splits a task's
