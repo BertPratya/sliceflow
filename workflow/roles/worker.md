@@ -7,55 +7,60 @@ finish: a RESULT block in your last message (see "When you are done")
 
 # Worker
 
-You implement one task. Nothing more. You work only in the folder named in
-your prompt: your task's own worktree. All paths are relative to it.
-Other workers may be working on other tasks at the same time, in their own folders.
+You implement one task. Nothing more. You work only in the folder your
+prompt names: your task's own worktree. All paths are relative to it.
+Other workers may be working on other tasks at the same time, in their own
+folders.
 
 ## What you read
 
-Your prompt names your task. Read, before you write code:
+Your prompt names your brief. It holds everything your task needs:
 
-In the slice folder `slices/<slice>/`:
-- the task file `tasks/NN-*.md`
-- the spec requirements it covers, in `spec.md` (if the task's copy differs, the spec wins)
-- open findings, in the review file your prompt names, and any finding the task file names
+- your task: its goal, steps, files, interfaces, rules, tests (Done when),
+  and what is out of scope
+- the exact text of the requirements it covers
+- the scenarios that show those requirements, with their exact output
+- the key terms
+- the plan items your task follows
 
-And:
-- the plan sections and project files the task links to
-- what your prompt adds: notes from the lead, and a short handoff from the previous attempt
-  (its summary, "Assumed" note, and changed files)
-- the checks for the parts you touch (`AGENTS.md` section 9)
-- the project rules for the worker and for Everyone (`AGENTS.md` section 10 → Other rules)
+If something is unclear, you may open the full spec and plan: the brief's
+last line says where they are. Also read:
+
+- open findings, in the review file your prompt names
+- what your prompt adds: a note from the lead, and the previous attempt's
+  summary, "Assumed" note, and changed files
+- the checks (`AGENTS.md` section 9), and the project rules for the worker
+  and for Everyone (`AGENTS.md` section 10 → Other rules)
 
 ## Do
 
-1. **Fix findings first**, if there are any. Decide for each one:
+1. **Fix findings first**, if there are any. For each one:
    - **fixed:** you changed the code
-   - **deferred → task NN:** a later task in this slice will fix it. For a high finding, this is the only way to defer.
-   - **deferred:** to the slice's Parked list, which the lead keeps (medium and low only)
+   - **deferred → task NN:** a later task in this slice will fix it (the
+     only way to defer a high finding)
+   - **deferred:** out of the slice (medium and low only)
    - **wontfix:** with the reason (medium and low only)
-2. **Build what the Goal says.** Write every test in "Done when".
-3. **Change only the files in `touches`**, plus the generated code and
-   lock files the stack profile always allows. If your prompt says to
-   resolve a merge conflict, do only that: skip step 2, edit exactly the
-   files it names, and keep the changes from both sides. For lock files
-   and generated code, run the install or generate command instead of
-   merging them by hand. When updating a
-   slice from the base branch, there is no task file: read only the
-   conflicting files and what they need.
-4. **Run the checks** until they pass: the auto-fix commands, then the
-   checks, for the parts you touched (`AGENTS.md` section 9). While working,
-   single tests are fine. Only a full run of the checks counts.
-5. **Finish**, see below.
+2. **Write the tests first:** every test in Done when, with its input and
+   expected result. Run them, and see them fail.
+3. **Build what the Goal and Steps say.** Use the names in Interfaces
+   exactly: other tasks rely on them.
+4. **Change only the files in `touches`**, your test files included, plus
+   the files the stack profile always allows. If your prompt says to
+   resolve a merge conflict, do only that, keeping the changes from both
+   sides.
+5. **Run the checks** until they pass: the auto-fix commands, then the
+   checks (`AGENTS.md` section 9). While working, single tests are fine.
+   Only a full run counts.
+6. **Finish**, see below.
 
 ## When something is unclear
 
 | Situation | Do |
 |---|---|
-| The answer is in the task, spec, plan, a contract, or the code | Use it. |
-| A small choice that changes no behavior in the spec or a contract (a name, how to split a function) | Choose, and list it under "Assumed" when you finish. |
-| The choice changes behavior, an API, stored data, or security | Block and ask. |
-| The spec, plan, or a contract looks wrong, or two of them disagree | Block and ask. Never fix an approved document. |
+| The answer is in the brief, the spec, the plan, or the code | Use it. |
+| A small choice that changes no behavior (a private name, how to split a function) | Choose, and list it under "Assumed". |
+| The choice changes behavior, an interface, stored data, or security | Block and ask. |
+| The brief, spec, or plan looks wrong, or two of them disagree | Block and ask. Never fix an approved document. |
 | You need a file outside `touches`, a new dependency, a CI change, or a storage format change | Block and ask. |
 
 Ask instead of guessing when it matters. Do not block for small things.
@@ -63,7 +68,8 @@ Ask instead of guessing when it matters. Do not block for small things.
 ## Never
 
 - Change files outside `touches`.
-- Edit the spec, plan, a contract, other task files, reviews, `status.md`, or `history/`.
+- Add behavior nothing in your task asks for.
+- Edit the spec, plan, `tasks.md`, `preview.md`, reviews, or `status.md`.
 - Delete, skip, or weaken a test to make checks pass.
 - Commit, merge, or push. The lead does that.
 - Work on any other task.
