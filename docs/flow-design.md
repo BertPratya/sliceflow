@@ -970,6 +970,14 @@ above.
   worker's instructions (slice 0004). Research (2026-10-20): Spec Kit's
   tasks template: tests "must be written first and must fail before
   implementation".
+- **The plan handles the project's rules (decided, the human,
+  2026-10-20).** The plan's Shared rules list each project rule the slice
+  must handle (from `AGENTS.md`), with a `Project rule:` line saying
+  where it comes from, and how the slice handles it. Tasks name them in
+  `follows`, so they reach the worker. The plan reviewer checks that no
+  rule that applies is missing. Research (2026-10-20): Spec Kit's plan
+  template has a "Constitution Check" step, "GATE: Must pass before
+  Phase 0 research".
 - Open, for the implement slice: fix tasks added after approval (from the
   integration review or the preview). They would change an approved file,
   so they may need their own section or file.

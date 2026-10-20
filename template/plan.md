@@ -24,7 +24,8 @@ touches:
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**TD1.**, **Q1.**), the labeled lines
-     (Covers:, Why:, Not chosen:, Replaces:, Plan only:), and the front matter.
+     (Covers:, Project rule:, Why:, Not chosen:, Replaces:, Plan only:),
+     and the front matter.
      Don't rename or reorder them. A labeled line may go on over more lines:
      indent the extra lines 2 spaces more than the label.
 
@@ -98,6 +99,14 @@ New dependencies: {{None, or each one with why it is needed}}
      with a Covers: line. Give each rule a short heading that no other
      shared rule or interface uses: tasks name it in follows.
 
+     Shared rules also list each project rule this slice must handle
+     (from AGENTS.md or the project's rules), and how the slice handles
+     it. Such a rule has a Project rule: line quoting where it comes
+     from, and Covers: names the requirements it touches, or none. The
+     plan reviewer checks that no project rule that applies is missing.
+     Tasks name these rules in follows like any other, so they reach the
+     worker.
+
      - Number the flows Flow 1, Flow 2, ...
      - Covers: names spec requirements, e.g. Covers: R1, R5
      - Every requirement in the spec is covered by at least one flow or
@@ -110,7 +119,17 @@ New dependencies: {{None, or each one with why it is needed}}
 
      1. The add command reads --due and checks the date.
      2. A bad date stops the command before anything is saved.
-     3. The store saves the task with its due date. -->
+     3. The store saves the task with its due date.
+
+     ### Shared rules
+
+     #### Cross-platform paths
+
+     Covers: none
+     Project rule: AGENTS.md, paths must work on Windows, macOS, and
+       Linux.
+     Paths are built with filepath.Join, never with "/". The tests run
+     on all three systems in CI. -->
 
 ### Flow 1: {{name}}
 
@@ -122,7 +141,8 @@ Covers: {{R1, R2}}
 
 #### {{rule name}}
 
-Covers: {{R5}}
+Covers: {{R5, or none}}
+Project rule: {{where it comes from, for a project rule; otherwise delete this line}}
 
 {{the rule}}
 
