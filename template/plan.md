@@ -3,7 +3,6 @@ slice: {{slice}}
 title: {{title}}
 created: {{date}}
 based_on: { spec: {{spec revision, e.g. R001}} }
-track: {{simple or complex}}
 touches:
   - {{a project file this slice changes, e.g. api/openapi.yaml}}
 ---
@@ -43,9 +42,6 @@ touches:
      - based_on: the approved spec revision this plan builds on.
      - A stacked slice (one that waits for another slice) adds a line:
        after: { slice: <that slice's name>, plan: <its revision> }
-     - track: simple or complex. complex when the slice changes a
-       contract or the data model, touches more than one part, or
-       involves security. Otherwise simple.
      - touches: the project-level files this slice changes, e.g. a
        contract or the data model doc. None? Write: touches: [] -->
 
@@ -152,8 +148,8 @@ Covers: {{R5}}
      are done, so every task uses the same helpers.
 
      One row per check kind the spec uses (unit, api, e2e). Say which
-     test tools, fakes, and test data are used. manual checks are listed
-     under Preview, not here.
+     test tools, fakes, and test data are used. manual checks are not
+     listed here: they go in preview.md.
 
      Example:
      | Check | How |
@@ -205,7 +201,9 @@ Covers: {{R5}}
      - touches: the files and folders this task may change. A folder
        ends with /. Keep it narrow. Two tasks that can run at the same
        time never touch the same file.
-     - risk: core, normal, or low. core tasks are always code-reviewed.
+     - risk: core, normal, or low. core and normal tasks are
+       code-reviewed. low tasks are not: use it only for small, safe
+       changes, e.g. docs or a rename.
 
      One task is one reviewable commit. Too big to review in one go?
      Split it.
@@ -236,24 +234,6 @@ tasks:
     touches: [{{folder/ or file}}]
     risk: {{core, normal, or low}}
 ```
-
-## Preview
-
-<!-- How the human tries the slice at the preview. Write the steps now,
-     so they are approved with the plan.
-
-     - Start with a Covers: line naming everything the preview checks:
-       every requirement with Check: manual, and every success criterion
-       (SC1, ...) in the spec.
-     - Then numbered steps. Each step is one thing the human does, with
-       an Expect: line saying what they should see.
-     - Include how to set up: e.g. build the program, make a test folder.
-     - Nothing to check by hand? Write: None. -->
-
-Covers: {{SC1, R12}}
-
-1. {{A step the human does.}}
-   Expect: {{what they should see}}
 
 ## Risks and rollout
 

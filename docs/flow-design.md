@@ -918,6 +918,13 @@ Details (lead's notes):
    what they need to decide.
 6. **Task review is configurable** in `flow.yaml`. A simple project can
    turn it off, to save tokens.
+
+**No track (decided, the human, 2026-10-20).** A slice has no
+simple/complex track. Every plan gets the full plan review. Task review
+follows each task's `risk` in the plan's task list: `core` and `normal`
+tasks are reviewed, `low` tasks are not. The setting in point 6 can still
+turn task review off. Why: one less field for the human to choose, and a
+risky slice never gets a light review by mistake.
 7. **Integration:** when all tasks are done, a final review of the whole
    slice. When it passes, the slice enters the preview phase.
 
