@@ -95,7 +95,8 @@ New dependencies: {{None, or each one with why it is needed}}
 
      Rules that apply across several flows (expiry, retries, locking,
      security) go under ### Shared rules, one #### subsection each, also
-     with a Covers: line.
+     with a Covers: line. Give each rule a short heading that no other
+     shared rule or interface uses: tasks name it in follows.
 
      - Number the flows Flow 1, Flow 2, ...
      - Covers: names spec requirements, e.g. Covers: R1, R5
@@ -129,7 +130,8 @@ Covers: {{R5}}
 
 <!-- Every way the outside world talks to the system that this slice
      touches. One ### subsection per kind: CLI, HTTP API, Events,
-     Settings, UI routes.
+     Settings, UI routes. Tasks name a subsection in follows by its
+     heading, so each heading is used once.
 
      - If a contract file exists (e.g. OpenAPI), list the operations and
        link the file. Never copy request or response details.

@@ -10,9 +10,14 @@ based_on: { spec: {{spec revision, e.g. R001}} }
      human approves plan.md and tasks.md together.
 
      Each task is built by one worker: an agent with a fresh context.
-     flow gives each worker only its own task's section, plus the exact
-     text of the requirements that task covers. So each section must make
-     sense on its own. Don't copy requirements here; name them, e.g. R5.
+     flow gives each worker a brief, built from the links in this file:
+     - its own task's section
+     - the exact text of the requirements in covers
+     - the spec's scenarios whose Shows: names one of those requirements
+     - the spec's Key concepts
+     - the exact text of the plan items in follows
+     The worker may also open the full spec and plan if something is
+     unclear. So don't copy any of these here; name them, e.g. R5, TD2.
 
      flow reads this file. Keep every marker exactly as shown: the task
      headings (## Task 01: name), the ### headings inside a task, the
@@ -89,6 +94,10 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        01 as a number. None: []
      - touches: the files and folders this task may change. A folder
        ends with /. Keep it narrow. flow rejects a change outside it.
+     - follows: the plan items this task must follow, by name: a
+       decision (TD2), a shared rule or an interface by its heading
+       (Locking, CLI), or Testing. flow checks each name exists, and puts
+       its exact text into the worker's brief. None: []
      - risk: core, normal, or low.
        - core: other tasks build on it, it changes stored data or a file
          format, it touches security, or it changes a contract or a
@@ -104,6 +113,7 @@ based_on: { spec: {{spec revision, e.g. R001}} }
      covers: [R6, R7]
      depends_on: ["01"]
      touches: [cmd/todo/list.go, internal/list/]
+     follows: [TD1, Testing]
      risk: normal
      ``` -->
 
@@ -111,6 +121,7 @@ based_on: { spec: {{spec revision, e.g. R001}} }
 covers: [{{R1, R2}}]
 depends_on: []
 touches: [{{folder/ or file}}]
+follows: [{{TD1, a shared rule, Testing}}]
 risk: {{core, normal, or low}}
 ```
 
@@ -180,8 +191,9 @@ risk: {{core, normal, or low}}
 
 ### Rules
 
-<!-- Optional. Rules from the plan or the project that apply to this
-     task and are easy to miss: error format, locking, security, limits.
+<!-- Optional. Rules that apply to this task and exist nowhere else.
+     A rule already in the plan goes in follows instead: flow gives the
+     worker its exact text. Don't copy it here.
 
      Example:
      - Errors start with "Error: " and end with "Nothing was changed."
@@ -193,8 +205,8 @@ risk: {{core, normal, or low}}
 
 <!-- The tests that prove the task works. One bullet per test: its name,
      what it checks, then a Proves: line naming the requirements it
-     proves. The plan's Testing section says which helpers and fakes to
-     use.
+     proves. Name Testing in follows, so the worker gets the plan's
+     helpers and fakes.
 
      Each test states its input and its expected result, with real
      values. "Tests the date check" is not enough; "'2026-02-30' returns

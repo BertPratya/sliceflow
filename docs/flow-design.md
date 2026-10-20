@@ -902,6 +902,20 @@ above.
   `tasks.md`; Task Master keeps them in one `tasks.json`, and its separate
   task files are generated from it, never edited. No tool splits a task's
   structure and its hand-written content into different files.
+- **What the brief holds (decided, the human, 2026-10-20).** `flow brief`
+  follows links the lead wrote, and never guesses: the task's section;
+  the text of the requirements in its `covers`; the spec scenarios whose
+  `Shows:` names one of them; the spec's Key concepts; and the exact text
+  of the plan items named in the task's new `follows:` key (a decision
+  such as `TD2`, a shared rule or interface by its heading, or
+  `Testing`). `flow plan validate` checks each name exists. The brief
+  ends by saying where the full spec and plan are, so the worker can
+  open them if something is unclear. Rules in a task hold only rules
+  that exist nowhere else. Research (2026-10-20): a missed hand copy
+  lets the wrong thing be built while its tests pass; Anthropic's
+  multi-agent write-up: "Without detailed task descriptions, agents
+  duplicate work, leave gaps"; Anthropic's context guide: "the smallest
+  possible set of high-signal tokens".
 - Open, for the implement slice: fix tasks added after approval (from the
   integration review or the preview). They would change an approved file,
   so they may need their own section or file.
