@@ -1266,6 +1266,17 @@ What a fallback lead may do, and what it must leave to the human: decided in
   The workflow ends with the merge into `main`; pushing is outside it.
 - **Events:** `preview.started`, `slice.approved`, `slice.done`.
 
+**The preview checks intent (decided, the human, 2026-10-20).** Besides one
+check per `manual` requirement and per success criterion, `flow` adds one
+preview check for the first scenario of each story, its main success case
+(`Covers: S1`). Its steps follow the scenario's exact command and output.
+Why: tests prove the code does what the tasks say, not that the tasks say
+what the human meant; and a slice with no manual requirement would
+otherwise have an empty preview. Research (2026-10-20): Wang, Pradel, Liu,
+"Are 'Solved Issues' in SWE-bench Really Solved Correctly?": 29.6% of
+plausible patches "induce different behavior than the ground truth
+patches".
+
 **Parked items go to the backlog through `flow` (decided, the human,
 2026-10-20).** At `flow slice done`, `flow` copies two kinds of items into
 `backlog.md`, word for word: each bullet of the plan's Parked section, and

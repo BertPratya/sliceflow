@@ -14,9 +14,13 @@ based_on: { spec: {{spec revision, e.g. R001}} }
      may go on over more lines: indent the extra lines 2 spaces more than
      the label.
 
-     flow writes the fixed part: one ### P check for each requirement
-     with Check: manual, and one for each success criterion (SC1, ...),
-     each with its Covers: line. You write the setup, the steps, and the
+     flow writes the fixed part, each check with its Covers: line:
+     - one ### P check for the first scenario of each story in the spec,
+       its main success case, e.g. Covers: S1. Tests prove the code does
+       what the tasks say; this check lets the human see it does what
+       they meant.
+     - one for each requirement with Check: manual
+     - one for each success criterion (SC1, ...) You write the setup, the steps, and the
      Expect: lines. You may add more checks; number them after the last.
 
      - Replace every {{...}} with real text. flow fills slice and
@@ -30,8 +34,9 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        left. Every placeholder of this template counts, even inside
        code. A {{ or a comment marker you write yourself inside a code
        block or `inline code` is real content.
-     - A section with nothing to say gets one line: None. E.g. nothing to
-       check by hand: None. under both Setup and Checks. -->
+     - A section with nothing to say gets one line: None. E.g. no setup
+       needed: None. under Setup. Checks is never empty while the spec
+       has a story. -->
 
 # Preview
 
@@ -47,14 +52,24 @@ based_on: { spec: {{spec revision, e.g. R001}} }
 
 <!-- One ### subsection per check, numbered P1, P2, ...
 
-     - Covers: names what this check proves: requirements (R12) and
-       success criteria (SC1). Every requirement with Check: manual and
-       every success criterion is in at least one Covers: line.
+     - Covers: names what this check proves: scenarios (S1),
+       requirements (R12), and success criteria (SC1). The first
+       scenario of each story, every requirement with Check: manual, and
+       every success criterion are in at least one Covers: line.
+     - For a scenario, the steps and Expect: lines follow the scenario's
+       exact command and output.
      - Then numbered steps. Each step is one thing the human does, with
        an Expect: line saying what they should see.
 
      Example:
-     ### P1. A plan runs with no lead action
+     ### P1. Start a new slice
+
+     Covers: S1
+
+     1. Run `flow slice new checkout` in the test repo.
+        Expect: "Created slice checkout." and the path to its spec.md.
+
+     ### P2. A plan runs with no lead action
 
      Covers: SC1
 
@@ -65,7 +80,7 @@ based_on: { spec: {{spec revision, e.g. R001}} }
 
 ### P1. {{short title}}
 
-Covers: {{SC1, R12}}
+Covers: {{S1, R12, SC1}}
 
 1. {{A step the human does.}}
    Expect: {{what they should see}}
