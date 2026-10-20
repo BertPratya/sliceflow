@@ -748,6 +748,14 @@ its events, and what it shows.
   copy in `.history/`: status **changed**. It is submitted and approved again.
 - **Setting:** `spec.review: on | off`.
 
+**Templates built into `flow` (decided, the human, 2026-10-20).** The
+document templates (spec, plan, tasks, preview, review, backlog) are part of
+the `flow` program, so they always match its validator. A repo needs no
+template files, and there is no override folder for now. Because a filled
+document no longer holds its rule comments, `flow` prints a template on
+request (a name like `flow template show spec`; settled in slice 0002, where
+the lead first needs it to change a spec).
+
 **History in git (decided, the human, 2026-10-20).** This replaces the
 copies in `.history/` here and in 2.3, and the fingerprint check for them.
 
