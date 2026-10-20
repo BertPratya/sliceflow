@@ -24,7 +24,8 @@ reviewer: {{reviewer}}
      flow reads this file. Keep every marker exactly as shown: the
      headings, the finding headings (### F1.), the labeled lines (Level:,
      Where:, Breaks:, Why:, Fix:, Guess:), and the line forms in Previous
-     findings and Requirements check. Don't rename or reorder them.
+     findings and Requirements check. Don't rename or reorder them. A
+     labeled line may go on over more lines, indented by 2 spaces.
 
      Report real problems only: things that break a requirement, a
      decision, an interface, or a project rule, or that are clearly wrong.
@@ -38,7 +39,8 @@ reviewer: {{reviewer}}
      - Replace every {{...}} with real text.
      - A section that doesn't apply gets one line: None.
      - When you are done, delete every comment and check that no {{ is
-       left. -->
+       left. Inside a code block or `inline code`, they are real content,
+       not leftovers. To name them in plain text, use `inline code`. -->
 
 # Review
 
@@ -85,6 +87,9 @@ reviewer: {{reviewer}}
      - <review>/F1: verified
      - <review>/F2: reopened. why
 
+     verified means: a fixed finding is really fixed, or the reason given
+     for wontfix or deferred is acceptable. Otherwise: reopened.
+
      Example:
      - task-04-1/F1: verified
      - task-04-1/F2: reopened. A done task due today still shows OVERDUE.
@@ -96,7 +101,8 @@ reviewer: {{reviewer}}
 ## Findings
 
 <!-- New findings only. Number them F1, F2, ... in this file. Outside
-     this file they are called <review>/F1, e.g. task-04-1/F1.
+     this file they are called <review>/F1, e.g. task-04-1/F1. List them
+     high first, then medium, then low.
 
      Each finding has these lines:
      - Level: high, medium, or low.
@@ -106,13 +112,16 @@ reviewer: {{reviewer}}
        - medium: a real problem that doesn't break anything yet. Must be
          fixed, or a reason given.
        - low: nice to have. Optional.
-     - Where: file:line, or the document and section.
+     - Where: file:line, or the document and section. A range:
+       file:12-18. More than one place: separate them with commas.
      - Breaks: what it breaks: a requirement (R5), a decision (SD1,
        TD2), a task's Interfaces (task 02), or a project rule (name it).
-       Breaks nothing approved? Write: nothing, and it is probably low.
+       Breaks nothing approved, e.g. a missing rule or a gap? Write:
+       nothing. Choose the level by its effect, as above.
      - Why: what is wrong, and how you found it: the test you ran, or
        the line you read.
-     - Fix: optional, one or two lines. The worker owns the fix.
+     - Fix: optional, one or two lines. No fix to suggest? Remove the
+       whole Fix: line.
 
      Example:
      ### F1. A done task that is overdue still shows OVERDUE
@@ -138,7 +147,7 @@ Fix: {{optional: one or two lines}}
 <!-- Integration reviews only. Other kinds: write None.
      Every requirement in the spec, checked against the finished slice.
      One line each: ok, fails (with the finding), or manual (goes to the
-     preview).
+     preview). Only low findings against it? It is ok: write ok, see F7.
 
      Example:
      - R1: ok

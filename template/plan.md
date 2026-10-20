@@ -21,11 +21,13 @@ touches:
      one idea per sentence.
 
      flow reads this file. Keep every marker exactly as shown: the
-     headings, the numbers (**TD1.**), the labeled lines (Covers:, Why:),
-     and the YAML blocks. Don't rename or reorder them.
+     headings, the numbers (**TD1.**, **Q1.**), the labeled lines
+     (Covers:, Why:, Not chosen:, Replaces:), and the YAML blocks. Don't
+     rename or reorder them. A labeled line may go on over more lines,
+     indented by 2 spaces.
 
      - Replace every {{...}} with real text. The text inside says what
-       goes there. flow fills slice and date itself. If they
+       goes there. flow fills slice, date, and based_on itself. If they
        still show {{...}}, fill them yourself.
      - Each section has a comment like this one with its rules. Follow it.
      - Add ### subsections freely inside a section. The ## sections are
@@ -36,6 +38,8 @@ touches:
        them when they don't apply.
      - When you are done, delete every comment and check that no {{ is
        left. A plan with a comment or a {{ left in it is not finished.
+       Inside a code block or `inline code`, they are real content, not
+       leftovers.
      - To change a plan later, read this template again first. The
        finished plan no longer has these rules in it.
 
@@ -127,7 +131,9 @@ Covers: {{R5}}
      - If a contract file exists (e.g. OpenAPI), list the operations and
        link the file. Never copy request or response details.
      - If there is no contract file (e.g. a CLI or settings), describe it
-       fully here: commands, flags, output, exit codes.
+       fully here: commands, flags, output, exit codes. What the user
+       sees comes from the spec. If the spec doesn't give it, don't
+       decide it here: add an Open question.
      - None? Write: None. -->
 
 ### {{kind, e.g. CLI}}
@@ -202,7 +208,8 @@ Covers: {{R5}}
        Every requirement appears in at least one task. A requirement may
        be in more than one task, when each task builds a part of it,
        e.g. the rule in one task and the command in another. Each task
-       proves its own part.
+       proves its own part. A requirement with Check: manual is in a
+       task's covers too: the task builds it, and preview.md proves it.
      - depends_on: ids of the tasks whose result this one needs, e.g.
        ["01"]. No loops. Empty: []
      - touches: the files and folders this task may change. A folder
@@ -254,7 +261,9 @@ tasks:
 ## Parked
 
 <!-- Optional. Delete this section if not needed.
-     Ideas found while planning that belong to a later slice.
+     Ideas found while planning that belong to a later slice. Only new
+     ideas: don't repeat an item the spec's Out of scope already sends
+     to the backlog.
 
      When the slice is done, flow copies each idea into backlog.md, word
      for word, with where it came from. So:
@@ -264,8 +273,8 @@ tasks:
 
      Example:
      - Show overdue tasks in red.
-     - A command that lists only overdue tasks.
-       It could also take a number of days. -->
+     - Let `todo due` take a number of days, e.g. `todo due 2 +3`.
+       Saves typing the full date. -->
 
 - {{An idea for later.}}
 

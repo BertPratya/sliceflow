@@ -13,7 +13,9 @@
 
      flow reads this file. Keep every marker exactly as shown: the
      headings and the labeled lines (Proves:, Done in:). Don't rename or
-     reorder them.
+     reorder them. In Files, Interfaces, and Done when, put the path,
+     name, or test name in `backticks`, then a colon. A labeled line may
+     go on over more lines, indented by 2 spaces.
 
      What to write here, and what to leave to the worker:
      - Fix what others rely on: the files, the names and signatures
@@ -35,6 +37,8 @@
        with nothing to say gets one line: None.
      - When you are done, delete every comment and check that no {{ is
        left. A task with a comment or a {{ left in it is not finished.
+       Inside a code block or `inline code`, they are real content, not
+       leftovers.
      - One task is one reviewable commit: about an hour of work, or a few
        hundred lines. Bigger? Split it in the plan's task list. -->
 
@@ -70,8 +74,8 @@
      All of them must be inside the task's touches in the plan.
 
      Example:
-     - internal/task/due.go: new. parseDue() and its tests' helpers.
-     - cmd/todo/add.go: changed. The --due flag. -->
+     - `internal/task/due.go`: new. parseDue() and its tests' helpers.
+     - `cmd/todo/add.go`: changed. The --due flag. -->
 
 - `{{path}}`: {{new or changed, and what goes in it}}
 
@@ -88,8 +92,9 @@
      - uses: a name from earlier tasks or existing code.
 
      Example:
-     - func parseDue(s string) (string, error): creates. Task 02 uses it.
-     - task.Task.Due: creates. Task 02 sorts by it. -->
+     - `func parseDue(s string) (string, error)`: creates. Task 02 uses
+       it.
+     - `task.Task.Due`: creates. Task 02 sorts by it. -->
 
 - `{{name or signature}}`: {{creates, changes, or uses; what it does; who else uses it}}
 
@@ -119,7 +124,8 @@
 <!-- The tests that prove the task works. One bullet per test: its name,
      what it checks, then a Proves: line naming the requirements it
      proves. Every requirement this task covers is in at least one
-     Proves: line. The plan's Testing section says which helpers and
+     Proves: line, except one with Check: manual: preview.md proves that
+     one, so it needs no test here. The plan's Testing section says which helpers and
      fakes to use.
 
      flow also runs all project checks before the task is handed in, so
@@ -129,8 +135,8 @@
      this task changes what it tests, and list its file under Files.
 
      Example:
-     - TestParseDueRejectsBadDate: "25/10/2026" and "2026-02-30" return
-       an error.
+     - `TestParseDueRejectsBadDate`: "25/10/2026" and "2026-02-30"
+       return an error.
        Proves: R3 -->
 
 - `{{TestName}}`: {{what the test checks}}
@@ -139,10 +145,12 @@
 ## Out of scope
 
 <!-- What this task must not do, even if it looks related, and where it
-     is done instead. Done in: is a task, e.g. task 02, or: not in this
+     is done instead. Done in: is one or more tasks, e.g. task 02, or
+     task 02, task 04. Anything not done in this slice: not in this
      slice.
 
      Example:
-     - Sorting by due date. Done in: task 02 -->
+     - Sorting by due date. Done in: task 02
+     - Due times. Done in: not in this slice -->
 
 - {{What this task must not do.}} Done in: {{task 03, or: not in this slice}}

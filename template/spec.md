@@ -13,6 +13,12 @@ created: {{date}}
      The human approves the spec. Write plain English, short sentences,
      one idea per sentence.
 
+     flow reads this file. Keep every marker exactly as shown: the
+     headings, the numbers (**R1.**, **SD1.**, **SC1.**, **Q1.**), and the
+     labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:,
+     Replaces:, Goes to:). Don't rename or reorder them. A labeled line
+     may go on over more lines, indented by 2 spaces.
+
      - Replace every {{...}} with real text. The text inside says what
        goes there. flow fills slice, title, and date itself. If they
        still show {{...}}, fill them yourself.
@@ -27,6 +33,8 @@ created: {{date}}
        Delete them when they don't apply.
      - When you are done, delete every comment and check that no {{ is
        left. A spec with a comment or a {{ left in it is not finished.
+       Inside a code block or `inline code`, they are real content, not
+       leftovers.
      - To change a spec later, read this template again first. The
        finished spec no longer has these rules in it. -->
 
@@ -192,9 +200,16 @@ created: {{date}}
      - the backlog
      - not planned: we decided not to do it
 
-     One - bullet per item, ending with its Goes to: line. When the slice
-     is done, flow copies each item that goes to the backlog into
-     backlog.md, word for word, with where it came from. -->
+     One - bullet per item, on one line: the item, then Goes to: at the
+     end of the line. No sub-bullets, headings, or code blocks.
+
+     When the slice is done, flow copies each item that goes to the
+     backlog into backlog.md: the text before Goes to:, word for word,
+     with where it came from.
+
+     Example:
+     - Reminders and notifications. Goes to: the backlog
+     - Repeating tasks. Goes to: a later slice (recurring-tasks) -->
 
 - {{What this slice does not do.}} Goes to: {{a later slice, the backlog, or not planned}}
 
