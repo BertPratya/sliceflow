@@ -351,8 +351,8 @@ Decided: three layers.
    worktree, network only to hosts the project lists (for example its
    package registry).
 3. **`flow` checks the result after the agent ends**, on every system: only
-   files in the task's `touches` changed; no approved document, `.history/`,
-   or event log was touched. A failed check is a case.
+   files in the task's `touches` changed; no approved document or event log
+   was touched. A failed check is a case.
 
 - On native Windows there is no sandbox for Claude Code, so layers 1 and 3
   are the protection.
@@ -713,6 +713,7 @@ its events, and what it shows.
 6. The human may read the spec or not. They tell the lead "approved".
 7. The lead runs the approve command. The slice enters the **plan** phase.
 8. Every approval keeps a copy: `.history/spec/`. History is read-only.
+   (Replaced: history is kept in git, see "History in git" below.)
 
 **Lead's view, to talk about** (not decided):
 
@@ -745,6 +746,28 @@ its events, and what it shows.
 - **Changed after approval.** `flow` sees `spec.md` differ from the last
   copy in `.history/`: status **changed**. It is submitted and approved again.
 - **Setting:** `spec.review: on | off`.
+
+**History in git (decided, the human, 2026-10-20).** This replaces the
+copies in `.history/` here and in 2.3, and the fingerprint check for them.
+
+- Each approval creates one git tag on the approved commit, e.g.
+  `flow/due-dates/spec/R001` and `flow/due-dates/plan/R001`. The approval
+  event records the same commit id.
+- Reading history is one step, however many commits came later. `flow`
+  wraps the git commands (names to settle in slice 0002), e.g. show the
+  spec as approved in R001, or the difference between R001 and R002.
+- An approved version cannot change: a commit is fixed, and `flow`
+  reports a tag that no longer points at the commit in its event.
+- A tag keeps its commit even after a squash merge or a deleted branch.
+- "Changed after approval", "no approved number disappears", and
+  "stale: the other slice's plan changed" compare with the tagged version.
+- Tags do not travel with a plain `git push`. The git policy pushes with
+  `--follow-tags`, and `flow` warns when approval tags are missing on the
+  remote.
+- Research (2026-10-20): GitHub Spec Kit and Kiro keep no snapshots; git
+  is the record. Spec Kit's "flow-forward" keeps a delivered feature's
+  files unchanged. Architecture Decision Records are never edited, only
+  superseded.
 - **Events:** `spec.submitted`, `review.started`, `review.submitted`,
   `spec.approved`, `spec.rejected`.
 
@@ -868,7 +891,7 @@ above.
 | 9 | lead | (fixes) + marks each finding | fixed, wontfix, or deferred, each with a note; decisions go to the human | draft |
 | 10 | lead | `flow plan submit` | next round: the reviewer checks the fixes (up to the round limit, then the human decides) | in review |
 | 11 | human | says "approved" | | awaiting approval |
-| 12 | lead | `flow plan approve` | copies `plan.md`, `tasks.md`, `preview.md`, and the contract changes to `.history/plan/`; the slice is **ready** | approved |
+| 12 | lead | `flow plan approve` | tags the commit that holds `plan.md`, `tasks.md`, `preview.md`, and the contract changes; the slice is **ready** | approved |
 
 - **One submit for the plan and its tasks:** `flow plan submit`, not a
   separate `flow task submit`. They are reviewed and approved together.
@@ -898,6 +921,9 @@ Both say the same thing: an approval must be tied to the exact content, all
 of it. The tasks are part of what the human approved. If a task file could
 change after approval without anyone noticing, the approval would mean
 nothing for that task.
+
+(Replaced 2026-10-20 by "History in git" in 2.2: the approval tags the
+commit that holds all of these, instead of copying them.)
 
 **Decided (the human, 2026-10-18):** `flow plan approve` saves the plan, the
 task files, and the contract changes together, one folder per revision:
@@ -1251,11 +1277,11 @@ recovery.
   The task is marked interrupted. On reopen, an interrupted task goes back
   to todo, and its work is still on its branch (the rule in the workflow
   files today: an interruption is not a failure).
-- **Kept:** the slice branch, every task branch, the event log, `.history/`,
-  reviews. **Removed:** the worktrees in `.flow/`, to free disk space; they
+- **Kept:** the slice branch, every task branch, the event log, the
+  approval tags, reviews. **Removed:** the worktrees in `.flow/`, to free disk space; they
   can be made again from the branches on reopen.
 - **The slice name is never used again.** The name is in the branch
-  name, the commits, the event log, `.history/`, other slices' `after:` and
+  name, the commits, the event log, the approval tags, other slices' `after:` and
   decisions, and the backlog. A new slice with the same name would make
   all of those point to two slices. It also keeps reopening possible.
 - **Stopping without cancelling is a different thing:** `flow run stop`
@@ -1287,8 +1313,8 @@ How the design is cut:
 | # | Slice | What you can do after it | Design |
 |---|---|---|---|
 | 0001 | slice and events | create a slice (`flow slice new`) and see it (`flow status`); every event in `.events.jsonl`, `status.md` written from it | 1.13, 2.1 |
-| 0002 | spec | take a spec from draft to approved: `spec validate`, `submit` (review off for now), `approve`, `reject`, history with fingerprints | 2.2 |
-| 0003 | plan | take a plan and its tasks to approved: `plan validate`, `brief`, one history folder per revision; the slice is ready to build | 2.3 |
+| 0002 | spec | take a spec from draft to approved: `spec validate`, `submit` (review off for now), `approve`, `reject`, history as git tags | 2.2 |
+| 0003 | plan | take a plan and its tasks to approved: `plan validate`, `brief`, history as git tags; the slice is ready to build | 2.3 |
 | 0004 | agents | `flow` starts agents itself: the Codex adapter, the permission layers, settings per role, `flow wait`; first use: the spec check and the plan review on submit | 1.9, 1.12c |
 | 0005 | the run | `flow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; when stuck, the task goes to "Needs you" | 2.4 |
 | 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue (rebase and check again), conflicts | 2.4 |
