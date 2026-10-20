@@ -16,7 +16,8 @@ created: {{date}}
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**R1.**, **S1.**, **SD1.**, **SC1.**, **Q1.**), and the
-     labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:, Rule:, Noticed:,
+     labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:, Cost:, Rule:,
+     Noticed:,
      Replaces:, Goes to:). Don't rename or reorder them. A labeled line
      may go on over more lines: indent the extra lines 2 spaces more than
      the label. Goes to: is the exception: it ends a one-line item.
@@ -240,6 +241,8 @@ created: {{date}}
      - Number them SD1, SD2, ...
      - Each one has the choice, Why:, and Not chosen: (the main other
        option, and why not).
+     - Optional: a Cost: line for the downside we accept with this
+       choice. Leave it out when there is no real downside.
      - Each one has a Rule: line. A worker sees requirements, not
        decisions. So a decision that changes what the feature does is
        also written as a requirement, and Rule: names it, e.g. Rule: R11.
@@ -255,11 +258,14 @@ created: {{date}}
        Why: the user still has the whole day to finish it.
        Not chosen: overdue on the due date, because it warns people who
          still have time.
+       Cost: a task finished late at night still shows as on time that
+         day.
        Rule: R11 -->
 
 - **SD1.** {{The choice.}}
   Why: {{the reason}}
   Not chosen: {{the main other option, and why not}}
+  Cost: {{optional: the downside we accept, or delete this line}}
   Rule: {{the requirement that states it, e.g. R11, or none}}
   Replaces: {{an earlier decision, e.g. device-pairing/SD3}}
 

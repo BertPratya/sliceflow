@@ -773,6 +773,11 @@ is on>" and combined forms ("While ..., when ..."), as on the EARS author's
 page (https://alistairmavin.com/ears/). A requirement names exact values
 (the message, the limit, the exit code), because a worker sees its text.
 
+**An optional Cost: line on decisions (decided, the human, 2026-10-20).**
+Spec and plan decisions may have a `Cost:` line for the downside accepted
+with the choice. Research (2026-10-20): Nygard's original ADR article: "All
+consequences should be listed here, not just the 'positive' ones."
+
 **History in git (decided, the human, 2026-10-20).** This replaces the
 copies in `.history/` here and in 2.3, and the fingerprint check for them.
 

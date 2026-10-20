@@ -24,7 +24,8 @@ touches:
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**TD1.**, **Q1.**), the labeled lines
-     (Covers:, Project rule:, Why:, Not chosen:, Replaces:, Plan only:),
+     (Covers:, Project rule:, Why:, Not chosen:, Cost:, Replaces:,
+     Plan only:),
      and the front matter.
      Don't rename or reorder them. A labeled line may go on over more lines:
      indent the extra lines 2 spaces more than the label.
@@ -217,6 +218,8 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
 
      - Each one has the choice, Why:, and Not chosen: (the main other
        option, and why not).
+     - Optional: a Cost: line for the downside we accept with this
+       choice. Leave it out when there is no real downside.
      - To replace a decision from an earlier slice, add Replaces: with
        that slice's name and the decision's number, e.g. checkout/TD2.
        Otherwise remove the whole Replaces: line.
@@ -238,6 +241,7 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
 - **TD1.** {{The choice.}}
   Why: {{the reason}}
   Not chosen: {{the main other option, and why not}}
+  Cost: {{optional: the downside we accept, or delete this line}}
   Replaces: {{an earlier decision, e.g. checkout/TD2}}
 
 ## Risks and rollout
