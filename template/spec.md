@@ -87,7 +87,8 @@ created: {{date}}
          terminal output. Use a code block when it is longer than one
          line.
      - Use "and" for more than one condition or result.
-     - End each scenario with the requirements it shows, e.g. (R3).
+     - End each scenario with a Shows: line naming the requirements it
+       shows, e.g. Shows: R1, R2
      - Every requirement a user can see, including error messages,
        appears in at least one scenario.
 
@@ -106,11 +107,12 @@ created: {{date}}
         Created slice checkout.
         Next: write the spec in slices/checkout/spec.md
         ```
-        (R1, R2)
+        Shows: R1, R2
      2. **Given** a slice named `checkout` already exists,
         **When** I run `flow slice new checkout`,
         **Then** flow changes nothing and prints
-        "Error: slice checkout already exists. Nothing was changed." (R3) -->
+        "Error: slice checkout already exists. Nothing was changed."
+        Shows: R3 -->
 
 ### Story 1: {{short title}}
 
@@ -121,10 +123,11 @@ created: {{date}}
    ```
    {{real output}}
    ```
-   ({{requirements this shows, e.g. R1, R2}})
+   Shows: {{the requirements this scenario shows, e.g. R1, R2}}
 2. **Given** {{the starting state}},
    **When** {{what the user does}},
-   **Then** {{what the user sees}}. ({{R3}})
+   **Then** {{what the user sees}}.
+   Shows: {{R3}}
 
 ## Key concepts
 
