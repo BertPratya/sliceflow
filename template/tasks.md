@@ -43,6 +43,9 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        another. Each task proves its own part.
      - A requirement with Check: manual is in a task's covers too: the
        task builds it, and preview.md proves it.
+     - Every scenario in the spec's User stories becomes at least one
+       e2e test in some task's Done when, with the scenario's exact
+       values.
      - No dependency loops.
      - Two tasks that can run at the same time never touch the same
        file. Tasks that must change the same file: order them with
@@ -193,6 +196,16 @@ risk: {{core, normal, or low}}
      proves. The plan's Testing section says which helpers and fakes to
      use.
 
+     Each test states its input and its expected result, with real
+     values. "Tests the date check" is not enough; "'2026-02-30' returns
+     an error" is.
+
+     Which level:
+     - A scenario from the spec becomes an e2e test with the scenario's
+       exact values. Name the scenario, e.g. (Story 1, scenario 2).
+     - Every other case, e.g. edge cases and rule details, goes in a
+       unit test. Keep e2e tests few; put tests as low as they can go.
+
      Every requirement this task covers is in at least one Proves: line.
      The only exception: a requirement whose Check: is manual and
      nothing else. preview.md proves that one. With Check: e2e, manual,
@@ -206,8 +219,12 @@ risk: {{core, normal, or low}}
 
      Example:
      - `TestParseDueRejectsBadDate`: "25/10/2026" and "2026-02-30"
-       return an error.
-       Proves: R3 -->
+       return an error; "2026-10-25" returns no error.
+       Proves: R3
+     - `TestDueUnknownTask`: (Story 1, scenario 5) `todo due 9
+       2026-11-01` with no task 9 prints "Error: task 9 not found." and
+       changes nothing.
+       Proves: R5 -->
 
 - `{{TestName}}`: {{what the test checks}}
   Proves: {{R5}}
