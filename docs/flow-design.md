@@ -991,6 +991,15 @@ above.
   judges whether the reasoning holds. Research (2026-10-20): Spec Kit's
   analyze step flags "Success Criteria requiring buildable work ... not
   reflected in tasks".
+- **A warning for long briefs (decided, the human, 2026-10-20).** Once
+  `tasks.md` exists, `flow plan validate` builds each task's brief and
+  warns when one is over a set size: about 1,500 words by default, a
+  setting in `flow.yaml`. It is a warning, not an error: it does not
+  block `flow plan submit`, and it goes to the plan reviewer, who judges
+  whether the length is justified. Before `tasks.md` exists there is no
+  brief, so there is no check. Research (2026-10-20): BMAD's plan
+  template: "Target: 900–1300 tokens ... Above 1600 = high risk of
+  context rot".
 - Open, for the implement slice: fix tasks added after approval (from the
   integration review or the preview). They would change an approved file,
   so they may need their own section or file.

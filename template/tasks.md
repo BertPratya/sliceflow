@@ -60,6 +60,9 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        depends_on.
      - One task is one reviewable commit: about an hour of work, or a
        few hundred lines. Bigger? Split it into two tasks.
+     - Keep each brief short. flow builds every brief while it validates
+       the plan, and warns when one is over a set size (about 1,500
+       words by default). Then split the task, or trim what it follows.
 
      Changing tasks:
      - Task ids are two digits: 01, 02, ... Before the first approval,
