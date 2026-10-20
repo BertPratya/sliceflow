@@ -756,6 +756,17 @@ document no longer holds its rule comments, `flow` prints a template on
 request (a name like `flow template show spec`; settled in slice 0002, where
 the lead first needs it to change a spec).
 
+**Assumptions are facts, not choices (decided, the human, 2026-10-20).** In
+the spec, an assumption is a fact about the world (environment, other
+systems, users). A choice about the feature is a requirement, a decision,
+or an Open question; the spec reviewer checks this. An optional `Noticed:`
+line says how a wrong assumption would show. Why: an agent fills a gap with
+a guess more easily than it asks; written as an assumption, the guess skips
+the human, gets no test, and never reaches a worker. Research (2026-10-20):
+Ambig-SWE (Vijayvargiya et al.): "models struggle to distinguish between
+well-specified and underspecified instructions", and asking the user gives
+"up to 74%" better results.
+
 **History in git (decided, the human, 2026-10-20).** This replaces the
 copies in `.history/` here and in 2.3, and the fingerprint check for them.
 

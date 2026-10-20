@@ -16,7 +16,7 @@ created: {{date}}
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**R1.**, **S1.**, **SD1.**, **SC1.**, **Q1.**), and the
-     labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:, Rule:,
+     labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:, Rule:, Noticed:,
      Replaces:, Goes to:). Don't rename or reorder them. A labeled line
      may go on over more lines: indent the extra lines 2 spaces more than
      the label. Goes to: is the exception: it ends a one-line item.
@@ -253,9 +253,24 @@ created: {{date}}
 ## Assumptions
 
 <!-- Things we believe are true but did not verify. If one turns out
-     wrong, the spec may need to change. -->
+     wrong, the spec may need to change.
 
-- {{Something we believe is true but did not verify.}}
+     An assumption is a fact about the world: the environment, other
+     systems, the users. A choice about what the feature does is never
+     an assumption. It is a requirement, a decision, or an Open question
+     for the human.
+
+     Optional: add a Noticed: line saying how we would notice if it is
+     wrong.
+
+     Example:
+     - Users run todo in one time zone.
+       Noticed: a user across time zones sees overdue marks a day off.
+     Not an assumption (a choice; ask it as a question instead):
+     - Dates before today are refused when adding a task. -->
+
+- {{A fact we believe is true but did not verify.}}
+  Noticed: {{optional: how we would notice if it is wrong, or delete this line}}
 
 ## Open questions
 
