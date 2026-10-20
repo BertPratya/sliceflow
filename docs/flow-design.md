@@ -761,9 +761,23 @@ copies in `.history/` here and in 2.3, and the fingerprint check for them.
 - A tag keeps its commit even after a squash merge or a deleted branch.
 - "Changed after approval", "no approved number disappears", and
   "stale: the other slice's plan changed" compare with the tagged version.
-- Tags do not travel with a plain `git push`. The git policy pushes with
-  `--follow-tags`, and `flow` warns when approval tags are missing on the
-  remote.
+- The history is visible to anyone with git, without `flow` (decided, the
+  human, 2026-10-20):
+  - The tags are **annotated**, and their message holds the approval
+    record: what was approved, the revision, the date, and the human's
+    own words. `git show <tag>` shows it.
+  - `flow` turns on git's `push.followTags` setting in each clone it sets
+    up, so a plain `git push` also sends the approval tags. (A plain push
+    sends no tags otherwise, and the setting works only for annotated
+    tags.) `flow` still warns when approval tags are missing on the
+    remote.
+  - Others read history with plain git: `git tag -l "flow/<slice>/*"`,
+    `git show <tag>:<path>`, `git diff <tag> <tag>`, or the Tags page on
+    GitHub.
+  - For the finish slice: a tag whose commit is on no branch can be missed
+    by a plain `git fetch` (e.g. after a squash merge deletes the slice
+    branch). Merging slices with a merge commit keeps every approved
+    commit in `main`'s history.
 - Research (2026-10-20): GitHub Spec Kit and Kiro keep no snapshots; git
   is the record. Spec Kit's "flow-forward" keeps a delivered feature's
   files unchanged. Architecture Decision Records are never edited, only
