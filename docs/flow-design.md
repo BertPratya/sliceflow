@@ -916,6 +916,12 @@ above.
   multi-agent write-up: "Without detailed task descriptions, agents
   duplicate work, leave gaps"; Anthropic's context guide: "the smallest
   possible set of high-signal tokens".
+- **Stable scenario ids (decided, the human, 2026-10-20).** Spec
+  scenarios are numbered S1, S2, ... across the whole spec, with the same
+  rules as requirement numbers. An e2e test names its scenario in a
+  `Scenario: S2` line under `Proves:`. `flow` checks that every scenario
+  has at least one e2e test. Why: numbers by position shift when a
+  scenario is added, and a free-text link cannot be checked.
 - Open, for the implement slice: fix tasks added after approval (from the
   integration review or the preview). They would change an approved file,
   so they may need their own section or file.

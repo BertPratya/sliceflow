@@ -21,7 +21,7 @@ based_on: { spec: {{spec revision, e.g. R001}} }
 
      flow reads this file. Keep every marker exactly as shown: the task
      headings (## Task 01: name), the ### headings inside a task, the
-     YAML block, and the labeled lines (Proves:, Done in:). Don't rename
+     YAML block, and the labeled lines (Proves:, Scenario:, Done in:). Don't rename
      or reorder them. A task's section runs from its ## Task heading to
      the next one. In Files, Interfaces, and Done when, put the path,
      name, or test name in `backticks`, then a colon. A labeled line may
@@ -48,9 +48,9 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        another. Each task proves its own part.
      - A requirement with Check: manual is in a task's covers too: the
        task builds it, and preview.md proves it.
-     - Every scenario in the spec's User stories becomes at least one
-       e2e test in some task's Done when, with the scenario's exact
-       values.
+     - Every scenario in the spec (S1, S2, ...) becomes at least one e2e
+       test in some task's Done when, with the scenario's exact values
+       and a Scenario: line. flow checks this.
      - No dependency loops.
      - Two tasks that can run at the same time never touch the same
        file. Tasks that must change the same file: order them with
@@ -214,7 +214,8 @@ risk: {{core, normal, or low}}
 
      Which level:
      - A scenario from the spec becomes an e2e test with the scenario's
-       exact values. Name the scenario, e.g. (Story 1, scenario 2).
+       exact values. Add a Scenario: line naming it, under Proves:, e.g.
+       Scenario: S2
      - Every other case, e.g. edge cases and rule details, goes in a
        unit test. Keep e2e tests few; put tests as low as they can go.
 
@@ -233,10 +234,10 @@ risk: {{core, normal, or low}}
      - `TestParseDueRejectsBadDate`: "25/10/2026" and "2026-02-30"
        return an error; "2026-10-25" returns no error.
        Proves: R3
-     - `TestDueUnknownTask`: (Story 1, scenario 5) `todo due 9
-       2026-11-01` with no task 9 prints "Error: task 9 not found." and
-       changes nothing.
-       Proves: R5 -->
+     - `TestDueUnknownTask`: `todo due 9 2026-11-01` with no task 9
+       prints "Error: task 9 not found." and changes nothing.
+       Proves: R5
+       Scenario: S2 -->
 
 - `{{TestName}}`: {{what the test checks}}
   Proves: {{R5}}

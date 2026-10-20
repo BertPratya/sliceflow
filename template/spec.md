@@ -15,7 +15,7 @@ created: {{date}}
      one idea per sentence.
 
      flow reads this file. Keep every marker exactly as shown: the
-     headings, the numbers (**R1.**, **SD1.**, **SC1.**, **Q1.**), and the
+     headings, the numbers (**R1.**, **S1.**, **SD1.**, **SC1.**, **Q1.**), and the
      labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:,
      Replaces:, Goes to:). Don't rename or reorder them. A labeled line
      may go on over more lines: indent the extra lines 2 spaces more than
@@ -89,8 +89,12 @@ created: {{date}}
 
      - A story is one thing the user wants to do: a short title, and one
        sentence saying who wants to do what.
-     - Under it, a numbered list of scenarios, one per case. The success
-       cases come first, then each important failure.
+     - Under it, a list of scenarios, one per case. The success cases
+       come first, then each important failure.
+     - Number scenarios S1, S2, ... across the whole spec, not per story.
+       Same rules as requirement numbers: renumber freely only before the
+       spec is first approved. After that, never reuse a number, and a
+       removed scenario stays, as: **S4.** (removed in R002: why)
      - Each scenario has three parts:
        - Given: the starting state. Leave it out when there is nothing
          special.
@@ -113,34 +117,34 @@ created: {{date}}
 
      A developer starts work on a new feature with one command.
 
-     1. **When** I run `flow slice new checkout`,
-        **Then** flow creates the slice and says where to write the spec:
-        ```
-        $ flow slice new checkout
-        Created slice checkout.
-        Next: write the spec in slices/checkout/spec.md
-        ```
-        Shows: R1, R2
-     2. **Given** a slice named `checkout` already exists,
-        **When** I run `flow slice new checkout`,
-        **Then** flow changes nothing and prints
-        "Error: slice checkout already exists. Nothing was changed."
-        Shows: R3 -->
+     - **S1.** **When** I run `flow slice new checkout`,
+       **Then** flow creates the slice and says where to write the spec:
+       ```
+       $ flow slice new checkout
+       Created slice checkout.
+       Next: write the spec in slices/checkout/spec.md
+       ```
+       Shows: R1, R2
+     - **S2.** **Given** a slice named `checkout` already exists,
+       **When** I run `flow slice new checkout`,
+       **Then** flow changes nothing and prints
+       "Error: slice checkout already exists. Nothing was changed."
+       Shows: R3 -->
 
 ### Story 1: {{short title}}
 
 {{One sentence: who wants to do what.}}
 
-1. **When** {{what the user does}},
-   **Then** {{what the user sees}}:
-   ```
-   {{real output}}
-   ```
-   Shows: {{the requirements this scenario shows, e.g. R1, R2}}
-2. **Given** {{the starting state}},
-   **When** {{what the user does}},
-   **Then** {{what the user sees}}.
-   Shows: {{R3}}
+- **S1.** **When** {{what the user does}},
+  **Then** {{what the user sees}}:
+  ```
+  {{real output}}
+  ```
+  Shows: {{the requirements this scenario shows, e.g. R1, R2}}
+- **S2.** **Given** {{the starting state}},
+  **When** {{what the user does}},
+  **Then** {{what the user sees}}.
+  Shows: {{R3}}
 
 ## Key concepts
 
