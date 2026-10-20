@@ -14,7 +14,8 @@ created: {{date}}
      one idea per sentence.
 
      - Replace every {{...}} with real text. The text inside says what
-       goes there. flow fills slice, title, and date itself.
+       goes there. flow fills slice, title, and date itself. If they
+       still show {{...}}, fill them yourself.
      - Each section has a comment like this one with its rules. Follow it.
      - Keep the sections in this order. Don't rename them.
      - Repeat a block as often as needed: stories, scenarios,
@@ -75,8 +76,8 @@ created: {{date}}
 
      - A story is one thing the user wants to do: a short title, and one
        sentence saying who wants to do what.
-     - Under it, a numbered list of scenarios, one per case. The main
-       path comes first, then each important failure.
+     - Under it, a numbered list of scenarios, one per case. The success
+       cases come first, then each important failure.
      - Each scenario has three parts:
        - Given: the starting state. Leave it out when there is nothing
          special.
@@ -127,7 +128,8 @@ created: {{date}}
 
 ## Key concepts
 
-<!-- Optional. Delete this section if the slice is simple.
+<!-- Optional. Use it when the slice brings in terms that need one fixed
+     meaning, e.g. "overdue". Otherwise delete this section.
 
      The important states, terms, and objects, so everyone uses the same
      words. One line each. -->
@@ -139,17 +141,22 @@ created: {{date}}
 <!-- The full rules, including the ones a user never sees.
 
      - Number them R1, R2, ... from top to bottom.
+     - When you are done, renumber them so they read R1, R2, ... from
+       top to bottom in this section, and update the scenario links to
+       match. You may renumber only before the spec is first approved.
      - Group them under small headings, e.g. ### Starting, ### Errors.
      - Write each one in one of these forms:
        - When <trigger>, the <system> shall <response>.
        - If <bad situation>, then the <system> shall <response>.
        - While <state>, the <system> shall <response>.
        - The <system> shall <response>.
+       For <system>, use the product's name, e.g. flow.
      - One behavior per requirement.
      - Each one has a Check: line saying how it is tested. More than one
        is allowed, e.g. Check: unit, e2e.
        - unit: tests one piece of code on its own.
-       - api: tests through the program's interface, without a user.
+       - api: calls the program's interface directly, e.g. an HTTP
+         endpoint. A plain command-line tool usually has none: use e2e.
        - e2e: runs the real program the way a user does.
        - manual: a human checks it at the preview. Use it only when no
          automatic test can check it.
@@ -176,7 +183,7 @@ created: {{date}}
 
 <!-- What this slice does not do, so nobody builds it by mistake.
      For each item, say where it goes:
-     - a later slice
+     - a later slice (name it if you know it)
      - the backlog
      - not planned: we decided not to do it -->
 
