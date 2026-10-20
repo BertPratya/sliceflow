@@ -1000,9 +1000,14 @@ above.
   brief, so there is no check. Research (2026-10-20): BMAD's plan
   template: "Target: 900–1300 tokens ... Above 1600 = high risk of
   context rot".
-- Open, for the implement slice: fix tasks added after approval (from the
-  integration review or the preview). They would change an approved file,
-  so they may need their own section or file.
+- **Changes to an approved `tasks.md` (decided, the human, 2026-10-20).**
+  After approval, `tasks.md` may change in only two ways without a new
+  approval: fix tasks added at the end, covering only approved
+  requirements; and a wider `touches` by the existing rule. Each gets a
+  Log line and a one-line note to the human, and `tasks.md` stays
+  approved. The diff against the plan's approval tag shows every such
+  change, and the integration review checks it holds only these two
+  kinds. Any other change is a plan change and needs a new approval.
 
 **The whole plan process, step by step (lead's proposal, 2026-10-18):**
 

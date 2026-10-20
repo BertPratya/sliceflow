@@ -18,6 +18,23 @@ There are two kinds of review. Your prompt says which one.
 - **Plan review** (`plan-R…`): `plan.md`, `tasks.md`, and `preview.md`,
   against the approved spec.
 
+## What you read
+
+Your prompt names the slice worktree (all paths are relative to it), the
+review kind, and your review file. In `slices/<name>/`:
+
+- `spec.md`; for a plan review also `plan.md`, `tasks.md`, `preview.md`,
+  and the slice's changes to the project files in the plan's `touches`
+- earlier reviews in `reviews/`, and each finding's state and reason in
+  `status.md` → Findings (round 2 and later)
+
+Also:
+- the templates in `templates/`
+- `AGENTS.md`, sections 9 and 10 (the checks and the project's rules)
+- the code the plan changes, to judge `touches`, Interfaces, and `uses`
+- what the prompt adds: briefs over 1,500 words with the reason, and, for
+  a stacked slice, the earlier slice's approved spec and plan
+
 Each document's template, in `templates/`, holds its rules in comments.
 Check the documents against those rules. Also follow the project rules for
 the plan reviewer and for Everyone (`AGENTS.md` section 10 → Other rules).

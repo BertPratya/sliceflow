@@ -5,9 +5,6 @@
      lead keeps it up to date after every step, with one Log line for each
      change, and commits it. Everyone else only reads it.
 
-     (In manual flow, before flow's first version, the lead writes this
-     file by hand. Later, flow writes it from the event log.)
-
      The sections always appear in this order. A section with nothing in
      it gets one line: None. Replace every {{...}}, and delete every
      comment when the file is first filled. To update it later, read this
@@ -22,9 +19,13 @@
      - implementing: workers are building tasks.
      - integration: all tasks are done; the whole slice is being reviewed.
      - preview: the human is trying the slice.
-     - done: merged into the base branch.
-     - blocked: stopped until a person decides something.
-     - cancelled: stopped for good.
+     - done: the human approved the result, and the slice is merged into
+       the base branch.
+     Marks, in brackets after the phase, which stays as it was:
+     - (blocked): stopped until a person decides something, e.g.
+       implementing (blocked).
+     - (cancelled): the human cancelled the slice; it can be reopened
+       from the same phase.
 
      Documents:
      - draft: being written.
@@ -42,6 +43,8 @@
      - done: reviewed (or not needed, for low risk) and merged into the
        slice branch.
      - blocked: stopped; the reason is under Needs human.
+     - cancelled: no longer needed after a plan change; its branch is
+       kept.
 
      Findings:
      - open: not fixed yet.
@@ -50,6 +53,8 @@
      - verified: the reviewer confirmed the fix, or accepted the reason.
      - reopened: the reviewer says it is not fixed.
      - wontfix: why: not fixed, with the reason.
+     - deferred: task NN: a later task in this slice fixes it; that
+       task's review checks it.
      - deferred: backlog: moved out of the slice; copied to backlog.md
        when the slice is done.
 
@@ -60,7 +65,7 @@
 
 # Status: {{slice}}
 
-- Phase: {{phase}}
+- Phase: {{phase, with a mark in brackets if any}}
 - Branch: slice/{{slice}}
 - After: {{the slice this one waits for, or delete this line}}
 - Updated: {{YYYY-MM-DD HH:MM}} UTC
@@ -99,8 +104,8 @@
 
 <!-- A progress line, then one row per task from tasks.md, in id order.
      Title is the task's name. Risk, Depends on, and Covers come from the
-     task's YAML block. Attempt counts check runs since the last review;
-     Round counts review rounds.
+     task's YAML block. Attempt counts failed check runs since the last
+     review or unblock; Round counts review rounds.
 
      Example:
      2 of 5 done · 1 doing · 2 todo
