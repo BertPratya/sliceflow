@@ -963,6 +963,13 @@ above.
   or changes, that task must be in its `depends_on` chain. `flow plan
   validate` checks it, so the mistake shows while planning instead of at
   the merge.
+- **Tests first (decided, the human, 2026-10-20).** A task's Steps start
+  by writing the Done when tests and seeing them fail, and end by running
+  them until they pass. `flow` cannot check the order (workers do not
+  commit along the way), so it is guidance in the template and in the
+  worker's instructions (slice 0004). Research (2026-10-20): Spec Kit's
+  tasks template: tests "must be written first and must fail before
+  implementation".
 - Open, for the implement slice: fix tasks added after approval (from the
   integration review or the preview). They would change an approved file,
   so they may need their own section or file.

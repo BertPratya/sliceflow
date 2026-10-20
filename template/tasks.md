@@ -143,14 +143,21 @@ risk: {{core, normal, or low}}
      line, each naming the file, function, or type it changes. The worker
      still writes the code; the steps say what to build, not every line.
 
+     Tests come first: the first step writes the tests listed under Done
+     when and runs them to see them fail; the last step runs them until
+     they pass. A test written first checks what was asked, not what the
+     code happens to do.
+
      Example:
-     1. Add a Due field (string, YYYY-MM-DD, empty means none) to Task in
+     1. Write the tests listed under Done when. Run them, and see them
+        fail.
+     2. Add a Due field (string, YYYY-MM-DD, empty means none) to Task in
         internal/task/task.go.
-     2. Add parseDue() in internal/task/due.go. It accepts only a real
+     3. Add parseDue() in internal/task/due.go. It accepts only a real
         date in the form YYYY-MM-DD and returns an error otherwise.
-     3. In cmd/todo/add.go, read --due, call parseDue(), and stop before
+     4. In cmd/todo/add.go, read --due, call parseDue(), and stop before
         saving when it fails.
-     4. Write the tests listed under Done when. -->
+     5. Run the tests until they pass. -->
 
 1. {{A step of the approach, naming the file or function.}}
 
