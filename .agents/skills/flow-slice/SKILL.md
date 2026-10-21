@@ -33,4 +33,5 @@ Work in the worktree from now on, with full paths into it.
 ## Then
 
 Tell the human the slice is created: its branch, its worktree, and its
-folder. The slice is now in its planning phase.
+folder. This skill ends here. The planning phase is the `flow-plan`
+skill.
