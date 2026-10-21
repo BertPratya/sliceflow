@@ -25,7 +25,8 @@ When the name is fine, create the slice. Do not ask again.
    `git worktree add -b slice/<name> .worktrees/<name> main`
 2. In the worktree, create `docs/slices/<name>/`.
 3. Copy `docs/templates/spec.md` and `docs/templates/status.md` into it.
-4. In `status.md`, set the phase to `planning`.
+4. In `status.md`, set the phase to `planning`, and in its Documents
+   table set `spec.md` to `draft`, with Revision `-` and Approved `-`.
 5. Commit in the worktree: `<name>: slice created`.
 
 Work in the worktree from now on, with full paths into it.
