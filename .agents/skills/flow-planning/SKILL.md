@@ -60,7 +60,8 @@ not say. Sort each missing point:
 When every open question is answered or deferred:
 
 1. Set `spec.md` to `in_review` in `status.md`.
-2. Start a plan reviewer for a spec check (`AGENTS.md` → Tools per role).
+2. Start a doc reviewer for a spec check (`AGENTS.md` → Tools per role).
+   Its prompt: read `.agents/prompts/doc-reviewer.md` and follow it.
    It looks for conflicts and unresolved points in `spec.md`.
 3. The reviewer gives each finding a level:
    - **high:** needs the human's decision. Add it to Open questions.
@@ -133,8 +134,8 @@ When every open question is answered or deferred:
 ### 5. The plan review
 
 1. Set `plan.md`, `tasks.md`, and `preview.md` to `in_review`.
-2. Start a plan reviewer for a plan review (`AGENTS.md` → Tools per
-   role). It checks the plan, tasks, and preview together, against the
+2. Start a doc reviewer for a plan review (`AGENTS.md` → Tools per
+   role), told to read `.agents/prompts/doc-reviewer.md`. It checks the plan, tasks, and preview together, against the
    spec.
 3. Sort its findings by level, as in the spec check: high to Open
    questions, medium as a `(lead's call)`, low fixed or left.

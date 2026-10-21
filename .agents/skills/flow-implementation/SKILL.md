@@ -31,7 +31,8 @@ may run at once.
    task in `tasks.md` and what it links to, as `docs/templates/tasks.md`
    says.
 3. **Worker:** start one in a fresh context (`AGENTS.md` → Tools per
-   role), with the brief, the worktree's full path, and the round. After
+   role). Its prompt: read `.agents/prompts/worker.md` and follow it,
+   with the brief, the worktree's full path, and the round. After
    a review or failed checks, add the findings or the last 40 lines of
    output. Read only its result, not its whole conversation.
 4. **Checks:** the auto-fix commands, then the task checks, in the task
@@ -40,7 +41,8 @@ may run at once.
 5. **Scope:** every changed file is in the task's `touches`, or always
    allowed by `AGENTS.md`. If not, the task is `blocked`.
 6. **Commit** on the task branch: `<name>/NN: <summary>`.
-7. **Review** when the task's risk is `core` or `normal` (not `low`).
+7. **Review** when the task's risk is `core` or `normal` (not `low`):
+   a code reviewer, told to read `.agents/prompts/code-reviewer.md`.
    Changes asked: a new worker round. Pass: merge. After the review
    round limit in `AGENTS.md`, the task is `blocked`.
 8. **Merge**, one task at a time: merge the slice branch into the task
@@ -76,8 +78,8 @@ scope, interfaces, data, security.
   example, the options, and your recommendation.
 - When the human answers:
   1. Change the spec, plan, and tasks the answer touches.
-  2. Start a plan reviewer on the change only, to check the documents
-     still agree with each other. Sort its findings as in planning: high
+  2. Start a doc reviewer (`.agents/prompts/doc-reviewer.md`) for a
+     change review, to check the documents still agree with each other. Sort its findings as in planning: high
      back to the human, medium as a `(lead's call)`, low fixed or left.
   3. Commit: `<name>: <what changed, from the human's answer>`.
   4. Make the next approval tag on that commit,
