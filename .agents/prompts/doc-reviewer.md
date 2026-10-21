@@ -36,8 +36,9 @@ Also:
 Give each finding a level. In a document review, the level says who
 deals with it:
 
-- **high:** needs the human's decision. Write it as a question, with your
-  guess at the answer. The lead asks the human.
+- **high:** needs the human's decision. Write it as a question under
+  Needs human decision, with a Guess: line, not as a finding. The lead
+  asks the human.
 - **medium:** a real problem the lead can decide and fix alone, because
   one fix is clearly right and changes nothing the human chose.
 - **low:** a small thing: a typo, a missing example, two lines that say
