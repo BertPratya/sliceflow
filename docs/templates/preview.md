@@ -1,12 +1,11 @@
 ---
 slice: {{slice}}
-based_on: { spec: {{spec revision, e.g. R001}} }
 ---
 
 <!-- HOW TO FILL THIS TEMPLATE
 
      The preview file says how the human tries the slice at the preview.
-     flow creates it when the spec is approved (see below); the lead
+     flow creates it when the spec review passes (see below); the lead
      fills it during the plan phase; the human approves it together with
      the plan.
 
@@ -17,22 +16,22 @@ based_on: { spec: {{spec revision, e.g. R001}} }
      the label.
 
      The fixed part comes from the spec alone, so it is written as soon
-     as the spec is approved: flow creates this file then, with one
+     as the spec review passes: flow creates this file then, with one
      ### P check, its number, title, and Covers: line, for each of these:
      - the first scenario of each story that is not removed, its main
        success case, e.g. Covers: S1. Tests prove the code does what the
        tasks say; this check lets the human see it does what they meant.
      - each requirement with Check: manual.
      - each success criterion (SC1, ...).
-     When the spec is approved again after a change, flow adds checks for
+     When the spec review passes again after a change, flow adds checks for
      new items. It never deletes text you wrote, and it reports a check
      whose item was removed.
 
      You write the setup, the steps, and the Expect: lines, during the
      plan phase. You may add more checks; number them after the last.
 
-     - Replace every {{...}} with real text. flow fills slice and
-       based_on itself. If they still show {{...}}, fill them
+     - Replace every {{...}} with real text. flow fills slice
+       itself. If they still show {{...}}, fill them
        yourself.
      - Write plain English, short sentences. The human follows these
        steps by hand, so each step is one thing to do.

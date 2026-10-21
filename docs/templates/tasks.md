@@ -1,12 +1,11 @@
 ---
 slice: {{slice}}
-based_on: { spec: {{spec revision, e.g. R001}} }
 ---
 
 <!-- HOW TO FILL THIS TEMPLATE
 
      tasks.md holds every task of the slice: one section per task. Write
-     it after plan.md is designed and its Open questions say None. The
+     it after plan.md is designed and every Open question left is deferred. The
      human approves plan.md and tasks.md together.
 
      Each task is built by one worker: an agent with a fresh context.
@@ -76,8 +75,8 @@ based_on: { spec: {{spec revision, e.g. R001}} }
        else to update.
 
      Filling the template:
-     - Replace every {{...}} with real text. flow fills slice and
-       based_on itself. If they still show {{...}}, fill them yourself.
+     - Replace every {{...}} with real text. flow fills slice
+       itself. If they still show {{...}}, fill them yourself.
      - Copy the whole ## Task block once per task.
      - Each part has a comment like this one with its rules. Follow it.
      - Three parts of a task are optional: Interfaces, Copy the style of, and

@@ -9,18 +9,25 @@ reviewer: {{reviewer}}
 
 <!-- HOW TO FILL THIS TEMPLATE
 
-     A review checks one thing: a spec, a plan with its tasks.md and
-     preview.md, one task, or the whole slice (integration). flow
+     A review checks one thing. A doc review (kind: spec, plan, or
+     change) checks a spec, a plan with its tasks.md and preview.md, or
+     the documents changed during building. A code review (kind: task or
+     integration) checks one task, or the whole slice. flow
      creates this file and fills
      the front matter. You write the sections below, then hand the review
      in through flow. After that the file is locked: never edit it again.
 
-     flow reads this file and sets the verdict from it:
+     flow reads this file and sets the verdict from it.
+     Code review:
      - Needs human decision is not None.            → needs_human
      - else any high or medium finding, new or
        reopened                                     → changes
      - else                                         → pass
      (low findings alone pass)
+     Doc review:
+     - Needs human decision is not None.            → needs_human
+     - else                                         → pass
+     (the lead fixes medium findings, and fixes or leaves low ones)
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the finding headings (### F1.), the labeled lines (Level:,
@@ -133,7 +140,15 @@ reviewer: {{reviewer}}
      high first, then medium, then low.
 
      Each finding has these lines:
-     - Level: high, medium, or low.
+     - Level: high, medium, or low. In a doc review the level says who
+       deals with it:
+       - high: needs the human's decision. Never a finding: write it as
+         a question under Needs human decision, with a Guess: line.
+       - medium: the lead can decide and fix it alone: one fix is
+         clearly right and changes nothing the human chose.
+       - low: a small thing, e.g. a typo or a missing example. The lead
+         fixes it or leaves it.
+       In a code review the level says how bad it is:
        - high: wrong behavior, breaks the spec, plan, or contract,
          security, or data loss. Blocks. Only a human can mark it
          wontfix, or defer it out of the slice.

@@ -13,9 +13,9 @@
      Status words, and what they mean:
 
      Phase (the slice):
-     - spec: the spec is being written or reviewed.
-     - plan: the plan, tasks, and preview are being written or reviewed.
-     - ready: the plan is approved; building has not started.
+     - planning: the spec, plan, tasks, and preview are being written or
+       reviewed.
+     - ready: the human approved the planning; building has not started.
      - implementing: workers are building tasks.
      - integration: all tasks are done or cancelled; the whole slice is
        being reviewed.
@@ -30,9 +30,8 @@
 
      Documents:
      - draft: being written.
-     - in review: a reviewer is checking it.
-     - waiting for approval: the review passed; the human has not
-       approved yet.
+     - in_review: a reviewer is checking it.
+     - review_passed: the review passed; the human has not approved yet.
      - approved: the human approved it; the Approved column names the tag.
      - changed: it was edited after approval and must be approved again.
 
@@ -78,7 +77,7 @@
      findings a worker is blocked on, failed preview checks.
 
      Example:
-     - plan.md is waiting for approval (plan review passed).
+     - The planning is waiting for approval (plan review passed).
      - Task 04 is blocked: checks failed 3 times. Last error: the date
        parser rejects 2026-02-28. -->
 
@@ -94,7 +93,7 @@
      Example:
      | Doc | Status | Revision | Approved |
      |---|---|---|---|
-     | spec.md | approved | R001 | 2026-10-20 by the human, tag flow/due-dates/spec/R001 |
+     | spec.md | review_passed | - | - |
      | plan.md | draft | - | - | -->
 
 | Doc | Status | Revision | Approved |
@@ -171,7 +170,7 @@ None.
 
      Example:
      - 2026-10-20 15:04 · lead (claude) · plan submitted for review
-     - 2026-10-20 14:02 · the human · spec R001 approved: "approved" -->
+     - 2026-10-20 14:02 · reviewer (claude) · spec check passed -->
 
 Newest first.
 

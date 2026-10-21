@@ -123,7 +123,7 @@ created: {{date}}
        ```
        $ flow slice new checkout
        Created slice checkout.
-       Next: write the spec in slices/checkout/spec.md
+       Next: write the spec in docs/slices/checkout/spec.md
        ```
        Shows: R1, R2
      - **S2.** **Given** a slice named `checkout` already exists,
@@ -293,7 +293,9 @@ created: {{date}}
 
 ## Open questions
 
-<!-- Questions for the human, numbered Q1, Q2, ... This section must say
-     None. before the spec check starts. -->
+<!-- Questions for the human, numbered Q1, Q2, ... An answered question
+     is written into the spec and removed from here. A deferred question
+     stays, marked Deferred. The spec check starts when every question
+     left here is deferred; with none left, this section says None. -->
 
 - **Q1.** {{A question for the human.}}

@@ -1,17 +1,16 @@
 ---
 slice: {{slice}}
 created: {{date}}
-based_on: { spec: {{spec revision, e.g. R001}} }
 touches:
   - {{a project file this slice changes, e.g. api/openapi.yaml}}
 ---
 
 <!-- HOW TO FILL THIS TEMPLATE
 
-     A plan says HOW the approved spec will be built: the parts that
+     A plan says HOW the spec will be built: the parts that
      change, the flows, the interfaces, the data, the tests, and the
      decisions. The tasks go in tasks.md, written after this plan is
-     designed and its Open questions say None. The human approves both
+     designed and every Open question left is deferred. The human approves both
      together.
 
      The plan never adds scope. Anything not in the spec needs a spec
@@ -30,7 +29,7 @@ touches:
      indent the extra lines 2 spaces more than the label.
 
      - Replace every {{...}} with real text. The text inside says what
-       goes there. flow fills slice, date, and based_on itself. If they
+       goes there. flow fills slice and date itself. If they
        still show {{...}}, fill them yourself.
      - Each section has a comment like this one with its rules. Follow it.
      - The ## sections are fixed. Add ### subsections freely, except in
@@ -48,9 +47,8 @@ touches:
        finished plan no longer has these rules in it.
 
      The front matter:
-     - based_on: the approved spec revision this plan builds on.
      - A stacked slice (one that waits for another slice) adds a line:
-       after: { slice: <that slice's name>, plan: <its revision> }
+       after: { slice: <that slice's name>, planning: <its approved revision> }
      - touches: the project-level files this slice changes, e.g. a
        contract or the data model doc. None? Write: touches: [] -->
 
@@ -276,7 +274,9 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
 
 ## Open questions
 
-<!-- Questions for the human, numbered Q1, Q2, ... This section must say
-     None. before the plan is submitted. -->
+<!-- Questions for the human, numbered Q1, Q2, ... An answered question
+     is written into the plan and removed from here. A deferred question
+     stays, marked Deferred. The plan review starts when every question
+     left here is deferred; with none left, this section says None. -->
 
 - **Q1.** {{A question for the human.}}
