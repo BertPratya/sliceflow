@@ -105,4 +105,5 @@ Stop, mark the task `blocked`, and tell the human in plain words when:
 
 ## When every task is done
 
-Every task is `done` or `cancelled`: the slice moves on to integration.
+Every task is `done` or `cancelled`: the slice moves on to integration,
+with the `flow-finish` skill.
