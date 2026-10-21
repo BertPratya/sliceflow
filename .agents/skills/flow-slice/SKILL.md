@@ -25,9 +25,17 @@ When the name is fine, create the slice. Do not ask again.
    `git worktree add -b slice/<name> .worktrees/<name> main`
 2. In the worktree, create `docs/slices/<name>/`.
 3. Copy `docs/templates/spec.md` and `docs/templates/status.md` into it.
-4. In `status.md`, set the phase to `planning`, and in its Documents
-   table set `spec.md` to `draft`, with Revision `-` and Approved `-`.
-5. Commit in the worktree: `<name>: slice created`.
+4. Fill the spec's front matter: `slice` (the name), `title` (a short
+   title, from the human's words), `created` (today).
+5. Fill `status.md`, as its template says:
+   - the header: `# Status: <name>`, Phase `planning`, Branch
+     `slice/<name>`, Updated (the time now, UTC). Delete the After: line,
+     unless the slice waits for another one.
+   - Documents: `spec.md` as `draft`, Revision `-`, Approved `-`.
+   - Every other section: `None.`
+   - Log: `<time> · lead (<tool>) · slice created`.
+   - Delete the template's comments.
+6. Commit in the worktree: `<name>: slice created`.
 
 Work in the worktree from now on, with full paths into it.
 

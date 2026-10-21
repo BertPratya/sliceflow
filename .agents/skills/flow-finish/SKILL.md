@@ -5,7 +5,18 @@ description: Takes a built slice to main (update from main, integration review, 
 
 # flow-finish
 
-Every task is `done` or `cancelled`. Set the phase to `integration`.
+Every task is `done` or `cancelled`. Set the phase to `integration` in
+the `status.md` header.
+
+## Keeping status.md
+
+After every step that changes something, update the slice's `status.md`
+as `docs/templates/status.md` says, then commit:
+
+- the header: `Phase`, and `Updated` (the time now, UTC)
+- the section the step changed
+- Needs human: add what now waits on the human; remove what no longer does
+- a Log line: time · who · what happened
 
 ## Part 1: integration
 
@@ -33,7 +44,9 @@ alone.
 ### 2. The integration review
 
 Start a code reviewer (`.agents/prompts/code-reviewer.md`) for an
-integration review, in a fresh context. It reads the spec, plan, tasks,
+integration review, in a fresh context, with its review file
+`reviews/integration-<round>.md`. Write its findings and their states in
+`status.md` → Findings → Integration review. It reads the spec, plan, tasks,
 the whole slice diff against `main`, and every deferred finding.
 
 - **high or medium finding:** becomes a fix task at the end of
@@ -41,7 +54,8 @@ the whole slice diff against `main`, and every deferred finding.
   with `flow-implementation`, then come back to step 1.
 - **Needs human decision:** ask the human, as in `flow-implementation`
   → Decisions.
-- **pass:** set the phase to `preview`.
+- **pass:** set the phase to `preview`, and fill `status.md` → Preview:
+  one line per check in `preview.md`, `not tried`.
 
 After the review round limit in `AGENTS.md`, the slice is `blocked`: ask
 the human what to do.
@@ -63,15 +77,16 @@ plain words:
 4. a few minutes to try it freely: one or two ideas of what to poke at,
    e.g. "try a name with spaces". Scripted checks miss what a real user
    does.
-5. every decision you made alone while building (from `status.md`), so
-   the human can disagree now
+5. every decision you made alone while building (`status.md` → Lead's
+   decisions), so the human can disagree now
 6. what was parked for later: the plan's Parked items, and findings
    deferred out of the slice
 
 ### 2. Record the results
 
 Write each check's result in `status.md` → Preview: `pass`, or `fail`
-with why.
+with why. A failed check also goes under Needs human until its fix task
+is done.
 
 - **A failed check:** a fix task. Back to `flow-implementation`, then
   Part 1 again, then the failed checks again.
@@ -100,13 +115,15 @@ slice is not done.
 
 ### 2. The human approves the result
 
-Ask the human to approve the result. Only the human approves. Never
+In `status.md` → Needs human: `The result is waiting for approval`. Ask
+the human to approve the result. Only the human approves. Never
 approve for them, even if asked to "just continue". Only a clear
 "approve" counts.
 
 When they approve:
 
-1. Add a Log line in `status.md` with their words.
+1. In `status.md`, remove the approval from Needs human, and add a Log
+   line with their words.
 2. Commit, and make an annotated tag on that commit,
    `flow/<name>/result/R001`. Its message quotes the human's approval.
    Write the message to a file and use `git tag -a -F <file>`.
@@ -132,7 +149,8 @@ Copy into `backlog.md` at the project root, in the form
 
 ### 5. Merge into main
 
-1. In `status.md`, set the phase to `done`. Commit.
+1. In `status.md`, set the phase to `done` and Updated, and add a Log
+   line. Commit.
 2. In the main checkout: check it is on `main` with no uncommitted
    changes. If not, stop and ask the human: it is their checkout.
 3. Merge with a merge commit: `git merge --no-ff slice/<name>`, with a

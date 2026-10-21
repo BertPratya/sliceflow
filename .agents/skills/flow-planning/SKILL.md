@@ -9,6 +9,16 @@ The slice was created by `flow-slice`. Work in its worktree, on
 `docs/slices/<name>/`. Read `docs/templates/spec.md` before writing the
 spec: its comments hold the spec's rules.
 
+## Keeping status.md
+
+After every step that changes something, update the slice's `status.md`
+as `docs/templates/status.md` says, then commit:
+
+- the header: `Phase`, and `Updated` (the time now, UTC)
+- the section the step changed
+- Needs human: add what now waits on the human; remove what no longer does
+- a Log line: time · who · what happened
+
 ## Part 1: the spec
 
 ### 1. Let the human propose
@@ -43,7 +53,8 @@ not say. Sort each missing point:
 ### 4. Ask the open questions, 3 at a time
 
 - Put every open question in the Open questions section first, numbered
-  Q1, Q2, ...
+  Q1, Q2, ... While a batch waits on the human, list it under Needs human
+  in `status.md`.
 - Ask them 3 at a time, the most important first: questions whose answer
   changes other questions, or the shape of the feature.
 - The next 3 come only after the human has dealt with all 3 of the batch.
@@ -60,8 +71,10 @@ not say. Sort each missing point:
 When every open question is answered or deferred:
 
 1. Set `spec.md` to `in_review` in `status.md`.
-2. Start a doc reviewer for a spec check (`AGENTS.md` → Tools per role).
-   Its prompt: read `.agents/prompts/doc-reviewer.md` and follow it.
+2. Start a doc reviewer for a spec check (`AGENTS.md` → Agents).
+   Its prompt: read `.agents/prompts/doc-reviewer.md` and follow it. Its
+   review file: `reviews/spec-<round>.md`, from `docs/templates/review.md`
+   with the front matter filled.
    It looks for conflicts and unresolved points in `spec.md`.
 3. The reviewer gives each finding a level:
    - **high:** needs the human's decision. Add it to Open questions.
@@ -69,6 +82,8 @@ When every open question is answered or deferred:
      and tell the human.
    - **low:** a small finding. Fix it or leave it, as you see fit. It
      never goes to Open questions.
+   Write each finding and its state in `status.md` → Findings → Doc
+   reviews.
 4. If there are high findings: set `spec.md` back to `draft`, ask the new
    questions as in step 4, then run the spec check again.
 5. If there are none: set `spec.md` to `review_passed`.
@@ -83,7 +98,6 @@ If writing the plan shows a gap in the spec, set `spec.md` back to
 `draft`, settle the gap as in steps 2-4, and run the spec check again. It
 counts as a round.
 
-Commit after every step that changes a file: `<name>: <what happened>`.
 When `spec.md` is `review_passed`, the plan can start.
 
 ## Part 2: the plan
@@ -94,7 +108,8 @@ write each one: their comments hold their rules.
 ### 1. Start the plan
 
 1. Copy `docs/templates/plan.md` and `docs/templates/preview.md` into the
-   slice folder. Fill their front matter.
+   slice folder. Fill their front matter: `slice`, and for the plan
+   `created` (today) and `touches`.
 2. In `preview.md`, write the fixed checks the preview template lists for
    the spec.
 3. In `status.md`, add `plan.md` and `preview.md` to the Documents table
@@ -127,18 +142,22 @@ step 6.
 
 When every open question is answered or deferred:
 
-1. Copy `docs/templates/tasks.md` into the slice folder, and write every
-   task.
-2. In `status.md`, add `tasks.md` to the Documents table as `draft`.
+1. Copy `docs/templates/tasks.md` into the slice folder, fill its front
+   matter (`slice`), and write every task.
+2. In `status.md`, add `tasks.md` to the Documents table as `draft`, and
+   fill the Tasks table: one row per task, status `todo`, Attempt and
+   Round `0`.
 
 ### 5. The plan review
 
 1. Set `plan.md`, `tasks.md`, and `preview.md` to `in_review`.
-2. Start a doc reviewer for a plan review (`AGENTS.md` → Tools per
-   role), told to read `.agents/prompts/doc-reviewer.md`. It checks the plan, tasks, and preview together, against the
-   spec.
+2. Start a doc reviewer for a plan review (`AGENTS.md` → Agents), told
+   to read `.agents/prompts/doc-reviewer.md`. Its review file:
+   `reviews/plan-<round>.md`. It checks the plan, tasks, and preview
+   together, against the spec.
 3. Sort its findings by level, as in the spec check: high to Open
-   questions, medium as a `(lead's call)`, low fixed or left.
+   questions, medium as a `(lead's call)`, low fixed or left. Write them
+   in `status.md` → Findings → Doc reviews.
 4. If there are high findings: set the documents they touch back to
    `draft`, ask the questions 3 at a time, and run the plan review again.
 5. If there are none: set the three documents to `review_passed`.
@@ -156,6 +175,7 @@ cannot approve while one is still open.
 
 ### 2. Ask the human to approve
 
+In `status.md` → Needs human: `The planning is waiting for approval`.
 Tell the human the planning is ready: the four documents, what each
 says in a few lines, and every `(lead's call)` you made. Ask them to read
 and approve.
@@ -171,10 +191,11 @@ review round. Then ask for approval again.
 
 ### 4. When the human approves
 
-1. In `status.md`: set the phase to `ready`, and set `spec.md`,
-   `plan.md`, `tasks.md`, and `preview.md` to `approved`, with Revision
-   `R001` and the date, the human, and the tag in Approved. Add a Log
-   line with the human's words.
+1. In `status.md`: set the phase to `ready` and Updated, and set
+   `spec.md`, `plan.md`, `tasks.md`, and `preview.md` to `approved`, with
+   Revision `R001` and the date, the human, and the tag in Approved.
+   Remove the approval from Needs human. Add a Log line with the human's
+   words.
 2. Commit: `<name>: planning approved`.
 3. Make one annotated tag on that commit, `flow/<name>/planning/R001`.
    Its message names the four documents and quotes the human's approval.

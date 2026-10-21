@@ -39,7 +39,7 @@
      - todo: not started. In brackets, why it cannot start yet, e.g.
        todo (waiting: 04, 06).
      - doing: a worker is building it.
-     - in review: a reviewer is checking it.
+     - in_review: a reviewer is checking it.
      - done: reviewed (or not needed, for low risk) and merged into the
        slice branch.
      - blocked: stopped; the reason is under Needs human.
@@ -123,8 +123,8 @@
 
 ## Findings
 
-<!-- A count line, then one table per review kind: Plan review, Task
-     reviews, Integration review. A kind with no reviews yet: None.
+<!-- A count line, then one table per review kind: Doc reviews (spec
+     check, plan review, change reviews), Task reviews, Integration review. A kind with no reviews yet: None.
      Open findings first, then closed ones; closed findings are kept.
      The finding's text stays in its review file; only its state is here.
 
@@ -139,7 +139,7 @@
 
 Open: {{N}} · Waiting for verify: {{N}} · Closed: {{N}}
 
-### Plan review
+### Doc reviews
 
 None.
 
@@ -150,6 +150,18 @@ None.
 ### Integration review
 
 None.
+
+## Lead's decisions
+
+<!-- Every decision the lead made alone while building: it changes no
+     approved document. One line each: the task, what, and why. Shown to
+     the human at the preview.
+
+     Example:
+     - 03: the sort keeps tasks with the same date in input order. Why:
+       the spec gives no order, and input order is what users see today. -->
+
+- {{task}}: {{what}}. Why: {{why}}
 
 ## Preview
 
