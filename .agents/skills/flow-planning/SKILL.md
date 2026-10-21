@@ -1,6 +1,6 @@
 ---
 name: flow-planning
-description: Runs a slice's planning phase with the human: the spec, the plan, tasks, and preview, their reviews, and the one approval. Use when a slice is in its planning phase, or when the human wants to write or change a slice's spec.
+description: Runs a slice's planning phase with the human (the spec, the plan, tasks, and preview, their reviews, and the one approval). Use when a slice is in its planning phase, or when the human wants to write or change a slice's spec.
 ---
 
 # flow-planning
