@@ -56,7 +56,7 @@ tasks will build.
   failing.
 - Check every finding still deferred. A deferred high finding not fixed is
   a new high finding.
-- Check no merge lost or undid another task's work:
+- Check no update from the base branch lost or undid the slice's work:
   `git log --merges <base>..<slice branch>`, and
   `git show --remerge-diff <merge>` for each merge with a conflict.
 - Look for problems no single task could see: parts that disagree,

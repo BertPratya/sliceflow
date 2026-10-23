@@ -33,6 +33,7 @@ read its skill and follow it:
 | The human asks for a new slice | `.agents/skills/start-slice/SKILL.md` |
 | A slice is in `planning` | `.agents/skills/plan-slice/SKILL.md` |
 | A slice is `ready` or `implementing` | `.agents/skills/build-slice/SKILL.md` |
+| A slice is in `integration` or `preview` | `.agents/skills/finish-slice/SKILL.md` |
 
 Until flow's first release, run this repo with these skills. Use the
 `flow` binary only in tests, on temporary repos.
@@ -94,7 +95,8 @@ If a type is not loaded, use `general-purpose`: the prompt names the file.
 - A new dependency.
 - A change to CI, the hooks, or a stored file format.
 - Anything that needs secrets.
-- Every merge into `main`.
+- Every merge into `main`. For a slice, the human's approval of the
+  result counts.
 - A push that does not follow a merge.
 
 **Never:**
