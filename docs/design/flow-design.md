@@ -590,6 +590,28 @@ indents; Markdown alone cannot hold exact fields; JSON and XML cost more
 and are harder to read and write), and TOON (made for large tables; our
 files are small). The exact form of each file is settled in its slice.
 
+### 1.13c Reading documents, and Spec Kit later (decided, the human, 2026-10-23)
+
+- **flow keeps its own format.** The human compared it with GitHub Spec
+  Kit and prefers flow's format.
+- **All Markdown reading lives in one Go package.** It turns a document
+  into plain data: requirements, scenarios, tasks, `touches`. The rest of
+  `flow` uses only that data and never looks at headings. The rules for
+  reading (which heading holds what, what an ID looks like) live in one
+  place, apart from the template text.
+- **Why:** it keeps two later features cheap: support for Spec Kit
+  projects (a second reader), and templates a project can change (1.10).
+  Without it, both would mean changing the whole codebase.
+- **Spec Kit later, not before the first release.** First a one-time
+  import of a Spec Kit feature into a slice. Its tasks have no `touches`,
+  so the human fills them in. Reading Spec Kit files directly, and
+  configurable templates, come after that.
+- Research (2026-10-23): Spec Kit numbers requirements `FR-001`, success
+  criteria `SC-001`, and tasks `T001`, marks parallel tasks with `[P]`,
+  and has no list of the files a task may change. Its templates can be
+  overridden per project, and by installed presets.
+  https://github.com/github/spec-kit
+
 ### 1.14 Not clear yet
 
 **Principles, to settle here** (they cut across slices): none left.
