@@ -5,11 +5,12 @@ slice: {{slice}}
 <!-- HOW TO FILL THIS TEMPLATE
 
      tasks.md holds every task of the slice: one section per task. Write
-     it after plan.md is designed and every Open question left is deferred. The
-     human approves plan.md and tasks.md together.
+     it after plan.md is designed and its Open questions say None. The
+     human approves it with the spec, plan, and preview, in one approval.
 
      Each task is built by one worker: an agent with a fresh context.
-     flow gives each worker a brief, built from the links in this file:
+     The lead gives each worker a brief, built from the links in this
+     file:
      - its own task's section
      - the exact text of the requirements in covers
      - the spec's scenarios whose Shows: names one of those requirements
@@ -61,9 +62,9 @@ slice: {{slice}}
        depends_on.
      - One task is one reviewable commit: about an hour of work, or a
        few hundred lines. Bigger? Split it into two tasks.
-     - Keep each brief short. flow builds every brief while it validates
-       the plan, and warns when one is over a set size (about 1,500
-       words by default). Then split the task, or trim what it follows.
+     - Keep each brief short: about 1,500 words at most, counting what
+       its links bring in. The plan review estimates it. Over that:
+       split the task, or trim what it follows.
 
      Changing tasks:
      - Task ids are two digits: 01, 02, ... Before the first approval,
@@ -71,12 +72,12 @@ slice: {{slice}}
        reuse an id: a removed task leaves its number unused, and a new
        task goes at the end with the next free number. The order of work
        comes from depends_on, not from the order in this file.
-     - To add, remove, or rename tasks, edit this file. There is nothing
-       else to update.
+     - Before approval, to add, remove, or rename tasks, edit this file
+       and the Tasks table in status.md.
 
      Filling the template:
-     - Replace every {{...}} with real text. flow fills slice
-       itself. If they still show {{...}}, fill them yourself.
+     - Replace every {{...}} with real text. The lead fills slice when
+       it copies this template.
      - Copy the whole ## Task block once per task.
      - Each part has a comment like this one with its rules. Follow it.
      - Three parts of a task are optional: Interfaces, Copy the style of, and

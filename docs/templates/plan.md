@@ -10,16 +10,17 @@ touches:
      A plan says HOW the spec will be built: the parts that
      change, the flows, the interfaces, the data, the tests, and the
      decisions. The tasks go in tasks.md, written after this plan is
-     designed and every Open question left is deferred. The human approves both
-     together.
+     designed and its Open questions say None. The human approves the
+     spec, plan, tasks, and preview together, in one approval.
 
      The plan never adds scope. Anything not in the spec needs a spec
      change first. If the spec leaves out something the user sees (an
      output layout, an exit code, a message), don't decide it here: add
      an Open question, so the spec is changed.
 
-     The human approves the plan. Write plain English, short sentences,
-     one idea per sentence.
+     Write plain English, short sentences, one idea per sentence. A
+     point the lead decided alone ends with (lead's call); the human sees
+     every one at approval.
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**TD1.**, **Q1.**), the labeled lines
@@ -29,8 +30,8 @@ touches:
      indent the extra lines 2 spaces more than the label.
 
      - Replace every {{...}} with real text. The text inside says what
-       goes there. flow fills slice and date itself. If they
-       still show {{...}}, fill them yourself.
+       goes there. The lead fills slice and created when it copies
+       this template.
      - Each section has a comment like this one with its rules. Follow it.
      - The ## sections are fixed. Add ### subsections freely, except in
        Flows and Interfaces, which have their own ### rules.
@@ -259,8 +260,8 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
      ideas: don't repeat an item the spec's Out of scope already sends
      to the backlog.
 
-     When the slice is done, flow copies each idea into backlog.md, word
-     for word, with where it came from. So:
+     Each idea is also added to docs/slices/backlog.md on main at once,
+     as plan-slice says. So:
      - One - bullet per idea. Start each idea with what it is.
      - Lines indented under a bullet belong to that idea.
      - No sub-bullets, headings, or code blocks.
@@ -276,7 +277,7 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
 
 <!-- Questions for the human, numbered Q1, Q2, ... An answered question
      is written into the plan and removed from here. A deferred question
-     stays, marked Deferred. The plan review starts when every question
-     left here is deferred; with none left, this section says None. -->
+     that does not block the build moves to Parked and the backlog.
+     The tasks are written only when this section says None. -->
 
 - **Q1.** {{A question for the human.}}

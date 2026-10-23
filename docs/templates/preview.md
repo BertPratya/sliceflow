@@ -5,9 +5,9 @@ slice: {{slice}}
 <!-- HOW TO FILL THIS TEMPLATE
 
      The preview file says how the human tries the slice at the preview.
-     flow creates it when the spec review passes (see below); the lead
-     fills it during the plan phase; the human approves it together with
-     the plan.
+     The lead creates it when the plan starts, right after the spec
+     review passes, and fills it along with the plan. The human approves
+     it with the spec, plan, and tasks, in one approval.
 
      flow reads this file. Keep every marker exactly as shown: the
      headings, the check numbers (### P1.), and the labeled lines
@@ -16,27 +16,27 @@ slice: {{slice}}
      the label.
 
      The fixed part comes from the spec alone, so it is written as soon
-     as the spec review passes: flow creates this file then, with one
-     ### P check, its number, title, and Covers: line, for each of these:
+     as the spec review passes: the lead writes one ### P check, its
+     number, title, and Covers: line, for each of these:
      - the first scenario of each story that is not removed, its main
        success case, e.g. Covers: S1. Tests prove the code does what the
        tasks say; this check lets the human see it does what they meant.
      - each requirement with Check: manual.
      - each success criterion (SC1, ...).
-     When the spec review passes again after a change, flow adds checks for
-     new items. It never deletes text you wrote, and it reports a check
+     When the spec changes later, the lead adds checks for new items,
+     keeps the text already written, and tells the human about a check
      whose item was removed.
 
-     You write the setup, the steps, and the Expect: lines, during the
-     plan phase. You may add more checks; number them after the last.
+     The lead writes the setup, the steps, and the Expect: lines while
+     writing the plan. More checks may be added; number them after the
+     last.
 
-     - Replace every {{...}} with real text. flow fills slice
-       itself. If they still show {{...}}, fill them
-       yourself.
+     - Replace every {{...}} with real text. The lead fills slice when
+       it copies this template.
      - Write plain English, short sentences. The human follows these
        steps by hand, so each step is one thing to do.
-     - Results are not written here. The human reports them through flow,
-       e.g. flow preview fail P2 "the date shows wrong".
+     - Results are not written here. The human tells the lead, who
+       writes them in status.md → Preview.
      - When you are done, delete every comment and check that no {{ is
        left. Every placeholder of this template counts, even inside
        code. A {{ or a comment marker you write yourself inside a code
