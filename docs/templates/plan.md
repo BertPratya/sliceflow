@@ -260,7 +260,7 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
      ideas: don't repeat an item the spec's Out of scope already sends
      to the backlog.
 
-     Each idea is also added to docs/slices/backlog.md on main at once,
+     Each idea is also added to docs/backlog.md on main at once,
      as plan-slice says. So:
      - One - bullet per idea. Start each idea with what it is.
      - Lines indented under a bullet belong to that idea.

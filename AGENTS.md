@@ -139,7 +139,7 @@ If a type is not loaded, use `general-purpose`: the prompt names the file.
 ## Where things live
 
 - `docs/slices/<name>/`: one slice; its state is in `status.md`.
-- `docs/slices/backlog.md`: the backlog, on `main`.
+- `docs/backlog.md`: the backlog, on `main`.
 - `docs/ideas/`: agreed ideas, and their index.
 - `docs/templates/`: the document templates; their comments hold the rules.
 - `docs/design/`: the design and the roadmap.

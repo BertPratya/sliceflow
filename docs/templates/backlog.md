@@ -2,7 +2,7 @@
 
 <!-- HOW TO FILL THIS FILE
 
-     The backlog is docs/slices/backlog.md, on main: ideas and known
+     The backlog is docs/backlog.md, on main: ideas and known
      gaps for later, in one table. Add an item on main as soon as it
      comes up, so every slice can see it.
 

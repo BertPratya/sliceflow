@@ -121,7 +121,7 @@ The spec part is done when `status.md` shows `spec.md` as
 
 ### The backlog
 
-The backlog is `docs/slices/backlog.md`, on `main`. Add an item at once,
+The backlog is `docs/backlog.md`, on `main`. Add an item at once,
 so every slice can see it:
 
 1. In the main checkout, check it is on `main`. If not, stop and ask the

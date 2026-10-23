@@ -157,7 +157,7 @@ When they approve:
    changes. If not, stop and ask the human: it is their checkout.
 3. `git merge --no-ff slice/<name>`, with a message naming the slice and
    what it does.
-4. The backlog, `docs/slices/backlog.md`: every open item this slice
+4. The backlog, `docs/backlog.md`: every open item this slice
    built gets status `closed`, Closed by `slice <name>`. Check that every
    Parked item, every Out of scope item marked `Goes to: the backlog`,
    and every finding deferred to the backlog has a row; add any missing.

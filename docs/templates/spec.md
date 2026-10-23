@@ -229,7 +229,7 @@ ideas:
      end of the line. No sub-bullets, headings, or code blocks.
 
      An item that goes to the backlog is also added to
-     docs/slices/backlog.md on main at once, as plan-slice says.
+     docs/backlog.md on main at once, as plan-slice says.
 
      Example:
      - Reminders and notifications. Goes to: the backlog
