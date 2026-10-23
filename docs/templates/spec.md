@@ -2,6 +2,8 @@
 slice: {{slice}}
 title: {{title}}
 created: {{date}}
+ideas:
+  - {{an idea file this slice builds on, e.g. docs/ideas/2026-10-23-due-dates.md; none: ideas: []}}
 ---
 
 <!-- HOW TO FILL THIS TEMPLATE
@@ -25,6 +27,8 @@ created: {{date}}
      - Replace every {{...}} with real text. The text inside says what
        goes there. flow fills slice, title, and date itself. If they
        still show {{...}}, fill them yourself.
+     - ideas: the idea files from docs/ideas/ this slice builds on.
+       Start the Summary and Why from them. None: ideas: []
      - The title of the slice lives only in this front matter. Don't
        repeat it in a heading or in other files.
      - Each section has a comment like this one with its rules. Follow it.

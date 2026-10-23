@@ -98,5 +98,4 @@ without reading every file. One row per idea, newest first:
 ## 6. Then
 
 Suggest the next step in one line, e.g. "When you want, this can become a
-slice." The human starts it; `flow-slice` takes the idea file as its
-input.
+slice." The human starts it, with `start-slice`.
