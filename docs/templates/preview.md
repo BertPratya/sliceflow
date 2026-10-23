@@ -9,7 +9,7 @@ slice: {{slice}}
      review passes, and fills it along with the plan. The human approves
      it with the spec, plan, and tasks, in one approval.
 
-     flow reads this file. Keep every marker exactly as shown: the
+     sliceflow reads this file. Keep every marker exactly as shown: the
      headings, the check numbers (### P1.), and the labeled lines
      (Covers:, Expect:). Don't rename or reorder them. A labeled line
      may go on over more lines: indent the extra lines 2 spaces more than
@@ -74,16 +74,16 @@ slice: {{slice}}
 
      Covers: S1
 
-     1. Run `flow slice new checkout` in the test repo.
+     1. Run `sliceflow slice new checkout` in the test repo.
         Expect: "Created slice checkout." and the path to its spec.md.
 
      ### P2. A plan runs with no lead action
 
      Covers: SC1
 
-     1. Run `flow run` on the test repo.
+     1. Run `sliceflow run` on the test repo.
         Expect: all 5 tasks finish, and the lead is never called.
-     2. Run `flow status`.
+     2. Run `sliceflow status`.
         Expect: the slice is in the preview phase. -->
 
 ### P1. {{short title}}

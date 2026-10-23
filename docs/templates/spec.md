@@ -16,7 +16,7 @@ ideas:
      The human approves the spec. Write plain English, short sentences,
      one idea per sentence.
 
-     flow reads this file. Keep every marker exactly as shown: the
+     sliceflow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**R1.**, **S1.**, **SD1.**, **SC1.**, **Q1.**), and the
      labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:, Cost:, Rule:,
      Noticed:,
@@ -25,7 +25,7 @@ ideas:
      the label. Goes to: is the exception: it ends a one-line item.
 
      - Replace every {{...}} with real text. The text inside says what
-       goes there. flow fills slice, title, and date itself. If they
+       goes there. sliceflow fills slice, title, and date itself. If they
        still show {{...}}, fill them yourself.
      - ideas: the idea files from docs/ideas/ this slice builds on.
        Start the Summary and Why from them. None: ideas: []
@@ -122,17 +122,17 @@ ideas:
 
      A developer starts work on a new feature with one command.
 
-     - **S1.** **When** I run `flow slice new checkout`,
-       **Then** flow creates the slice and says where to write the spec:
+     - **S1.** **When** I run `sliceflow slice new checkout`,
+       **Then** sliceflow creates the slice and says where to write the spec:
        ```
-       $ flow slice new checkout
+       $ sliceflow slice new checkout
        Created slice checkout.
        Next: write the spec in docs/slices/checkout/spec.md
        ```
        Shows: R1, R2
      - **S2.** **Given** a slice named `checkout` already exists,
-       **When** I run `flow slice new checkout`,
-       **Then** flow changes nothing and prints
+       **When** I run `sliceflow slice new checkout`,
+       **Then** sliceflow changes nothing and prints
        "Error: slice checkout already exists. Nothing was changed."
        Shows: R3 -->
 
@@ -179,7 +179,7 @@ ideas:
        - The <system> shall <response>.
        Two keywords may be combined when a rule needs both, e.g.
        While <state>, when <trigger>, the <system> shall <response>.
-       For <system>, use the product's name, e.g. flow.
+       For <system>, use the product's name, e.g. sliceflow.
      - Name exact values: the message printed, the limit, the exit
        code. A worker sees this text, so "say so" is not enough.
      - One behavior per requirement.
@@ -201,14 +201,14 @@ ideas:
      Example:
      ### Errors
 
-     - **R3.** If a slice with that name already exists, then flow shall
+     - **R3.** If a slice with that name already exists, then sliceflow shall
        change nothing and print "Error: slice <name> already exists.
        Nothing was changed."
        Check: e2e
 
      ### Settings
 
-     - **R9.** Where task review is turned off, flow shall merge a task
+     - **R9.** Where task review is turned off, sliceflow shall merge a task
        without starting a reviewer.
        Check: e2e -->
 
@@ -249,7 +249,7 @@ ideas:
      - Each one has a Rule: line. A worker sees requirements, not
        decisions. So a decision that changes what the feature does is
        also written as a requirement, and Rule: names it, e.g. Rule: R11.
-       A decision that changes no behavior says Rule: none. flow checks
+       A decision that changes no behavior says Rule: none. sliceflow checks
        that every decision has this line, and that it names a real
        requirement.
      - To replace a decision from an earlier slice, add Replaces: with

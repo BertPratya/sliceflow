@@ -1,5 +1,5 @@
 ---
-name: flow-worker
+name: sliceflow-worker
 description: Implements exactly one task. Use when the lead starts a worker for a task.
 ---
 

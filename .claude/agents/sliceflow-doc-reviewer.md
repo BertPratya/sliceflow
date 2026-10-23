@@ -1,5 +1,5 @@
 ---
-name: flow-doc-reviewer
+name: sliceflow-doc-reviewer
 description: Runs a spec check, plan review, or change review of a slice's documents. Use when the lead starts a document review.
 ---
 

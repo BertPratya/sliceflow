@@ -1,7 +1,7 @@
 # AGENTS.md
 
-flow is a command-line tool that runs a spec-driven workflow with AI coding
-agents. Go, in `cmd/flow/` and `internal/`. It runs on Windows, macOS, and
+sliceflow is a command-line tool that runs a spec-driven workflow with AI coding
+agents. Go, in `cmd/sliceflow/` and `internal/`. It runs on Windows, macOS, and
 Linux.
 
 ## How we work
@@ -35,8 +35,8 @@ read its skill and follow it:
 | A slice is `ready` or `implementing` | `.agents/skills/build-slice/SKILL.md` |
 | A slice is in `integration` or `preview` | `.agents/skills/finish-slice/SKILL.md` |
 
-Until flow's first release, run this repo with these skills. Use the
-`flow` binary only in tests, on temporary repos.
+Until sliceflow's first release, run this repo with these skills. Use the
+`sliceflow` binary only in tests, on temporary repos.
 
 ## Commands
 
@@ -49,7 +49,7 @@ Run in the repo root, or the slice worktree. Only a full run counts.
   - `go vet ./...`
   - `go test ./...`
   - `go build ./...`
-- Run locally, for a preview: `go run ./cmd/flow <command>`, against a
+- Run locally, for a preview: `go run ./cmd/sliceflow <command>`, against a
   temporary test repo.
 
 Markdown files have no automatic checks; reviewers read them.
@@ -77,9 +77,9 @@ prompt file and follow it, and names the worktree and the target.
 | Agent | What it does | Prompt file | How to start | Model |
 |---|---|---|---|---|
 | Lead | The main chat: runs the skills, talks to the human, keeps `status.md`, commits | - | - | the human's choice |
-| Doc reviewer | Reviews the spec; the plan, tasks, and preview together; a change after a human decision | `.agents/prompts/doc-reviewer.md` | Agent tool, type `flow-doc-reviewer` | `opus` |
-| Code reviewer | Reviews one task's code; the whole slice at the end | `.agents/prompts/code-reviewer.md` | Agent tool, type `flow-code-reviewer` | `opus` |
-| Worker | Builds one task | `.agents/prompts/worker.md` | Agent tool, type `flow-worker` | `sonnet` |
+| Doc reviewer | Reviews the spec; the plan, tasks, and preview together; a change after a human decision | `.agents/prompts/doc-reviewer.md` | Agent tool, type `sliceflow-doc-reviewer` | `opus` |
+| Code reviewer | Reviews one task's code; the whole slice at the end | `.agents/prompts/code-reviewer.md` | Agent tool, type `sliceflow-code-reviewer` | `opus` |
+| Worker | Builds one task | `.agents/prompts/worker.md` | Agent tool, type `sliceflow-worker` | `sonnet` |
 
 If a type is not loaded, use `general-purpose`: the prompt names the file.
 
@@ -107,7 +107,7 @@ If a type is not loaded, use `general-purpose`: the prompt names the file.
 - Move or delete an approval tag. Edit a submitted review.
 - Force-push, or rewrite shared history.
 - Use a bare `git stash`.
-- Make flow send data to any outside service.
+- Make sliceflow send data to any outside service.
 
 ## Git
 
@@ -128,7 +128,7 @@ If a type is not loaded, use `general-purpose`: the prompt names the file.
 - Shared Go logic goes in `internal/`, not `cmd/`.
 - Every change that adds behavior adds a test. Tests create their own
   temporary git repos; never use shared services.
-- flow sends no data out: no telemetry, no uploads, no calls home. It reads
+- sliceflow sends no data out: no telemetry, no uploads, no calls home. It reads
   and writes repo files, and runs local programs (git, the checks, the
   agent tools).
 - Run each check or git command as its own process with its own arguments,

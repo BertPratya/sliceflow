@@ -25,7 +25,7 @@ The checks already passed. Do not check formatting or types again.
 - the diff of the whole slice against the base branch
 - every finding still deferred (`status.md` → Findings)
 - the documents against the latest approval tag,
-  `flow/<name>/planning/R00N`: since that tag, `tasks.md` may only have
+  `sliceflow/<name>/planning/R00N`: since that tag, `tasks.md` may only have
   gained fix tasks at the end and wider `touches`. Any other change is a
   high finding.
 

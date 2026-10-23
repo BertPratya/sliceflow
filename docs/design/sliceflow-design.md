@@ -1,7 +1,7 @@
-# flow design (brainstorm)
+# sliceflow design (brainstorm)
 
 > **Status: brainstorm, not approved.** This is where we design the
-> orchestration workflow that the `flow` command runs, one process at a time.
+> orchestration workflow that the `sliceflow` command runs, one process at a time.
 > When it is settled, it is cut into slices, and each slice gets its spec.
 >
 > It replaces `docs/pipeline-sketch.md` as the main design document.
@@ -19,7 +19,7 @@ We go through the workflow one process at a time. For each process:
 2. **The lead consults.** How it works today (the sketch, the workflow
    files), 2-3 real options with trade-offs, what other tools do, risks.
 3. **We talk** until it feels right.
-4. **The lead writes a short section** here: what `flow` does, its commands,
+4. **The lead writes a short section** here: what `sliceflow` does, its commands,
    its events, what it shows. The human reads it.
 5. **Questions come only now**, for what is still unclear. One at a time,
    each explained.
@@ -37,7 +37,12 @@ are settled in each slice's spec, when that slice is built.
 
 ### 1.1 The vision (from the human, 2026-10-18)
 
-flow-cli is a tool for development automation.
+sliceflow is a tool for development automation.
+
+**The name (decided, the human, 2026-10-23):** `sliceflow`, one word, no
+dash. It was `flow`, but two other tools already install a program called
+`flow` (Meta's JavaScript type checker, and the Flow blockchain's tools).
+Prose may write it SliceFlow; the command is `sliceflow`.
 
 The workflow has **4 phases: spec, plan, implement, preview.**
 
@@ -49,8 +54,8 @@ checks, updates the status, and commits.
 `main`** (the human, 2026-10-18). What comes after, such as pushing to a
 remote, is outside it.
 
-The new idea: **the pipeline orchestrates itself.** `flow` holds the
-control flow. The lead is a **fallback**, called only when `flow` cannot go
+The new idea: **the pipeline orchestrates itself.** `sliceflow` holds the
+control flow. The lead is a **fallback**, called only when `sliceflow` cannot go
 on by itself. The goal is a workflow that is efficient and automatic.
 
 ### 1.2 Lead-orchestrated or hybrid? (research, 2026-10-18)
@@ -59,16 +64,16 @@ Two ways to run the same workflow:
 
 - **A. Lead-orchestrated (today).** An AI agent reads the rules and decides
   each step.
-- **B. Hybrid.** `flow` runs the steps as fixed code. An AI agent is called
-  only when `flow` stops.
+- **B. Hybrid.** `sliceflow` runs the steps as fixed code. An AI agent is called
+  only when `sliceflow` stops.
 
-| | A. Lead orchestrates | B. Hybrid: `flow` + lead as fallback |
+| | A. Lead orchestrates | B. Hybrid: `sliceflow` + lead as fallback |
 |---|---|---|
 | Same input, same steps? | No. A model can skip a step or bend a rule, even at temperature 0. | Yes. The rules are code, and tests prove them. |
 | Cost | Tokens on every routine step (start a worker, run checks, update status). | Tokens only on real work (spec, code, reviews) and on stops. |
-| Long runs | The lead's context fills. Today the lead must suggest a fresh session after about 5 tasks. | `flow` has no context to fill. Each agent starts fresh. |
-| State | Kept by hand in `status.md`. It can drift from what really happened. | Written by `flow` at each step, from what really happened. |
-| Unusual cases | Handled well: the lead can think. | `flow` stops and calls the lead. Only as good as the stop rules. |
+| Long runs | The lead's context fills. Today the lead must suggest a fresh session after about 5 tasks. | `sliceflow` has no context to fill. Each agent starts fresh. |
+| State | Kept by hand in `status.md`. It can drift from what really happened. | Written by `sliceflow` at each step, from what really happened. |
+| Unusual cases | Handled well: the lead can think. | `sliceflow` stops and calls the lead. Only as good as the stop rules. |
 | Work to build | Little: Markdown rules. | More: every rule must be designed and coded. |
 
 **What the sources say:**
@@ -90,7 +95,7 @@ Two ways to run the same workflow:
 **Lead's recommendation: B, hybrid.** Our workflow is well-defined. Its rules
 are already written (`workflow/formats/lifecycle.md`, the stop rules in
 `AGENTS.md`). The parts that need judgment stay with agents: writing a spec,
-writing code, reviewing. The parts that follow rules move into `flow`.
+writing code, reviewing. The parts that follow rules move into `sliceflow`.
 
 ### 1.3 Three kinds of work
 
@@ -98,12 +103,12 @@ This follows from 1.2:
 
 | Kind | Who | Examples |
 |---|---|---|
-| Rules | `flow` | pick the next task, start a worker, run the checks, count failures, merge, update status |
+| Rules | `sliceflow` | pick the next task, start a worker, run the checks, count failures, merge, update status |
 | Judgment | agents (lead, workers, reviewers) | write the spec, write code, review, answer a blocked task when the answer is in an approved document |
 | Decisions | the human | approve, choose between options, accept a risk |
 
-The fallback rule: `flow` calls the lead only when a step needs judgment and
-no worker or reviewer owns it. The lead acts through `flow` commands, so the
+The fallback rule: `sliceflow` calls the lead only when a step needs judgment and
+no worker or reviewer owns it. The lead acts through `sliceflow` commands, so the
 state stays correct.
 
 ### 1.4 Phases and lifecycle (from the human, 2026-10-18)
@@ -147,12 +152,12 @@ Lead's notes, to talk about (not decided):
 
 ### 1.5 One autonomous run (from the human, 2026-10-18)
 
-After the human approves the plan, `flow` runs by itself. How far it goes is
+After the human approves the plan, `sliceflow` runs by itself. How far it goes is
 **configurable**, with two choices:
 
 - **To preview:** build every task, review it, merge it, run the
   integration review, then wait for the human at preview.
-- **Preview prepared:** the same, and `flow` also prepares the preview for
+- **Preview prepared:** the same, and `sliceflow` also prepares the preview for
   the human (for example a test repo and the list of things to try).
 
 There is no "build only" choice. The run is autonomous, so it always goes at
@@ -163,11 +168,11 @@ least as far as preview.
 When something goes wrong during a run, it climbs 3 levels:
 
 ```
-flow  ──can't──▶  lead  ──can't──▶  human
+sliceflow  ──can't──▶  lead  ──can't──▶  human
 ```
 
-1. **flow:** if `flow` can handle it, it does.
-2. **lead:** if not, `flow` sends it to the lead. If the lead can handle
+1. **sliceflow:** if `sliceflow` can handle it, it does.
+2. **lead:** if not, `sliceflow` sends it to the lead. If the lead can handle
    it, it does.
 3. **human:** if the lead can't, or it needs a person, it goes to the human.
 
@@ -206,11 +211,11 @@ that builds each part (section 0).
    lowest level that has the authority. A reviewer's question for the human
    goes to the human, not through the lead first: the lead could not decide
    it, and passing it through costs time and tokens.
-3. **Each level tries once.** `flow` uses its counters. The lead gets one
+3. **Each level tries once.** `sliceflow` uses its counters. The lead gets one
    try per case. If the same problem comes back after the lead's fix, it
    goes to the human. No loops.
-4. **`flow` enforces what the lead may do.** When `flow` starts a fallback
-   lead, it marks it as such. `flow` refuses commands only the human may
+4. **`sliceflow` enforces what the lead may do.** When `sliceflow` starts a fallback
+   lead, it marks it as such. `sliceflow` refuses commands only the human may
    cause: approve, reject, accept a high finding, cancel. The chat lead may
    run them only with the human's words (`--human "approved, go"`), which go
    into the event.
@@ -219,13 +224,13 @@ that builds each part (section 0).
    recommendation; and what happens meanwhile ("the run goes on with tasks
    03 and 05").
 6. **The human is not paged.** Cases for the human wait in one "Needs you"
-   list at the top of `status.md`, the dashboard, and `flow status`. The run
+   list at the top of `status.md`, the dashboard, and `sliceflow status`. The run
    goes on with everything that does not depend on them. When a chat lead
    is open, it tells the human.
 
 **Who handles what** (a first version; each slice settles its rows):
 
-| Stop | flow | lead | human |
+| Stop | sliceflow | lead | human |
 |---|---|---|---|
 | Passing failure (network, rate limit, the tool crashed) | waits and retries | — | told if it lasts (for example 30 min): the lead cannot fix a network |
 | Checks fail (counter, for example 3) | new attempt | cause visible → a hint, retry once | cause unclear, or the hint did not help |
@@ -236,7 +241,7 @@ that builds each part (section 0).
 | Reviewer: "needs the human" | — | — | decides |
 | High finding to leave unfixed, or moved out of the slice | — | — | decides |
 | New dependency, secret, CI change | — | — | decides |
-| `flow` itself broken (a bad event log, an internal error) | stops safely | must not repair the log by hand | decides |
+| `sliceflow` itself broken (a bad event log, an internal error) | stops safely | must not repair the log by hand | decides |
 
 ### 1.7 Monitoring, reliability, parallel slices (from the human, 2026-10-18)
 
@@ -246,7 +251,7 @@ slice: what is happening now, which step, failures, what is blocked, and why.
 **Agents.** Maybe also every AI agent that is running: who is working now,
 on what. (The human is not sure yet if this is needed.)
 
-**Reliability.** `flow` must handle stopping unexpectedly: the program is
+**Reliability.** `sliceflow` must handle stopping unexpectedly: the program is
 killed, the computer restarts, or an agent stops (for example the internet
 connection drops while a worker is working). The human must see that it
 stopped, and why. If possible, the system recovers by itself.
@@ -256,43 +261,43 @@ same time.
 
 **Lead's proposal, to talk about** (not decided):
 
-One design choice carries all four: **`flow` writes down every step before
+One design choice carries all four: **`sliceflow` writes down every step before
 and after it does it** (an event log). The dashboard reads that log. Recovery
 reads that log. Nothing else is needed for either.
 
 1. **Event log.** `task.started` is written before the worker starts;
    `task.handed_in` after. On restart, anything started but not finished was
    interrupted. (Durable execution systems like Temporal work this way.)
-2. **Check reality on restart.** `flow` compares the log with what is
+2. **Check reality on restart.** `sliceflow` compares the log with what is
    really there: branches, worktrees, commits, running processes. It repairs
    the difference: resume, restart the task (its work is kept on the branch),
    or report it. (Kubernetes works this way: "what should be" against "what is".)
-3. **Heartbeat.** While an agent runs, `flow` records that it is alive and
-   when it last did something. Dead or silent too long → `flow` knows, and
+3. **Heartbeat.** While an agent runs, `sliceflow` records that it is alive and
+   when it last did something. Dead or silent too long → `sliceflow` knows, and
    says so.
 4. **Two kinds of failure.**
-   - *Passing* (network down, rate limit, the agent tool crashed): `flow`
+   - *Passing* (network down, rate limit, the agent tool crashed): `sliceflow`
      waits and retries by itself. It does not count as the task failing.
    - *Real* (checks fail, review fails): the counters and the ladder (1.6).
 5. **Two kinds of state.**
    - *History* (what happened to the slice): kept with the slice, in git.
    - *Live* (which process runs, last heartbeat): local only, not in git.
-6. **Agents view.** `flow` starts every agent itself, so it already knows
+6. **Agents view.** `sliceflow` starts every agent itself, so it already knows
    who runs where. Recording it costs little: role, slice, task, tool and
    model, started, last activity.
 7. **Parallel slices.** Each slice has its own run and its own lock.
    Merges into `main` still happen one at a time.
-8. **Dashboard.** First `flow status` in the terminal (with a live mode).
+8. **Dashboard.** First `sliceflow status` in the terminal (with a live mode).
    A web view later, reading the same data.
 
 What is easy, and what is hard:
 
 | Part | Effort | Why |
 |---|---|---|
-| Event log, `flow status` | easy | append a line, read the lines |
-| Agents view | easy | `flow` starts every agent anyway |
+| Event log, `sliceflow status` | easy | append a line, read the lines |
+| Agents view | easy | `sliceflow` starts every agent anyway |
 | Detect a stop, show the reason | medium | the reason depends on what the agent tool reports (exit code, last output) |
-| Recover after `flow` itself is killed | medium | every step must be safe to run twice; check reality on restart |
+| Recover after `sliceflow` itself is killed | medium | every step must be safe to run twice; check reality on restart |
 | Silent agent (alive but stuck) | medium | needs a time limit and an activity check |
 | Parallel slices | medium | locks, and merging into `main` one at a time |
 | Processes on Windows, macOS, Linux | medium | starting, watching, and stopping processes differs per system |
@@ -306,16 +311,16 @@ written in one chat session. Then the implement phase runs either:
 - in **the same session**, or
 - in **a new session**, which gets the current status and context first.
 
-This does not need its own design. `flow` keeps the state in files, so any
-session can be the lead. We design `flow`, not the session.
+This does not need its own design. `sliceflow` keeps the state in files, so any
+session can be the lead. We design `sliceflow`, not the session.
 
-### 1.9 How `flow` starts and ends agents (from the human, 2026-10-18)
+### 1.9 How `sliceflow` starts and ends agents (from the human, 2026-10-18)
 
-To consider: how `flow` starts the workers and reviewers, and cleans up
+To consider: how `sliceflow` starts the workers and reviewers, and cleans up
 after them.
 
 Today the lead starts them as subagents inside its own chat. In the hybrid,
-`flow` starts each one as a separate program, using the agent tool's
+`sliceflow` starts each one as a separate program, using the agent tool's
 non-interactive mode (for example `claude -p`, `codex exec`).
 
 **Permissions. Decided (the human, 2026-10-19).** Nobody is there to click
@@ -338,19 +343,19 @@ Research (2026-10-19):
 
 Decided: three layers.
 
-1. **A fixed list per role**, set by `flow` before each agent starts.
+1. **A fixed list per role**, set by `sliceflow` before each agent starts.
    Everything else is refused, not asked, so an agent never waits for a click.
 
    | Role | May | May not |
    |---|---|---|
-   | Worker | read the repo, edit files in its own worktree, run the setup, auto-fix, and check commands | commit, merge, push: `flow` does all git work |
+   | Worker | read the repo, edit files in its own worktree, run the setup, auto-fix, and check commands | commit, merge, push: `sliceflow` does all git work |
    | Reviewer | read everything, write only its own review file | change any code |
-   | Fallback lead | read, run `flow` commands (`flow` still refuses approve, reject, cancel: 1.6) | edit code, git |
+   | Fallback lead | read, run `sliceflow` commands (`sliceflow` still refuses approve, reject, cancel: 1.6) | edit code, git |
 
 2. **A sandbox on top, where the system has one:** writes only inside the
    worktree, network only to hosts the project lists (for example its
    package registry).
-3. **`flow` checks the result after the agent ends**, on every system: only
+3. **`sliceflow` checks the result after the agent ends**, on every system: only
    files in the task's `touches` changed; no approved document or event log
    was touched. A failed check is a case.
 
@@ -360,12 +365,12 @@ Decided: three layers.
   ("blocked: needs network for `go mod download`"). That is a case, routed
   by the ladder (1.6). Often it is a new dependency, which goes to the human.
 - "Skip all prompts" only as a setting the human turns on, for running
-  `flow` inside a container or a virtual machine.
+  `sliceflow` inside a container or a virtual machine.
 - The exact lists, flags, and hosts are settled in the slice (section 0).
 
 **Lead's notes, details for the slice:**
 
-- **Result and reason.** The tool's exit code and last output tell `flow`
+- **Result and reason.** The tool's exit code and last output tell `sliceflow`
   whether the agent finished, failed, or hit a limit. JSON output also gives
   cost and turns.
 - **Per role.** Tool, model, and effort per role come from the settings.
@@ -386,9 +391,9 @@ need reviews turns them off, or changes the order of steps.
 | 3. Any workflow | your own steps, states, and scripts | hard: this is building a general workflow engine |
 
 Proposal: levels 1 and 2. Level 3 breaks the reliability promise (1.7):
-`flow` can only recover a step safely if it knows what the step does.
+`sliceflow` can only recover a step safely if it knows what the step does.
 
-Later, level 3 stays possible (lead's note): build the steps inside `flow` as
+Later, level 3 stays possible (lead's note): build the steps inside `sliceflow` as
 separate units, each with the same shape (what it reads, what it writes, its
 events, safe to run twice). Then a general engine is a later step: open that
 shape to steps a project writes itself. Specific first, general later.
@@ -413,7 +418,7 @@ No existing tool matches this workflow. The closest ones, by kind:
 | Agent orchestrators | ORCH, Orca, and similar | parallel agents in git worktrees, a task state machine, review | no spec or plan approvals, no escalation ladder |
 | Workflow engines | Temporal, GitHub Actions | durable steps, retries, recovery | a server or the cloud; nothing about agents, specs, or approvals |
 
-**Lead's recommendation:** build `flow`, but reuse what exists:
+**Lead's recommendation:** build `sliceflow`, but reuse what exists:
 - the agent tools themselves (we never build an agent),
 - git for branches, worktrees, and merges,
 - the ideas: durable steps (Temporal), task state machines (ORCH),
@@ -421,35 +426,35 @@ No existing tool matches this workflow. The closest ones, by kind:
 
 Before the plan, look closer at ORCH-like tools, to borrow ideas.
 
-**Decided (the human, 2026-10-18):** build `flow` first, as a specific engine
+**Decided (the human, 2026-10-18):** build `sliceflow` first, as a specific engine
 for this workflow. A general engine is a later, optional project.
 
-### 1.12 Who runs `flow` (from the human, 2026-10-18)
+### 1.12 Who runs `sliceflow` (from the human, 2026-10-18)
 
-The **lead** runs the `flow` commands, not the human. The human works with
-the lead in the chat. `flow` is designed for the lead to use.
+The **lead** runs the `sliceflow` commands, not the human. The human works with
+the lead in the chat. `sliceflow` is designed for the lead to use.
 
-Lead's note: so every `flow` output is read first by an AI agent. It must
+Lead's note: so every `sliceflow` output is read first by an AI agent. It must
 be exact and complete (what happened, what is next, why it stopped), and
 still plain enough for the human to read when they look.
 
 ### 1.12b No data out (decided, the human, 2026-10-18)
 
-The old rule "`flow` makes no network calls" is removed. The new rule:
-**`flow` itself sends no data to any outside service** (no telemetry, no
+The old rule "`sliceflow` makes no network calls" is removed. The new rule:
+**`sliceflow` itself sends no data to any outside service** (no telemetry, no
 uploads, no calls home). It runs local programs: git, the check commands,
-the agent tools. What those programs send is theirs, not `flow`'s. A
+the agent tools. What those programs send is theirs, not `sliceflow`'s. A
 dashboard page served on the human's own computer is fine.
 
 ### 1.12c How the lead runs commands, and how cases reach it (decided, the human, 2026-10-19)
 
 **Research (2026-10-19):** how other agent pipelines reach a coordinator agent.
 
-- **Two directions.** Agents that `flow` starts itself (workers, reviewers,
-  a fallback lead): `flow` owns the process and reads its output as it
+- **Two directions.** Agents that `sliceflow` starts itself (workers, reviewers,
+  a fallback lead): `sliceflow` owns the process and reads its output as it
   comes (Claude Code `stream-json`, Codex JSON events; the Codex app server
   even sends approval requests and pauses until they are answered). The
-  chat lead: the human started it, so `flow` can neither read it nor write
+  chat lead: the human started it, so `sliceflow` can neither read it nor write
   into it. Only this direction is a problem.
 - **Gas Town:** a message is stored as mail (`gt mail`), and a "nudge" typed
   into the agent's terminal wakes it. Their rule: mail first, then nudge.
@@ -469,23 +474,23 @@ dashboard page served on the human's own computer is fine.
 | Kind | Examples | How long | How the lead uses it |
 |---|---|---|---|
 | Quick | `spec validate`, `slice new`, `spec approve`, `status` | seconds | runs it, waits, reads the result |
-| Starts agents | `spec submit`, `plan submit`, `flow run` | minutes to hours | `flow` starts the work in its own process and returns at once |
-| The doorbell | `flow wait` | until something needs the lead or the human | runs it in the background; the agent tool wakes the lead when it ends |
+| Starts agents | `spec submit`, `plan submit`, `sliceflow run` | minutes to hours | `sliceflow` starts the work in its own process and returns at once |
+| The doorbell | `sliceflow wait` | until something needs the lead or the human | runs it in the background; the agent tool wakes the lead when it ends |
 
 - **The work runs in its own process.** It must outlive the chat: closing a
   terminal must not stop a run. Waiting on it in the chat would also block
   the chat (and Claude Code stops a foreground command after 10 minutes).
 - **The mailbox** is the event log and the "Needs you" list (1.6, point 6).
   Every case is written there first.
-- **The doorbell** is `flow wait` (the name is settled in the slice). It ends
+- **The doorbell** is `sliceflow wait` (the name is settled in the slice). It ends
   when a case needs the lead or the human, when a review is done, or when
   the run ends, and prints what happened. The agent tool then wakes the
-  session that started it, so `flow` never looks for a session. It is not
+  session that started it, so `sliceflow` never looks for a session. It is not
   polling: the lead uses no tokens while it waits.
-- **Who is listening.** While `flow wait` runs, it leaves a "listening" mark
-  in `.flow/`. That is how `flow` knows a chat lead is there.
+- **Who is listening.** While `sliceflow wait` runs, it leaves a "listening" mark
+  in `.sliceflow/`. That is how `sliceflow` knows a chat lead is there.
 - **The safety net.** A case has one owner at a time. If nobody is listening,
-  or the chat lead does not take a case in time, `flow` gives it to a
+  or the chat lead does not take a case in time, `sliceflow` gives it to a
   fallback lead (2.4). No case is stuck because a wake-up failed or the chat
   closed.
 - **Later, maybe:** a Channels doorbell for Claude Code, when Channels is
@@ -494,32 +499,32 @@ dashboard page served on the human's own computer is fine.
 **The lead tool only matters for the doorbell** (the human, 2026-10-19).
 The lead just runs commands, so the lead side needs no adapter.
 
-- **Claude Code:** `flow wait` runs in the background, and Claude Code wakes
+- **Claude Code:** `sliceflow wait` runs in the background, and Claude Code wakes
   the lead when it ends.
 - **Cursor:** no reliable wake-up yet. No sign that Cursor wakes the agent
   when a background command ends; users report the agent keeps checking the
   output instead (polling), and long foreground commands hit Cursor's own
   time limits. So a Cursor lead does not listen during the run: cases for a
   lead go to a fallback lead (Codex), cases for the human wait in "Needs
-  you", and the lead runs `flow status` when the human comes back. Nothing
-  in `flow` changes for this.
+  you", and the lead runs `sliceflow status` when the human comes back. Nothing
+  in `sliceflow` changes for this.
 - **Cursor, later maybe:** its "stop" hook runs when the agent ends its turn
-  and can send the next message. It could run `flow wait` and send the
+  and can send the next message. It could run `sliceflow wait` and send the
   case. Known bugs (unstable, and on Windows the message may not arrive),
   so it is not the base.
-- One guide for the lead on using `flow` can serve every lead tool: Cursor
+- One guide for the lead on using `sliceflow` can serve every lead tool: Cursor
   also loads skills from `.agents/skills/`, `.claude/skills/`, and
   `.codex/skills/`.
 
 ```
-lead:  flow spec validate          → "ok" after a second. Done.
-lead:  flow run                    → "run started: 0001, 6 tasks", returns at once.
-lead:  flow wait  (in background)  → nothing yet. The lead goes quiet.
+lead:  sliceflow spec validate          → "ok" after a second. Done.
+lead:  sliceflow run                    → "run started: 0001, 6 tasks", returns at once.
+lead:  sliceflow wait  (in background)  → nothing yet. The lead goes quiet.
 ...    the run works for an hour. The lead uses no tokens.
-flow:  task 04 fails its checks 3 times → writes a case.
-       flow wait prints the case and ends.
+sliceflow:  task 04 fails its checks 3 times → writes a case.
+       sliceflow wait prints the case and ends.
        the agent tool wakes the lead.
-lead:  handles the case, runs flow wait again.
+lead:  handles the case, runs sliceflow wait again.
 ```
 
 ### 1.13 Where and how events are kept (decided, the human, 2026-10-18)
@@ -528,43 +533,43 @@ lead:  handles the case, runs flow wait again.
 `slices/<name>/.events.jsonl`, one event per line. It is the only
 source of truth for the slice.
 
-- Only `flow` writes it. Not the human, not the lead, not any agent.
+- Only `sliceflow` writes it. Not the human, not the lead, not any agent.
 - It is committed in git with the rest of the slice.
 - It holds only the steps that matter: for example `slice.created`,
   `plan.approved`. No high-frequency signals such as heartbeats.
 
-**`status.md` is a view, not a second truth.** `flow` writes it from
+**`status.md` is a view, not a second truth.** `sliceflow` writes it from
 `.events.jsonl` so people can read the status.
 
-- `flow` never reads `status.md` to decide anything.
-- If it is wrong or deleted, `flow` writes it again from the log.
-- Its first line says it is written by `flow` and must not be edited.
-- `flow` rewrites it only when the status really changes.
+- `sliceflow` never reads `status.md` to decide anything.
+- If it is wrong or deleted, `sliceflow` writes it again from the log.
+- Its first line says it is written by `sliceflow` and must not be edited.
+- `sliceflow` rewrites it only when the status really changes.
 
 **Live state is not history.** Heartbeats, retries, and which process runs
-where stay local in `.flow/`, in a small file `flow` overwrites. It is
+where stay local in `.sliceflow/`, in a small file `sliceflow` overwrites. It is
 not in git and is not a source of truth for the slice.
 
 **Lead's notes** (technical, for the plan):
 
-- Several `flow` processes may write at once (two workers hand in at the
-  same time): `flow` locks the file while it adds a line.
-- Task worktrees have their own copy of the slice folder. `flow` always
+- Several `sliceflow` processes may write at once (two workers hand in at the
+  same time): `sliceflow` locks the file while it adds a line.
+- Task worktrees have their own copy of the slice folder. `sliceflow` always
   writes the copy in the slice worktree. A task never changes it.
 - Crash safety: "starting X" before X, "X done" after. A half-written last
   line is skipped when reading, and reported.
-- If a log ever grows large, keep the computed status in `.flow/` and apply
+- If a log ever grows large, keep the computed status in `.sliceflow/` and apply
   only the new events. Not needed at the start.
 
 ### 1.13b File formats (decided, the human, 2026-10-19)
 
 - **Files people read, approve, or edit:** Markdown. A small YAML header
-  holds the fields `flow` needs (`spec.md`, `plan.md`, `tasks.md`,
+  holds the fields `sliceflow` needs (`spec.md`, `plan.md`, `tasks.md`,
   reviews). Exact fields inside a document go in a YAML block (one per
   task in `tasks.md`, section 2.3).
-- **Files only `flow` writes:** JSON Lines for machines (`.events.jsonl`),
+- **Files only `sliceflow` writes:** JSON Lines for machines (`.events.jsonl`),
   Markdown for people (`status.md`).
-- **Settings:** YAML, read strictly (`flow.yaml`).
+- **Settings:** YAML, read strictly (`sliceflow.yaml`).
 
 Why (research, 2026-10-19):
 
@@ -577,13 +582,13 @@ Why (research, 2026-10-19):
 - Any format can be broken by an edit without anyone noticing: a renamed
   heading, a wrong indent, `01` read as a number. So accuracy comes from
   rules, not from the format:
-  1. `flow` writes the fixed parts. Agents write only free text (option C
+  1. `sliceflow` writes the fixed parts. Agents write only free text (option C
      in section 2.3, the plan). Exception: `tasks.md` (2.3, "Tasks in one
      `tasks.md`").
   2. Each fact has one copy. Requirements are named, not copied.
-  3. `flow` reads every file strictly: typed fields, unknown keys refused,
+  3. `sliceflow` reads every file strictly: typed fields, unknown keys refused,
      a check before submit.
-  4. State changes only through `flow` commands, never by editing a file.
+  4. State changes only through `sliceflow` commands, never by editing a file.
 
 Not chosen: one format for everything (long text in YAML depends on its
 indents; Markdown alone cannot hold exact fields; JSON and XML cost more
@@ -592,11 +597,11 @@ files are small). The exact form of each file is settled in its slice.
 
 ### 1.13c Reading documents, and Spec Kit later (decided, the human, 2026-10-23)
 
-- **flow keeps its own format.** The human compared it with GitHub Spec
-  Kit and prefers flow's format.
+- **sliceflow keeps its own format.** The human compared it with GitHub Spec
+  Kit and prefers sliceflow's format.
 - **All Markdown reading lives in one Go package.** It turns a document
   into plain data: requirements, scenarios, tasks, `touches`. The rest of
-  `flow` uses only that data and never looks at headings. The rules for
+  `sliceflow` uses only that data and never looks at headings. The rules for
   reading (which heading holds what, what an ID looks like) live in one
   place, apart from the template text.
 - **Why:** it keeps two later features cheap: support for Spec Kit
@@ -664,37 +669,37 @@ For 1.13b:
 
 ## 2. The processes
 
-One section per process, in order. Each says what `flow` does, its commands,
+One section per process, in order. Each says what `sliceflow` does, its commands,
 its events, and what it shows.
 
 ### 2.1 Create a slice
 
 **From the human (2026-10-18):**
 
-1. The lead runs `flow slice new` with the slice name. The name is the
+1. The lead runs `sliceflow slice new` with the slice name. The name is the
    slice ID, with no number (changed by the human on 2026-10-19, see
    "Slice ID" below).
-2. `flow` creates the slice's branch and its worktree in `.flow/worktrees/`.
-3. `flow` copies the spec template into the slice.
-4. `flow` creates the files that record the slice's status.
+2. `sliceflow` creates the slice's branch and its worktree in `.sliceflow/worktrees/`.
+3. `sliceflow` copies the spec template into the slice.
+4. `sliceflow` creates the files that record the slice's status.
 
 **Lead's view, to talk about** (not decided):
 
-- **Command form. Decided (the human, 2026-10-18):** `flow <noun> <verb>`,
-  for every command: `flow slice new | list | cancel | done`, `flow task …`,
-  `flow review …`. Like `gh pr create` and `git worktree add`.
-- **`.flow/` for all local state.** Worktrees, locks, logs, and live agent
-  state all go under `.flow/`: one folder, one line in `.gitignore`.
+- **Command form. Decided (the human, 2026-10-18):** `sliceflow <noun> <verb>`,
+  for every command: `sliceflow slice new | list | cancel | done`, `sliceflow task …`,
+  `sliceflow review …`. Like `gh pr create` and `git worktree add`.
+- **`.sliceflow/` for all local state.** Worktrees, locks, logs, and live agent
+  state all go under `.sliceflow/`: one folder, one line in `.gitignore`.
   The workflow files today say `.worktrees/`; they change with this design.
 - **The status files. Decided (the human, 2026-10-18):** an event log
-  is the truth (where and how it is kept: open, see 1.13). After every step, `flow` writes a
+  is the truth (where and how it is kept: open, see 1.13). After every step, `sliceflow` writes a
   `status.md` from it, readable on GitHub and in a pull request, never edited
   by hand. (Rejected: the event log only, which nobody can read without
-  `flow`; a hand-kept `status.md`, which can drift.)
+  `sliceflow`; a hand-kept `status.md`, which can drift.)
 - **Checks before it creates anything.** A technical detail: the lead
   proposes the list in this slice's spec (the sketch has a first list).
   If one fails, nothing is created.
-- **All or nothing.** If a step fails halfway, `flow` undoes what it did and
+- **All or nothing.** If a step fails halfway, `sliceflow` undoes what it did and
   says why.
 - **Output.** The slice ID, branch, worktree, the files it created, and the
   next step.
@@ -713,7 +718,7 @@ its events, and what it shows.
   The cost: a name is never used again (2.7), and the order of slices
   comes from the created time in the event log, not from a number.
   This repo's own slices (0001-0010, section 3) keep their numbers: they
-  are made with agent-flow's skills until the first release.
+  are made with agent-sliceflow's skills until the first release.
   (Replaces the open item "the same number on two machines", sketch H11.)
 
 ### 2.2 Write and approve the spec
@@ -722,13 +727,13 @@ its events, and what it shows.
 
 1. The human and the lead write the spec together. Its status is **draft**
    until it is finished.
-2. `flow spec validate` checks the format, like a compiler: the headings
+2. `sliceflow spec validate` checks the format, like a compiler: the headings
    are there, the format follows the template. If something is wrong, it
    says what. (The exact format rules are refined later, in a slice.)
-3. When the draft is finished, the lead runs `flow spec submit`
+3. When the draft is finished, the lead runs `sliceflow spec submit`
    (decided, the human, 2026-10-18).
 4. Then, depending on the settings:
-   - **With a review:** `flow` starts a reviewer. It looks for unclear
+   - **With a review:** `sliceflow` starts a reviewer. It looks for unclear
      points and conflicts. If it finds any, they are written down, and the
      lead is told.
    - **Without a review:** the lead reports to the human.
@@ -744,8 +749,8 @@ its events, and what it shows.
   Without a review: draft → awaiting approval. The reviewer finds open
   points: back to draft. The status lives in the event log, not in the
   spec's header.
-- **"The draft is finished": `flow spec submit`** (name decided). It runs
-  `flow spec validate` first and refuses if the format is broken, so the
+- **"The draft is finished": `sliceflow spec submit`** (name decided). It runs
+  `sliceflow spec validate` first and refuses if the format is broken, so the
   check can never be skipped. Then it starts the reviewer, or goes straight
   to awaiting approval.
 - **Validate like a compiler.** Each problem on one line:
@@ -753,29 +758,29 @@ its events, and what it shows.
   submit. Warnings (not finished yet, for example open questions) are fine
   while drafting, but block submit too.
 - **Where the reviewer writes.** A review file in the slice's `reviews/`
-  folder. `flow` reads it, records `review.submitted`, and tells the lead:
+  folder. `sliceflow` reads it, records `review.submitted`, and tells the lead:
   "3 open points". The lead answers facts itself and brings decisions to
   the human, updates the spec, and submits again.
-- **Approve.** `flow spec approve`, run by the lead only right after the
+- **Approve.** `sliceflow spec approve`, run by the lead only right after the
   human says so. The event records who approved and the human's words.
-  `flow spec reject` sends it back to draft, with the reason.
+  `sliceflow spec reject` sends it back to draft, with the reason.
 - **Read-only history.** File permissions do not travel in git and work
   differently on Windows, so "read-only" must be a check: the approval
-  event stores a fingerprint (hash) of the copy, and `flow` reports any
+  event stores a fingerprint (hash) of the copy, and `sliceflow` reports any
   history file that no longer matches.
-- **A pattern:** files that only `flow` writes start with a dot
+- **A pattern:** files that only `sliceflow` writes start with a dot
   (`.events.jsonl`, `.history/`). Files people and agents write do not
   (`spec.md`, `reviews/`).
-- **Changed after approval.** `flow` sees `spec.md` differ from the last
+- **Changed after approval.** `sliceflow` sees `spec.md` differ from the last
   copy in `.history/`: status **changed**. It is submitted and approved again.
 - **Setting:** `spec.review: on | off`.
 
-**Templates built into `flow` (decided, the human, 2026-10-20).** The
+**Templates built into `sliceflow` (decided, the human, 2026-10-20).** The
 document templates (spec, plan, tasks, preview, review, backlog) are part of
-the `flow` program, so they always match its validator. A repo needs no
+the `sliceflow` program, so they always match its validator. A repo needs no
 template files, and there is no override folder for now. Because a filled
-document no longer holds its rule comments, `flow` prints a template on
-request (a name like `flow template show spec`; settled in slice 0002, where
+document no longer holds its rule comments, `sliceflow` prints a template on
+request (a name like `sliceflow template show spec`; settled in slice 0002, where
 the lead first needs it to change a spec).
 
 **Assumptions are facts, not choices (decided, the human, 2026-10-20).** In
@@ -804,27 +809,27 @@ consequences should be listed here, not just the 'positive' ones."
 copies in `.history/` here and in 2.3, and the fingerprint check for them.
 
 - Each approval creates one git tag on the approved commit, e.g.
-  `flow/due-dates/spec/R001` and `flow/due-dates/plan/R001`. The approval
+  `sliceflow/due-dates/spec/R001` and `sliceflow/due-dates/plan/R001`. The approval
   event records the same commit id.
-- Reading history is one step, however many commits came later. `flow`
+- Reading history is one step, however many commits came later. `sliceflow`
   wraps the git commands (names to settle in slice 0002), e.g. show the
   spec as approved in R001, or the difference between R001 and R002.
-- An approved version cannot change: a commit is fixed, and `flow`
+- An approved version cannot change: a commit is fixed, and `sliceflow`
   reports a tag that no longer points at the commit in its event.
 - A tag keeps its commit even after a squash merge or a deleted branch.
 - "Changed after approval", "no approved number disappears", and
   "stale: the other slice's plan changed" compare with the tagged version.
-- The history is visible to anyone with git, without `flow` (decided, the
+- The history is visible to anyone with git, without `sliceflow` (decided, the
   human, 2026-10-20):
   - The tags are **annotated**, and their message holds the approval
     record: what was approved, the revision, the date, and the human's
     own words. `git show <tag>` shows it.
-  - `flow` turns on git's `push.followTags` setting in each clone it sets
+  - `sliceflow` turns on git's `push.followTags` setting in each clone it sets
     up, so a plain `git push` also sends the approval tags. (A plain push
     sends no tags otherwise, and the setting works only for annotated
-    tags.) `flow` still warns when approval tags are missing on the
+    tags.) `sliceflow` still warns when approval tags are missing on the
     remote.
-  - Others read history with plain git: `git tag -l "flow/<slice>/*"`,
+  - Others read history with plain git: `git tag -l "sliceflow/<slice>/*"`,
     `git show <tag>:<path>`, `git diff <tag> <tag>`, or the Tags page on
     GitHub.
   - For the finish slice: a tag whose commit is on no branch can be missed
@@ -832,7 +837,7 @@ copies in `.history/` here and in 2.3, and the fingerprint check for them.
     branch). Merging slices with a merge commit keeps every approved
     commit in `main`'s history.
 - Research (2026-10-20): GitHub Spec Kit and Kiro keep no snapshots; git
-  is the record. Spec Kit's "flow-forward" keeps a delivered feature's
+  is the record. Spec Kit's "sliceflow-forward" keeps a delivered feature's
   files unchanged. Architecture Decision Records are never edited, only
   superseded.
 - **Events:** `spec.submitted`, `review.started`, `review.submitted`,
@@ -851,12 +856,12 @@ copies in `.history/` here and in 2.3, and the fingerprint check for them.
 
 **Research: three ways to make task files (2026-10-18)**
 
-| | A. The agent writes each file from nothing | B. `flow` copies a blank template, the agent fills it | C. The agent names the task, `flow` fills the fixed parts, the agent writes only the rest |
+| | A. The agent writes each file from nothing | B. `sliceflow` copies a blank template, the agent fills it | C. The agent names the task, `sliceflow` fills the fixed parts, the agent writes only the rest |
 |---|---|---|---|
 | Agent's work per task | 1 write, but it types everything: header, headings, copied text | read the template, then several edits | 1 command, then 1 write of the free text |
 | Wasted output | headers, headings, and requirement text copied from the spec | little | none |
-| Format errors | likely: wrong number, wrong header, a requirement copied with a word changed | fewer | almost none: `flow` writes the fixed parts |
-| Checks needed | many (T1-T6 today) | some | few: `flow` refuses a bad task when it is created |
+| Format errors | likely: wrong number, wrong header, a requirement copied with a word changed | fewer | almost none: `sliceflow` writes the fixed parts |
+| Checks needed | many (T1-T6 today) | some | few: `sliceflow` refuses a bad task when it is created |
 
 What the sources say:
 
@@ -873,7 +878,7 @@ What the sources say:
 - **Do not copy what already exists.** Today each task file copies its
   requirements word for word from the spec, and a check (T5) makes sure the
   copy is exact. Instead, the task file only names them (`covers: R3, R5`).
-  When a worker starts, `flow brief` shows the text from the approved spec.
+  When a worker starts, `sliceflow brief` shows the text from the approved spec.
   One source of truth, no copy that can drift, and check T5 goes away.
 - **The lead writes only what needs judgment:** what to build, and "Done
   when" (the tests that prove it).
@@ -885,7 +890,7 @@ not copied.
 
 The lead writes the plan with a **task list**: every task, what it depends
 on, and which requirements it covers. Every requirement must appear. Then
-one `flow` command creates **all** the task files from that list.
+one `sliceflow` command creates **all** the task files from that list.
 
 Research (2026-10-18):
 
@@ -899,7 +904,7 @@ Research (2026-10-18):
   files from it. GitHub Spec Kit writes all tasks in one list too.
 - **Seeing the whole list at once allows checks no single file can do:**
   every requirement is covered, no dependency loops, no two tasks that run
-  at the same time touch the same files. `flow` checks them before any file
+  at the same time touch the same files. `sliceflow` checks them before any file
   exists.
 
 **Lead's view, to talk about** (not decided):
@@ -908,18 +913,18 @@ Research (2026-10-18):
   list is in `plan.md` and also in each task file's header, there are two
   copies that can drift. So the structure (number, name, covers, depends on, touches, risk) lives
   only in the plan's task list. A task file holds only its content (what
-  to build, "Done when"). `flow brief` puts the two together for the worker.
-- **A form `flow` can read exactly.** A Markdown table is easy to break by
+  to build, "Done when"). `sliceflow brief` puts the two together for the worker.
+- **A form `sliceflow` can read exactly.** A Markdown table is easy to break by
   hand. A small fenced block in `plan.md` (for example YAML) is exact and
   still readable. The research in section 1.13b (file formats) supports
   this.
 - **Safe to run again.** Plans change. The command can run any time: it
   creates the files that are missing, never overwrites content the lead
   wrote, and reports a task file whose task left the list (it does not
-  delete it). A name for that: `flow task sync`.
+  delete it). A name for that: `sliceflow task sync`.
 
 **Tasks in one `tasks.md` (decided, the human, 2026-10-20).** This replaces
-the task list in `plan.md`, the separate task files, and `flow task sync`
+the task list in `plan.md`, the separate task files, and `sliceflow task sync`
 above.
 
 - All tasks live in one file, `tasks.md`, next to `plan.md`. Each task is
@@ -930,28 +935,28 @@ above.
 - The lead writes `tasks.md` after the plan's design is done and its open
   questions are empty. The human approves `plan.md` and `tasks.md`
   together.
-- `flow brief` gives each worker only its own task's section (from its
+- `sliceflow brief` gives each worker only its own task's section (from its
   heading to the next one), plus what "What the brief holds" below lists.
 - Changing tasks is editing one file: no command, no orphan files, no
   broken file names. Task ids are never reused once the plan is approved.
 - **The lead writes all of `tasks.md`, fixed parts included (decided, the
   human, 2026-10-20).** The tasks are not known until the lead designs
-  them, so `flow` has no frame to write in advance. `flow plan validate`
+  them, so `sliceflow` has no frame to write in advance. `sliceflow plan validate`
   checks every fixed part strictly and names the exact line: the
   `## Task NN: <name>` headings, the YAML keys, the `###` headings, and
-  the labels. This is the one exception to "`flow` writes the fixed
+  the labels. This is the one exception to "`sliceflow` writes the fixed
   parts" (1.13b), and it replaces option C for tasks.
 - Research (2026-10-20): GitHub Spec Kit and Kiro keep all tasks in one
   `tasks.md`; Task Master keeps them in one `tasks.json`, and its separate
   task files are generated from it, never edited. No tool splits a task's
   structure and its hand-written content into different files.
-- **What the brief holds (decided, the human, 2026-10-20).** `flow brief`
+- **What the brief holds (decided, the human, 2026-10-20).** `sliceflow brief`
   follows links the lead wrote, and never guesses: the task's section;
   the text of the requirements in its `covers`; the spec scenarios whose
   `Shows:` names one of them; the spec's Key concepts; and the exact text
   of the plan items named in the task's new `follows:` key (a decision
   such as `TD2`, a shared rule or interface by its heading, or
-  `Testing`). `flow plan validate` checks each name exists. The brief
+  `Testing`). `sliceflow plan validate` checks each name exists. The brief
   ends by saying where the full spec and plan are, so the worker can
   open them if something is unclear. Rules in a task hold only rules
   that exist nowhere else. Research (2026-10-20): a missed hand copy
@@ -962,17 +967,17 @@ above.
 - **Stable scenario ids (decided, the human, 2026-10-20).** Spec
   scenarios are numbered S1, S2, ... across the whole spec, with the same
   rules as requirement numbers. An e2e test names its scenario in a
-  `Scenario: S2` line under `Proves:`. `flow` checks that every scenario
+  `Scenario: S2` line under `Proves:`. `sliceflow` checks that every scenario
   has at least one e2e test. Why: numbers by position shift when a
   scenario is added, and a free-text link cannot be checked.
 - **Every decision reaches a worker (decided, the human, 2026-10-20).**
   A worker sees requirements and the plan items its task follows, not
   decisions as such. So each spec decision has a `Rule:` line naming the
   requirement that states it (`Rule: none` when it changes no behavior),
-  and `flow spec validate` checks the line and the requirement (and
-  `flow plan validate` again). Each
+  and `sliceflow spec validate` checks the line and the requirement (and
+  `sliceflow plan validate` again). Each
   plan decision is named in at least one task's `follows`, or has a
-  `Plan only:` line with the reason; `flow` warns about one that is
+  `Plan only:` line with the reason; `sliceflow` warns about one that is
   neither, or both. A plan decision does not list its tasks: the link is
   written once, on the task side. Research (2026-10-20): MAST, a study
   of multi-agent failures, counts "disobey task specification" as 11.8%
@@ -980,19 +985,19 @@ above.
 - **Test files belong to the task (decided, the human, 2026-10-20).** A
   task's test files are in its `touches` and Files, like its code. Each
   task puts its e2e tests in its own file (the plan's Testing section
-  says where), so parallel tasks never share a test file. `flow` checks
+  says where), so parallel tasks never share a test file. `sliceflow` checks
   that each test named in Done when exists in a file inside the task's
   `touches`; where the project's test tool reports test names (e.g.
   `go test -json`), it also checks the test ran and passed. That second
   check is optional per project.
 - **A task waits for the code it uses (decided, the human, 2026-10-20).**
   When a task's Interfaces says it uses a name that another task creates
-  or changes, that task must be in its `depends_on` chain. `flow plan
+  or changes, that task must be in its `depends_on` chain. `sliceflow plan
   validate` checks it, so the mistake shows while planning instead of at
   the merge.
 - **Tests first (decided, the human, 2026-10-20).** A task's Steps start
   by writing the Done when tests and seeing them fail, and end by running
-  them until they pass. `flow` cannot check the order (workers do not
+  them until they pass. `sliceflow` cannot check the order (workers do not
   commit along the way), so it is guidance in the template and in the
   worker's instructions (slice 0004). Research (2026-10-20): Spec Kit's
   tasks template: tests "must be written first and must fail before
@@ -1008,16 +1013,16 @@ above.
 - **The plan says how each success criterion is reached (decided, the
   human, 2026-10-20).** When the spec has success criteria, the plan's
   Approach has one line per criterion: its number, the flows, decisions,
-  or shared rules that reach it, and how. `flow` checks that every
+  or shared rules that reach it, and how. `sliceflow` checks that every
   criterion has a line and that the names exist; the plan reviewer
   judges whether the reasoning holds. Research (2026-10-20): Spec Kit's
   analyze step flags "Success Criteria requiring buildable work ... not
   reflected in tasks".
 - **A warning for long briefs (decided, the human, 2026-10-20).** Once
-  `tasks.md` exists, `flow plan validate` builds each task's brief and
+  `tasks.md` exists, `sliceflow plan validate` builds each task's brief and
   warns when one is over a set size: about 1,500 words by default, a
-  setting in `flow.yaml`. It is a warning, not an error: it does not
-  block `flow plan submit`, and it goes to the plan reviewer, who judges
+  setting in `sliceflow.yaml`. It is a warning, not an error: it does not
+  block `sliceflow plan submit`, and it goes to the plan reviewer, who judges
   whether the length is justified. Before `tasks.md` exists there is no
   brief, so there is no check. Research (2026-10-20): BMAD's plan
   template: "Target: 900–1300 tokens ... Above 1600 = high risk of
@@ -1036,21 +1041,21 @@ above.
 | # | Who | Command | What happens | Plan status |
 |---|---|---|---|---|
 | 1 | lead | (writes) | `plan.md` and the contract changes, until its open questions are empty | draft |
-| 2 | lead | `flow plan validate` | checks the plan; repeat until clean | draft |
-| 3 | lead | (writes) | `tasks.md`: every task, with its structure and content; and fills `preview.md` (flow created it, with its fixed checks, when the spec was approved) | draft |
-| 4 | lead | `flow plan validate` | checks plan, tasks, preview, and contract changes together; repeat until clean | draft |
+| 2 | lead | `sliceflow plan validate` | checks the plan; repeat until clean | draft |
+| 3 | lead | (writes) | `tasks.md`: every task, with its structure and content; and fills `preview.md` (sliceflow created it, with its fixed checks, when the spec was approved) | draft |
+| 4 | lead | `sliceflow plan validate` | checks plan, tasks, preview, and contract changes together; repeat until clean | draft |
 | 5 | — | — | (no step: there is no task sync any more) | draft |
-| 6 | lead | `flow plan submit` | validates again (refuses if broken), then starts the reviewer, or skips it when review is off | in review |
+| 6 | lead | `sliceflow plan submit` | validates again (refuses if broken), then starts the reviewer, or skips it when review is off | in review |
 | 7 | reviewer | (writes, then hands in) | one review file with findings: high, medium, low, and questions for the human | in review |
-| 8 | `flow` | — | reads the review: no high or medium findings, no questions → pass; else → back to the lead | awaiting approval, or draft |
+| 8 | `sliceflow` | — | reads the review: no high or medium findings, no questions → pass; else → back to the lead | awaiting approval, or draft |
 | 9 | lead | (fixes) + marks each finding | fixed, wontfix, or deferred, each with a note; decisions go to the human | draft |
-| 10 | lead | `flow plan submit` | next round: the reviewer checks the fixes (up to the round limit, then the human decides) | in review |
+| 10 | lead | `sliceflow plan submit` | next round: the reviewer checks the fixes (up to the round limit, then the human decides) | in review |
 | 11 | human | says "approved" | | awaiting approval |
-| 12 | lead | `flow plan approve` | tags the commit that holds `plan.md`, `tasks.md`, `preview.md`, and the contract changes; the slice is **ready** | approved |
+| 12 | lead | `sliceflow plan approve` | tags the commit that holds `plan.md`, `tasks.md`, `preview.md`, and the contract changes; the slice is **ready** | approved |
 
-- **One submit for the plan and its tasks:** `flow plan submit`, not a
-  separate `flow task submit`. They are reviewed and approved together.
-- **`flow task submit` is kept for the implement phase:** a worker hands
+- **One submit for the plan and its tasks:** `sliceflow plan submit`, not a
+  separate `sliceflow task submit`. They are reviewed and approved together.
+- **`sliceflow task submit` is kept for the implement phase:** a worker hands
   in its finished task with it.
 
 **Different from the spec:** the reviewer gives findings to fix (high,
@@ -1059,8 +1064,8 @@ to the round limit.
 
 **Approving the plan, and what goes into history (research, 2026-10-18):**
 
-The command is `flow plan approve`: the same thing that was submitted is
-approved. There is no `flow task approve`: tasks are approved with the plan.
+The command is `sliceflow plan approve`: the same thing that was submitted is
+approved. There is no `sliceflow task approve`: tasks are approved with the plan.
 
 Should the task files be copied into history too? What other tools do:
 
@@ -1080,7 +1085,7 @@ nothing for that task.
 (Replaced 2026-10-20 by "History in git" in 2.2: the approval tags the
 commit that holds all of these, instead of copying them.)
 
-**Decided (the human, 2026-10-18):** `flow plan approve` saves the plan, the
+**Decided (the human, 2026-10-18):** `sliceflow plan approve` saves the plan, the
 task files, and the contract changes together, one folder per revision:
 
   ```
@@ -1114,15 +1119,15 @@ Details (lead's notes):
    server. Building on those should make tracking and recovery easier.
 3. **Each worker has its own worktree.** Example: `A → B → D`, `C → D`.
    A and C have no dependencies, so they start together (up to the worker
-   limit in `flow.yaml`). A starts from the slice branch. When A is done, it
+   limit in `sliceflow.yaml`). A starts from the slice branch. When A is done, it
    is merged into the slice branch. B then starts from the slice branch with
    A in it. C may start from the slice branch before or after A or B is
    merged; both are fine.
 4. **Only one task merges into the slice branch at a time** (no race).
 5. **Failed review:** back to a worker. The number of review rounds has a
-   limit. Over it: `flow` reports to the lead, and the lead tells the human
+   limit. Over it: `sliceflow` reports to the lead, and the lead tells the human
    what they need to decide.
-6. **Task review is configurable** in `flow.yaml`. A simple project can
+6. **Task review is configurable** in `sliceflow.yaml`. A simple project can
    turn it off, to save tokens.
 
 **No track (decided, the human, 2026-10-20).** A slice has no
@@ -1148,13 +1153,13 @@ tokens.
 
 | | Claude Code `claude -p` | Codex `codex exec --json` | Codex app server |
 |---|---|---|---|
-| How it runs | one program run per job, then it exits | one program run per job, then it exits | a program that stays running; `flow` talks to it (JSON-RPC) |
-| What `flow` sees | a stream of events (`--output-format stream-json`): start, each message and tool use, a final result with cost | a stream of events: thread, turn, item (command, file change), failed | the same events, plus approval requests, and `flow` can interrupt |
+| How it runs | one program run per job, then it exits | one program run per job, then it exits | a program that stays running; `sliceflow` talks to it (JSON-RPC) |
+| What `sliceflow` sees | a stream of events (`--output-format stream-json`): start, each message and tool use, a final result with cost | a stream of events: thread, turn, item (command, file change), failed | the same events, plus approval requests, and `sliceflow` can interrupt |
 | Recovery | a session ID; `--resume <id>` continues it | the thread can be resumed | `thread/resume` |
 
 Both tools give a stream of events and a session to resume. That is what
 tracking and recovery need. Proposal: one small **adapter** per tool in
-`flow`, all with the same shape (start, events, result, resume, stop).
+`sliceflow`, all with the same shape (start, events, result, resume, stop).
 Start with the one-run-per-job mode of each tool (simplest); the Codex app
 server can come later through the same adapter, if its extra control
 (interrupt, approvals) is needed.
@@ -1166,7 +1171,7 @@ work:
   made from the slice branch as it is at that moment. B starts after A is
   merged, so it has A.
 - **Bring it up to date at merge, and check again.** C may have started
-  before A was merged. At merge, `flow` puts C's work on top of the newest
+  before A was merged. At merge, `sliceflow` puts C's work on top of the newest
   slice branch (with A, maybe B), runs the checks again, and only then
   merges. A conflict, or failing checks, goes back to a worker.
 - Also: two tasks that change the same files (`touches`) do not run at the
@@ -1209,7 +1214,7 @@ it: the lead, or B's worker?
 - Not the lead: the lead does not write code, and it does not know B's work.
   It stays the fallback.
 
-What `flow` does:
+What `sliceflow` does:
 
 1. It tries to put B's work on top of the newest slice branch (with A and C).
    Conflict.
@@ -1235,10 +1240,10 @@ checks are enough. The final review sees the whole slice anyway. Exception:
 if solving it changed more than the fit, the task review runs again (when
 task reviews are on).
 
-How `flow` knows (lead's proposal, not decided): **it measures, it does not
+How `sliceflow` knows (lead's proposal, not decided): **it measures, it does not
 ask.**
 
-- `flow` compares B's change before and after the conflict was solved (git
+- `sliceflow` compares B's change before and after the conflict was solved (git
   can compare two versions of the same change: `git range-diff`).
 - Only the files that were in conflict changed → it was the fit. Checks are
   enough.
@@ -1248,7 +1253,7 @@ ask.**
   this is a fact code can measure (the hybrid rule, 1.3).
 
 **Conflicts are visible, and do not block (from the human, 2026-10-18).**
-A conflict is shown to the human (dashboard, `flow status`), but the run
+A conflict is shown to the human (dashboard, `sliceflow status`), but the run
 keeps going.
 
 Lead's notes:
@@ -1264,7 +1269,7 @@ Lead's notes:
 **Watching a long run (from the human, 2026-10-18).** The implement phase
 runs the longest, so it must be reliable:
 
-- `flow` checks often that the run is still healthy.
+- `sliceflow` checks often that the run is still healthy.
 - There is a time limit. Over it, the lead looks at what happened and
   decides what to do.
 
@@ -1274,16 +1279,16 @@ Who checks what:
 
 | What can go wrong | Who notices | How |
 |---|---|---|
-| An agent is dead (its program ended without a result) | the `flow` run | the program's exit |
-| An agent is alive but silent (no output for a long time) | the `flow` run | the time since its last event |
-| An agent is busy, but takes too long | the `flow` run | the time since it started |
-| The `flow` run itself died (killed, computer restarted) | the next `flow` command (`flow status`, the dashboard, `flow run`) | the run writes "alive at <time>" into `.flow/` every few seconds; too old, or its process is gone → "the run stopped at 14:02, last step: task B review". `flow run` continues from the log. |
+| An agent is dead (its program ended without a result) | the `sliceflow` run | the program's exit |
+| An agent is alive but silent (no output for a long time) | the `sliceflow` run | the time since its last event |
+| An agent is busy, but takes too long | the `sliceflow` run | the time since it started |
+| The `sliceflow` run itself died (killed, computer restarted) | the next `sliceflow` command (`sliceflow status`, the dashboard, `sliceflow run`) | the run writes "alive at <time>" into `.sliceflow/` every few seconds; too old, or its process is gone → "the run stopped at 14:02, last step: task B review". `sliceflow run` continues from the log. |
 
 **Decided (the human, 2026-10-18):** a time limit is **per agent run**, not
 per task or per slice. Each role has its own: a worker and a reviewer have
 separate limits. Each fresh worker in a fix round starts its own clock.
 
-Lead's proposal: two kinds of limit per role (in `flow.yaml`):
+Lead's proposal: two kinds of limit per role (in `sliceflow.yaml`):
 
 ```yaml
 limits:
@@ -1293,12 +1298,12 @@ limits:
   reviewer:
     minutes: 20
     silent_minutes: 10
-  lead:                   # a fallback lead that flow starts itself
+  lead:                   # a fallback lead that sliceflow starts itself
     minutes: 20
     silent_minutes: 10
 ```
 
-- Over a limit, `flow` does not stop the agent by itself. It tells the lead,
+- Over a limit, `sliceflow` does not stop the agent by itself. It tells the lead,
   with a case: which task, how long, the last activity, the last lines of
   output, the cost so far.
 - The lead decides: let it continue, stop it and start a fresh worker, or
@@ -1306,7 +1311,7 @@ limits:
 - An idea for later: a cost limit per task, so a stuck agent cannot burn
   tokens without end.
 
-**When no lead session is there. Decided (the human, 2026-10-18):** `flow`
+**When no lead session is there. Decided (the human, 2026-10-18):** `sliceflow`
 starts a fresh lead agent itself, the same way it starts a worker. It gets
 the case, handles it, and ends. If it cannot handle it, the case goes on to
 the human, as the ladder says (1.6): the task is blocked and waits, and the
@@ -1315,10 +1320,10 @@ run goes on with other tasks.
 So there are two kinds of lead:
 
 - **The chat lead:** the session the human talks to (1.8).
-- **A fallback lead:** started by `flow` for one case, with its own time
+- **A fallback lead:** started by `sliceflow` for one case, with its own time
   limit (`limits.lead`).
 
-How `flow` knows a chat lead is there, and how a case reaches it: 1.12c.
+How `sliceflow` knows a chat lead is there, and how a case reaches it: 1.12c.
 
 What a fallback lead may do, and what it must leave to the human: decided in
 1.6, point 4.
@@ -1329,7 +1334,7 @@ What a fallback lead may do, and what it must leave to the human: decided in
 
 1. **Show the result.** What the feature does now, how to run it, a list of
    things to try by hand, and what was parked for later. With the run
-   choice "preview prepared" (1.5), `flow` prepares this before the human
+   choice "preview prepared" (1.5), `sliceflow` prepares this before the human
    looks: for example a test repo and the list of things to try.
 2. **The human tries it.** A problem → fix tasks, and the run starts again
    (implement). Something new → a spec change, not a fix.
@@ -1342,12 +1347,12 @@ What a fallback lead may do, and what it must leave to the human: decided in
 **Lead's view, to talk about** (not decided):
 
 - **Commands**, following the same pattern as spec and plan:
-  `flow slice approve` records the human's approval of the result (only
-  right after they say so, with their words). `flow slice done` does the
+  `sliceflow slice approve` records the human's approval of the result (only
+  right after they say so, with their words). `sliceflow slice done` does the
   finish: update from `main`, checks, merge into `main` (one slice at a
   time, like the task merge queue), backlog, remove the worktree.
 - **The things to try** come from the requirements checked `manual` in the
-  spec, so the list is made by `flow`, not written by hand.
+  spec, so the list is made by `sliceflow`, not written by hand.
 - **Push. Decided (the human, 2026-10-18):** not part of the workflow.
   The workflow ends with the merge into `main`; pushing is outside it.
 - **Events:** `preview.started`, `slice.approved`, `slice.done`.
@@ -1363,10 +1368,10 @@ its `Why:` names an input and the wrong result it gives; otherwise it is
 low (Anthropic: "Chasing every finding leads to over-engineering").
 
 **The preview checks intent (decided, the human, 2026-10-20).** Besides one
-check per `manual` requirement and per success criterion, `flow` adds one
+check per `manual` requirement and per success criterion, `sliceflow` adds one
 preview check for the first scenario of each story, its main success case
 (`Covers: S1`). Its steps follow the scenario's exact command and output.
-The fixed checks come from the spec alone, so `flow` creates `preview.md`
+The fixed checks come from the spec alone, so `sliceflow` creates `preview.md`
 with them when the spec is approved; the lead fills the steps during the
 plan phase. A later spec approval adds checks for new items, never deletes
 the lead's text, and reports a check whose item was removed. In manual flow
@@ -1378,8 +1383,8 @@ otherwise have an empty preview. Research (2026-10-20): Wang, Pradel, Liu,
 plausible patches "induce different behavior than the ground truth
 patches".
 
-**Parked items go to the backlog through `flow` (decided, the human,
-2026-10-20).** At `flow slice done`, `flow` copies two kinds of items into
+**Parked items go to the backlog through `sliceflow` (decided, the human,
+2026-10-20).** At `sliceflow slice done`, `sliceflow` copies two kinds of items into
 `backlog.md`, word for word: each bullet of the plan's Parked section, and
 each spec Out of scope item with `Goes to: the backlog`. Each line ends
 with where it came from and the date, e.g.
@@ -1395,7 +1400,7 @@ always leads back to the source.
   (locked after hand-in), its state (fixed, wontfix, deferred, verified,
   reopened) lives in the event log, and `status.md` shows the open ones.
   A findings file would be a second copy of the state.
-- At `flow slice done`, `flow` also copies every finding deferred out of
+- At `sliceflow slice done`, `sliceflow` also copies every finding deferred out of
   the slice into `backlog.md`, with its source, e.g.
   `(from slices/due-dates/reviews/task-04-1.md F3, 2026-10-22)`, copied
   as its title (the text after `### F3. `). An item with more lines is
@@ -1403,7 +1408,7 @@ always leads back to the source.
   findings that were never fixed are not copied: they were optional, and
   they stay in the review files.
 - `backlog.md` has a template: one bullet per item, on one line, ending
-  with `(from <source>, <date>)`. `flow` adds at the end and never
+  with `(from <source>, <date>)`. `sliceflow` adds at the end and never
   rewrites existing lines. What happens to a line that becomes a slice
   is settled with "backlog to slice" (section 4).
 - Research (2026-10-20): the Scrum Guide calls the backlog "the single
@@ -1450,13 +1455,13 @@ Two different things wait on 0002, and only one of them has to:
    documents until it builds, so it never needs to be moved while designing.
 2. **The plan reviewer reads 0002's approved spec and plan** (and contract
    changes) as the base 0003 builds on.
-3. **If 0002's plan changes after 0003's plan was approved**, `flow` marks
+3. **If 0002's plan changes after 0003's plan was approved**, `sliceflow` marks
    0003's plan "stale: 0002 changed", and it is checked and approved again
    (check X3 in the workflow files today).
 4. **Build after the merge (A), automatically.** When 0002 is merged into
-   `main`, `flow` updates 0003's branch from the local `main` (no remote is
+   `main`, `sliceflow` updates 0003's branch from the local `main` (no remote is
    involved). 0003 holds only its own documents, so this cannot conflict.
-   The checks run once, then `flow` starts 0003's run by itself (if its
+   The checks run once, then `sliceflow` starts 0003's run by itself (if its
    plan is approved). 0004 follows 0003 the same way.
 5. **Build on top (B) later, as a setting**, if the waiting turns out to be
    too slow. It costs a restack every time 0002 changes, and rework when
@@ -1482,29 +1487,29 @@ recovery.
 
 - **Cancelled is a mark on top of the phase, like blocked** (1.4):
   "implement (cancelled)". The phase never changes, so "where it was" is
-  never lost. `flow slice reopen` removes the mark, and the slice goes on
+  never lost. `sliceflow slice reopen` removes the mark, and the slice goes on
   from there.
-- **Commands:** `flow slice cancel --reason "…"` (only when the human says
-  so, with their words in the event) and `flow slice reopen`.
+- **Commands:** `sliceflow slice cancel --reason "…"` (only when the human says
+  so, with their words in the event) and `sliceflow slice reopen`.
 - **Before an agent is stopped, its work is saved** on its task branch.
   The task is marked interrupted. On reopen, an interrupted task goes back
   to todo, and its work is still on its branch (the rule in the workflow
   files today: an interruption is not a failure).
 - **Kept:** the slice branch, every task branch, the event log, the
-  approval tags, reviews. **Removed:** the worktrees in `.flow/`, to free disk space; they
+  approval tags, reviews. **Removed:** the worktrees in `.sliceflow/`, to free disk space; they
   can be made again from the branches on reopen.
 - **The slice name is never used again.** The name is in the branch
   name, the commits, the event log, the approval tags, other slices' `after:` and
   decisions, and the backlog. A new slice with the same name would make
   all of those point to two slices. It also keeps reopening possible.
-- **Stopping without cancelling is a different thing:** `flow run stop`
+- **Stopping without cancelling is a different thing:** `sliceflow run stop`
   stops the run (agents interrupted, work saved) but the slice is not
   cancelled. For "pause for now", not "we do not want this".
 - **Events:** `slice.cancelled` { by, reason, at }, `slice.reopened`,
   `task.interrupted` { task, at }.
 
 **A slice stacked on a cancelled one** (0003 waits for 0002, and 0002 is
-cancelled): `flow` does not change 0003 by itself. It shows
+cancelled): `sliceflow` does not change 0003 by itself. It shows
 "0003 waiting: 0002 was cancelled", and the human chooses:
 
 - **Move 0003 onto `main`:** the dependency is removed (maybe with a spec or
@@ -1525,22 +1530,22 @@ How the design is cut:
 
 | # | Slice | What you can do after it | Design |
 |---|---|---|---|
-| 0001 | slice and events | create a slice (`flow slice new`) and see it (`flow status`); every event in `.events.jsonl`, `status.md` written from it | 1.13, 2.1 |
+| 0001 | slice and events | create a slice (`sliceflow slice new`) and see it (`sliceflow status`); every event in `.events.jsonl`, `status.md` written from it | 1.13, 2.1 |
 | 0002 | spec | take a spec from draft to approved: `spec validate`, `submit` (review off for now), `approve`, `reject`, history as git tags | 2.2 |
 | 0003 | plan | take a plan and its tasks to approved: `plan validate`, `brief`, history as git tags; the slice is ready to build | 2.3 |
-| 0004 | agents | `flow` starts agents itself: the Codex adapter, the permission layers, settings per role, `flow wait`; first use: the spec check and the plan review on submit | 1.9, 1.12c |
-| 0005 | the run | `flow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; when stuck, the task goes to "Needs you" | 2.4 |
+| 0004 | agents | `sliceflow` starts agents itself: the Codex adapter, the permission layers, settings per role, `sliceflow wait`; first use: the spec check and the plan review on submit | 1.9, 1.12c |
+| 0005 | the run | `sliceflow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; when stuck, the task goes to "Needs you" | 2.4 |
 | 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue (rebase and check again), conflicts | 2.4 |
-| 0007 | reliability | a run survives a killed `flow`, a lost network, a stuck agent: heartbeats, time limits per role, retries for passing failures, checking the log against reality on restart | 1.7, 2.4 |
-| 0008 | cases and the lead | stops go to the right level: the case shape, routing by kind, the chat lead through `flow wait`, the fallback lead, `--human` | 1.6, 1.12c |
+| 0007 | reliability | a run survives a killed `sliceflow`, a lost network, a stuck agent: heartbeats, time limits per role, retries for passing failures, checking the log against reality on restart | 1.7, 2.4 |
+| 0008 | cases and the lead | stops go to the right level: the case shape, routing by kind, the chat lead through `sliceflow wait`, the fallback lead, `--human` | 1.6, 1.12c |
 | 0009 | finish | the full path to `main`: integration review, preview, `slice approve`, update from `main`, merge into `main` (one slice at a time), backlog, `slice done` | 2.5 |
 | 0010 | stacking and cancel | design ahead (`after:`), stale plans, the automatic update and start; cancel and reopen | 2.6, 2.7 |
 | 0011 | Claude Code | a second agent tool; proves the adapter shape | 1.9 |
 | 0012 | configurable steps | level 2: pick and order the built-in steps (simple settings come earlier, with each slice) | 1.10 |
 
-- **0009 is the first release.** After it `flow` runs the whole workflow,
-  and this repo can switch from agent-flow's skills to `flow` itself.
-- **Codex first (the human, 2026-10-19).** Codex is the agent tool `flow`
+- **0009 is the first release.** After it `sliceflow` runs the whole workflow,
+  and this repo can switch from agent-sliceflow's skills to `sliceflow` itself.
+- **Codex first (the human, 2026-10-19).** Codex is the agent tool `sliceflow`
   starts in both of the human's setups: a Cursor lead with Codex agents, and
   a Claude Code lead with Codex agents. So 0004 builds the Codex adapter,
   and Claude Code comes in 0011.
@@ -1549,13 +1554,13 @@ How the design is cut:
   sandbox on a test repo, on Linux and Windows (a reported bug refuses
   writes on native Windows), before the tasks are written.
 - **Codex points for 0004** (settled there): reviewers run in the
-  `read-only` sandbox and `flow` writes the review file from their last
-  message; the sandbox has no network, so `flow` runs the setup commands
+  `read-only` sandbox and `sliceflow` writes the review file from their last
+  message; the sandbox has no network, so `sliceflow` runs the setup commands
   before the worker starts; `codex exec resume` needs its flags again.
 - **Lessons from another of the human's projects**, which already runs Codex
   workers by hand (input for 0004, 2026-10-19):
   - The sandbox makes git's own files read-only, so a worker cannot commit.
-    This fits: `flow` does all git work.
+    This fits: `sliceflow` does all git work.
   - Tool caches outside the worktree are read-only too (Go's build cache
     had to be moved per worktree, with `GOCACHE`).
   - The sandbox blocks even `localhost`, so tests that use a local database
@@ -1577,10 +1582,10 @@ How the design is cut:
   read Spec Kit files directly, templates a project can change (1.13c).
 - **Later: tervi** (the human's other project: run coding agents from a
   browser). Deferred by the human, 2026-10-19. When it comes back: tervi
-  reads `flow`, and `flow` never sends anything to tervi (1.12b). It needs
+  reads `sliceflow`, and `sliceflow` never sends anything to tervi (1.12b). It needs
   output other programs can rely on: the event log and a `--json` form of
-  `flow status`, documented and versioned.
+  `sliceflow status`, documented and versioned.
 - **Open for 0009: pull requests.** Projects that merge through pull
-  requests (tervi, and likely the human's work) need either "`flow` merges
-  locally" or "`flow` stops at approved, and the lead opens a pull request".
+  requests (tervi, and likely the human's work) need either "`sliceflow` merges
+  locally" or "`sliceflow` stops at approved, and the lead opens a pull request".
   Push stays outside the workflow (2.5).

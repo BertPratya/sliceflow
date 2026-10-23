@@ -22,7 +22,7 @@ touches:
      point the lead decided alone ends with (lead's call); the human sees
      every one at approval.
 
-     flow reads this file. Keep every marker exactly as shown: the
+     sliceflow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**TD1.**, **Q1.**), the labeled lines
      (Success criteria:, Covers:, Project rule:, Why:, Not chosen:, Cost:,
      Replaces:, Plan only:), and the front matter. Don't rename or reorder
@@ -72,7 +72,7 @@ touches:
      line, and under it one bullet per criterion. Each bullet starts with
      the criterion's number and a colon, then the flows, decisions, or
      shared rules that reach it, then a period and one or two sentences
-     on how. flow checks that every criterion has a bullet and that the
+     on how. sliceflow checks that every criterion has a bullet and that the
      names exist; the reasoning is checked in the plan review.
      No success criteria in the spec? Leave the line out.
 
@@ -89,7 +89,7 @@ touches:
 
      Success criteria:
      - SC1: Flow 2, TD3. The run loop never calls the lead when a task
-       passes, and flow writes the merge messages itself. -->
+       passes, and sliceflow writes the merge messages itself. -->
 
 {{The whole idea in a few sentences.}}
 
@@ -230,7 +230,7 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
        (in tasks.md). So every decision is named by at least one task.
        A decision that no task's code depends on says why, in a
        Plan only: line, e.g. Plan only: it picks a dependency; no task's
-       code depends on the choice. flow warns about a decision that is
+       code depends on the choice. sliceflow warns about a decision that is
        neither followed nor plan only, and about one that is both.
 
      Example:

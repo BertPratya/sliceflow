@@ -16,7 +16,7 @@ description: Creates a new slice (branch, worktree, slice folder, spec.md, and s
   - the branch `slice/<name>`
   - the folder `docs/slices/<name>/` on `main`
   - the worktree `.worktrees/<name>/`
-  - a tag that starts with `flow/<name>/`
+  - a tag that starts with `sliceflow/<name>/`
 
 When the name is fine, go on. Do not ask again.
 

@@ -94,7 +94,7 @@ The step is done when Open questions says `None.`
    `docs/slices/<name>/reviews/spec-<round>.md`, and fill its front
    matter.
 3. Start a doc reviewer in a fresh context: Agent tool, type
-   `flow-doc-reviewer`, model `opus`. Its prompt: read
+   `sliceflow-doc-reviewer`, model `opus`. Its prompt: read
    `.agents/prompts/doc-reviewer.md` and follow it, for a spec check of
    `docs/slices/<name>/spec.md`, with the worktree's full path and the
    review file. It looks for conflicts and unresolved points.
@@ -251,7 +251,7 @@ approval again.
    `R001`, and in Approved the date, the human, and the tag. Remove the
    approval from Needs human. Add a Log line with the human's words.
 2. Commit: `<name>: planning approved`.
-3. Make one annotated tag on that commit, `flow/<name>/planning/R001`.
+3. Make one annotated tag on that commit, `sliceflow/<name>/planning/R001`.
    Its message names the four documents and quotes the human's
    approval. Write the message to a file and use `git tag -a -F <file>`.
 4. Ask the human whether to start the implementation phase now.
