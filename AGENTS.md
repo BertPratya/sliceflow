@@ -1,121 +1,146 @@
 # AGENTS.md
 
 flow is a command-line tool that runs a spec-driven workflow with AI coding
-agents. It starts workers and reviewers, runs the checks, merges tasks, and
-keeps each slice's status. It runs on Windows, macOS, and Linux. Go, in
-`cmd/flow/` and `internal/`.
+agents. Go, in `cmd/flow/` and `internal/`. It runs on Windows, macOS, and
+Linux.
 
 ## How we work
 
-Pick one at the start. If unsure, ask the human.
+Pick the path at the start. If unsure, ask the human.
 
-- **Brainstorm:** the human wants to think, not build.
-- **Slice:** new behavior, a contract or data change, or a design decision.
-- **Small change:** a clear bug fix, a text tweak, a small refactor, a
-  config or test fix. A `fix/<short-name>` branch, the checks, then merge.
-  If it grows into a feature, stop and suggest a slice.
+- **Slice:** a new feature, a new spec, or a major change in behavior. Use
+  the skills below.
+- **Fix branch:** a fix users can see, not big enough for a slice.
+  1. Branch `fix/<short-name>`, in worktree `.worktrees/fix-<short-name>/`.
+  2. Fix it, and run the checks.
+  3. Explain the diff to the human in plain words.
+  4. After the human says "merge": `git merge --no-ff` into `main`, then
+     push.
+- **Directly on `main`:** small, and nothing users see changes, e.g. docs,
+  comments, a typo in Markdown, a test-only fix. In the main checkout: run
+  the checks, then commit.
+
+A fix that grows into a feature: stop, and suggest a slice.
+
+## Skills
 
 If you are the main chat agent, you are the lead. Before the work below,
 read its skill and follow it:
 
-| When | Read |
+| When | Skill |
 |---|---|
-| The human wants to explore an idea | `.agents/skills/brainstorming/SKILL.md` |
-| The human asks for a new slice | `.agents/skills/flow-slice/SKILL.md` |
-| A slice is in `planning` | `.agents/skills/flow-planning/SKILL.md` |
-| A slice is `ready` or `implementing` | `.agents/skills/flow-implementation/SKILL.md` |
-| A slice is in `integration` or `preview` | `.agents/skills/flow-finish/SKILL.md` |
+| The human has an early idea, or wants to agree on a direction | `.agents/skills/idea-discovery/SKILL.md` |
+| The human asks for a new slice | `.agents/skills/start-slice/SKILL.md` |
+| A slice is in `planning` | `.agents/skills/plan-slice/SKILL.md` |
+| A slice is `ready` or `implementing` | `.agents/skills/build-slice/SKILL.md` |
 
-A slice lives in `docs/slices/<name>/`, on branch `slice/<name>`, in
-worktree `.worktrees/<name>/`. Its state is in its `status.md`.
-Phases: `planning → ready → implementing → integration → preview → done`,
-with the marks `(blocked)` and `(cancelled)`. Templates: `docs/templates/`.
-Their comments hold each document's rules. The design and its decisions:
-`docs/design/flow-design.md`.
+Until flow's first release, run this repo with these skills. Use the
+`flow` binary only in tests, on temporary repos.
+
+## Commands
+
+Run in the repo root, or the slice worktree. Only a full run counts.
+
+- Setup: none.
+- Auto-fix: `gofmt -w cmd internal`
+- The checks:
+  - `gofmt -l cmd internal` prints nothing
+  - `go vet ./...`
+  - `go test ./...`
+  - `go build ./...`
+- Run locally, for a preview: `go run ./cmd/flow <command>`, against a
+  temporary test repo.
+
+Markdown files have no automatic checks; reviewers read them.
+
+`.githooks/pre-commit` runs the checks for Go commits (once per clone:
+`git config core.hooksPath .githooks`). CI runs them on Linux, Windows, and
+macOS for every push to `main` and every pull request.
+
+## Limits
+
+- Review rounds: **3**. A document or task that still does not pass is
+  `blocked`, and the human decides.
+- Failed check runs: **3** since the last review. Then the task is
+  `blocked`.
+
+## Always allowed
+
+Any task may also change: `go.sum`, when `go.mod` did not change.
 
 ## Agents
 
 The lead starts each agent in a fresh context. Its prompt says to read its
 prompt file and follow it, and names the worktree and the target.
 
-| Agent | Prompt file | Tool | How to start (Claude Code) |
-|---|---|---|---|
-| Worker | `.agents/prompts/worker.md` | Claude Code, Sonnet 5.5, high effort | Agent tool, type `flow-worker`, model `sonnet` |
-| Code reviewer | `.agents/prompts/code-reviewer.md` | Claude Code, Opus 5.5, high effort | Agent tool, type `flow-code-reviewer`, model `opus` |
-| Doc reviewer | `.agents/prompts/doc-reviewer.md` | Claude Code, Opus 5.5, high effort | Agent tool, type `flow-doc-reviewer`, model `opus` |
+| Agent | What it does | Prompt file | How to start | Model |
+|---|---|---|---|---|
+| Lead | The main chat: runs the skills, talks to the human, keeps `status.md`, commits | - | - | the human's choice |
+| Doc reviewer | Reviews the spec; the plan, tasks, and preview together; a change after a human decision | `.agents/prompts/doc-reviewer.md` | Agent tool, type `flow-doc-reviewer` | `opus` |
+| Code reviewer | Reviews one task's code; the whole slice at the end | `.agents/prompts/code-reviewer.md` | Agent tool, type `flow-code-reviewer` | `opus` |
+| Worker | Builds one task | `.agents/prompts/worker.md` | Agent tool, type `flow-worker` | `sonnet` |
 
 If a type is not loaded, use `general-purpose`: the prompt names the file.
 
-## Hard rules
+## Boundaries
 
-- Only the human approves. Never approve for them, even if asked to "just
-  continue".
-- Never change an approved document without the human. Their answer to a
-  question counts, as `flow-implementation` says.
-- Never move or delete an approval tag. Never edit a submitted review.
+**Always:**
+- Run the checks before every commit of code.
+- Keep everything generic: no company names, internal URLs, or secrets.
+- Write plain, simple English. Short sentences.
 - Only the lead changes `status.md`.
-- Never force-push. Never rewrite shared history.
-- Merge or push only as the git policy says.
 
-## Stop rules
+**Ask the human first:**
+- A new dependency.
+- A change to CI, the hooks, or a stored file format.
+- Anything that needs secrets.
+- Every merge into `main`.
+- A push that does not follow a merge.
 
-Stop, mark the task or slice `blocked`, and tell the human when:
-
-- the checks fail 3 times since the last review
-- a review does not pass after **3 rounds** (the review round limit)
-- something is unclear, or a document looks wrong
-- you need a new dependency, a storage format change, secrets, or CI changes
-
-## Checks
-
-Run in the repo root (or the task's worktree). Only a full run counts.
-
-1. Auto-fix: `gofmt -w cmd internal`
-2. Checks:
-   - `gofmt -l cmd internal` prints nothing
-   - `go vet ./...`
-   - `go test ./...`
-   - `go build ./...`
-
-Run locally, for the preview: `go run ./cmd/flow <command>` in the slice
-worktree, against a temporary test repo. Tests create their own temporary
-git repos; never use shared services.
-
-Always allowed in any task: `go.sum`, when `go.mod` did not change.
-
-Setup commands: none. Workflow files (Markdown) have no automatic checks;
-reviewers read them by hand.
-
-Hooks and CI: `.githooks/pre-commit` runs the checks for Go commits (turn on
-once per clone: `git config core.hooksPath .githooks`). CI runs the checks
-on Linux, Windows, and macOS for every push to `main` and every pull request.
+**Never:**
+- Approve for the human, even if asked to "just continue". Only a clear
+  "approve" counts.
+- Change an approved document without the human. Their answer to a
+  question counts, as `build-slice` says.
+- Move or delete an approval tag. Edit a submitted review.
+- Force-push, or rewrite shared history.
+- Use a bare `git stash`.
+- Make flow send data to any outside service.
 
 ## Git
 
 - Base branch `main`. `origin` is private.
-- Slice `slice/<name>`, task `task/<name>-NN`, update `update/<name>`, small
-  change `fix/<short-name>`. Worktrees in `.worktrees/`.
-- Slice, task, and update work happens in its worktree, with full paths.
-  The main checkout is the human's.
-- Commit after every step: `<name>: <what happened>`; task work
+- Branches: `slice/<name>` and `fix/<short-name>`. Their worktrees are in
+  `.worktrees/`, used with full paths. The main checkout is the human's.
+- Commit after every step: `<name>: <what happened>`. Task work:
   `<name>/NN: <summary>`.
-- Merge into `main` with `git merge --no-ff`, only after the human
-  approves, one slice at a time. Then push to `origin`. Tags go with it:
-  `git config push.followTags true` once per clone.
+- A slice merges into `main` with `git merge --no-ff`, after the human
+  approves its result. One slice at a time.
+- After a slice or fix branch merges into `main`: push `main` at once. Tags
+  go with it (once per clone: `git config push.followTags true`).
+- Direct commits on `main` wait for the human's "push", or go with the next
+  merge's push. Say how many commits are waiting.
 
-## Project rules
+## Code rules
 
-- Everyone: plain, simple English. Short sentences.
-- Everyone: keep everything generic: no company names, internal URLs, or
-  secrets.
-- Lead: until flow's first release, run this repo with the skills above.
-  Use the `flow` binary only in tests, on temporary repos.
-- Lead, planning: shared Go logic goes in `internal/`, not `cmd/`.
-- Worker: every change that adds behavior adds a test.
-- Worker: `flow` sends no data to any outside service: no telemetry, no
-  uploads, no calls home. It reads and writes repo files, and runs local
-  programs (git, the checks, the agent tools).
-- Worker: run each check or git command as its own process with its own
-  arguments, never as one shell string.
-- Worker: paths, line endings, and processes must work on Windows, macOS,
-  and Linux.
+- Shared Go logic goes in `internal/`, not `cmd/`.
+- Every change that adds behavior adds a test. Tests create their own
+  temporary git repos; never use shared services.
+- flow sends no data out: no telemetry, no uploads, no calls home. It reads
+  and writes repo files, and runs local programs (git, the checks, the
+  agent tools).
+- Run each check or git command as its own process with its own arguments,
+  never as one shell string.
+- Paths, line endings, and processes must work on Windows, macOS, and
+  Linux.
+
+## Where things live
+
+- `docs/slices/<name>/`: one slice; its state is in `status.md`.
+- `docs/slices/backlog.md`: the backlog, on `main`.
+- `docs/ideas/`: agreed ideas, and their index.
+- `docs/templates/`: the document templates; their comments hold the rules.
+- `docs/design/`: the design and the roadmap.
+- `.agents/skills/`, `.agents/prompts/`: the skills, and the agents'
+  prompts.
+- `.worktrees/`: slice and fix worktrees, and the briefs. Ignored by git.
