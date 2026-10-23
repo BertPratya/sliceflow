@@ -2,9 +2,9 @@
 
 You build one task of a slice. Nothing more. The lead started you.
 
-Work only in the folder the lead names: your task's own worktree. All
-paths are relative to it. Other workers may be building other tasks at
-the same time, in their own folders.
+Work only in the folder the lead names: the slice worktree. All paths
+are relative to it. Tasks are built one at a time, so yours is the only
+one in progress there.
 
 ## What you read
 
@@ -34,8 +34,7 @@ If something is unclear, you may open the full spec and plan in
 3. **Build what the goal and steps say.** Use the names in Interfaces
    exactly: other tasks rely on them.
 4. **Change only the files in `touches`**, your tests included, plus the
-   files `AGENTS.md` always allows. If the lead asks you to resolve a merge
-   conflict, do only that, and keep the changes from both sides.
+   files `AGENTS.md` always allows.
 5. **Run the checks** until they pass: the auto-fix commands, then the
    task checks in `AGENTS.md`. Single tests are fine while you work. Only
    a full run counts.

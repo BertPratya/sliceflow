@@ -59,8 +59,8 @@
      - wontfix: why: not fixed, with the reason.
      - deferred: task NN: a later task in this slice fixes it; that
        task's review checks it.
-     - deferred: backlog: moved out of the slice; copied to backlog.md
-       when the slice is done.
+     - deferred: backlog: moved out of the slice; added to the backlog
+       at once.
 
      Preview checks:
      - not tried: the human has not done it yet.
