@@ -34,6 +34,10 @@
      - review_passed: the review passed; the human has not approved yet.
      - approved: the human approved it; the Approved column names the tag.
      - changed: it was edited after approval and must be approved again.
+     Round (spec.md and plan.md): the review rounds so far, 0 before the
+     first review. It never resets, so review file names stay unique.
+     tasks.md and preview.md are reviewed with the plan: their Round is
+     with plan.md.
 
      Tasks:
      - todo: not started. In brackets, why it cannot start yet, e.g.
@@ -86,19 +90,21 @@
 ## Documents
 
 <!-- spec.md, plan.md, tasks.md, preview.md, and every project file in the
-     plan's touches. Revision is the approved revision (R001, ...), or -
-     before the first approval. Approved names the date, who, and the git
-     tag.
+     plan's touches. Round counts review rounds (see the status words
+     above). Revision is the approved revision (R001, ...), or - before
+     the first approval. Approved names the date, who, and the git tag.
 
      Example:
-     | Doc | Status | Revision | Approved |
-     |---|---|---|---|
-     | spec.md | review_passed | - | - |
-     | plan.md | draft | - | - | -->
+     | Doc | Status | Round | Revision | Approved |
+     |---|---|---|---|---|
+     | spec.md | review_passed | 2 | - | - |
+     | plan.md | in_review | 1 | - | - |
+     | tasks.md | in_review | with plan.md | - | - |
+     | preview.md | in_review | with plan.md | - | - | -->
 
-| Doc | Status | Revision | Approved |
-|---|---|---|---|
-| spec.md | {{status}} | {{R001 or -}} | {{date, who, tag, or -}} |
+| Doc | Status | Round | Revision | Approved |
+|---|---|---|---|---|
+| spec.md | {{status}} | {{0}} | {{R001 or -}} | {{date, who, tag, or -}} |
 
 ## Tasks
 

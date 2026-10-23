@@ -2,35 +2,28 @@
 
 <!-- HOW TO FILL THIS FILE
 
-     Ideas and known gaps for later: one bullet per item, on one line.
-     Each line ends with where it came from and the date:
-       - <the item> (from <source>, <YYYY-MM-DD>)
+     The backlog is docs/slices/backlog.md, on main: ideas and known
+     gaps for later, in one table. Add an item on main as soon as it
+     comes up, so every slice can see it.
 
-     The source is one of:
-     - a slice file, e.g. docs/slices/due-dates/plan.md or
-       docs/slices/due-dates/spec.md
-     - a review finding: the review file and the finding, e.g.
-       docs/slices/due-dates/reviews/task-04-1.md F3
-     - a short label for an item added by hand, e.g. setup, design talk
+     One row per item, at the end of the table:
+     - Item: the item, one sentence.
+     - Status: open, or closed.
+     - From: where it came from:
+       - a slice file and its number, e.g.
+         docs/slices/due-dates/spec.md Q4
+       - a review finding: the review file and the finding, e.g.
+         docs/slices/due-dates/reviews/task-04-1.md F3
+       - a short label for an item added by hand, e.g. setup, design talk
+     - Added: the date, YYYY-MM-DD.
+     - Closed by: - while open. When closed: the slice that built it,
+       e.g. slice sort-by-due, or dropped: why.
 
-     When a slice is done, flow adds three kinds of items here, word for
-     word: the plan's Parked items, the spec's Out of scope items marked
-     Goes to: the backlog, and every finding deferred out of the slice.
-     An item with more than one line is joined into one line, with one
-     space between the lines. A deferred finding is copied as its title:
-     the text after ### F1. in its review.
+     Never delete a row: a closed item stays, so the record is kept.
 
-     flow adds new items at the end. It never reorders or rewrites the
-     lines already here. People and the lead may add items by hand in
-     the same form. Keep the form exact: flow reads this file.
+     A new backlog.md holds the heading # Backlog and the table's header
+     row only. -->
 
-     Example:
-     - Show overdue tasks in red. (from docs/slices/due-dates/plan.md, 2026-10-22)
-     - Overdue mark ignores the user's time zone. (from docs/slices/due-dates/reviews/task-04-1.md F3, 2026-10-22)
-     - A checker for the workflow files. (from setup, 2026-10-17)
-
-     A new backlog.md holds only the heading # Backlog. This comment is
-     for reading the rules (e.g. with flow template show backlog); it is
-     not copied into the file. -->
-
-- {{The item.}} (from {{source}}, {{date}})
+| Item | Status | From | Added | Closed by |
+|---|---|---|---|---|
+| {{The item.}} | {{open or closed}} | {{source}} | {{YYYY-MM-DD}} | {{-, slice <name>, or dropped: why}} |

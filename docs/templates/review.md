@@ -42,9 +42,9 @@ reviewer: {{reviewer}}
      Don't invent issues to look thorough. If everything is fine, say so,
      and write None. under Findings.
 
-     A spec review is short: fill Summary, Checked, and Needs human
-     decision (every real gap, most important first). Write None. in the
-     other sections.
+     A spec review is short: fill Summary, Checked, Findings (medium and
+     low), and Needs human decision (every high gap, most important
+     first). Write None. in the other sections.
 
      - Replace every {{...}} with real text.
      - A section that doesn't apply gets one line: None.
@@ -215,7 +215,7 @@ Fix: {{optional: one or two lines}}
 
 <!-- Questions only the human can answer, numbered Q1, Q2, ... Each one
      says what is unclear, and has a Guess: line: what a worker would
-     have to guess without the answer. In a spec review, every real gap
+     have to guess without the answer. In a doc review, every high gap
      goes here. Anything here makes the verdict needs_human.
 
      Example:

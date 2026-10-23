@@ -228,9 +228,8 @@ ideas:
      One - bullet per item, on one line: the item, then Goes to: at the
      end of the line. No sub-bullets, headings, or code blocks.
 
-     When the slice is done, flow copies each item that goes to the
-     backlog into backlog.md: the text before Goes to:, word for word,
-     with where it came from.
+     An item that goes to the backlog is also added to
+     docs/slices/backlog.md on main at once, as plan-slice says.
 
      Example:
      - Reminders and notifications. Goes to: the backlog
@@ -299,7 +298,7 @@ ideas:
 
 <!-- Questions for the human, numbered Q1, Q2, ... An answered question
      is written into the spec and removed from here. A deferred question
-     stays, marked Deferred. The spec check starts when every question
-     left here is deferred; with none left, this section says None. -->
+     that does not block the build moves to Out of scope and the backlog.
+     The spec review starts only when this section says None. -->
 
 - **Q1.** {{A question for the human.}}

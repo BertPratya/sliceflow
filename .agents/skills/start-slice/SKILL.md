@@ -66,7 +66,8 @@ As `docs/templates/status.md` says:
   `slice/<name>`, Updated (the time now, UTC)
 - the `After:` line: keep it only when the human said this slice waits
   for another slice, with that slice's name. Otherwise delete it.
-- Documents: one row, `spec.md` as `draft`, Revision `-`, Approved `-`
+- Documents: one row, `spec.md` as `draft`, Round `0`, Revision `-`,
+  Approved `-`
 - every other section: `None.` Findings keeps its count line and its
   three sub-headings, each with `None.`
 - Log: `<time> · lead (<tool>) · slice created`
