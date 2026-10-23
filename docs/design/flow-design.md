@@ -1572,6 +1572,9 @@ How the design is cut:
 - **To the backlog:** the web dashboard, a Channels doorbell, a Cursor
   stop-hook doorbell, a cost limit, building on top of a slice not merged
   yet (2.6, point 5), the Codex app server, a general engine.
+- **Later: Spec Kit and configurable templates** (the human, 2026-10-23):
+  after the first release, in this order: import a Spec Kit feature,
+  read Spec Kit files directly, templates a project can change (1.13c).
 - **Later: tervi** (the human's other project: run coding agents from a
   browser). Deferred by the human, 2026-10-19. When it comes back: tervi
   reads `flow`, and `flow` never sends anything to tervi (1.12b). It needs
