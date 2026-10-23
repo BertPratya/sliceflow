@@ -53,7 +53,7 @@ Write it to `.worktrees/briefs/<name>-NN.md`, from the task in
 
 ### 2. Start the worker
 
-Agent tool, type `flow-worker`, in a fresh context. Its prompt: read
+Agent tool, type `sliceflow-worker`, in a fresh context. Its prompt: read
 `.agents/prompts/worker.md` and follow it, with the brief, the slice
 worktree's full path, and the round. In a later round, add the review
 file, or the last 40 lines of the failed checks.
@@ -97,7 +97,7 @@ straight to step 6.
    `docs/slices/<name>/reviews/task-NN-<round>.md`, and fill its front
    matter.
 3. Start a code reviewer in a fresh context: Agent tool, type
-   `flow-code-reviewer`, model `opus`. Its prompt: read
+   `sliceflow-code-reviewer`, model `opus`. Its prompt: read
    `.agents/prompts/code-reviewer.md` and follow it, for a task review
    of task NN, with the slice worktree's full path, the brief, the
    review file, and the task's commits.
@@ -160,7 +160,7 @@ The human decided it, so they do not approve the documents again.
    finds yourself. A high finding is a new question for the human.
 3. Commit: `<name>: <what changed, from the human's answer>`.
 4. Make the next approval tag on that commit,
-   `flow/<name>/planning/R00N`. Its message names the changed documents
+   `sliceflow/<name>/planning/R00N`. Its message names the changed documents
    and quotes the human's answer. Write the message to a file and use
    `git tag -a -F <file>`.
 5. In `status.md` → Documents, the changed documents stay `approved`,

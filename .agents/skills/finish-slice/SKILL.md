@@ -54,7 +54,7 @@ test the merged result.
    `docs/slices/<name>/reviews/integration-<round>.md`, and fill its
    front matter. Round counts integration reviews, from 1.
 2. Start a code reviewer in a fresh context: Agent tool, type
-   `flow-code-reviewer`, model `opus`. Its prompt: read
+   `sliceflow-code-reviewer`, model `opus`. Its prompt: read
    `.agents/prompts/code-reviewer.md` and follow it, for an integration
    review, with the slice worktree's full path and the review file.
 3. Write each finding and its state in `status.md` → Findings →
@@ -115,7 +115,7 @@ it first.
 - No high finding is open. Every deferred finding names the task that
   fixed it, or is in the backlog.
 - Every preview check is `pass`.
-- Since the latest approval tag `flow/<name>/planning/R00N`, `tasks.md`
+- Since the latest approval tag `sliceflow/<name>/planning/R00N`, `tasks.md`
   only gained fix tasks and wider `touches`, and no other document
   changed.
 - The checks passed on the slice branch after the last update from
@@ -135,7 +135,7 @@ When they approve:
 1. In `status.md`: remove the approval from Needs human, and add a Log
    line with their words.
 2. Commit, and make an annotated tag on that commit,
-   `flow/<name>/result/R001`. Its message quotes the human's approval.
+   `sliceflow/<name>/result/R001`. Its message quotes the human's approval.
    Write the message to a file and use `git tag -a -F <file>`.
 
 ### 3. Update from main once more

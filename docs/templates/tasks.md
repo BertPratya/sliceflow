@@ -19,7 +19,7 @@ slice: {{slice}}
      The worker may also open the full spec and plan if something is
      unclear. So don't copy any of these here; name them, e.g. R5, TD2.
 
-     flow reads this file. Keep every marker exactly as shown: the task
+     sliceflow reads this file. Keep every marker exactly as shown: the task
      headings (## Task 01: name), the ### headings inside a task, the
      YAML block, the labeled lines (Proves:, Scenario:, Done in:), and
      the words creates, changes, and uses in Interfaces. Don't rename or
@@ -52,11 +52,11 @@ slice: {{slice}}
      - Every scenario in the spec (S1, S2, ...) that is not removed
        becomes at least one e2e
        test in some task's Done when, with the scenario's exact values
-       and a Scenario: line. flow checks this.
+       and a Scenario: line. sliceflow checks this.
      - No dependency loops.
      - A task that uses a name another task creates or changes (see
        Interfaces) depends on that task, directly or through other tasks.
-       flow checks this, so two such tasks never run at the same time.
+       sliceflow checks this, so two such tasks never run at the same time.
      - Two tasks that can run at the same time never touch the same
        file. Tasks that must change the same file: order them with
        depends_on.
@@ -101,11 +101,11 @@ slice: {{slice}}
        quotes, e.g. ["01"]. Quotes are needed: without them YAML reads
        01 as a number. None: []
      - touches: the files and folders this task may change, its test
-       files included. A folder ends with /. Keep it narrow. flow
+       files included. A folder ends with /. Keep it narrow. sliceflow
        rejects a change outside it.
      - follows: the plan items this task must follow, by name: a
        decision (TD2), a shared rule or an interface by its heading
-       (Locking, CLI), or Testing. flow checks each name exists, and puts
+       (Locking, CLI), or Testing. sliceflow checks each name exists, and puts
        its exact text into the worker's brief. None: []
      - risk: core, normal, or low.
        - core: other tasks build on it, it changes stored data or a file
@@ -194,7 +194,7 @@ risk: {{core, normal, or low}}
      - changes: an existing name gets a new signature or behavior.
      - uses: a name from earlier tasks or existing code. If another task
        creates or changes it, this task must depend on that task.
-     Write the name the same way in both tasks, so flow can match them.
+     Write the name the same way in both tasks, so sliceflow can match them.
 
      Example:
      - `func parseDue(s string) (string, error)`: creates. Task 02 uses
@@ -217,7 +217,7 @@ risk: {{core, normal, or low}}
 ### Rules
 
 <!-- Optional. Rules that apply to this task and exist nowhere else.
-     A rule already in the plan goes in follows instead: flow gives the
+     A rule already in the plan goes in follows instead: sliceflow gives the
      worker its exact text. Don't copy it here.
 
      Example:
@@ -241,7 +241,7 @@ risk: {{core, normal, or low}}
      - A scenario from the spec becomes an e2e test with the scenario's
        exact values. Add a Scenario: line naming it, under Proves:, e.g.
        Scenario: S2. The scenario must be in this task's brief: its
-       Shows: names a requirement in this task's covers. flow checks
+       Shows: names a requirement in this task's covers. sliceflow checks
        this.
      - Every other case, e.g. edge cases and rule details, goes in a
        unit test. Keep e2e tests few; put tests as low as they can go.
@@ -251,8 +251,8 @@ risk: {{core, normal, or low}}
      nothing else. preview.md proves that one. With Check: e2e, manual,
      the e2e part still needs a test here.
 
-     flow also runs all project checks before the task is handed in, so
-     don't list them here. flow checks that each test named here exists
+     sliceflow also runs all project checks before the task is handed in, so
+     don't list them here. sliceflow checks that each test named here exists
      in a file inside the task's touches, and, where the project's test
      tool reports test names, that it ran and passed.
 

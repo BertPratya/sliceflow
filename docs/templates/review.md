@@ -12,12 +12,12 @@ reviewer: {{reviewer}}
      A review checks one thing. A doc review (kind: spec, plan, or
      change) checks a spec, a plan with its tasks.md and preview.md, or
      the documents changed during building. A code review (kind: task or
-     integration) checks one task, or the whole slice. flow
+     integration) checks one task, or the whole slice. sliceflow
      creates this file and fills
      the front matter. You write the sections below, then hand the review
-     in through flow. After that the file is locked: never edit it again.
+     in through sliceflow. After that the file is locked: never edit it again.
 
-     flow reads this file and sets the verdict from it.
+     sliceflow reads this file and sets the verdict from it.
      Code review:
      - Needs human decision is not None.            → needs_human
      - else any high or medium finding, new or
@@ -29,7 +29,7 @@ reviewer: {{reviewer}}
      - else                                         → pass
      (the lead fixes medium findings, and fixes or leaves low ones)
 
-     flow reads this file. Keep every marker exactly as shown: the
+     sliceflow reads this file. Keep every marker exactly as shown: the
      headings, the finding headings (### F1.), the labeled lines (Level:,
      Where:, Breaks:, Why:, Fix:, Guess:), the numbers (**Q1.**), and the
      line forms in Tests, Previous findings, and Requirements check.
@@ -160,7 +160,7 @@ reviewer: {{reviewer}}
      - Breaks: what it breaks: a requirement (R5), a decision (SD1,
        TD2), a task's Interfaces (task 02), or a project rule (name it).
        A decision without a number: name the document and section,
-       e.g. docs/flow-design.md 2.3.
+       e.g. docs/sliceflow-design.md 2.3.
        The work adds behavior nothing asks for? Write: scope, and what
        it adds, e.g. Breaks: scope: adds --color, which no requirement
        asks for. A scope finding is at least medium: the plan never adds
