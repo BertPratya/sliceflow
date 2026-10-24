@@ -49,6 +49,9 @@ func runTitle(ctx context.Context, args []string, stdout, stderr io.Writer) int 
 	}
 	r, err := slice.FindRepo(ctx, wd)
 	if err != nil {
+		if ctx.Err() != nil {
+			err = slice.InterruptedSave()
+		}
 		return statusFail(stderr, err)
 	}
 	if err := slice.SetTitle(ctx, r, pos[0], pos[1]); err != nil {

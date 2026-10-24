@@ -2,6 +2,7 @@ package slice
 
 import (
 	"context"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -51,6 +52,37 @@ func TestSetTitleSameAndEmpty(t *testing.T) {
 	got = errMsg(t, SetTitle(ctx, r, saveName, ""))
 	if want := "the title must not be empty. Nothing was changed."; got != want {
 		t.Errorf("empty: %q", got)
+	}
+	if commitCount(t, wt) != before {
+		t.Error("commit made")
+	}
+}
+
+func TestSetTitleUntitledOwnName(t *testing.T) {
+	r := newRepo(t)
+	c, err := Create(context.Background(), r, CreateOptions{Name: saveName})
+	if err != nil {
+		t.Fatal(err)
+	}
+	wt := filepath.FromSlash(c.Worktree)
+	before := commitCount(t, wt)
+	got := errMsg(t, SetTitle(context.Background(), r, saveName, saveName))
+	if want := `the title of login-google is already "login-google". Nothing was changed.`; got != want {
+		t.Errorf("got %q", got)
+	}
+	if commitCount(t, wt) != before {
+		t.Error("commit made")
+	}
+}
+
+func TestSetTitleCancelled(t *testing.T) {
+	r, wt := saveSlice(t)
+	before := commitCount(t, wt)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	got := errMsg(t, SetTitle(ctx, r, saveName, "New title"))
+	if want := "could not save the event: interrupted. Nothing was changed."; got != want {
+		t.Errorf("got %q", got)
 	}
 	if commitCount(t, wt) != before {
 		t.Error("commit made")

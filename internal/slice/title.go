@@ -8,11 +8,20 @@ import (
 	"github.com/BertPratya/sliceflow/internal/state"
 )
 
+// InterruptedSave is R10's error with the reason "interrupted", for a stop
+// before anything was saved.
+func InterruptedSave() error {
+	return saveError("interrupted", "", nil)
+}
+
 // SetTitle saves slice.titled (Flow 6). It works in any phase. The commit
 // holds only the log; the title never goes into a git argument.
 func SetTitle(ctx context.Context, r Repo, name, title string) error {
 	wt, err := openSlice(ctx, r, name)
 	if err != nil {
+		if ctx.Err() != nil {
+			return InterruptedSave()
+		}
 		return err
 	}
 	_, _, err = saveEvent(ctx, r, name, wt, saveOp{
