@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:57 UTC
+- Updated: 2026-10-24 08:58 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-6 of 13 done · 1 in_review · 6 todo
+7 of 13 done · 6 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -29,7 +29,7 @@ None.
 | 04 | repo-and-names | core | done | 0 | 1 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | done | 0 | 1 | 01 | R7 |
 | 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
-| 07 | create-command | normal | in_review | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
+| 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | todo | 0 | 0 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
 | 09 | create-undo | core | todo | 0 | 0 | 08 | R8, R18 |
 | 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 1 · Closed: 56
+Open: 0 · Waiting for verify: 0 · Closed: 57
 
 ### Doc reviews
 
@@ -99,7 +99,7 @@ Open: 0 · Waiting for verify: 1 · Closed: 56
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-07-1/F1 | low | 07 | TestCreateSpecSubmit does not check the log line | fixed (waiting for verify) |
+| task-07-1/F1 | low | 07 | TestCreateSpecSubmit does not check the log line | verified |
 | task-06-1/F1 | medium | 06 | path.Join drops the // of a Windows network-share root | verified |
 | task-06-1/F2 | low | 06 | Create cannot tell whether it made .sliceflow/ and its .gitignore | deferred: task 09 |
 | task-03-1/F1 | high | 03 | Any flag after slice prints the help and exits 0 | verified |
@@ -133,6 +133,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:58 · lead (claude) · task 07 done
+- 2026-10-24 08:58 · code reviewer (claude opus) · task-07-2 submitted: pass; F1 verified; no new findings
 - 2026-10-24 08:57 · lead (claude) · task 07 code review started, round 2
 - 2026-10-24 08:57 · lead (claude) · task 07 fixes from review 1 committed (bdf7eb9); checks pass
 - 2026-10-24 08:55 · lead (claude) · task 07 worker round 2 started: F1, and relative paths from the slice name
