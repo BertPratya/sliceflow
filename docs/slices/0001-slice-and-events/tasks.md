@@ -1108,3 +1108,107 @@ One e2e test proves that no command of this slice runs `git fetch`,
 
 - Network calls from the user's own git hooks. Done in: not in this
   slice
+
+## Task 14: fix-undo-prune
+
+```yaml
+covers: [R18]
+depends_on: ["09"]
+touches: [internal/slice/undo.go, internal/slice/undo_test.go]
+follows: [Undo on failure, Tests, Testing]
+risk: core
+```
+
+### Goal
+
+A fix task from integration-1/F1. When `git worktree remove --force`
+fails for this run's worktree and its folder is gone, the undo no
+longer runs `git worktree prune`, which clears every stale worktree
+entry in the repo. It removes only this run's entry, with
+`git worktree remove --force --force <wt>`, so Undo on failure's rule
+holds: it never removes a thing that is not on the list.
+
+### Steps
+
+1. Write the test listed under Done when. Run it, and see it fail.
+2. In `internal/slice/undo.go`, `removeWorktree`: replace
+   `git worktree prune` with `git worktree remove --force --force <wt>`
+   for this run's worktree. It still reports false when the folder
+   stays.
+3. Run the tests until they pass.
+
+### Files
+
+- `internal/slice/undo.go`: changed. `removeWorktree`.
+- `internal/slice/undo_test.go`: changed. The new test.
+
+### Done when
+
+- `TestUndoKeepsOtherStaleEntries` (unit): another worktree
+  `.sliceflow/worktrees/other` on a detached HEAD whose folder is
+  deleted by hand (a stale, unlocked entry); then `Create` of
+  `spec-submit` fails after its worktree step, with this run's worktree
+  locked (`git worktree lock`) and its folder deleted before the undo
+  (e.g. with `afterStep`): after the error, `git worktree list
+  --porcelain` still lists `.sliceflow/worktrees/other`, and lists no
+  `.sliceflow/worktrees/spec-submit`; no branch `slice/spec-submit` is
+  left; the error ends with `Everything sliceflow made was removed.`
+  Proves: R18
+
+### Out of scope
+
+- The other undo steps. Done in: task 09
+
+## Task 15: dedupe-helpers
+
+```yaml
+covers: []
+depends_on: ["14"]
+touches: [internal/cli/create.go, internal/cli/status.go,
+  internal/slice/check.go, internal/slice/status.go,
+  internal/eventlog/event.go, internal/eventlog/parse.go]
+follows: [Shared logic in internal, Tests]
+risk: low
+```
+
+### Goal
+
+A fix task from integration-1/F2. Small pieces of logic that are copied
+between files get one home each, so a later change cannot miss a copy.
+No behavior changes: every existing test passes unchanged.
+
+### Steps
+
+1. `internal/cli/create.go`: drop its own `fromJSON` type, and use the
+   one in `internal/cli/status.go`.
+2. `internal/cli/status.go`: add `shortCommit(id string) string` (the
+   first 7 characters); `create.go` and `status.go` both call it.
+3. `internal/slice/check.go` and `internal/slice/status.go`: add
+   `baseExists(ctx context.Context, r Repo, base string) (bool, error)`
+   in `check.go` (the `git show-ref --verify --quiet refs/heads/<base>`
+   check: exit 1 is false, any other error is returned); `checkCreate`
+   and `baseWarning` both call it.
+4. `internal/eventlog/event.go`: rename `timeLayout` to `TimeLayout`;
+   `parse.go` and `internal/slice/status.go` use it.
+5. Run every test; none changes.
+
+### Files
+
+- `internal/cli/create.go`, `internal/cli/status.go`: changed.
+- `internal/slice/check.go`, `internal/slice/status.go`: changed.
+- `internal/eventlog/event.go`, `internal/eventlog/parse.go`: changed.
+
+### Interfaces
+
+- `eventlog.TimeLayout`: changes (renamed from `timeLayout`).
+- `func baseExists(ctx context.Context, r Repo, base string) (bool, error)`: creates.
+- `func shortCommit(id string) string`: creates.
+
+### Done when
+
+- Every existing test passes, unchanged.
+  Proves: none (no change in behavior)
+
+### Out of scope
+
+- Any change in behavior. Done in: not in this slice
