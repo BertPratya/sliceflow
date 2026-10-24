@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:14 UTC
+- Updated: 2026-10-24 17:17 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-9 of 17 done · 1 in_review · 7 todo
+9 of 17 done · 1 doing · 7 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -33,7 +33,7 @@ None.
 | 07 | status-spec | normal | done | 0 | 2 | 06 | R4, R29, R31 |
 | 08 | cli-groups-and-template | core | done | 0 | 1 | - | R35, R36 |
 | 09 | validate-command | core | done | 0 | 2 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
-| 10 | lock | core | in_review | 0 | 1 | - | R6, R7 |
+| 10 | lock | core | doing | 0 | 1 | - | R6, R7 |
 | 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | todo | 0 | 0 | - | R25, R26, R27 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 4 · Closed: 70
+Open: 2 · Waiting for verify: 4 · Closed: 70
 
 ### Doc reviews
 
@@ -105,6 +105,8 @@ Open: 0 · Waiting for verify: 4 · Closed: 70
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-10-1/F1 | medium | 10 | Freeing the lock tries the remove once; on Windows it can fail and leave the lock | open |
+| task-10-1/F2 | low | 10 | A lock file being deleted on Windows gives a raw error, not a retry | open |
 | task-09-1/F1 | high | 09 | R19's path is built from fixed parts, wrong for a moved worktree | verified |
 | task-09-1/F2 | low | 09 | S6's test does not use S6's line numbers 42, 44, 140 | verified |
 | task-07-1/F1 | low | 07 | R29's refused-mark rule is in two places, and no test catches a drift | verified |
@@ -154,6 +156,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:17 · lead (claude) · task 10 worker round 2 started, with review task-10-1
+- 2026-10-24 17:17 · code-reviewer (claude opus) · task review 1 of task 10 handed in: 1 medium, 1 low
 - 2026-10-24 17:14 · lead (claude) · task review 1 of task 10 started
 - 2026-10-24 17:14 · lead (claude) · task 10 committed (76aa1c8); the checks pass
 - 2026-10-24 17:14 · worker (claude sonnet) · task 10 round 1 handed in
