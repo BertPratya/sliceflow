@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 18:13 UTC
+- Updated: 2026-10-24 18:18 UTC
 
 ## Needs human
 
@@ -20,15 +20,15 @@ None.
 
 ## Tasks
 
-3 of 17 done · 1 in_review · 13 todo
+4 of 17 done · 1 doing · 12 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | eventlog-events | core | done | 0 | 2 | - | R5 |
 | 02 | state-machine | core | done | 0 | 2 | 01 | R1, R2, R3, R4 |
 | 03 | spec-reader | core | done | 0 | 3 | - | R18 |
-| 04 | spec-errors | core | in_review | 0 | 3 | 03 | R15, R18 |
-| 05 | spec-warnings | core | todo | 0 | 0 | 04 | R16, R17, R18 |
+| 04 | spec-errors | core | done | 0 | 3 | 03 | R15, R18 |
+| 05 | spec-warnings | core | doing | 0 | 0 | 04 | R16, R17, R18 |
 | 06 | status-core | core | todo | 0 | 0 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
 | 08 | cli-groups-and-template | core | todo | 0 | 0 | - | R35, R36 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 5 · Closed: 59
+Open: 0 · Waiting for verify: 4 · Closed: 60
 
 ### Doc reviews
 
@@ -105,7 +105,7 @@ Open: 0 · Waiting for verify: 5 · Closed: 59
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-04-2/F1 | low | 04 | A requirement above the first heading also gives "shows R9, which does not exist" | fixed (waiting for verify) |
+| task-04-2/F1 | low | 04 | A requirement above the first heading also gives "shows R9, which does not exist" | verified |
 | task-04-1/F1 | medium | 04 | A marker above the first ## heading is never checked | verified |
 | task-04-1/F2 | low | 04 | Quotes in a value show with backslashes | verified |
 | task-04-1/F3 | low | 04 | Inline code is lost in the not-a-marker text | verified |
@@ -139,6 +139,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 18:18 · lead (claude) · task 05 started: worker round 1
+- 2026-10-24 18:18 · lead (claude) · task 04 done
+- 2026-10-24 18:18 · code-reviewer (claude opus) · task review 3 of task 04 handed in: task-04-2/F1 verified; no new findings
 - 2026-10-24 18:13 · lead (claude) · task review 3 of task 04 started (the last round allowed)
 - 2026-10-24 18:13 · lead (claude) · task 04 fix committed (7810cce); the checks pass
 - 2026-10-24 18:13 · worker (claude sonnet) · task 04 round 3 handed in: task-04-2/F1 fixed
