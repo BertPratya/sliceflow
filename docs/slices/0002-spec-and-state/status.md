@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 15:55 UTC
+- Updated: 2026-10-24 16:00 UTC
 
 ## Needs human
 
@@ -20,11 +20,11 @@ None.
 
 ## Tasks
 
-0 of 17 done · 1 doing · 16 todo
+0 of 17 done · 1 in_review · 16 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
-| 01 | eventlog-events | core | doing | 0 | 0 | - | R5 |
+| 01 | eventlog-events | core | in_review | 0 | 1 | - | R5 |
 | 02 | state-machine | core | todo | 0 | 0 | 01 | R1, R2, R3, R4 |
 | 03 | spec-reader | core | todo | 0 | 0 | - | R18 |
 | 04 | spec-errors | core | todo | 0 | 0 | 03 | R15, R18 |
@@ -117,6 +117,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 16:00 · lead (claude) · task review 1 of task 01 started
+- 2026-10-24 16:00 · lead (claude) · task 01 committed (ffc681e); the checks pass
+- 2026-10-24 16:00 · worker (claude sonnet) · task 01 round 1 handed in
 - 2026-10-24 15:55 · lead (claude) · task 01 started: worker round 1
 - 2026-10-24 15:49 · lead (claude) · main's checks pass (base-check at be47b4a); phase implementing
 - 2026-10-24 15:46 · human · planning approved, R001: "yes, okay, and I approve" (the plan-5/F1 fix went in with this approval, with no separate review)
