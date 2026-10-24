@@ -55,8 +55,8 @@ func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error) {
 	}
 
 	branch := "slice/" + opts.Name
-	worktree := path.Join(r.Root, ".sliceflow", "worktrees", opts.Name)
-	wtDir := filepath.FromSlash(worktree)
+	wtDir := worktreeDir(r.Root, opts.Name)
+	worktree := filepath.ToSlash(wtDir)
 	if _, err := git.Run(ctx, root, "worktree", "add", "-b", branch, wtDir, commit); err != nil {
 		return Created{}, err
 	}
@@ -96,4 +96,10 @@ func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error) {
 // checkCreate runs the checks before anything is made. Task 08 fills it.
 func checkCreate(ctx context.Context, r Repo, opts CreateOptions, base, source string) error {
 	return nil
+}
+
+// worktreeDir is the slice worktree folder, in the native form. It uses
+// filepath.Join so a Windows network share root keeps its leading "//".
+func worktreeDir(root, name string) string {
+	return filepath.Join(filepath.FromSlash(root), ".sliceflow", "worktrees", name)
 }

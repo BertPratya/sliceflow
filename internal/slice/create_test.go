@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -177,5 +178,16 @@ func TestCreateIgnoredFiles(t *testing.T) {
 	files := gitOut(t, r.Dir, "diff", "--name-only", "main", "slice/ign")
 	if files != "docs/slices/ign/.events.jsonl\ndocs/slices/ign/spec.md" {
 		t.Errorf("files = %q", files)
+	}
+}
+
+func TestWorktreeDirNetworkShare(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("a network share root only exists on Windows")
+	}
+	got := filepath.ToSlash(worktreeDir("//server/share/repo", "a"))
+	want := "//server/share/repo/.sliceflow/worktrees/a"
+	if got != want {
+		t.Errorf("worktreeDir = %q, want %q", got, want)
 	}
 }
