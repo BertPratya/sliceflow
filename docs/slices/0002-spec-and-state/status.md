@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 18:55 UTC
+- Updated: 2026-10-24 19:00 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-5 of 17 done · 1 doing · 11 todo
+5 of 17 done · 1 in_review · 11 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -29,7 +29,7 @@ None.
 | 03 | spec-reader | core | done | 0 | 3 | - | R18 |
 | 04 | spec-errors | core | done | 0 | 3 | 03 | R15, R18 |
 | 05 | spec-warnings | core | done | 0 | 2 | 04 | R16, R17, R18 |
-| 06 | status-core | core | doing | 0 | 0 | 02 | R1, R3, R29, R30, R34 |
+| 06 | status-core | core | in_review | 0 | 1 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
 | 08 | cli-groups-and-template | core | todo | 0 | 0 | - | R35, R36 |
 | 09 | validate-command | core | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
@@ -143,6 +143,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 19:00 · lead (claude) · task review 1 of task 06 started
+- 2026-10-24 19:00 · lead (claude) · task 06 committed (2e9534f); the checks pass
+- 2026-10-24 19:00 · worker (claude sonnet) · task 06 round 1 handed in
 - 2026-10-24 18:55 · lead (claude) · task 06's touches widened to two 0001 e2e test files; the worker goes on
 - 2026-10-24 18:55 · worker (claude sonnet) · task 06 round 1 blocked: two 0001 e2e tests now get R4's warning for a second slice.created
 - 2026-10-24 18:41 · lead (claude) · task 06 started: worker round 1
