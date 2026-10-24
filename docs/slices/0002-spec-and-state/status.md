@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 20:01 UTC
+- Updated: 2026-10-24 20:07 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-6 of 17 done · 1 in_review · 10 todo
+7 of 17 done · 1 doing · 9 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -30,8 +30,8 @@ None.
 | 04 | spec-errors | core | done | 0 | 3 | 03 | R15, R18 |
 | 05 | spec-warnings | core | done | 0 | 2 | 04 | R16, R17, R18 |
 | 06 | status-core | core | done | 0 | 3 | 02 | R1, R3, R29, R30, R34 |
-| 07 | status-spec | normal | in_review | 0 | 2 | 06 | R4, R29, R31 |
-| 08 | cli-groups-and-template | core | todo | 0 | 0 | - | R35, R36 |
+| 07 | status-spec | normal | done | 0 | 2 | 06 | R4, R29, R31 |
+| 08 | cli-groups-and-template | core | doing | 0 | 0 | - | R35, R36 |
 | 09 | validate-command | core | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
 | 10 | lock | core | todo | 0 | 0 | - | R6, R7 |
 | 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 5 · Closed: 67
+Open: 0 · Waiting for verify: 4 · Closed: 68
 
 ### Doc reviews
 
@@ -105,7 +105,7 @@ Open: 0 · Waiting for verify: 5 · Closed: 67
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-07-1/F1 | low | 07 | R29's refused-mark rule is in two places, and no test catches a drift | fixed (waiting for verify) |
+| task-07-1/F1 | low | 07 | R29's refused-mark rule is in two places, and no test catches a drift | verified |
 | task-06-2/F1 | low | 06 | A cancel during the compare reads as not changed | verified |
 | task-06-1/F1 | high | 06 | A worktree folder deleted by hand makes slice status and list fail | verified |
 | task-06-1/F2 | low | 06 | findWorktree returns git's path, not a cleaned one | verified |
@@ -151,6 +151,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 20:07 · lead (claude) · task 08 started: worker round 1
+- 2026-10-24 20:07 · lead (claude) · task 07 done
+- 2026-10-24 20:07 · code-reviewer (claude opus) · task review 2 of task 07 handed in: task-07-1/F1 verified; no new findings
 - 2026-10-24 20:01 · lead (claude) · task review 2 of task 07 started
 - 2026-10-24 20:01 · lead (claude) · task 07 tests committed (290c964); the checks pass
 - 2026-10-24 20:01 · worker (claude sonnet) · task 07 round 2 handed in: F1 fixed (tests only)
