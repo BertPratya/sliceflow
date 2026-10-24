@@ -2,7 +2,7 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 07:20 UTC
+- Updated: 2026-10-24 07:21 UTC
 
 ## Needs human
 
@@ -12,10 +12,10 @@ None.
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 2 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 3 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
@@ -109,6 +109,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 07:21 · lead (claude) · plan review round 3 started (reviews/plan-3.md), the last round of the limit
 - 2026-10-24 07:20 · lead (claude) · plan-2 fixed: task 08 follows Cross-platform paths; R38 only in tasks 03, 07, 12; size reasons in long briefs; lows F2-F5 and plan-1/F15
 - 2026-10-24 07:20 · human · plan-2 fixes: yes
 - 2026-10-24 07:15 · doc reviewer (claude opus) · plan-2: 15 of plan-1 verified, F10 and F15 reopened; new: 1 medium, 4 low; nothing for the human to decide; documents back to draft
