@@ -190,6 +190,18 @@ func TestStatusJSONReview(t *testing.T) {
 		!strings.Contains(out, `"next":"fix spec.md, then: sliceflow spec submit"`) {
 		t.Fatalf("refused: %q", out)
 	}
+	// A refused submit after review 1 passed, spec.md not changed: no mark.
+	passedSlice(t, dir, "refused-passed")
+	appendLog(t, dir, "refused-passed", submittedLine(5, "refused", 1, 2))
+	out = statusJSON(t, dir, "refused-passed", "--json")
+	if !strings.Contains(out, `"status":"review_passed"`) || strings.Contains(out, "submit_refused") ||
+		!strings.Contains(out, `"next":"write the plan"`) {
+		t.Fatalf("refused after pass: %q", out)
+	}
+	plain, _, code := run(t, dir, "slice", "status", "refused-passed")
+	if code != 0 || !strings.Contains(plain, "Spec:     review_passed (review 1, placeholder)\n") || strings.Contains(plain, "submit refused") {
+		t.Fatalf("refused after pass, plain: code %d %q", code, plain)
+	}
 	// A running review has no result.
 	createSlice(t, dir, "running-one")
 	c2 := commitSpec(t, dir, "running-one", "# Spec\n")
@@ -202,7 +214,7 @@ func TestStatusJSONReview(t *testing.T) {
 	_ = commit
 	// No slice.created: docs is [], and next is left out.
 	testrepo.Git(t, dir, "branch", "slice/old-idea")
-	out, _, code := run(t, dir, "slice", "status", "old-idea", "--json")
+	out, _, code = run(t, dir, "slice", "status", "old-idea", "--json")
 	if code != 0 || !strings.Contains(out, `"docs":[]`) || strings.Contains(out, `"next"`) {
 		t.Fatalf("no created: code %d %q", code, out)
 	}
@@ -212,6 +224,18 @@ func TestStatusJSONReview(t *testing.T) {
 	out = statusJSON(t, dir, "merged-one", "--json")
 	if !strings.Contains(out, `"status":"review_passed"`) || strings.Contains(out, `"next"`) {
 		t.Fatalf("merged: %q", out)
+	}
+	// A merged slice whose last spec event is a refused submit: no mark, no next.
+	createSlice(t, dir, "merged-refused")
+	appendLog(t, dir, "merged-refused", submittedLine(2, "refused", 0, 1))
+	mergeAndRemove(t, dir, "merged-refused")
+	out = statusJSON(t, dir, "merged-refused", "--json")
+	if strings.Contains(out, "submit_refused") || strings.Contains(out, `"next"`) {
+		t.Fatalf("merged refused: %q", out)
+	}
+	plain, _, code = run(t, dir, "slice", "status", "merged-refused")
+	if code != 0 || strings.Contains(plain, "submit refused") || strings.Contains(plain, "Next:     fix") {
+		t.Fatalf("merged refused, plain: code %d %q", code, plain)
 	}
 	// slice list --json has the same docs and next for each slice.
 	listOut, errOut, code := run(t, dir, "slice", "list", "--json", "--all")
@@ -228,7 +252,7 @@ func TestStatusJSONReview(t *testing.T) {
 	if err := json.Unmarshal([]byte(listOut), &list); err != nil {
 		t.Fatalf("list json: %v: %q", err, listOut)
 	}
-	if len(list.Slices) != 5 {
+	if len(list.Slices) != 7 {
 		t.Fatalf("list has %d slices: %q", len(list.Slices), listOut)
 	}
 	for _, s := range list.Slices {
