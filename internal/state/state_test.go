@@ -1,6 +1,7 @@
 package state
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -23,7 +24,8 @@ func submitted(result string, errs, warns int) eventlog.Event {
 
 func started(round int) eventlog.Event {
 	return eventlog.New(2, t0, "review.started", eventlog.ReviewStarted{
-		Doc: "spec.md", Round: round, Reviewer: "r", File: "reviews/spec-1.md", Commit: "abc1234"})
+		Doc: "spec.md", Round: round, Reviewer: fmt.Sprintf("r%d", round),
+		File: fmt.Sprintf("reviews/spec-%d.md", round), Commit: fmt.Sprintf("abc123%d", round)})
 }
 
 func finished(round int, result string) eventlog.Event {
@@ -115,6 +117,10 @@ func TestReplayCreated(t *testing.T) {
 	if s.Phase != "planning" || s.Spec.Status != "draft" || len(w) != 0 {
 		t.Errorf("created: %+v %v", s, w)
 	}
+	s, w = Replay(numbered(eventlog.NewCreated(t0, eventlog.From{Branch: "main", Commit: "9dd7ebf"}, "First title")))
+	if s.Title != "First title" || len(w) != 0 {
+		t.Errorf("created with title: %+v %v", s, w)
+	}
 	s, w = Replay(nil)
 	if s.Phase != "unknown" || s.Spec.Status != "" || len(w) != 0 {
 		t.Errorf("empty: %+v %v", s, w)
@@ -165,6 +171,9 @@ func TestReplayRounds(t *testing.T) {
 	}
 	if s.Spec.MaxRound != 2 || s.Spec.Review == nil || s.Spec.Review.Round != 2 || s.Spec.Review.Result != "passed" {
 		t.Errorf("state: %+v %+v", s.Spec, s.Spec.Review)
+	}
+	if r := s.Spec.Review; r.Reviewer != "r2" || r.File != "reviews/spec-2.md" || r.Commit != "abc1232" {
+		t.Errorf("review fields: %+v", r)
 	}
 	if s.Spec.SubmitSeq != 6 {
 		t.Errorf("SubmitSeq %d", s.Spec.SubmitSeq)
