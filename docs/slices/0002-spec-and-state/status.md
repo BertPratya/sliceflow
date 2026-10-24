@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:06 UTC
+- Updated: 2026-10-24 17:09 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-8 of 17 done · 1 in_review · 8 todo
+8 of 17 done · 1 doing · 8 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -32,7 +32,7 @@ None.
 | 06 | status-core | core | done | 0 | 3 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | done | 0 | 2 | 06 | R4, R29, R31 |
 | 08 | cli-groups-and-template | core | done | 0 | 1 | - | R35, R36 |
-| 09 | validate-command | core | in_review | 0 | 1 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
+| 09 | validate-command | core | doing | 0 | 1 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
 | 10 | lock | core | todo | 0 | 0 | - | R6, R7 |
 | 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 4 · Closed: 68
+Open: 2 · Waiting for verify: 4 · Closed: 68
 
 ### Doc reviews
 
@@ -105,6 +105,8 @@ Open: 0 · Waiting for verify: 4 · Closed: 68
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-09-1/F1 | high | 09 | R19's path is built from fixed parts, wrong for a moved worktree | open |
+| task-09-1/F2 | low | 09 | S6's test does not use S6's line numbers 42, 44, 140 | open |
 | task-07-1/F1 | low | 07 | R29's refused-mark rule is in two places, and no test catches a drift | verified |
 | task-06-2/F1 | low | 06 | A cancel during the compare reads as not changed | verified |
 | task-06-1/F1 | high | 06 | A worktree folder deleted by hand makes slice status and list fail | verified |
@@ -142,6 +144,7 @@ None.
 - Task 06: touches widened to `internal/e2e/status_command_test.go` and `internal/e2e/slice_list_test.go` (tasks.md changed). Their tests (`TestStatusBadLines`, `TestListBadLine`, from 0001) now expect R4's third warning, `.events.jsonl line 3: slice.created is not allowed when spec.md is draft; skipped`. Why: replay now skips the second `slice.created`, as R2 and R4 say; task 06 changes what these tests check. The test logs stay as 0001 wrote them.
 - Task 06, task-06-2/F1 (low): fixed in round 3, not left or deferred. Why: task 14 uses `specChanged` in a command that writes, where a cancel must stop it; task 14's touches do not hold `next.go`.
 - Task 07, task-07-1/F1 (low): fixed with two JSON test cases (a refused submit on an unchanged `review_passed` spec, and on a merged slice: no `submit_refused`), not with a new `SliceStatus` field. Why: the tests catch a drift between the two copies of R29's rule, inside task 07's touches; a new field would change `internal/slice` and tasks.md.
+- Task 09, task-09-1/F1: R19's path comes from a private helper in `internal/slice` that builds it from the real worktree path (relative to the main checkout's root, with `/`). Task 14 reuses it; its brief will say so. Why: one way to build R19's path for both commands; a private name changes no document.
 
 ## Preview
 
@@ -151,6 +154,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:09 · lead (claude) · task 09 worker round 2 started, with review task-09-1
+- 2026-10-24 17:09 · code-reviewer (claude opus) · task review 1 of task 09 handed in: 1 high, 1 low
 - 2026-10-24 17:06 · lead (claude) · task review 1 of task 09 started
 - 2026-10-24 17:06 · lead (claude) · task 09 committed (26602dc); the checks pass
 - 2026-10-24 17:06 · worker (claude sonnet) · task 09 round 1 handed in
