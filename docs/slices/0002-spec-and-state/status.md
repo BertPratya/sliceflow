@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:01 UTC
+- Updated: 2026-10-24 17:03 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-7 of 17 done · 1 in_review · 9 todo
+8 of 17 done · 1 doing · 8 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -31,8 +31,8 @@ None.
 | 05 | spec-warnings | core | done | 0 | 2 | 04 | R16, R17, R18 |
 | 06 | status-core | core | done | 0 | 3 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | done | 0 | 2 | 06 | R4, R29, R31 |
-| 08 | cli-groups-and-template | core | in_review | 0 | 1 | - | R35, R36 |
-| 09 | validate-command | core | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
+| 08 | cli-groups-and-template | core | done | 0 | 1 | - | R35, R36 |
+| 09 | validate-command | core | doing | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
 | 10 | lock | core | todo | 0 | 0 | - | R6, R7 |
 | 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
@@ -151,6 +151,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:03 · lead (claude) · task 09 started: worker round 1
+- 2026-10-24 17:03 · lead (claude) · task 08 done
+- 2026-10-24 17:03 · code-reviewer (claude opus) · task review 1 of task 08 handed in: no findings
 - 2026-10-24 17:01 · lead (claude) · task review 1 of task 08 started
 - 2026-10-24 17:01 · lead (claude) · task 08 committed (553d4ab); the checks pass
 - 2026-10-24 17:01 · worker (claude sonnet) · task 08 round 1 handed in
