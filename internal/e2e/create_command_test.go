@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -39,6 +40,18 @@ func TestCreateSpecSubmit(t *testing.T) {
 	files := strings.Fields(testrepo.Git(t, dir, "diff", "--name-only", "main", "slice/spec-submit"))
 	if len(files) != 2 || files[0] != "docs/slices/spec-submit/.events.jsonl" || files[1] != "docs/slices/spec-submit/spec.md" {
 		t.Errorf("files %v", files)
+	}
+	ev := testrepo.Git(t, dir, "show", "slice/spec-submit:docs/slices/spec-submit/.events.jsonl")
+	if strings.Count(ev, "\n") != 1 || !strings.HasSuffix(ev, "\n") {
+		t.Errorf("event log not one line: %q", ev)
+	}
+	mainFull := strings.TrimSpace(testrepo.Git(t, dir, "rev-parse", "main"))
+	reEv := regexp.MustCompile(`^\{"version":1,"seq":1,"event":"slice\.created","at":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z",`)
+	if !reEv.MatchString(ev) {
+		t.Errorf("event line %q", ev)
+	}
+	if !strings.Contains(ev, `"from":{"branch":"main","commit":"`+mainFull+`"}`) {
+		t.Errorf("event from %q want commit %s", ev, mainFull)
 	}
 	log := strings.TrimSpace(testrepo.Git(t, dir, "log", "--format=%s", "main..slice/spec-submit"))
 	if log != "spec-submit: slice created" {

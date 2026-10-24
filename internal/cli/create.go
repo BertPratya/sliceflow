@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
+	"path"
 
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
@@ -81,7 +81,7 @@ func runCreate(ctx context.Context, args []string, stdout, stderr io.Writer) int
 	if len(short) > 7 {
 		short = short[:7]
 	}
-	wt := strings.TrimPrefix(strings.TrimPrefix(c.Worktree, r.Root), "/")
+	wt := path.Join(".sliceflow", "worktrees", c.Slice)
 	fmt.Fprintf(stdout, "Created slice %s.\n", c.Slice)
 	fmt.Fprintf(stdout, "  Branch:   %s (from %s @ %s)\n", c.Branch, c.From.Branch, short)
 	fmt.Fprintf(stdout, "  Worktree: %s\n", wt)
