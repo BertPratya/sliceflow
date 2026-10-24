@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 10:02 UTC
+- Updated: 2026-10-24 10:03 UTC
 
 ## Needs human
 
@@ -152,6 +152,7 @@ None.
 - 09: task-09-1/F4: `Could not remove:` lists paths relative to the main checkout, with `/`. Why: R9's other lines use that form; the spec does not say which form.
 - 09: task-09-1/F3 is wontfix: `slice.Interrupted` stays. Why: only the CLI uses it; the integration review is told.
 - 12: `internal/cli/status.go` is added to task 12's touches (task-11-1/F1), so R30's object can move into one helper that `slice status` and `slice list` share. Why: R37 says each slice in `slice list --json` has R30's form; a copy could drift.
+- 09 (found by the lead after task 09 was done): `removeWorktree` in `internal/slice/undo.go` runs `git worktree prune` when `git worktree remove --force` fails and the folder is gone. `prune` clears every stale worktree entry in the repo, not only this run's, which breaks Undo on failure ("never removes a thing that is not on the list"). It only runs when this run's worktree was locked during `create`, so the risk is low. Passed to the integration review, with the fix `git worktree remove --force --force <wt>` for this run's entry only. Why: no task left may change `undo.go`, and a new fix task would change tasks.md.
 
 ## Preview
 
@@ -161,6 +162,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 10:03 · lead (claude) · found `git worktree prune` in undo.go (clears every stale entry); low risk; passed to the integration review (Lead's decisions)
 - 2026-10-24 10:02 · lead (claude) · task 12 worker round 2 started: F1
 - 2026-10-24 10:02 · code reviewer (claude opus) · task-12-1 submitted: changes; 1 high (ls-tree path is relative to the subfolder); task-11-1/F1 verified
 - 2026-10-24 10:00 · lead (claude) · task 12 code review started, round 1
