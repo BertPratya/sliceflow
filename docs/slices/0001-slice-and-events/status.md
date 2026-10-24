@@ -12,10 +12,10 @@ None.
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 1 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 2 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
@@ -104,6 +104,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 07:11 · lead (claude) · plan review round 2 started (reviews/plan-2.md)
 - 2026-10-24 07:11 · lead (claude) · plan-1 fixed: spec R18 reason, R38 wrong use, key concept; plan F1-F17; tasks now 13 (create and status split), e2e in internal/e2e/
 - 2026-10-24 07:11 · human · plan-1 Q1: bare commands show usage, a missing or extra name is wrong use (R38); Q2: first line as reason, the rest indented (R18); the lead's fixes: ok
 - 2026-10-24 06:58 · doc reviewer (claude opus) · plan-1: 10 medium, 7 low, 2 questions for the human; documents back to draft
