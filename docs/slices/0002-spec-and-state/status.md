@@ -7,13 +7,13 @@
 
 ## Needs human
 
-None.
+- plan.md Open question Q1: placeholders in labeled lines (changes the spec)
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | review_passed | 3 | - | - |
+| spec.md | draft | 3 | - | - |
 | plan.md | draft | 0 | - | - |
 | preview.md | draft | with plan.md | - | - |
 
@@ -72,6 +72,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:10 · lead (claude) · plan flows, testing, and preview written; plan Q1 shows a gap in the spec, so spec.md is back to draft
 - 2026-10-24 16:30 · lead (claude) · human: keep the 10 s lock wait (a slow hook is a listed risk). Shared rules for the lock, saving, undo, and crash leftovers; TD1, TD2
 - 2026-10-24 16:10 · lead (claude) · human: the reviewer writes the review file, and sliceflow reads the result from it (option 1). Interfaces written
 - 2026-10-24 15:50 · lead (claude) · human: lock file is one JSON line (pid, since); a leftover lock is removed by hand until 0007 (roadmap); reads take no lock. Data written
