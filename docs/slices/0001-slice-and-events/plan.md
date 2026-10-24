@@ -91,16 +91,28 @@ touches:
      - SC1: Flow 2, TD3. The run loop never calls the lead when a task
        passes, and sliceflow writes the merge messages itself. -->
 
-{{The whole idea in a few sentences.}}
+sliceflow is one Go program. A thin command layer reads the arguments
+and prints the result, as text or as JSON. All the real work is in a
+core package, which a later server can call too. The core does every
+git step by running `git` as its own process, one command at a time,
+with its own arguments. The event log format is its own small package,
+with no file or git access, so it is easy to test.
+
+`slice create` never touches the main checkout. `git worktree add`
+makes the branch and the worktree in one step. sliceflow writes the two
+files inside the worktree, and makes a normal commit there.
 
 | Part | Folder | Change |
 |---|---|---|
-| {{part}} | {{folder}} | {{new, changed, or removed}} |
+| Program entry: only `main`, which calls the CLI and exits with its code | cmd/sliceflow/ | new |
+| CLI: commands, flags, help, text and `--json` output, exit codes | internal/cli/ | new |
+| Slice core: create (checks, steps, undo), status, list | internal/slice/ | new |
+| Event log: write an event line; read a log into events and warnings | internal/eventlog/ | new |
+| Git: small functions that each run one git command | internal/git/ | new |
+| Spec template, built into the binary | internal/template/ | new |
+| End-to-end tests: build the binary, run it in temporary repos | e2e/ | new |
 
-New dependencies: {{None, or each one with why it is needed}}
-
-Success criteria:
-- {{SC1}}: {{Flow 2, TD3}}. {{How they reach it. Delete this line and the one above if the spec has no success criteria.}}
+New dependencies: None.
 
 ## Flows
 
@@ -238,12 +250,27 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
        Why: it sorts correctly as text and needs no time zone.
        Not chosen: a timestamp, because a due date has no time of day. -->
 
-- **TD1.** {{The choice.}}
-  Why: {{the reason}}
-  Not chosen: {{the main other option, and why not}}
-  Cost: {{optional: the downside we accept, or delete this line}}
-  Plan only: {{why no task's code depends on it, or delete this line}}
-  Replaces: {{an earlier decision, e.g. checkout/TD2}}
+- **TD1.** The Go module path is `github.com/BertPratya/sliceflow`.
+  Why: it is where the repo is going after its rename, so the path is
+  set once, and `go install` works after the rename.
+  Not chosen: `github.com/BertPratya/flow-cli`, the repo's name today,
+  because it must change after the rename.
+  Cost: until the repo is renamed, `go install` with this path does not
+  work. Builds and tests in the repo work.
+- **TD2.** Flags are parsed with Go's standard `flag` package, plus a
+  small helper that moves the flags in front of the positional
+  arguments before parsing.
+  Why: `flag` stops at the first argument that is not a flag, but the
+  spec puts flags after the name, e.g.
+  `sliceflow slice create login-google --title "Login with Google" --json`.
+  The helper keeps sliceflow free of dependencies.
+  Not chosen: `spf13/pflag` or `cobra`, because each is a new
+  dependency, and cobra is large.
+- **TD3.** `go.mod` says `go 1.25`. (lead's call)
+  Why: it is the Go version on the development machine, and CI uses the
+  version in `go.mod`.
+  Not chosen: an older version, because no user needs one yet.
+  Plan only: it picks the Go version; no task's code depends on it.
 
 ## Risks and rollout
 
