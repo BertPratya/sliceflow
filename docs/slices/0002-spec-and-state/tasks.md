@@ -251,7 +251,7 @@ blocks, `inline code`, and comments (R18).
 covers: [R15, R18]
 depends_on: ["03"]
 touches: [internal/spec/check.go, internal/spec/errors.go, internal/spec/errors_test.go, internal/spec/testdata/,
-  internal/spec/parse.go, internal/spec/parse_test.go]
+  internal/spec/parse.go, internal/spec/parse_test.go, internal/spec/doc.go]
 follows: [Spec reader, Tests, Testing]
 risk: core
 ```
@@ -281,9 +281,9 @@ spec; both give 0 errors.
 - `internal/spec/errors_test.go`: new.
 - `internal/spec/testdata/fresh.md`, `internal/spec/testdata/0001-spec.md`:
   new.
-- `internal/spec/parse.go`, `internal/spec/parse_test.go`: changed, for
-  review task-04-1/F1 only: the lines above the first `##` heading are
-  read too.
+- `internal/spec/parse.go`, `internal/spec/parse_test.go`,
+  `internal/spec/doc.go`: changed, for review task-04-1/F1 only: the
+  lines above the first `##` heading are read too, into `Doc.Preamble`.
 
 ### Interfaces
 
@@ -291,6 +291,10 @@ spec; both give 0 errors.
   `Level` is `error`, `warning`, or `note`. Tasks 05, 09, and 14 use it.
 - `func Check(d Doc, slice string) []Problem`: creates. Task 05 adds the
   warnings and notes; task 09 calls it.
+- `Doc.Preamble Section`: changes `Doc`, for review task-04-1/F1. The
+  lines above the first `##` heading, as a `Section` with `Name` `""`
+  and `Line` 0; not in `Sections`. `Check` checks its items and bad
+  markers as R15 says.
 - `Parse`, `Doc`: uses.
 
 ### Done when
