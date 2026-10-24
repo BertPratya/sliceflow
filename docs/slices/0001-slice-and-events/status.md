@@ -1,30 +1,30 @@
 # Status: 0001-slice-and-events
 
-- Phase: implementing (blocked)
+- Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:24 UTC
+- Updated: 2026-10-24 08:33 UTC
 
 ## Needs human
 
-- Task 02 is blocked on task-02-1/Q1 (small): R27 does not say which seq the first good line must have. Keep the worker's choice (expect 1), or give no seq warning for the first good line?
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | approved | 3 | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
+| spec.md | approved | 3 | R002 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R002 |
 | plan.md | approved | 3 | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
 | preview.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
-| tasks.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
+| tasks.md | approved | with plan.md | R002 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R002 |
 
 ## Tasks
 
-1 of 13 done · 1 blocked · 11 todo
+1 of 13 done · 1 doing · 11 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | git-runner | core | done | 0 | 2 | - | R40 |
-| 02 | event-log | core | blocked | 0 | 1 | 01 | R19, R25, R26, R27 |
+| 02 | event-log | core | doing | 0 | 1 | 01 | R19, R25, R26, R27 |
 | 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | todo | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | todo | 0 | 0 | 01 | R7 |
@@ -39,12 +39,13 @@
 
 ## Findings
 
-Open: 2 · Waiting for verify: 0 · Closed: 50
+Open: 1 · Waiting for verify: 0 · Closed: 51
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
+| change-5 | - | No findings: R27's new sentence and TestParseSeqFirstGoodLine | - |
 | change-4/F1 | low | The final . is dropped for every reason, but task 09 names only file errors | fixed: task 09 step 3 names Flow 3 step 5; TestCreateHookOutput's first line ends in . |
 | change-3/F1 | medium | TestReasonFileError fails on Linux and macOS (ToSlash only converts the own separator) | verified |
 | change-3/F2 | low | Two periods when the reason ends with . | verified |
@@ -98,7 +99,7 @@ Open: 2 · Waiting for verify: 0 · Closed: 50
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-02-1/Q1 | needs human | 02 | R27 does not say which seq the first good line must have | open |
+| task-02-1/Q1 | needs human | 02 | R27 does not say which seq the first good line must have | verified: the human chose option 1 (expect 1); R002 |
 | task-02-1/F1 | low | 02 | A seq too big for an int gets a wrong value reason R26 does not list | open |
 | task-01-1/F1 | low | 01 | Show reports a bad ref or a non-repo folder as a missing file | wontfix: why: in this slice callers check the ref and repo first; Show's doc comment says so |
 | task-01-1/F2 | low | 01 | The no-network test can pass against a broken Run | verified |
@@ -111,6 +112,8 @@ None.
 
 - before 01: `main` counts as passing its checks. Why: `main` has no Go code yet (no `go.mod`, `cmd/`, or `internal/`), so the checks cannot run there, and nothing on `main` can make a task fail.
 - 01 to 02: the gofmt check runs on the folders that exist, as `.githooks/pre-commit` does. Why: `cmd/` comes with task 03; until then `gofmt -l cmd internal` fails with "stat cmd", which is not a format error.
+- 02: task-02-1/F1, a seq too big for an int, gets `field "seq" has the wrong type`, not `has a wrong value`. Why: R26's wrong values name only at, commit, branch, and title; the plan already calls a seq that is not a usable whole number the wrong type.
+- 02: the worker adds a TestParseBadLines row for a line of only `\r` (`blank line`). Why: Reading a line says so, and the review showed no test catches it.
 
 ## Preview
 
@@ -120,6 +123,10 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:33 · lead (claude) · task 02 worker round 2 started: TestParseSeqFirstGoodLine, F1, and the \r test row
+- 2026-10-24 08:33 · lead (claude) · spec.md and tasks.md approved as R002 (tag on 35296ae); phase back to implementing
+- 2026-10-24 08:33 · doc reviewer (claude opus) · change-5 submitted: no findings
+- 2026-10-24 08:33 · human · task-02-1/Q1 answered: "1."
 - 2026-10-24 08:24 · lead (claude) · task 02 blocked on Q1, a small decision: asked the human
 - 2026-10-24 08:24 · code reviewer (claude opus) · task-02-1 submitted: needs_human; Q1 (R27, first good line), 1 low; 5 of 6 deliberate breaks caught by the tests
 - 2026-10-24 08:21 · lead (claude) · task 02 code review started, round 1
