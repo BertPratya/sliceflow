@@ -91,16 +91,30 @@ touches:
      - SC1: Flow 2, TD3. The run loop never calls the lead when a task
        passes, and sliceflow writes the merge messages itself. -->
 
-{{The whole idea in a few sentences.}}
+A new state machine replays a slice's events through one table of moves,
+and gives the state: the spec's state, the title, the last review, and
+the last refused submit. The same table answers whether a move is allowed
+now. It touches no files and no git. Every write goes one way: take the
+lock, replay, check the move, write the log, commit, and undo when the
+commit fails. A new spec reader turns `spec.md` into a structure with line
+numbers, and the checks run on that structure. The reviewer sits behind an
+interface; the placeholder is the only one in this slice.
 
 | Part | Folder | Change |
 |---|---|---|
-| {{part}} | {{folder}} | {{new, changed, or removed}} |
+| State machine: replay, and the table of moves | internal/state/ | new |
+| Spec reader, and the checks | internal/spec/ | new |
+| Reviewer interface, the placeholder, and the review file | internal/review/ | new |
+| Event lines: the new events' data, and each event's line number | internal/eventlog/ | changed |
+| The write path (lock, save, undo), submit, title, validate, and status | internal/slice/ | changed |
+| The unfilled spec template, for `template show` | internal/template/ | changed |
+| The new commands, and the new status output | internal/cli/ | changed |
 
-New dependencies: {{None, or each one with why it is needed}}
+The packages depend on each other in one direction only: `cli` uses
+`slice`; `slice` uses `state`, `spec`, `review`, `git`, and `template`;
+`state` uses `eventlog`. Only `slice` and `git` touch files or run git.
 
-Success criteria:
-- {{SC1}}: {{Flow 2, TD3}}. {{How they reach it. Delete this line and the one above if the spec has no success criteria.}}
+New dependencies: None.
 
 ## Flows
 

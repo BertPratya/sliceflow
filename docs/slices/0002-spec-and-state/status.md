@@ -72,6 +72,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 15:20 · lead (claude) · human: complex; package layout option 1 (three new packages: state, spec, review); Approach written
 - 2026-10-24 15:00 · lead (claude) · plan started: plan.md and preview.md copied; preview's fixed checks P1-P5
 - 2026-10-24 14:55 · lead (claude) · spec.md review_passed
 - 2026-10-24 14:50 · doc-reviewer (claude opus) · change review 3 handed in: spec-2 all verified; no new findings
