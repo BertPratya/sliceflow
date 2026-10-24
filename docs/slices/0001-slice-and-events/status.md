@@ -1,18 +1,18 @@
 # Status: 0001-slice-and-events
 
-- Phase: planning (blocked)
+- Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 04:59 UTC
+- Updated: 2026-10-24 05:00 UTC
 
 ## Needs human
 
-- spec review 3 is at the round limit with 1 medium and 2 low findings: the human decides how to go on.
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
+| spec.md | in_review | 3 | - | - |
 
 ## Tasks
 
@@ -20,15 +20,15 @@ None.
 
 ## Findings
 
-Open: 3 · Waiting for verify: 0 · Closed: 18
+Open: 0 · Waiting for verify: 3 · Closed: 18
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| spec-3/F1 | medium | Warning items: drop Warning: and <name>: , the R23 item | open |
-| spec-3/F2 | low | R37: with no slices, only slices is [] | open |
-| spec-3/F3 | low | R26: a bad at, by the form of R19 | open |
+| spec-3/F1 | medium | Warning items: drop Warning: and <name>: , the R23 item | fixed (waiting for verify) |
+| spec-3/F2 | low | R37: with no slices, only slices is [] | fixed (waiting for verify) |
+| spec-3/F3 | low | R26: a bad at, by the form of R19 | fixed (waiting for verify) |
 | spec-2/F1 | medium | R9 vs S1 and R10: what the spec path is relative to | verified |
 | spec-2/F2 | medium | The base-branch warning: its form, in --json, and the ! mark | verified |
 | spec-2/F3 | medium | slice list --json with no slices | verified |
@@ -68,6 +68,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 05:00 · lead (claude) · spec fixed for spec-3 F1-F3; change review of only these fixes started (reviews/change-1.md)
+- 2026-10-24 05:00 · human · "2": fix spec-3 F1-F3, then a change review of only the fixes
 - 2026-10-24 04:59 · lead (claude) · spec at the review round limit: planning (blocked)
 - 2026-10-24 04:59 · doc reviewer · spec review 3 handed in: 5 verified, 1 new medium, 2 new low
 - 2026-10-24 04:57 · lead (claude) · spec review round 3 started

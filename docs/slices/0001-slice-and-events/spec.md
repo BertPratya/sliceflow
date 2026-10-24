@@ -401,7 +401,7 @@ stderr, changes nothing, and exits with code 1.
   `unknown version <v>`, `unknown event "<e>"`, `unknown field "<f>"`,
   `missing field "<f>"`, `field "<f>" has the wrong type`, and
   `field "<f>" has a wrong value`. A wrong value is: an `at` that is not
-  a UTC time like `2026-10-24T07:42:00Z`, a `commit` that is not 40 or
+  in the form of R19, e.g. `2026-10-24T07:42:00Z`, a `commit` that is not 40 or
   64 lowercase hex characters, or an empty `branch` or `title`. A field
   inside `data` is named like `data.from.branch`. The order of the fields
   is not checked when reading. If the log does not exist, sliceflow
@@ -430,8 +430,10 @@ stderr, changes nothing, and exits with code 1.
   R29's lines, one JSON object with `slice`, `title` (only when one was
   saved), `phase`, `from`, `created` (RFC 3339 in UTC), and `warnings`
   (a list, empty when there are none). Each item of `warnings` is the
-  warning's text only, without `Warning: <name>: `. The list also holds
-  the warning of R23, when there is one. A value the log does not have
+  warning's text only: without `Warning: `, and without `<name>: ` when
+  the warning has a slice name. The list also holds the warning of R23,
+  when there is one, e.g.
+  `base branch main does not exist (the default); merged slices are not shown`. A value the log does not have
   is left out.
   Check: e2e
 - **R31.** When no name is given and the current branch is
@@ -468,8 +470,8 @@ stderr, changes nothing, and exits with code 1.
   rows or the `No slices` lines, one JSON object with `slices`, a list of
   objects in the form of R30 in the order of R34, and `warnings`, a list
   of the warnings about the whole repo (the warning of R23). Each slice
-  object holds only its own warnings. With no slices, it prints
-  `{"slices":[],"warnings":[]}`.
+  object holds only its own warnings. With no slices, `slices` is `[]`,
+  e.g. `{"slices":[],"warnings":[]}`.
   Check: e2e
 
 ### Every command
