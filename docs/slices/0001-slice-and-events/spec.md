@@ -257,7 +257,8 @@ A user, or an AI agent, sees every slice in progress.
   Check: e2e
 - **R7.** sliceflow shall add exactly two files to the slice branch:
   `docs/slices/<name>/spec.md`, from the spec template built into
-  sliceflow, with its front matter filled, and
+  sliceflow, with its front matter filled with `slice`, `created`, and
+  `ideas: []`, and no `title`, and
   `docs/slices/<name>/.events.jsonl`, with one `slice.created` event.
   Check: e2e
 - **R8.** sliceflow shall commit those two files on the slice branch as
@@ -420,6 +421,7 @@ stderr, changes nothing, and exits with code 1.
 - Teammates' slices from remote branches in `slice list`. Goes to: the backlog
 - Every event other than `slice.created`. Goes to: a later slice (each one with the step it records)
 - Adding an event to an existing log: the lock, and cutting off a half-written last line. Goes to: a later slice (the first one that adds a second event)
+- A command to set or change a slice's title, and showing the title in `spec.md`, written from the log. Goes to: the backlog
 - A settings file (`sliceflow.yaml`). Goes to: a later slice (when there are settings a whole team shares)
 - Templates a project can change. Goes to: a later slice (design 1.10)
 - Fetching from a remote. Goes to: not planned
@@ -504,7 +506,16 @@ stderr, changes nothing, and exits with code 1.
   Not chosen: the overview plus the events, because the events are not
     needed to know the status.
   Rule: R25
-- **SD12.** The commands only format what a shared core returns. A later
+- **SD12.** The title lives only in the event log. The spec's front
+  matter has no `title`.
+  Why: one source of truth. A title in the spec could be edited and
+    then disagree with the log.
+  Not chosen: the title only in the spec, because `status` would then
+    depend on reading the spec.
+  Cost: the spec file does not show its title, until it is written there
+    from the log later.
+  Rule: R7
+- **SD13.** The commands only format what a shared core returns. A later
   server for the browser app calls the same core, not the commands.
   Why: the CLI and the server are two ways into one program, as in Theia.
   Not chosen: the server running `sliceflow slice status --json`, because
@@ -521,15 +532,5 @@ stderr, changes nothing, and exits with code 1.
 
 ## Open questions
 
-- **Q1.** The spec's front matter has a `title:`, and `slice.created`
-  may have a `title` too. Two copies of the title. What does sliceflow
-  write in the front matter, with and without `--title`?
-- **Q2.** This spec has 35 requirements. The template says about 25-30
-  is the limit, and above it the slice should be split. Keep it as one
-  slice, or move `slice list` to its own slice?
-- **Q3.** The playback said `list` and `status` read merged slices from
-  `main`. With a base branch like `develop`, merged slices are on
-  `develop`. So this spec reads them from the base branch (R20, R31). Is
-  that right?
 - **Q4.** On Windows, paths in the output: with `/` as on the other
   systems, or with `\`?
