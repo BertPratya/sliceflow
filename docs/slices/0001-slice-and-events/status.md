@@ -19,12 +19,12 @@ None.
 
 ## Tasks
 
-1 of 13 done · 1 doing · 11 todo
+1 of 13 done · 1 in_review · 11 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | git-runner | core | done | 0 | 2 | - | R40 |
-| 02 | event-log | core | doing | 0 | 1 | 01 | R19, R25, R26, R27 |
+| 02 | event-log | core | in_review | 0 | 2 | 01 | R19, R25, R26, R27 |
 | 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | todo | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | todo | 0 | 0 | 01 | R7 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 1 · Waiting for verify: 0 · Closed: 51
+Open: 0 · Waiting for verify: 1 · Closed: 51
 
 ### Doc reviews
 
@@ -100,7 +100,7 @@ Open: 1 · Waiting for verify: 0 · Closed: 51
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
 | task-02-1/Q1 | needs human | 02 | R27 does not say which seq the first good line must have | verified: the human chose option 1 (expect 1); R002 |
-| task-02-1/F1 | low | 02 | A seq too big for an int gets a wrong value reason R26 does not list | open |
+| task-02-1/F1 | low | 02 | A seq too big for an int gets a wrong value reason R26 does not list | fixed (waiting for verify) |
 | task-01-1/F1 | low | 01 | Show reports a bad ref or a non-repo folder as a missing file | wontfix: why: in this slice callers check the ref and repo first; Show's doc comment says so |
 | task-01-1/F2 | low | 01 | The no-network test can pass against a broken Run | verified |
 
@@ -123,6 +123,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:33 · lead (claude) · task 02 code review started, round 2
+- 2026-10-24 08:33 · lead (claude) · task 02 fixes from review 1 committed (80c4e39); checks pass
 - 2026-10-24 08:33 · lead (claude) · task 02 worker round 2 started: TestParseSeqFirstGoodLine, F1, and the \r test row
 - 2026-10-24 08:33 · lead (claude) · spec.md and tasks.md approved as R002 (tag on 35296ae); phase back to implementing
 - 2026-10-24 08:33 · doc reviewer (claude opus) · change-5 submitted: no findings
