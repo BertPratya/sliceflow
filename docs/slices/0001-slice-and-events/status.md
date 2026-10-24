@@ -2,11 +2,11 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-23 07:42 UTC
+- Updated: 2026-10-24 04:38 UTC
 
 ## Needs human
 
-None.
+- spec.md open questions Q1-Q4: the human answers them.
 
 ## Documents
 
@@ -46,4 +46,5 @@ None.
 
 Newest first.
 
+- 2026-10-24 04:38 · lead (claude) · spec.md written from the brainstorm; open questions Q1-Q4
 - 2026-10-23 07:42 · lead (claude) · slice created
