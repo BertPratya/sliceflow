@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 10:34 UTC
+- Updated: 2026-10-24 10:35 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-13 of 15 done · 1 in_review · 1 todo
+14 of 15 done · 1 doing
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -36,12 +36,12 @@ None.
 | 11 | status-command | normal | done | 0 | 1 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | done | 0 | 2 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
 | 13 | no-network-check | normal | done | 0 | 2 | 09, 12 | R40 |
-| 14 | fix-undo-prune | core | in_review | 0 | 1 | 09 | R18 |
-| 15 | dedupe-helpers | low | todo (waiting: 14) | 0 | 0 | 14 | - |
+| 14 | fix-undo-prune | core | done | 0 | 1 | 09 | R18 |
+| 15 | dedupe-helpers | low | doing | 0 | 0 | 14 | - |
 
 ## Findings
 
-Open: 2 · Waiting for verify: 0 · Closed: 84
+Open: 1 · Waiting for verify: 1 · Closed: 84
 
 ### Doc reviews
 
@@ -142,7 +142,7 @@ Open: 2 · Waiting for verify: 0 · Closed: 84
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| integration-1/F1 | high | removeWorktree runs git worktree prune, which clears other stale entries | open: fix task 14 |
+| integration-1/F1 | high | removeWorktree runs git worktree prune, which clears other stale entries | fixed (waiting for verify): task 14 |
 | integration-1/F2 | low | Small pieces of logic are copied between files | open: fix task 15 |
 
 ## Lead's decisions
@@ -170,6 +170,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 10:35 · lead (claude) · task 15 started: worker round 1 (low: no code review)
+- 2026-10-24 10:35 · lead (claude) · task 14 done
+- 2026-10-24 10:35 · code reviewer (claude opus) · task-14-1 submitted: pass; a prune put back makes the new test fail on the other entry alone
 - 2026-10-24 10:34 · lead (claude) · task 14 code review started, round 1
 - 2026-10-24 10:34 · lead (claude) · task 14 committed (23feee5); checks pass
 - 2026-10-24 10:32 · lead (claude) · task 14 started: worker round 1
