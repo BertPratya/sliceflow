@@ -2,7 +2,7 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 06:30 UTC
+- Updated: 2026-10-24 06:32 UTC
 
 ## Needs human
 
@@ -12,7 +12,7 @@ None.
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | review_passed | 3 | - | - |
+| spec.md | draft | 3 | - | - |
 | plan.md | draft | 0 | - | - |
 | preview.md | draft | with plan.md | - | - |
 
@@ -70,8 +70,9 @@ None.
 
 Newest first.
 
-- 2026-10-24 06:30 · human · plan part 1: package layout yes; module path github.com/BertPratya/sliceflow; flag package plus a small helper
+- 2026-10-24 06:32 · human · errors stay text on stderr with --json (R42, S29); JSON errors with codes go to the backlog; spec.md back to draft, the plan review checks it
 
+- 2026-10-24 06:30 · human · plan part 1: package layout yes; module path github.com/BertPratya/sliceflow; flag package plus a small helper
 - 2026-10-24 05:06 · lead (claude) · plan started: plan.md and preview.md copied; preview checks P1-P4 from the spec; depth: complex
 - 2026-10-24 05:04 · lead (claude) · spec.md review_passed
 - 2026-10-24 05:04 · doc reviewer · change review 2 handed in: spec-3/F1 verified; no findings

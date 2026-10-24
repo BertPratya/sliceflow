@@ -239,6 +239,11 @@ A user learns how to use a command, and sees what was wrong.
   `Error: not inside a git repository. Nothing was changed.`
   and the exit code is 1.
   Shows: R22
+- **S29.** **When** I run `sliceflow slice create My-Slice --json`,
+  **Then** sliceflow prints nothing on stdout, prints on stderr
+  `Error: invalid slice name "My-Slice": use 1-64 lowercase letters, digits, and dashes, starting with a letter or digit. Nothing was changed.`
+  and the exit code is 1.
+  Shows: R42
 
 ## Key concepts
 
@@ -494,6 +499,10 @@ stderr, changes nothing, and exits with code 1.
   on every system, also in `--json`. On Windows a full path looks like
   `C:/Users/me/project/.sliceflow/worktrees/spec-submit`.
   Check: unit, e2e
+- **R42.** Where `--json` is given and a command fails, sliceflow shall
+  print the same error line on stderr as without `--json`, and nothing
+  on stdout. Warnings go to stderr as R28 says, also with `--json`.
+  Check: e2e
 
 ## Out of scope
 
@@ -508,6 +517,7 @@ stderr, changes nothing, and exits with code 1.
 - A command to set or change a slice's title, and showing the title in `spec.md`, written from the log. Goes to: the backlog
 - A settings file (`sliceflow.yaml`). Goes to: a later slice (when there are settings a whole team shares)
 - Templates a project can change. Goes to: a later slice (design 1.10)
+- Errors as JSON with a stable error code, under `--json`. Goes to: the backlog
 - Fetching from a remote. Goes to: not planned
 
 ## Decisions
