@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 16:00 UTC
+- Updated: 2026-10-24 16:08 UTC
 
 ## Needs human
 
@@ -20,11 +20,11 @@ None.
 
 ## Tasks
 
-0 of 17 done · 1 in_review · 16 todo
+0 of 17 done · 1 doing · 16 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
-| 01 | eventlog-events | core | in_review | 0 | 1 | - | R5 |
+| 01 | eventlog-events | core | doing | 0 | 1 | - | R5 |
 | 02 | state-machine | core | todo | 0 | 0 | 01 | R1, R2, R3, R4 |
 | 03 | spec-reader | core | todo | 0 | 0 | - | R18 |
 | 04 | spec-errors | core | todo | 0 | 0 | 03 | R15, R18 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 4 · Closed: 42
+Open: 2 · Waiting for verify: 4 · Closed: 42
 
 ### Doc reviews
 
@@ -99,7 +99,10 @@ Open: 0 · Waiting for verify: 4 · Closed: 42
 
 ### Task reviews
 
-None.
+| ID | Level | Task | Title | Status |
+|---|---|---|---|---|
+| task-01-1/F1 | medium | 01 | The S15 line (accepted) is not tested | open |
+| task-01-1/F2 | low | 01 | TestParseNewEvents checks the warnings too loosely | open |
 
 ### Integration review
 
@@ -117,6 +120,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 16:08 · lead (claude) · task 01 worker round 2 started, with review task-01-1
+- 2026-10-24 16:08 · code-reviewer (claude opus) · task review 1 of task 01 handed in: 1 medium, 1 low
 - 2026-10-24 16:00 · lead (claude) · task review 1 of task 01 started
 - 2026-10-24 16:00 · lead (claude) · task 01 committed (ffc681e); the checks pass
 - 2026-10-24 16:00 · worker (claude sonnet) · task 01 round 1 handed in
