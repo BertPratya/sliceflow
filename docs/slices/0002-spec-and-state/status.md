@@ -3,11 +3,11 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 11:45 UTC
+- Updated: 2026-10-24 12:05 UTC
 
 ## Needs human
 
-- spec.md Open questions Q1-Q4
+- spec.md Open questions Q1-Q2
 
 ## Documents
 
@@ -47,5 +47,6 @@ None.
 
 Newest first.
 
+- 2026-10-24 12:05 · lead (claude) · human: keep one slice (old Q1); review file with all 7 template sections (old Q3, R26); renumbered: Q1 stuck submit, Q2 stdout
 - 2026-10-24 11:45 · lead (claude) · spec written after the human's yes to the playback; Q1-Q4 open
 - 2026-10-24 08:12 · lead (claude) · slice created

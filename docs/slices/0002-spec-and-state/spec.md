@@ -553,7 +553,8 @@ The lead reads the template's rules, which a filled spec no longer holds.
   Check: e2e
 - **R26.** The reviewer in this slice shall be the placeholder: its
   `reviewer` is `placeholder`, it reads nothing, and its result is
-  `passed`. It adds this to the review file, after the front matter:
+  `passed`. It adds this to the review file, after the front matter. It
+  has every section of the review template, in the template's order:
   ```
   # Review
 
@@ -561,7 +562,23 @@ The lead reads the template's rules, which a filled spec no longer holds.
 
   No review was done: placeholder reviewer.
 
+  ## Checked
+
+  None.
+
+  ## Tests
+
+  None.
+
+  ## Previous findings
+
+  None.
+
   ## Findings
+
+  None.
+
+  ## Requirements check
 
   None.
 
@@ -796,15 +813,10 @@ The lead reads the template's rules, which a filled spec no longer holds.
 
 ## Open questions
 
-- **Q1.** The spec has 37 requirements. The template says that more than
-  about 25-30 means the slice is too big. Keep it as one slice, or split
-  it?
-- **Q2.** A submit can stop halfway: `spec.submitted` is saved, but the
+- **Q1.** A submit can stop halfway: `spec.submitted` is saved, but the
   commit of `review.started` fails, or the user presses Ctrl-C. Then
   `spec.md` stays `submitted` or `in_review`, and no command in this
   slice moves it on. What should happen?
-- **Q3.** The review file is a stored file that later slices read (R25,
-  R26). Its form needs the human's yes. Is the proposed form right?
-- **Q4.** `spec validate` prints its problems on stdout, also when it
+- **Q2.** `spec validate` prints its problems on stdout, also when it
   exits with 1. That is an exception to R38 of 0001-slice-and-events
   (R37). Is that right, or should they go on stderr?
