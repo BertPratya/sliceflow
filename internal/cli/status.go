@@ -56,28 +56,7 @@ func runStatus(ctx context.Context, args []string, stdout, stderr io.Writer) int
 		return statusFail(stderr, err)
 	}
 	if *asJSON {
-		type fromJSON struct {
-			Branch string `json:"branch"`
-			Commit string `json:"commit"`
-		}
-		warnings := []string{}
-		for _, w := range st.Warnings {
-			warnings = append(warnings, w.Text)
-		}
-		obj := struct {
-			Slice    string    `json:"slice"`
-			Title    string    `json:"title,omitempty"`
-			Phase    string    `json:"phase"`
-			From     *fromJSON `json:"from,omitempty"`
-			Created  string    `json:"created,omitempty"`
-			Warnings []string  `json:"warnings"`
-		}{Slice: st.Slice, Title: st.Title, Phase: st.Phase, Warnings: warnings}
-		if st.From != nil {
-			obj.From = &fromJSON{st.From.Branch, st.From.Commit}
-		}
-		if !st.Created.IsZero() {
-			obj.Created = st.Created.UTC().Format("2006-01-02T15:04:05Z")
-		}
+		obj := newSliceJSON(st)
 		b, err := json.Marshal(obj)
 		if err != nil {
 			return fail(stderr, err)
@@ -119,4 +98,40 @@ func statusFail(stderr io.Writer, err error) int {
 		return 1
 	}
 	return fail(stderr, err)
+}
+
+type fromJSON struct {
+	Branch string `json:"branch"`
+	Commit string `json:"commit"`
+}
+
+// sliceJSON is the JSON object of one slice (R30). `slice status --json` and
+// each item of `slice list --json` (R37) both use it.
+type sliceJSON struct {
+	Slice    string    `json:"slice"`
+	Title    string    `json:"title,omitempty"`
+	Phase    string    `json:"phase"`
+	From     *fromJSON `json:"from,omitempty"`
+	Created  string    `json:"created,omitempty"`
+	Warnings []string  `json:"warnings"`
+}
+
+// warningTexts returns the text of each warning; never nil, so JSON gets [].
+func warningTexts(ws []slice.Warning) []string {
+	texts := []string{}
+	for _, w := range ws {
+		texts = append(texts, w.Text)
+	}
+	return texts
+}
+
+func newSliceJSON(st slice.SliceStatus) sliceJSON {
+	obj := sliceJSON{Slice: st.Slice, Title: st.Title, Phase: st.Phase, Warnings: warningTexts(st.Warnings)}
+	if st.From != nil {
+		obj.From = &fromJSON{st.From.Branch, st.From.Commit}
+	}
+	if !st.Created.IsZero() {
+		obj.Created = st.Created.UTC().Format("2006-01-02T15:04:05Z")
+	}
+	return obj
 }
