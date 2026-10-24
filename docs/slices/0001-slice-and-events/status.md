@@ -1,21 +1,21 @@
 # Status: 0001-slice-and-events
 
-- Phase: planning
+- Phase: planning (blocked: the plan review did not pass in 3 rounds)
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 07:21 UTC
+- Updated: 2026-10-24 07:23 UTC
 
 ## Needs human
 
-None.
+- The plan review did not pass in 3 rounds (plan-3: 1 medium, 2 low). The human decides how to go on.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
-| plan.md | in_review | 3 | - | - |
-| preview.md | in_review | with plan.md | - | - |
-| tasks.md | in_review | with plan.md | - | - |
+| spec.md | draft | 3 | - | - |
+| plan.md | draft | 3 | - | - |
+| preview.md | draft | with plan.md | - | - |
+| tasks.md | draft | with plan.md | - | - |
 
 ## Tasks
 
@@ -39,17 +39,19 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 7 · Closed: 36
+Open: 3 · Waiting for verify: 0 · Closed: 42
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-2/F1 | medium | Task 08's folder check misses Cross-platform paths | fixed |
-| plan-2/F2 | low | TestSpecFrontMatter passes with the ideas: example left in | fixed |
-| plan-2/F3 | low | Ctrl-C during FindRepo prints context canceled | fixed |
-| plan-2/F4 | low | R18: <command> for worktree add; a step that is not git | fixed |
-| plan-2/F5 | low | R38's short list leaves out the new wrong uses | fixed |
+| plan-3/F1 | medium | R18's system error reason: not in Flow 3 or task 09, path with \ on Windows | open |
+| plan-3/F2 | low | Task 09: how to get <command> from git.Error.Args | open |
+| plan-2/F1 | medium | Task 08's folder check misses Cross-platform paths | verified |
+| plan-2/F2 | low | TestSpecFrontMatter passes with the ideas: example left in | reopened |
+| plan-2/F3 | low | Ctrl-C during FindRepo prints context canceled | verified |
+| plan-2/F4 | low | R18: <command> for worktree add; a step that is not git | verified |
+| plan-2/F5 | low | R38's short list leaves out the new wrong uses | verified |
 | plan-1/F1 | medium | Status and List are each a type and a function | verified |
 | plan-1/F2 | medium | Tasks 02 and 05 need go.mod from task 01 | verified |
 | plan-1/F3 | medium | Interrupts: undo ctx, WaitDelay, the reason, Ctrl-C during checks | verified |
@@ -59,12 +61,12 @@ Open: 0 · Waiting for verify: 7 · Closed: 36
 | plan-1/F7 | medium | TestSpecNoTitle: wrong placeholder, impossible body | verified |
 | plan-1/F8 | medium | Cross-platform paths misses tasks 08-10; Tests rule reaches no task | verified |
 | plan-1/F9 | medium | R42 proved only for create | verified |
-| plan-1/F10 | medium | Briefs of tasks 06, 07, 09 over 1,500 words | fixed |
+| plan-1/F10 | medium | Briefs of tasks 06, 07, 09 over 1,500 words | verified |
 | plan-1/F11 | low | TD3 both followed and Plan only | verified |
 | plan-1/F12 | low | follows names flows and Data subsections | verified |
 | plan-1/F13 | low | Some Proves: lines name a requirement not proved | verified |
 | plan-1/F14 | low | e2e/ outside the gofmt check | verified |
-| plan-1/F15 | low | R26: which reason wins with two faults | fixed |
+| plan-1/F15 | low | R26: which reason wins with two faults | verified |
 | plan-1/F16 | low | Flow 1: Create finds the repo, but gets a Repo | verified |
 | plan-1/F17 | low | git makes .sliceflow/worktrees/, undo list misses it | verified |
 | spec-3/F1 | medium | Warning items: drop Warning: and <name>: , the R23 item | verified |
@@ -109,6 +111,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 07:23 · lead (claude) · round limit reached; slice marked planning (blocked); asking the human
+- 2026-10-24 07:23 · doc reviewer (claude opus) · plan-3: 6 of 7 verified, plan-2/F2 reopened; new: 1 medium, 1 low; nothing for the human to decide
 - 2026-10-24 07:21 · lead (claude) · plan review round 3 started (reviews/plan-3.md), the last round of the limit
 - 2026-10-24 07:20 · lead (claude) · plan-2 fixed: task 08 follows Cross-platform paths; R38 only in tasks 03, 07, 12; size reasons in long briefs; lows F2-F5 and plan-1/F15
 - 2026-10-24 07:20 · human · plan-2 fixes: yes
