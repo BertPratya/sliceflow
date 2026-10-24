@@ -13,10 +13,10 @@ None.
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 3 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 4 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
@@ -107,6 +107,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 20:50 · lead (claude) · change review 4 started: only the human's two changes before approval
 - 2026-10-24 20:45 · lead (claude) · human, before approval: R11 gets a 'Make one:' line and a merged-slice error; a merged slice shows Next: - (R29, new S5; S5-S31 renumbered to S6-S32). Documents back to draft
 - 2026-10-24 20:15 · lead (claude) · plan-3 low fixed; spec, plan, tasks, preview review_passed; waiting for the human's approval
 - 2026-10-24 20:10 · doc-reviewer (claude opus) · change review 3 handed in: all reopened findings verified; 1 new low
