@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 10:12 UTC
+- Updated: 2026-10-24 10:14 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-12 of 13 done · 1 in_review
+13 of 13 done
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -35,11 +35,11 @@ None.
 | 10 | status-core | core | done | 0 | 2 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | done | 0 | 1 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | done | 0 | 2 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
-| 13 | no-network-check | normal | in_review | 0 | 2 | 09, 12 | R40 |
+| 13 | no-network-check | normal | done | 0 | 2 | 09, 12 | R40 |
 
 ## Findings
 
-Open: 0 · Waiting for verify: 2 · Closed: 82
+Open: 0 · Waiting for verify: 0 · Closed: 84
 
 ### Doc reviews
 
@@ -109,8 +109,8 @@ Open: 0 · Waiting for verify: 2 · Closed: 82
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-13-1/F1 | medium | 13 | The empty-trace check can never fire | fixed (waiting for verify) |
-| task-13-1/F2 | low | 13 | A connection without fetch, e.g. ls-remote, passes | fixed (waiting for verify) |
+| task-13-1/F1 | medium | 13 | The empty-trace check can never fire | verified |
+| task-13-1/F2 | low | 13 | A connection without fetch, e.g. ls-remote, passes | verified |
 | task-12-1/F1 | high | 12 | In a subfolder, slice list does not see merged slices | verified |
 | task-11-1/F1 | low | 11 | R30's object is built inline; task 12 would copy it | verified |
 | task-10-1/F1 | high | 10 | The base goes to git as a bare name, not refs/heads/<base> | verified |
@@ -165,6 +165,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 10:14 · lead (claude) · task 13 done; every task is done
+- 2026-10-24 10:14 · code reviewer (claude opus) · task-13-2 submitted: pass; F1 and F2 verified; no new findings
 - 2026-10-24 10:12 · lead (claude) · task 13 code review started, round 2
 - 2026-10-24 10:12 · lead (claude) · task 13 fixes from review 1 committed (1d5b178); checks pass
 - 2026-10-24 10:10 · lead (claude) · task 13 worker round 2 started: F1, F2
