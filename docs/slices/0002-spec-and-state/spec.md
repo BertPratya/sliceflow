@@ -737,7 +737,9 @@ The lead reads the template's rules, which a filled spec no longer holds.
 - **R35.** When the user runs `sliceflow template show spec`, sliceflow
   shall print on stdout the built-in spec template of R7 of
   0001-slice-and-events, before its front matter is filled, with all its
-  rule comments, and exit with code 0. For any other template name, it
+  rule comments, and exit with code 0. It works in any folder, also
+  outside a git repo, and runs no git command. For any other template
+  name, it
   shall print `Error: unknown template "<x>". Known templates: spec.`
   and exit with code 1.
   Check: e2e

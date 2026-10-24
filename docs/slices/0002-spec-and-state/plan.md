@@ -157,7 +157,7 @@ Covers: R35
 
 1. `template show spec` prints the built-in template file as it is
    embedded, with its own front matter and every comment, on stdout.
-2. It needs no git repo, and runs no git command. (lead's call)
+2. It needs no git repo, and runs no git command (R35).
 3. Any other name gives R35's error.
 
 ### Flow 8: Wrong use, and the order of the first checks

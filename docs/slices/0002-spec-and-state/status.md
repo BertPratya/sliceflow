@@ -3,11 +3,10 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 18:40 UTC
+- Updated: 2026-10-24 18:50 UTC
 
 ## Needs human
 
-- plan-1 Q1: template show outside a git repo (changes the spec)
 - plan-1 medium findings F1-F4: the lead's fixes wait for the human's yes
 
 ## Documents
@@ -43,13 +42,13 @@
 
 ## Findings
 
-Open: 5 · Waiting for verify: 8 · Closed: 22
+Open: 4 · Waiting for verify: 9 · Closed: 22
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-1/Q1 | high | template show outside a git repo | open |
+| plan-1/Q1 | high | template show outside a git repo | fixed: R35 |
 | plan-1/F1 | medium | saveEvent can't run the command's checks under its lock | open |
 | plan-1/F2 | medium | R12 and R19 for spec submit are in no task | open |
 | plan-1/F3 | medium | Six briefs over 1,500 words; task 15 too big | open |
@@ -105,6 +104,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 18:50 · lead (claude) · human: plan-1 Q1 option 1, template show works outside a git repo (spec R35)
 - 2026-10-24 18:40 · lead (claude) · plan-1 lows fixed (F5-F12, two parts wait for F3); documents back to draft
 - 2026-10-24 18:30 · doc-reviewer (claude opus) · plan review 1 handed in: 1 high, 4 medium, 8 low
 - 2026-10-24 18:00 · lead (claude) · plan review 1 started: spec, plan, tasks, and preview together
