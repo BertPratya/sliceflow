@@ -787,8 +787,10 @@ what this run did not make. Its brief is about 1,950 words, over the usual 1,500
   removed, the error ends with `Could not remove: <the folder>.`
   Proves: R18
 - `TestReasonFileError` (unit): the reason for a `*fs.PathError` with
-  `Op` `open`, `Path` `C:\a\b\spec.md`, and `Err` `Access is denied.`
-  is `open C:/a/b/spec.md: Access is denied.`
+  `Op` `open`, `Path` `filepath.FromSlash("C:/a/b/spec.md")` (so it has
+  the system's own separator), and `Err` `Access is denied.` is
+  `open C:/a/b/spec.md: Access is denied`, with no `.` at the end, on
+  every system.
   Proves: R18
 - `TestReasonGitCommand` (unit): a failed `worktree add` with an empty
   stderr and exit code 128 gives `git worktree add failed (exit code 128)`.

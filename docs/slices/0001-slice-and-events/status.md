@@ -2,20 +2,20 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 07:28 UTC
+- Updated: 2026-10-24 07:36 UTC
 
 ## Needs human
 
-- change-3/F1 (medium): the lead's fix waits for the human's yes
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 3 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 3 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
@@ -39,14 +39,14 @@
 
 ## Findings
 
-Open: 2 · Waiting for verify: 0 · Closed: 45
+Open: 0 · Waiting for verify: 2 · Closed: 45
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| change-3/F1 | medium | TestReasonFileError fails on Linux and macOS (ToSlash only converts the own separator) | open |
-| change-3/F2 | low | Two periods when the reason ends with . | open |
+| change-3/F1 | medium | TestReasonFileError fails on Linux and macOS (ToSlash only converts the own separator) | fixed |
+| change-3/F2 | low | Two periods when the reason ends with . | fixed |
 | plan-3/F1 | medium | R18's system error reason: not in Flow 3 or task 09, path with \ on Windows | verified |
 | plan-3/F2 | low | Task 09: how to get <command> from git.Error.Args | verified |
 | plan-2/F1 | medium | Task 08's folder check misses Cross-platform paths | verified |
@@ -113,6 +113,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 07:36 · lead (claude) · change-3 fixed (test input with FromSlash; a final . of a reason dropped); change review started (reviews/change-4.md)
+- 2026-10-24 07:36 · human · change-3/F1 fix: yes
 - 2026-10-24 07:28 · doc reviewer (claude opus) · change-3: the three fixes verified; new from the F1 fix: 1 medium, 1 low; nothing for the human to decide
 - 2026-10-24 07:27 · lead (claude) · plan-3 fixed (F1, F2, plan-2/F2); change review started (reviews/change-3.md), it checks only these fixes
 - 2026-10-24 07:27 · human · after the round limit: fix the three, then a change review of only the fixes (option 1); block removed

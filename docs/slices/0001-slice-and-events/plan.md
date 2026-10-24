@@ -104,8 +104,10 @@ Covers: R18
 4. For a step that is not git, such as writing a file, the reason is
    Go's error text, with any path in it written with `/` (R41): for a
    `*fs.PathError`, its `Op`, then `filepath.ToSlash(Path)`, then its
-   `Err`, e.g. `open C:/Users/me/project/.sliceflow/worktrees/x/docs/slices/x/spec.md: Access is denied.`
+   `Err`, e.g. `open C:/Users/me/project/.sliceflow/worktrees/x/docs/slices/x/spec.md: Access is denied`.
    (lead's call)
+5. A `.` at the end of any reason is dropped, because R18's text adds
+   its own `. ` after the reason. (lead's call)
 
 ### Flow 4: Status of one slice
 
