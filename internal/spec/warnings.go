@@ -24,6 +24,9 @@ func warnings(d Doc) []Problem {
 	}
 	for _, s := range d.Sections {
 		if s.Empty {
+			if s.Name == "Open questions" {
+				ps = append(ps, warningAt(s.Line, openQuestions(s)))
+			}
 			if s.Name != "Success criteria" && s.Name != "Key concepts" {
 				ps = append(ps, warningAt(s.Line, fmt.Sprintf("\"## %s\" is empty; write None. if there is nothing to say", s.Name)))
 			}

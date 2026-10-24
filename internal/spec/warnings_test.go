@@ -132,3 +132,38 @@ func TestCheckOrder(t *testing.T) {
 		t.Fatalf("got %v\nwant %v", got, want)
 	}
 }
+
+func TestEmptyOpenQuestions(t *testing.T) {
+	text := strings.Replace(goodSpec, "## Open questions\n\nNone.\n", "## Open questions\n\n", 1)
+	if text == goodSpec {
+		t.Fatal("edit did not apply")
+	}
+	line := lineOf(text, "## Open questions", 0)
+	want := []Problem{
+		{line, LevelWarning, `"## Open questions" is not None.`},
+		{line, LevelWarning, `"## Open questions" is empty; write None. if there is nothing to say`},
+	}
+	got := softOf(text, "demo")
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestSortProblemsLevelAtOneLine(t *testing.T) {
+	ps := []Problem{
+		{5, LevelNote, "n"},
+		{5, LevelWarning, "w"},
+		{5, LevelError, "e"},
+		{3, LevelNote, "early"},
+	}
+	sortProblems(ps)
+	want := []Problem{
+		{3, LevelNote, "early"},
+		{5, LevelError, "e"},
+		{5, LevelWarning, "w"},
+		{5, LevelNote, "n"},
+	}
+	if !reflect.DeepEqual(ps, want) {
+		t.Fatalf("got %v\nwant %v", ps, want)
+	}
+}
