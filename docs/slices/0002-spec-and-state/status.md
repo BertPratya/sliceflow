@@ -7,8 +7,7 @@
 
 ## Needs human
 
-- Review as its own node: `sliceflow run`, or keep it inside `spec submit`
-- plan-4/F4: the `Make one:` line's path
+- Review as its own node, or inside `spec submit`: brainstorm with the human
 
 ## Documents
 
@@ -44,7 +43,7 @@
 
 ## Findings
 
-Open: 1 · Waiting for verify: 4 · Closed: 37
+Open: 0 · Waiting for verify: 5 · Closed: 37
 
 ### Doc reviews
 
@@ -53,7 +52,7 @@ Open: 1 · Waiting for verify: 4 · Closed: 37
 | plan-4/F1 | low | R31: next for a merged slice | fixed |
 | plan-4/F2 | low | R29: refused mark on a merged slice | fixed |
 | plan-4/F3 | low | Task 09: how openSlice finds a merged slice | fixed |
-| plan-4/F4 | low | The Make one: path works only from the root | open: the human's call |
+| plan-4/F4 | low | The Make one: path works only from the root | fixed: full path (the human's choice) |
 | plan-4/F5 | low | Task 07's brief reason names S1 to S4 | fixed |
 | plan-3/F1 | low | Task 07's Done in: line form | verified (fixed) |
 | plan-2/F1 | low | Leftovers of the round-1 fixes | verified (fixed) |
@@ -113,6 +112,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 21:30 · lead (claude) · human: the Make one: line prints the full path (R11, S12); the review question goes to a brainstorm first
 - 2026-10-24 21:20 · lead (claude) · plan-4 lows F1, F2, F3, F5 fixed; F4 and the human's question (review as its own node) are open; documents back to draft
 - 2026-10-24 21:10 · doc-reviewer (claude opus) · change review 4 handed in: 5 low
 - 2026-10-24 20:50 · lead (claude) · change review 4 started: only the human's two changes before approval

@@ -130,7 +130,7 @@ The lead checks the spec's form as often as it likes, while writing it.
   **Then** sliceflow prints on stderr:
   ```
   Error: slice login-google has no worktree: no worktree has the branch slice/login-google checked out. Nothing was changed.
-  Make one: git worktree add .sliceflow/worktrees/login-google slice/login-google
+  Make one: git worktree add <full path of the repo>/.sliceflow/worktrees/login-google slice/login-google
   ```
   and the exit code is 1.
   Shows: R11
@@ -465,8 +465,10 @@ The lead reads the template's rules, which a filled spec no longer holds.
   `spec validate`, `spec submit`, and `slice title` shall print the two
   lines
   `Error: slice <name> has no worktree: no worktree has the branch slice/<name> checked out. Nothing was changed.`
-  and `Make one: git worktree add .sliceflow/worktrees/<name> slice/<name>`,
-  and exit with code 1. When the slice has no branch `slice/<name>`
+  and `Make one: git worktree add <root>/.sliceflow/worktrees/<name> slice/<name>`,
+  where `<root>` is the full path of the main checkout, with `/` (R41 of
+  0001-slice-and-events), so the command works from any folder, and exit
+  with code 1. When the slice has no branch `slice/<name>`
   because it is merged (a folder on the base branch only), they shall
   instead print
   `Error: slice <name> is merged into <base branch>, so it has no worktree. Nothing was changed.` These three commands check in this order, and
