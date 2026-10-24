@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 20:07 UTC
+- Updated: 2026-10-24 17:01 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-7 of 17 done · 1 doing · 9 todo
+7 of 17 done · 1 in_review · 9 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -31,7 +31,7 @@ None.
 | 05 | spec-warnings | core | done | 0 | 2 | 04 | R16, R17, R18 |
 | 06 | status-core | core | done | 0 | 3 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | done | 0 | 2 | 06 | R4, R29, R31 |
-| 08 | cli-groups-and-template | core | doing | 0 | 0 | - | R35, R36 |
+| 08 | cli-groups-and-template | core | in_review | 0 | 1 | - | R35, R36 |
 | 09 | validate-command | core | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
 | 10 | lock | core | todo | 0 | 0 | - | R6, R7 |
 | 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
@@ -151,114 +151,118 @@ None.
 
 Newest first.
 
-- 2026-10-24 20:07 · lead (claude) · task 08 started: worker round 1
-- 2026-10-24 20:07 · lead (claude) · task 07 done
-- 2026-10-24 20:07 · code-reviewer (claude opus) · task review 2 of task 07 handed in: task-07-1/F1 verified; no new findings
-- 2026-10-24 20:01 · lead (claude) · task review 2 of task 07 started
-- 2026-10-24 20:01 · lead (claude) · task 07 tests committed (290c964); the checks pass
-- 2026-10-24 20:01 · worker (claude sonnet) · task 07 round 2 handed in: F1 fixed (tests only)
-- 2026-10-24 19:55 · lead (claude) · task 07 worker round 2 started, to add two JSON test cases for task-07-1/F1
-- 2026-10-24 19:55 · code-reviewer (claude opus) · task review 1 of task 07 handed in: 1 low
-- 2026-10-24 19:46 · lead (claude) · task review 1 of task 07 started
-- 2026-10-24 19:46 · lead (claude) · task 07 committed (be44aaf); the checks pass
-- 2026-10-24 19:46 · worker (claude sonnet) · task 07 round 1 handed in
-- 2026-10-24 19:37 · lead (claude) · task 07 started: worker round 1
-- 2026-10-24 19:37 · lead (claude) · task 06 done
-- 2026-10-24 19:37 · code-reviewer (claude opus) · task review 3 of task 06 handed in: task-06-2/F1 verified; no new findings
-- 2026-10-24 19:32 · lead (claude) · task review 3 of task 06 started (the last round allowed)
-- 2026-10-24 19:32 · lead (claude) · task 06 fix committed (e50a196); the checks pass
-- 2026-10-24 19:32 · worker (claude sonnet) · task 06 round 3 handed in: task-06-2/F1 fixed
-- 2026-10-24 19:26 · lead (claude) · task 06 worker round 3 started, to fix the low task-06-2/F1
-- 2026-10-24 19:26 · code-reviewer (claude opus) · task review 2 of task 06 handed in: task-06-1 F1-F4 verified; 1 new low
-- 2026-10-24 19:18 · lead (claude) · task review 2 of task 06 started
-- 2026-10-24 19:18 · lead (claude) · task 06 fixes committed (0716b44); the checks pass
-- 2026-10-24 19:18 · worker (claude sonnet) · task 06 round 2 handed in: F1-F3 fixed, F4 wontfix
-- 2026-10-24 19:10 · lead (claude) · task 06 worker round 2 started, with review task-06-1
-- 2026-10-24 19:10 · code-reviewer (claude opus) · task review 1 of task 06 handed in: 1 high, 3 low
-- 2026-10-24 19:00 · lead (claude) · task review 1 of task 06 started
-- 2026-10-24 19:00 · lead (claude) · task 06 committed (2e9534f); the checks pass
-- 2026-10-24 19:00 · worker (claude sonnet) · task 06 round 1 handed in
-- 2026-10-24 18:55 · lead (claude) · task 06's touches widened to two 0001 e2e test files; the worker goes on
-- 2026-10-24 18:55 · worker (claude sonnet) · task 06 round 1 blocked: two 0001 e2e tests now get R4's warning for a second slice.created
-- 2026-10-24 18:41 · lead (claude) · task 06 started: worker round 1
-- 2026-10-24 18:41 · lead (claude) · task 05 done
-- 2026-10-24 18:41 · code-reviewer (claude opus) · task review 2 of task 05 handed in: F1, Q1 verified; no new findings
-- 2026-10-24 18:36 · lead (claude) · task review 2 of task 05 started
-- 2026-10-24 18:36 · lead (claude) · task 05 fixes committed (adfc0fd); the checks pass
-- 2026-10-24 18:36 · worker (claude sonnet) · task 05 round 2 handed in: F1, Q1 fixed
-- 2026-10-24 18:31 · lead (claude) · task 05 worker round 2 started, with review task-05-1
-- 2026-10-24 18:31 · lead (claude) · decided task-05-1/Q1: both warnings, as R16 says
-- 2026-10-24 18:31 · code-reviewer (claude opus) · task review 1 of task 05 handed in: 1 low, 1 question
-- 2026-10-24 18:24 · lead (claude) · task review 1 of task 05 started
-- 2026-10-24 18:24 · lead (claude) · task 05 committed (ebb1ee0); the checks pass
-- 2026-10-24 18:24 · worker (claude sonnet) · task 05 round 1 handed in
-- 2026-10-24 18:18 · lead (claude) · task 05 started: worker round 1
-- 2026-10-24 18:18 · lead (claude) · task 04 done
-- 2026-10-24 18:18 · code-reviewer (claude opus) · task review 3 of task 04 handed in: task-04-2/F1 verified; no new findings
-- 2026-10-24 18:13 · lead (claude) · task review 3 of task 04 started (the last round allowed)
-- 2026-10-24 18:13 · lead (claude) · task 04 fix committed (7810cce); the checks pass
-- 2026-10-24 18:13 · worker (claude sonnet) · task 04 round 3 handed in: task-04-2/F1 fixed
-- 2026-10-24 18:08 · lead (claude) · task 04 worker round 3 started, to fix the low task-04-2/F1
-- 2026-10-24 18:08 · code-reviewer (claude opus) · task review 2 of task 04 handed in: task-04-1 F1-F4 verified; 1 new low
-- 2026-10-24 18:01 · lead (claude) · task review 2 of task 04 started
-- 2026-10-24 18:01 · lead (claude) · task 04 fixes committed (e164aa8); the checks pass
-- 2026-10-24 18:01 · worker (claude sonnet) · task 04 round 2 handed in: F1-F3 fixed, F4 wontfix
-- 2026-10-24 17:56 · lead (claude) · task 04 worker round 2 started again, with the new brief (R002); phase implementing
-- 2026-10-24 17:56 · lead (claude) · task 04's uncommitted round 2 code discarded (kept as a patch in .worktrees/briefs/ for the new worker)
-- 2026-10-24 17:56 · lead (claude) · tag sliceflow/0002-spec-and-state/planning/R002 on dc3980d
-- 2026-10-24 17:52 · lead (claude) · change-1 findings fixed; tasks.md approved again, R002 (the human's answer is the approval)
-- 2026-10-24 17:52 · doc-reviewer (claude opus) · change review 1 handed in: 1 medium, 3 low; nothing for the human
-- 2026-10-24 17:44 · lead (claude) · change review 1 started: tasks.md, task 04 (touches, Files, Doc.Preamble)
-- 2026-10-24 17:44 · lead (claude) · tasks.md changed: task 04 changes Doc with Preamble, and touches internal/spec/doc.go
-- 2026-10-24 17:44 · human · task 04's question, option 1, keep Doc.Preamble: "your recommentation"
-- 2026-10-24 17:35 · lead (claude) · task 04 blocked: the F1 fix adds Doc.Preamble in doc.go, outside touches and task 03's Interfaces; question to the human (small). The checks pass; the code is not committed
-- 2026-10-24 17:35 · worker (claude sonnet) · task 04 round 2 handed in: F1-F3 fixed, F4 wontfix
-- 2026-10-24 17:27 · lead (claude) · task 04 worker round 2 started, with review task-04-1
-- 2026-10-24 17:27 · lead (claude) · task 04's touches widened to internal/spec/parse.go and parse_test.go, for task-04-1/F1
-- 2026-10-24 17:27 · code-reviewer (claude opus) · task review 1 of task 04 handed in: 1 medium, 3 low
-- 2026-10-24 17:19 · lead (claude) · task review 1 of task 04 started
-- 2026-10-24 17:19 · lead (claude) · task 04 committed (c25ef94); the checks pass
-- 2026-10-24 17:19 · worker (claude sonnet) · task 04 round 1 handed in
-- 2026-10-24 17:12 · lead (claude) · task 04 started: worker round 1
-- 2026-10-24 17:12 · lead (claude) · task 02 done
-- 2026-10-24 17:12 · code-reviewer (claude opus) · task review 2 of task 02 handed in: task-02-1/F1 verified; no new findings
-- 2026-10-24 17:08 · lead (claude) · task review 2 of task 02 started
-- 2026-10-24 17:08 · lead (claude) · task 02 fixes committed (e309867); the checks pass
-- 2026-10-24 17:08 · worker (claude sonnet) · task 02 round 2 handed in: F1 fixed (the lead asked once for values that differ per round)
-- 2026-10-24 17:01 · lead (claude) · task 02 worker round 2 started, to fix the low task-02-1/F1
-- 2026-10-24 17:01 · code-reviewer (claude opus) · task review 1 of task 02 handed in: 1 low
-- 2026-10-24 16:56 · lead (claude) · task review 1 of task 02 started
-- 2026-10-24 16:56 · lead (claude) · task 02 committed (804587e); the checks pass
-- 2026-10-24 16:56 · worker (claude sonnet) · task 02 round 1 handed in
-- 2026-10-24 16:51 · lead (claude) · task 02 started: worker round 1
-- 2026-10-24 16:51 · lead (claude) · task 03 done
-- 2026-10-24 16:51 · code-reviewer (claude opus) · task review 3 of task 03 handed in: task-03-2/F1 verified; no new findings
-- 2026-10-24 16:46 · lead (claude) · task review 3 of task 03 started (the last round allowed)
-- 2026-10-24 16:46 · lead (claude) · task 03 fixes committed (2b91ce9); the checks pass
-- 2026-10-24 16:46 · worker (claude sonnet) · task 03 round 3 handed in: task-03-2/F1 fixed
-- 2026-10-24 16:42 · lead (claude) · task 03 worker round 3 started, with review task-03-2
-- 2026-10-24 16:42 · code-reviewer (claude opus) · task review 2 of task 03 handed in: task-03-1 F1-F5 verified; 1 new medium
-- 2026-10-24 16:36 · lead (claude) · task review 2 of task 03 started
-- 2026-10-24 16:36 · lead (claude) · task 03 fixes committed (31a6ab8); the checks pass
-- 2026-10-24 16:36 · worker (claude sonnet) · task 03 round 2 handed in: F1-F5 fixed
-- 2026-10-24 16:31 · lead (claude) · task 03 worker round 2 started, with review task-03-1
-- 2026-10-24 16:31 · lead (claude) · decided task-03-1/F3: an unclosed front matter gives HasFront false
-- 2026-10-24 16:31 · code-reviewer (claude opus) · task review 1 of task 03 handed in: 2 high, 2 medium, 1 low
-- 2026-10-24 16:24 · lead (claude) · task review 1 of task 03 started
-- 2026-10-24 16:24 · lead (claude) · task 03 committed (5b38b6f); the checks pass
-- 2026-10-24 16:24 · worker (claude sonnet) · task 03 round 1 handed in
-- 2026-10-24 16:17 · lead (claude) · task 03 started: worker round 1
-- 2026-10-24 16:17 · lead (claude) · task 01 done
-- 2026-10-24 16:17 · code-reviewer (claude opus) · task review 2 of task 01 handed in: task-01-1 F1, F2 verified; no new findings
-- 2026-10-24 16:12 · lead (claude) · task review 2 of task 01 started
-- 2026-10-24 16:12 · lead (claude) · task 01 fixes committed (706baa5); the checks pass
-- 2026-10-24 16:12 · worker (claude sonnet) · task 01 round 2 handed in: F1, F2 fixed
-- 2026-10-24 16:08 · lead (claude) · task 01 worker round 2 started, with review task-01-1
-- 2026-10-24 16:08 · code-reviewer (claude opus) · task review 1 of task 01 handed in: 1 medium, 1 low
-- 2026-10-24 16:00 · lead (claude) · task review 1 of task 01 started
-- 2026-10-24 16:00 · lead (claude) · task 01 committed (ffc681e); the checks pass
-- 2026-10-24 16:00 · worker (claude sonnet) · task 01 round 1 handed in
-- 2026-10-24 15:55 · lead (claude) · task 01 started: worker round 1
+- 2026-10-24 17:01 · lead (claude) · task review 1 of task 08 started
+- 2026-10-24 17:01 · lead (claude) · task 08 committed (553d4ab); the checks pass
+- 2026-10-24 17:01 · worker (claude sonnet) · task 08 round 1 handed in
+- 2026-10-24 17:01 · lead (claude) · Log times since 15:49 corrected from the commit times (git blame): the lead had written estimated times, not the clock
+- 2026-10-24 16:59 · lead (claude) · task 08 started: worker round 1
+- 2026-10-24 16:59 · lead (claude) · task 07 done
+- 2026-10-24 16:59 · code-reviewer (claude opus) · task review 2 of task 07 handed in: task-07-1/F1 verified; no new findings
+- 2026-10-24 16:58 · lead (claude) · task review 2 of task 07 started
+- 2026-10-24 16:58 · lead (claude) · task 07 tests committed (290c964); the checks pass
+- 2026-10-24 16:58 · worker (claude sonnet) · task 07 round 2 handed in: F1 fixed (tests only)
+- 2026-10-24 16:56 · lead (claude) · task 07 worker round 2 started, to add two JSON test cases for task-07-1/F1
+- 2026-10-24 16:56 · code-reviewer (claude opus) · task review 1 of task 07 handed in: 1 low
+- 2026-10-24 16:53 · lead (claude) · task review 1 of task 07 started
+- 2026-10-24 16:53 · lead (claude) · task 07 committed (be44aaf); the checks pass
+- 2026-10-24 16:53 · worker (claude sonnet) · task 07 round 1 handed in
+- 2026-10-24 16:50 · lead (claude) · task 07 started: worker round 1
+- 2026-10-24 16:50 · lead (claude) · task 06 done
+- 2026-10-24 16:50 · code-reviewer (claude opus) · task review 3 of task 06 handed in: task-06-2/F1 verified; no new findings
+- 2026-10-24 16:49 · lead (claude) · task review 3 of task 06 started (the last round allowed)
+- 2026-10-24 16:49 · lead (claude) · task 06 fix committed (e50a196); the checks pass
+- 2026-10-24 16:49 · worker (claude sonnet) · task 06 round 3 handed in: task-06-2/F1 fixed
+- 2026-10-24 16:48 · lead (claude) · task 06 worker round 3 started, to fix the low task-06-2/F1
+- 2026-10-24 16:48 · code-reviewer (claude opus) · task review 2 of task 06 handed in: task-06-1 F1-F4 verified; 1 new low
+- 2026-10-24 16:46 · lead (claude) · task review 2 of task 06 started
+- 2026-10-24 16:46 · lead (claude) · task 06 fixes committed (0716b44); the checks pass
+- 2026-10-24 16:46 · worker (claude sonnet) · task 06 round 2 handed in: F1-F3 fixed, F4 wontfix
+- 2026-10-24 16:44 · lead (claude) · task 06 worker round 2 started, with review task-06-1
+- 2026-10-24 16:44 · code-reviewer (claude opus) · task review 1 of task 06 handed in: 1 high, 3 low
+- 2026-10-24 16:41 · lead (claude) · task review 1 of task 06 started
+- 2026-10-24 16:41 · lead (claude) · task 06 committed (2e9534f); the checks pass
+- 2026-10-24 16:41 · worker (claude sonnet) · task 06 round 1 handed in
+- 2026-10-24 16:40 · lead (claude) · task 06's touches widened to two 0001 e2e test files; the worker goes on
+- 2026-10-24 16:40 · worker (claude sonnet) · task 06 round 1 blocked: two 0001 e2e tests now get R4's warning for a second slice.created
+- 2026-10-24 16:37 · lead (claude) · task 06 started: worker round 1
+- 2026-10-24 16:37 · lead (claude) · task 05 done
+- 2026-10-24 16:37 · code-reviewer (claude opus) · task review 2 of task 05 handed in: F1, Q1 verified; no new findings
+- 2026-10-24 16:36 · lead (claude) · task review 2 of task 05 started
+- 2026-10-24 16:36 · lead (claude) · task 05 fixes committed (adfc0fd); the checks pass
+- 2026-10-24 16:36 · worker (claude sonnet) · task 05 round 2 handed in: F1, Q1 fixed
+- 2026-10-24 16:35 · lead (claude) · task 05 worker round 2 started, with review task-05-1
+- 2026-10-24 16:35 · lead (claude) · decided task-05-1/Q1: both warnings, as R16 says
+- 2026-10-24 16:35 · code-reviewer (claude opus) · task review 1 of task 05 handed in: 1 low, 1 question
+- 2026-10-24 16:33 · lead (claude) · task review 1 of task 05 started
+- 2026-10-24 16:33 · lead (claude) · task 05 committed (ebb1ee0); the checks pass
+- 2026-10-24 16:33 · worker (claude sonnet) · task 05 round 1 handed in
+- 2026-10-24 16:31 · lead (claude) · task 05 started: worker round 1
+- 2026-10-24 16:31 · lead (claude) · task 04 done
+- 2026-10-24 16:31 · code-reviewer (claude opus) · task review 3 of task 04 handed in: task-04-2/F1 verified; no new findings
+- 2026-10-24 16:30 · lead (claude) · task review 3 of task 04 started (the last round allowed)
+- 2026-10-24 16:30 · lead (claude) · task 04 fix committed (7810cce); the checks pass
+- 2026-10-24 16:30 · worker (claude sonnet) · task 04 round 3 handed in: task-04-2/F1 fixed
+- 2026-10-24 16:29 · lead (claude) · task 04 worker round 3 started, to fix the low task-04-2/F1
+- 2026-10-24 16:29 · code-reviewer (claude opus) · task review 2 of task 04 handed in: task-04-1 F1-F4 verified; 1 new low
+- 2026-10-24 16:27 · lead (claude) · task review 2 of task 04 started
+- 2026-10-24 16:27 · lead (claude) · task 04 fixes committed (e164aa8); the checks pass
+- 2026-10-24 16:27 · worker (claude sonnet) · task 04 round 2 handed in: F1-F3 fixed, F4 wontfix
+- 2026-10-24 16:26 · lead (claude) · task 04 worker round 2 started again, with the new brief (R002); phase implementing
+- 2026-10-24 16:26 · lead (claude) · task 04's uncommitted round 2 code discarded (kept as a patch in .worktrees/briefs/ for the new worker)
+- 2026-10-24 16:26 · lead (claude) · tag sliceflow/0002-spec-and-state/planning/R002 on dc3980d
+- 2026-10-24 16:25 · lead (claude) · change-1 findings fixed; tasks.md approved again, R002 (the human's answer is the approval)
+- 2026-10-24 16:25 · doc-reviewer (claude opus) · change review 1 handed in: 1 medium, 3 low; nothing for the human
+- 2026-10-24 16:23 · lead (claude) · change review 1 started: tasks.md, task 04 (touches, Files, Doc.Preamble)
+- 2026-10-24 16:23 · lead (claude) · tasks.md changed: task 04 changes Doc with Preamble, and touches internal/spec/doc.go
+- 2026-10-24 16:23 · human · task 04's question, option 1, keep Doc.Preamble: "your recommentation"
+- 2026-10-24 16:21 · lead (claude) · task 04 blocked: the F1 fix adds Doc.Preamble in doc.go, outside touches and task 03's Interfaces; question to the human (small). The checks pass; the code is not committed
+- 2026-10-24 16:21 · worker (claude sonnet) · task 04 round 2 handed in: F1-F3 fixed, F4 wontfix
+- 2026-10-24 16:19 · lead (claude) · task 04 worker round 2 started, with review task-04-1
+- 2026-10-24 16:19 · lead (claude) · task 04's touches widened to internal/spec/parse.go and parse_test.go, for task-04-1/F1
+- 2026-10-24 16:19 · code-reviewer (claude opus) · task review 1 of task 04 handed in: 1 medium, 3 low
+- 2026-10-24 16:16 · lead (claude) · task review 1 of task 04 started
+- 2026-10-24 16:16 · lead (claude) · task 04 committed (c25ef94); the checks pass
+- 2026-10-24 16:16 · worker (claude sonnet) · task 04 round 1 handed in
+- 2026-10-24 16:13 · lead (claude) · task 04 started: worker round 1
+- 2026-10-24 16:13 · lead (claude) · task 02 done
+- 2026-10-24 16:13 · code-reviewer (claude opus) · task review 2 of task 02 handed in: task-02-1/F1 verified; no new findings
+- 2026-10-24 16:12 · lead (claude) · task review 2 of task 02 started
+- 2026-10-24 16:12 · lead (claude) · task 02 fixes committed (e309867); the checks pass
+- 2026-10-24 16:12 · worker (claude sonnet) · task 02 round 2 handed in: F1 fixed (the lead asked once for values that differ per round)
+- 2026-10-24 16:11 · lead (claude) · task 02 worker round 2 started, to fix the low task-02-1/F1
+- 2026-10-24 16:11 · code-reviewer (claude opus) · task review 1 of task 02 handed in: 1 low
+- 2026-10-24 16:09 · lead (claude) · task review 1 of task 02 started
+- 2026-10-24 16:09 · lead (claude) · task 02 committed (804587e); the checks pass
+- 2026-10-24 16:09 · worker (claude sonnet) · task 02 round 1 handed in
+- 2026-10-24 16:07 · lead (claude) · task 02 started: worker round 1
+- 2026-10-24 16:07 · lead (claude) · task 03 done
+- 2026-10-24 16:07 · code-reviewer (claude opus) · task review 3 of task 03 handed in: task-03-2/F1 verified; no new findings
+- 2026-10-24 16:06 · lead (claude) · task review 3 of task 03 started (the last round allowed)
+- 2026-10-24 16:06 · lead (claude) · task 03 fixes committed (2b91ce9); the checks pass
+- 2026-10-24 16:06 · worker (claude sonnet) · task 03 round 3 handed in: task-03-2/F1 fixed
+- 2026-10-24 16:05 · lead (claude) · task 03 worker round 3 started, with review task-03-2
+- 2026-10-24 16:05 · code-reviewer (claude opus) · task review 2 of task 03 handed in: task-03-1 F1-F5 verified; 1 new medium
+- 2026-10-24 16:03 · lead (claude) · task review 2 of task 03 started
+- 2026-10-24 16:03 · lead (claude) · task 03 fixes committed (31a6ab8); the checks pass
+- 2026-10-24 16:03 · worker (claude sonnet) · task 03 round 2 handed in: F1-F5 fixed
+- 2026-10-24 16:01 · lead (claude) · task 03 worker round 2 started, with review task-03-1
+- 2026-10-24 16:01 · lead (claude) · decided task-03-1/F3: an unclosed front matter gives HasFront false
+- 2026-10-24 16:01 · code-reviewer (claude opus) · task review 1 of task 03 handed in: 2 high, 2 medium, 1 low
+- 2026-10-24 15:58 · lead (claude) · task review 1 of task 03 started
+- 2026-10-24 15:58 · lead (claude) · task 03 committed (5b38b6f); the checks pass
+- 2026-10-24 15:58 · worker (claude sonnet) · task 03 round 1 handed in
+- 2026-10-24 15:55 · lead (claude) · task 03 started: worker round 1
+- 2026-10-24 15:55 · lead (claude) · task 01 done
+- 2026-10-24 15:55 · code-reviewer (claude opus) · task review 2 of task 01 handed in: task-01-1 F1, F2 verified; no new findings
+- 2026-10-24 15:54 · lead (claude) · task review 2 of task 01 started
+- 2026-10-24 15:54 · lead (claude) · task 01 fixes committed (706baa5); the checks pass
+- 2026-10-24 15:54 · worker (claude sonnet) · task 01 round 2 handed in: F1, F2 fixed
+- 2026-10-24 15:53 · lead (claude) · task 01 worker round 2 started, with review task-01-1
+- 2026-10-24 15:53 · code-reviewer (claude opus) · task review 1 of task 01 handed in: 1 medium, 1 low
+- 2026-10-24 15:52 · lead (claude) · task review 1 of task 01 started
+- 2026-10-24 15:52 · lead (claude) · task 01 committed (ffc681e); the checks pass
+- 2026-10-24 15:52 · worker (claude sonnet) · task 01 round 1 handed in
+- 2026-10-24 15:50 · lead (claude) · task 01 started: worker round 1
 - 2026-10-24 15:49 · lead (claude) · main's checks pass (base-check at be47b4a); phase implementing
 - 2026-10-24 15:46 · human · planning approved, R001: "yes, okay, and I approve" (the plan-5/F1 fix went in with this approval, with no separate review)
 - 2026-10-24 15:46 · lead (claude) · plan-5/F1 fixed: task 15 sets R10's last sentence for a failed review.finished, with tests in tasks 15 and 17
