@@ -205,3 +205,22 @@ func TestListBadBranchName(t *testing.T) {
 		t.Fatalf("json slices: %q", out)
 	}
 }
+
+// task-12-1/F1: run from a subfolder, the list is the same as from the top.
+func TestListFromSubfolder(t *testing.T) {
+	dir, _ := s20Repo(t)
+	folders := map[string]string{
+		"main checkout":  filepath.Join(dir, "docs"),
+		"slice worktree": filepath.Join(dir, ".sliceflow", "worktrees", "spec-submit", "docs"),
+	}
+	for name, sub := range folders {
+		for _, args := range [][]string{{"slice", "list"}, {"slice", "list", "--all"}} {
+			wantOut, wantErr, wantCode := run(t, dir, args...)
+			out, errOut, code := run(t, sub, args...)
+			if code != wantCode || out != wantOut || errOut != wantErr {
+				t.Errorf("%s, %v: from a subfolder\ncode %d, want %d\nstdout %q\nwant   %q\nstderr %q",
+					name, args, code, wantCode, out, wantOut, errOut)
+			}
+		}
+	}
+}

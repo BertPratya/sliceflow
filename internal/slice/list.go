@@ -49,7 +49,8 @@ func List(ctx context.Context, r Repo, all bool) (SliceList, error) {
 	merged := map[string]bool{}
 	if exists {
 		// -z: git does not quote odd names. A name that breaks R2 is no slice.
-		out, err := git.Run(ctx, r.Dir, "ls-tree", "-d", "--name-only", "-z", "refs/heads/"+base, "docs/slices/")
+		// --full-tree: the path is from the top of the repo, not the current folder.
+		out, err := git.Run(ctx, r.Dir, "ls-tree", "--full-tree", "-d", "--name-only", "-z", "refs/heads/"+base, "docs/slices/")
 		if err != nil {
 			return SliceList{}, err
 		}
