@@ -31,7 +31,7 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 | # | Slice | What you can do after it | Design |
 |---|---|---|---|
 | 0001 | slice and events | create a slice (`sliceflow slice create`), see it (`sliceflow slice status`, `sliceflow slice list`); the event log with its first event, `slice.created` | 1.13, 2.1 |
-| 0002 | spec | the state machine's engine, and the spec's moves: write a spec and check it; see where a slice is and what comes next; set a slice's title | 1.4, 2.2 |
+| 0002 | spec | the state machine's engine, and the spec's moves: write a spec and check it; see where a slice is and what comes next; set a slice's title; the spec's draft state comes from `slice.created`, with no extra event | 1.4, 2.2 |
 | 0003 | plan | write the plan, tasks, and preview, review them, and approve the planning once; the slice is ready to build | 2.3 |
 | 0004 | agents | `sliceflow` starts agents itself: the Codex adapter, the permission layers, settings per role; first use: the spec check and the plan review; who caused each event (`by`); each session sliceflow starts is bound to its slice by its session ID, and commands on other slices are refused | 1.9, 1.12c |
 | 0005 | the run | `sliceflow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; `sliceflow stop`, and `sliceflow run` continues where it stopped | 2.4 |
