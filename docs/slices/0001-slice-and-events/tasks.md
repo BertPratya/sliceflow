@@ -731,6 +731,7 @@ what this run did not make. Its brief is about 1,950 words, over the usual 1,500
    command name the step passes (e.g. `commit`, `worktree add`), with
    the other lines after it; else, for a step that is not git, the
    error text with paths written with `/`, as Flow 3, step 4 says.
+   For every reason, drop a `.` at its end (Flow 3, step 5).
 4. In `internal/cli/create.go`: make the `ctx` with
    `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)` first,
    before `FindRepo`. When `FindRepo` returns because the `ctx` is done,
@@ -761,7 +762,7 @@ what this run did not make. Its brief is about 1,950 words, over the usual 1,500
   Proves: R8, R18
   Scenario: S12
 - `TestCreateHookOutput` (e2e): a `pre-commit` hook that prints
-  `lint: 2 errors` and `a.go:1: bad` on stderr and exits with 1:
+  `lint: 2 errors.` and `a.go:1: bad` on stderr and exits with 1:
   the error line is
   `Error: could not create slice spec-submit: lint: 2 errors. Everything sliceflow made was removed.`
   and the next line is `  a.go:1: bad`.
