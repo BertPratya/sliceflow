@@ -95,3 +95,17 @@ func TestCheckFolderLast(t *testing.T) {
 		t.Errorf("exists before folder: %q", got)
 	}
 }
+
+func TestCheckBaseOnlyBranch(t *testing.T) {
+	r := newRepo(t)
+	testrepo.Git(t, r.Root, "commit", "--allow-empty", "-m", "second")
+	for _, base := range []string{"main~1", "main@{0}", "main^", "HEAD"} {
+		want := "base branch " + base + " does not exist (from --from). Nothing was changed."
+		if got := checkMsg(t, r, "x", base, "from --from"); got != want {
+			t.Errorf("%s: %q", base, got)
+		}
+	}
+	if got := checkMsg(t, r, "x", "main", "from --from"); got != "" {
+		t.Errorf("main: %q", got)
+	}
+}

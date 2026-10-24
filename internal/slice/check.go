@@ -2,6 +2,7 @@ package slice
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -17,9 +18,15 @@ func checkCreate(ctx context.Context, r Repo, opts CreateOptions, base, source s
 	if err := CheckName(name); err != nil {
 		return err
 	}
-	ok, err := git.RefExists(ctx, r.Dir, "refs/heads/"+base)
-	if err != nil {
-		return err
+	// Only an existing local branch is a base: check the exact ref first, so
+	// main~1, main@{0}, main^ and HEAD are not resolved as commits.
+	ok := true
+	if _, err := git.Run(ctx, r.Dir, "show-ref", "--verify", "--quiet", "refs/heads/"+base); err != nil {
+		var ge *git.Error
+		if !errors.As(err, &ge) || ge.ExitCode != 1 {
+			return err
+		}
+		ok = false
 	}
 	if !ok {
 		return &Error{Message: fmt.Sprintf("base branch %s does not exist (%s). Nothing was changed.", base, source)}

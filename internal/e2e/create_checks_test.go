@@ -90,3 +90,9 @@ func TestCreateBadNameJSON(t *testing.T) {
 	dir := testrepo.New(t)
 	wantFail(t, dir, strings.Replace(nameErr, "%s", "My-Slice", 1), "slice", "create", "My-Slice", "--json")
 }
+
+func TestCreateBaseNotABranch(t *testing.T) {
+	dir := testrepo.New(t)
+	testrepo.Git(t, dir, "commit", "--allow-empty", "-m", "second")
+	wantFail(t, dir, "base branch main~1 does not exist (from --from). Nothing was changed.", "slice", "create", "aa", "--from", "main~1")
+}
