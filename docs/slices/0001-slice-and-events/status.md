@@ -1,12 +1,13 @@
 # Status: 0001-slice-and-events
 
-- Phase: implementing
+- Phase: implementing (blocked)
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 09:33 UTC
+- Updated: 2026-10-24 09:37 UTC
 
 ## Needs human
 
-None.
+- Task 09 is blocked on task-09-2/Q1 (small): when `git worktree add` fails without a signal, e.g. a failing `post-checkout` hook, git keeps the worktree. Clean it up the same way as after a signal?
+- Task 09, task-09-2/F2 (small, asked with Q1): the reason shown for a failed `worktree add` is git's progress line `Preparing worktree (...)`. Run it with `--quiet`?
 
 ## Documents
 
@@ -19,7 +20,7 @@ None.
 
 ## Tasks
 
-8 of 13 done · 1 in_review · 4 todo
+8 of 13 done · 1 blocked · 4 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -31,7 +32,7 @@ None.
 | 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | done | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
-| 09 | create-undo | core | in_review | 0 | 2 | 08 | R8, R18 |
+| 09 | create-undo | core | blocked | 0 | 2 | 08 | R8, R18 |
 | 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
@@ -39,7 +40,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 3 · Closed: 71
+Open: 3 · Waiting for verify: 0 · Closed: 74
 
 ### Doc reviews
 
@@ -108,11 +109,14 @@ Open: 0 · Waiting for verify: 3 · Closed: 71
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-09-2/Q1 | needs human | 09 | Clean up after every failed worktree add, not only after a signal? | open |
+| task-09-2/F1 | high | 09 | A failed post-checkout hook leaves the worktree; the message does not name it | open |
+| task-09-2/F2 | low | 09 | The reason for a failed worktree add is git's progress line | open |
 | task-09-1/Q1 | needs human | 09 | Which plan rule changes so an interrupted worktree add is undone | verified: the human chose option 2 (kill at once, then clean up); R003 |
-| task-09-1/F1 | high | 09 | Ctrl-C during git worktree add leaves the branch and worktree | fixed (waiting for verify) |
-| task-09-1/F2 | medium | 09 | Could not remove: does not name the kept branch | fixed (waiting for verify) |
+| task-09-1/F1 | high | 09 | Ctrl-C during git worktree add leaves the branch and worktree | verified |
+| task-09-1/F2 | medium | 09 | Could not remove: does not name the kept branch | verified |
 | task-09-1/F3 | low | 09 | slice.Interrupted is a new export not in tasks.md | wontfix: why: used only by the CLI; noted for the integration review |
-| task-09-1/F4 | low | 09 | Could not remove: lists full paths | fixed (waiting for verify) |
+| task-09-1/F4 | low | 09 | Could not remove: lists full paths | verified |
 | task-08-1/F1 | high | 08 | The base check accepts revision syntax like main~1 | verified |
 | task-08-1/F2 | low | 08 | The folder check reads the base ref, not the commit id | wontfix: why: the fix changes checkCreate's signature, which tasks.md fixes; the window is milliseconds; Flow 1 puts the checks before the commit id |
 | task-07-1/F1 | low | 07 | TestCreateSpecSubmit does not check the log line | verified |
@@ -153,6 +157,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:37 · lead (claude) · task 09 blocked on task-09-2/Q1 and F2 (small): asked the human; task 10 started meanwhile, as the human allowed
+- 2026-10-24 09:37 · code reviewer (claude opus) · task-09-2 submitted: needs_human; round-1 findings verified (10 interrupt runs on 20,000 files left nothing); Q1, 1 high, 1 low
 - 2026-10-24 09:33 · lead (claude) · task 09 code review started, round 2
 - 2026-10-24 09:33 · lead (claude) · task 09 fixes from review 1 committed (62a4d16); checks pass; by hand: Ctrl-C during worktree add leaves nothing, and a second create works
 - 2026-10-24 09:31 · lead (claude) · task 09 worker round 2 started: F1 (R003), F2, F4
