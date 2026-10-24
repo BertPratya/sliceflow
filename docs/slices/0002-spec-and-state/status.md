@@ -1,22 +1,22 @@
 # Status: 0002-spec-and-state
 
-- Phase: planning
+- Phase: ready
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 23:20 UTC
+- Updated: 2026-10-24 15:46 UTC
 
 ## Needs human
 
-- plan-5/F1: the lead's fix waits for the human's yes
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 5 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | approved | 3 | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
+| plan.md | approved | 5 | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
+| preview.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
+| tasks.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
 
 ## Tasks
 
@@ -38,19 +38,19 @@
 | 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | todo | 0 | 0 | - | R25, R26, R27 |
 | 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
-| 15 | review-core | core | todo | 0 | 0 | 09, 11, 13 | R12, R24, R25, R27, R28 |
+| 15 | review-core | core | todo | 0 | 0 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | normal | todo | 0 | 0 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
-| 17 | submit-review-failures | normal | todo | 0 | 0 | 16 | R6, R7, R8, R9, R10, R24, R25, R29 |
+| 17 | submit-review-failures | normal | todo | 0 | 0 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
 
 ## Findings
 
-Open: 1 · Waiting for verify: 3 · Closed: 42
+Open: 0 · Waiting for verify: 4 · Closed: 42
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-5/F1 | medium | A failed review.finished commit has no brief and no test | open |
+| plan-5/F1 | medium | A failed review.finished commit has no brief and no test | fixed (not re-reviewed: the human approved) |
 | plan-5/F2 | low | Three leftover lines in spec.md | fixed |
 | plan-5/F3 | low | plan.md leaves out spec review; wrong task for Ctrl-C | fixed |
 | plan-5/F4 | low | Stale task numbers; R20's error index | fixed |
@@ -117,49 +117,51 @@ None.
 
 Newest first.
 
-- 2026-10-24 23:20 · lead (claude) · plan-5 lows fixed; documents back to draft
-- 2026-10-24 23:15 · doc-reviewer (claude opus) · change review 5 handed in: plan-4 all verified; 1 medium, 3 low
-- 2026-10-24 23:00 · lead (claude) · change review 5 started: the review as its own command
-- 2026-10-24 22:55 · lead (claude) · human: the review is its own command, `sliceflow spec review`; `spec submit` ends at submitted; a general `sliceflow run` goes to the backlog. Spec (Stories 3 and 4, R20, R23, R24, SD8, SD13), plan (Flows 3 to 5), tasks (14 to 17), preview (P3, P4) changed
-- 2026-10-24 21:30 · lead (claude) · human: the Make one: line prints the full path (R11, S12); the review question goes to a brainstorm first
-- 2026-10-24 21:20 · lead (claude) · plan-4 lows F1, F2, F3, F5 fixed; F4 and the human's question (review as its own node) are open; documents back to draft
-- 2026-10-24 21:10 · doc-reviewer (claude opus) · change review 4 handed in: 5 low
-- 2026-10-24 20:50 · lead (claude) · change review 4 started: only the human's two changes before approval
-- 2026-10-24 20:45 · lead (claude) · human, before approval: R11 gets a 'Make one:' line and a merged-slice error; a merged slice shows Next: - (R29, new S5; S5-S31 renumbered to S6-S32). Documents back to draft
-- 2026-10-24 20:15 · lead (claude) · plan-3 low fixed; spec, plan, tasks, preview review_passed; waiting for the human's approval
-- 2026-10-24 20:10 · doc-reviewer (claude opus) · change review 3 handed in: all reopened findings verified; 1 new low
-- 2026-10-24 19:55 · lead (claude) · change review 3 of the plan started: only the fixes since round 2 (the last round)
-- 2026-10-24 19:50 · lead (claude) · human: "yes": Prepare also returns the commit message; reasons for the long briefs of tasks 14, 15, 16
-- 2026-10-24 19:40 · lead (claude) · plan-2 lows fixed (plan-1/F7, F10, plan-2/F1); documents back to draft
-- 2026-10-24 19:35 · doc-reviewer (claude opus) · plan review 2 handed in: nothing for the human; plan-1/F1, F3 reopened (medium), F7, F10 reopened (low); 1 new low
-- 2026-10-24 19:10 · lead (claude) · plan review 2 started
-- 2026-10-24 19:05 · lead (claude) · human: "yes" to the plan-1 F1-F4 fixes: a Prepare step under the lock; R12 and R19 in task 14; task 15 split into 15 and 16; Allowed returns a string
-- 2026-10-24 18:50 · lead (claude) · human: plan-1 Q1 option 1, template show works outside a git repo (spec R35)
-- 2026-10-24 18:40 · lead (claude) · plan-1 lows fixed (F5-F12, two parts wait for F3); documents back to draft
-- 2026-10-24 18:30 · doc-reviewer (claude opus) · plan review 1 handed in: 1 high, 4 medium, 8 low
-- 2026-10-24 18:00 · lead (claude) · plan review 1 started: spec, plan, tasks, and preview together
-- 2026-10-24 17:55 · lead (claude) · tasks written: 15 tasks; plan Open questions: None.
-- 2026-10-24 17:25 · lead (claude) · human: plan Q1 option 1, a value with `{{` is not checked, only warned (spec R18); the plan review checks the spec change
-- 2026-10-24 17:10 · lead (claude) · plan flows, testing, and preview written; plan Q1 shows a gap in the spec, so spec.md is back to draft
-- 2026-10-24 16:30 · lead (claude) · human: keep the 10 s lock wait (a slow hook is a listed risk). Shared rules for the lock, saving, undo, and crash leftovers; TD1, TD2
-- 2026-10-24 16:10 · lead (claude) · human: the reviewer writes the review file, and sliceflow reads the result from it (option 1). Interfaces written
-- 2026-10-24 15:50 · lead (claude) · human: lock file is one JSON line (pid, since); a leftover lock is removed by hand until 0007 (roadmap); reads take no lock. Data written
-- 2026-10-24 15:20 · lead (claude) · human: complex; package layout option 1 (three new packages: state, spec, review); Approach written
-- 2026-10-24 15:00 · lead (claude) · plan started: plan.md and preview.md copied; preview's fixed checks P1-P5
-- 2026-10-24 14:55 · lead (claude) · spec.md review_passed
-- 2026-10-24 14:50 · doc-reviewer (claude opus) · change review 3 handed in: spec-2 all verified; no new findings
-- 2026-10-24 14:40 · lead (claude) · spec review 3 started: a change review of the spec-2 fixes only, as for 0001
-- 2026-10-24 14:35 · lead (claude) · human: "yes" to the spec-2 F1, F2 fixes
-- 2026-10-24 14:20 · lead (claude) · spec-2 lows fixed (F3, F4), and S23 uses a commit-msg hook (the reviewer's note); spec.md back to draft
-- 2026-10-24 14:15 · doc-reviewer (claude opus) · spec review 2 handed in: spec-1 all verified; 0 high, 2 medium, 2 low
-- 2026-10-24 13:40 · lead (claude) · spec review 2 started, also against 0001's merged code
-- 2026-10-24 13:35 · lead (claude) · human: "yes" to the F1-F9 fixes; Q1 option 1, keep a bad last line (SD15)
-- 2026-10-24 13:10 · lead (claude) · spec-1 lows fixed (F10-F14, F16, F17), F15 left; spec.md back to draft
-- 2026-10-24 13:05 · lead (claude) · updated from main after 0001 merged
-- 2026-10-24 13:00 · doc-reviewer (claude opus) · spec review 1 handed in: 1 high, 9 medium, 8 low
-- 2026-10-24 12:30 · lead (claude) · spec review 1 started
-- 2026-10-24 12:30 · lead (claude) · human: problems on stdout (SD14); Open questions: None.
-- 2026-10-24 12:20 · lead (claude) · human: option 2, spec submit goes on from submitted (R10, R20, R24, R29, SD13, S22-S23)
-- 2026-10-24 12:05 · lead (claude) · human: keep one slice (old Q1); review file with all 7 template sections (old Q3, R26); renumbered: Q1 stuck submit, Q2 stdout
-- 2026-10-24 11:45 · lead (claude) · spec written after the human's yes to the playback; Q1-Q4 open
+- 2026-10-24 15:46 · human · planning approved, R001: "yes, okay, and I approve" (the plan-5/F1 fix went in with this approval, with no separate review)
+- 2026-10-24 15:46 · lead (claude) · plan-5/F1 fixed: task 15 sets R10's last sentence for a failed review.finished, with tests in tasks 15 and 17
+- 2026-10-24 15:40 · lead (claude) · plan-5 lows fixed; documents back to draft
+- 2026-10-24 15:40 · doc-reviewer (claude opus) · change review 5 handed in: plan-4 all verified; 1 medium, 3 low
+- 2026-10-24 15:37 · lead (claude) · change review 5 started: the review as its own command
+- 2026-10-24 15:37 · lead (claude) · human: the review is its own command, `sliceflow spec review`; `spec submit` ends at submitted; a general `sliceflow run` goes to the backlog. Spec (Stories 3 and 4, R20, R23, R24, SD8, SD13), plan (Flows 3 to 5), tasks (14 to 17), preview (P3, P4) changed
+- 2026-10-24 14:50 · lead (claude) · human: the Make one: line prints the full path (R11, S12); the review question goes to a brainstorm first
+- 2026-10-24 14:48 · lead (claude) · plan-4 lows F1, F2, F3, F5 fixed; F4 and the human's question (review as its own node) are open; documents back to draft
+- 2026-10-24 14:48 · doc-reviewer (claude opus) · change review 4 handed in: 5 low
+- 2026-10-24 14:44 · lead (claude) · change review 4 started: only the human's two changes before approval
+- 2026-10-24 14:44 · lead (claude) · human, before approval: R11 gets a 'Make one:' line and a merged-slice error; a merged slice shows Next: - (R29, new S5; S5-S31 renumbered to S6-S32). Documents back to draft
+- 2026-10-24 13:53 · lead (claude) · plan-3 low fixed; spec, plan, tasks, preview review_passed; waiting for the human's approval
+- 2026-10-24 13:53 · doc-reviewer (claude opus) · change review 3 handed in: all reopened findings verified; 1 new low
+- 2026-10-24 13:51 · lead (claude) · change review 3 of the plan started: only the fixes since round 2 (the last round)
+- 2026-10-24 13:51 · lead (claude) · human: "yes": Prepare also returns the commit message; reasons for the long briefs of tasks 14, 15, 16
+- 2026-10-24 13:32 · lead (claude) · plan-2 lows fixed (plan-1/F7, F10, plan-2/F1); documents back to draft
+- 2026-10-24 13:32 · doc-reviewer (claude opus) · plan review 2 handed in: nothing for the human; plan-1/F1, F3 reopened (medium), F7, F10 reopened (low); 1 new low
+- 2026-10-24 13:28 · lead (claude) · plan review 2 started
+- 2026-10-24 13:28 · lead (claude) · human: "yes" to the plan-1 F1-F4 fixes: a Prepare step under the lock; R12 and R19 in task 14; task 15 split into 15 and 16; Allowed returns a string
+- 2026-10-24 13:22 · lead (claude) · human: plan-1 Q1 option 1, template show works outside a git repo (spec R35)
+- 2026-10-24 13:15 · lead (claude) · plan-1 lows fixed (F5-F12, two parts wait for F3); documents back to draft
+- 2026-10-24 13:15 · doc-reviewer (claude opus) · plan review 1 handed in: 1 high, 4 medium, 8 low
+- 2026-10-24 13:03 · lead (claude) · plan review 1 started: spec, plan, tasks, and preview together
+- 2026-10-24 13:03 · lead (claude) · tasks written: 15 tasks; plan Open questions: None.
+- 2026-10-24 12:59 · lead (claude) · human: plan Q1 option 1, a value with `{{` is not checked, only warned (spec R18); the plan review checks the spec change
+- 2026-10-24 12:57 · lead (claude) · plan flows, testing, and preview written; plan Q1 shows a gap in the spec, so spec.md is back to draft
+- 2026-10-24 12:54 · lead (claude) · human: keep the 10 s lock wait (a slow hook is a listed risk). Shared rules for the lock, saving, undo, and crash leftovers; TD1, TD2
+- 2026-10-24 12:51 · lead (claude) · human: the reviewer writes the review file, and sliceflow reads the result from it (option 1). Interfaces written
+- 2026-10-24 12:47 · lead (claude) · human: lock file is one JSON line (pid, since); a leftover lock is removed by hand until 0007 (roadmap); reads take no lock. Data written
+- 2026-10-24 12:39 · lead (claude) · human: complex; package layout option 1 (three new packages: state, spec, review); Approach written
+- 2026-10-24 12:34 · lead (claude) · plan started: plan.md and preview.md copied; preview's fixed checks P1-P5
+- 2026-10-24 12:34 · lead (claude) · spec.md review_passed
+- 2026-10-24 12:34 · doc-reviewer (claude opus) · change review 3 handed in: spec-2 all verified; no new findings
+- 2026-10-24 12:32 · lead (claude) · spec review 3 started: a change review of the spec-2 fixes only, as for 0001
+- 2026-10-24 12:32 · lead (claude) · human: "yes" to the spec-2 F1, F2 fixes
+- 2026-10-24 12:30 · lead (claude) · spec-2 lows fixed (F3, F4), and S23 uses a commit-msg hook (the reviewer's note); spec.md back to draft
+- 2026-10-24 12:30 · doc-reviewer (claude opus) · spec review 2 handed in: spec-1 all verified; 0 high, 2 medium, 2 low
+- 2026-10-24 12:24 · lead (claude) · spec review 2 started, also against 0001's merged code
+- 2026-10-24 12:24 · lead (claude) · human: "yes" to the F1-F9 fixes; Q1 option 1, keep a bad last line (SD15)
+- 2026-10-24 12:22 · lead (claude) · spec-1 lows fixed (F10-F14, F16, F17), F15 left; spec.md back to draft
+- 2026-10-24 12:22 · lead (claude) · updated from main after 0001 merged
+- 2026-10-24 12:22 · doc-reviewer (claude opus) · spec review 1 handed in: 1 high, 9 medium, 8 low
+- 2026-10-24 12:13 · lead (claude) · spec review 1 started
+- 2026-10-24 12:13 · lead (claude) · human: problems on stdout (SD14); Open questions: None.
+- 2026-10-24 12:12 · lead (claude) · human: option 2, spec submit goes on from submitted (R10, R20, R24, R29, SD13, S22-S23)
+- 2026-10-24 12:08 · lead (claude) · human: keep one slice (old Q1); review file with all 7 template sections (old Q3, R26); renumbered: Q1 stuck submit, Q2 stdout
+- 2026-10-24 11:41 · lead (claude) · spec written after the human's yes to the playback; Q1-Q4 open
 - 2026-10-24 08:12 · lead (claude) · slice created

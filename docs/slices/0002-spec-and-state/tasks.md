@@ -1023,7 +1023,7 @@ and `spec.submitted`, all in one `Prepare` under the lock. It ends at
 ## Task 15: review-core
 
 ```yaml
-covers: [R12, R24, R25, R27, R28]
+covers: [R10, R12, R24, R25, R27, R28]
 depends_on: ["09", "11", "13"]
 touches: [internal/slice/review.go, internal/slice/review_test.go]
 follows: ["Flow 5: Review the spec", Core API, Saving an event, Interrupts, Tests, Testing]
@@ -1057,7 +1057,9 @@ lock, and finding the commit of the last accepted `spec.submitted`.
 - `var reviewer = review.Placeholder()`: creates. The one reviewer of
   this slice. (lead's call)
 - `openSlice`, `saveEvent`, `review.FrontMatter`, `review.ReadResult`:
-  uses.
+  uses. The `review.finished` save sets `saveOp.Tail` to
+  `The steps before it were saved; spec.md is in_review.`, because
+  `review.started` is already saved then (R10).
 
 ### Done when
 
@@ -1079,6 +1081,12 @@ lock, and finding the commit of the last accepted `spec.submitted`.
 - `TestReviewNoName`: on `main` with no name, the error's second line is
   `Give a name: sliceflow spec review <name>`.
   Proves: R12
+- `TestReviewFinishFails`: with a `commit-msg` hook that refuses only
+  messages with `passed`, the `review 1 started` commit is made, the
+  second save fails, the error ends with
+  `The steps before it were saved; spec.md is in_review.`, `step` got
+  only `started`, and the state is `in_review`.
+  Proves: R10
 - `TestReviewMovedFirst`: when another save moves the state between
   `review.started` and `review.finished`, the second save returns R6's
   error, with `The steps before it were saved.`
@@ -1169,7 +1177,7 @@ exact output of each step.
 ## Task 17: submit-review-failures
 
 ```yaml
-covers: [R6, R7, R8, R9, R10, R24, R25, R29]
+covers: [R6, R7, R8, R9, R10, R24, R25, R29, R37]
 depends_on: ["16"]
 touches: [internal/e2e/submit_review_failures_test.go, internal/e2e/no_network_check_test.go]
 follows: ["Flow 5: Review the spec", Undo after a failed commit, Leftovers after a crash, Interrupts, No network, Tests, Testing]
@@ -1221,6 +1229,14 @@ scenarios and the write path's rules hold the exact failure output.
 - `TestReviewAgain`: S24's output, exit 0, two new commits.
   Proves: R24, R25
   Scenario: S24
+- `TestReviewStopsHalfway`: with a `commit-msg` hook that refuses only
+  messages with `passed`, `sliceflow spec review` prints
+  `Review 1 started: reviews/spec-1.md (reviewer: placeholder)` on
+  stdout, and on stderr
+  `Error: could not save the event: git commit failed (exit code 1). The steps before it were saved; spec.md is in_review.`;
+  the exit code is 1, and `slice status` shows
+  `Spec:     in_review (review 1, placeholder: reviews/spec-1.md)`.
+  Proves: R10, R37
 - `TestSubmitInterrupted`: with a `pre-commit` hook that sleeps 30 s,
   `os.Interrupt` during the commit of `spec submit` gives R10's error
   with the reason `interrupted`, the log as committed, and no lock file
