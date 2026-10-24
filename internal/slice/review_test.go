@@ -271,7 +271,8 @@ func TestReviewNoLockWhileReviewing(t *testing.T) {
 		}
 		return nil
 	})
-	// The reviewer wrote no file, so finishing fails; only the lock matters.
+	// The review file already holds the front matter, so the review finishes
+	// as "review 1 needs the human". Only the lock matters here.
 	_ = ReviewSpec(context.Background(), r, saveName, func(Step) {})
 	if !ran {
 		t.Fatal("reviewer did not run")
