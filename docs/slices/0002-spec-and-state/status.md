@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 18:15 UTC
+- Updated: 2026-10-24 18:17 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-14 of 17 done · 1 doing · 2 todo
+14 of 17 done · 1 in_review · 2 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -38,13 +38,13 @@ None.
 | 12 | title-command | normal | done | 0 | 2 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | done | 0 | 1 | - | R25, R26, R27 |
 | 14 | submit-core | core | done | 0 | 2 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
-| 15 | review-core | core | doing | 0 | 1 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
+| 15 | review-core | core | in_review | 0 | 2 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | normal | todo | 0 | 0 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
 | 17 | submit-review-failures | normal | todo | 0 | 0 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
 
 ## Findings
 
-Open: 2 · Waiting for verify: 3 · Closed: 86
+Open: 0 · Waiting for verify: 5 · Closed: 86
 
 ### Doc reviews
 
@@ -105,8 +105,8 @@ Open: 2 · Waiting for verify: 3 · Closed: 86
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-15-1/F1 | medium | 15 | No test checks what the review passed commit holds | open |
-| task-15-1/F2 | low | 15 | No test shows the lock is free, or a Ctrl-C, while the reviewer runs | open |
+| task-15-1/F1 | medium | 15 | No test checks what the review passed commit holds | fixed (waiting for verify) |
+| task-15-1/F2 | low | 15 | No test shows the lock is free, or a Ctrl-C, while the reviewer runs | fixed (waiting for verify) |
 | task-14-1/F1 | medium | 14 | With no name, a Ctrl-C while reading the branch gives context canceled, not interrupted | verified |
 | task-14-1/F2 | medium | 14 | No test for R20's order: the state check before R19 | verified |
 | task-14-1/F3 | low | 14 | The refused test uses a comment, not S14's open questions | verified |
@@ -175,6 +175,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 18:17 · lead (claude) · task review 2 of task 15 started
+- 2026-10-24 18:17 · lead (claude) · task 15 tests committed (46ddee6); the checks pass
+- 2026-10-24 18:17 · worker (claude sonnet) · task 15 round 2 handed in: F1, F2 fixed (tests only)
 - 2026-10-24 18:15 · lead (claude) · task 15 worker round 2 started, with review task-15-1
 - 2026-10-24 18:15 · code-reviewer (claude opus) · task review 1 of task 15 handed in: 1 medium, 1 low; the plan-5/F1 part (R10's Tail for review.finished) checked and correct
 - 2026-10-24 18:12 · lead (claude) · task review 1 of task 15 started
