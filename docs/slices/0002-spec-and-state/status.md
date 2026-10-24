@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 16:36 UTC
+- Updated: 2026-10-24 16:42 UTC
 
 ## Needs human
 
@@ -20,13 +20,13 @@ None.
 
 ## Tasks
 
-1 of 17 done · 1 in_review · 15 todo
+1 of 17 done · 1 doing · 15 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | eventlog-events | core | done | 0 | 2 | - | R5 |
 | 02 | state-machine | core | todo | 0 | 0 | 01 | R1, R2, R3, R4 |
-| 03 | spec-reader | core | in_review | 0 | 2 | - | R18 |
+| 03 | spec-reader | core | doing | 0 | 2 | - | R18 |
 | 04 | spec-errors | core | todo | 0 | 0 | 03 | R15, R18 |
 | 05 | spec-warnings | core | todo | 0 | 0 | 04 | R16, R17, R18 |
 | 06 | status-core | core | todo | 0 | 0 | 02 | R1, R3, R29, R30, R34 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 9 · Closed: 44
+Open: 1 · Waiting for verify: 4 · Closed: 49
 
 ### Doc reviews
 
@@ -101,11 +101,12 @@ Open: 0 · Waiting for verify: 9 · Closed: 44
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-03-1/F1 | high | 03 | An ideas list item with no space before - is dropped | fixed (waiting for verify) |
-| task-03-1/F2 | high | 03 | Markers like **R 7.** are neither items nor bad markers | fixed (waiting for verify) |
-| task-03-1/F3 | medium | 03 | An unclosed front matter cannot give the no front matter error | fixed (waiting for verify) |
-| task-03-1/F4 | medium | 03 | A section with only code counts as empty | fixed (waiting for verify) |
-| task-03-1/F5 | low | 03 | Inline code is paired within one line only | fixed (waiting for verify) |
+| task-03-2/F1 | medium | 03 | A lone backtick in one item hides the next item | open |
+| task-03-1/F1 | high | 03 | An ideas list item with no space before - is dropped | verified |
+| task-03-1/F2 | high | 03 | Markers like **R 7.** are neither items nor bad markers | verified |
+| task-03-1/F3 | medium | 03 | An unclosed front matter cannot give the no front matter error | verified |
+| task-03-1/F4 | medium | 03 | A section with only code counts as empty | verified |
+| task-03-1/F5 | low | 03 | Inline code is paired within one line only | verified |
 | task-01-1/F1 | medium | 01 | The S15 line (accepted) is not tested | verified |
 | task-01-1/F2 | low | 01 | TestParseNewEvents checks the warnings too loosely | verified |
 
@@ -125,6 +126,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 16:42 · lead (claude) · task 03 worker round 3 started, with review task-03-2
+- 2026-10-24 16:42 · code-reviewer (claude opus) · task review 2 of task 03 handed in: task-03-1 F1-F5 verified; 1 new medium
 - 2026-10-24 16:36 · lead (claude) · task review 2 of task 03 started
 - 2026-10-24 16:36 · lead (claude) · task 03 fixes committed (31a6ab8); the checks pass
 - 2026-10-24 16:36 · worker (claude sonnet) · task 03 round 2 handed in: F1-F5 fixed
