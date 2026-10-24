@@ -12,10 +12,10 @@ None.
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 0 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 1 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
@@ -85,6 +85,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 06:52 · lead (claude) · plan review round 1 started (reviews/plan-1.md); spec.md, plan.md, tasks.md, preview.md in_review
 - 2026-10-24 06:52 · lead (claude) · tasks.md written: 11 tasks; plan adds internal/testrepo for test repos
 - 2026-10-24 06:48 · human · plan Q1: a field twice gets its own warning (R26); Q2: a slice/ branch with a bad name is skipped with a repo warning (R43); plan open questions: none
 - 2026-10-24 06:46 · lead (claude) · plan part 5 (flows, testing) and preview written after the human's yes; reread found plan Q1-Q2
