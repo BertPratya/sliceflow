@@ -30,3 +30,12 @@ func TestUnknownCommand(t *testing.T) {
 		t.Fatalf("code %d out %q err %q", code, out, errOut)
 	}
 }
+
+func TestUnknownFlagAfterSlice(t *testing.T) {
+	dir := testrepo.New(t)
+	out, errOut, code := run(t, dir, "slice", "--colour")
+	want := "Error: unknown flag --colour. Run sliceflow --help.\n"
+	if code != 2 || out != "" || errOut != want {
+		t.Fatalf("code %d out %q err %q", code, out, errOut)
+	}
+}

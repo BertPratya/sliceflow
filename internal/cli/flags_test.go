@@ -44,6 +44,11 @@ func TestParseFlagsWrongUse(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	fs, _, _ = newFS()
+	_, err = parseFlags(fs, "usage", []string{"--json=yes"}, &out)
+	if err == nil || err.Error() != "unknown flag --json=yes" {
+		t.Fatalf("got %v", err)
+	}
+	fs, _, _ = newFS()
 	_, err = parseFlags(fs, "usage", []string{"a", "--title"}, &out)
 	if err == nil || err.Error() != "flag needs a value: --title" {
 		t.Fatalf("got %v", err)

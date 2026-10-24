@@ -38,7 +38,7 @@ func TestUsageError(t *testing.T) {
 }
 
 func TestRunTopHelp(t *testing.T) {
-	for _, args := range [][]string{nil, {"slice"}, {"--help"}, {"-h"}} {
+	for _, args := range [][]string{nil, {"slice"}, {"--help"}, {"-h"}, {"slice", "--help"}, {"slice", "-h"}} {
 		var o, e bytes.Buffer
 		if code := Run(args, &o, &e); code != 0 || e.Len() != 0 {
 			t.Fatalf("%v: code %d stderr %q", args, code, e.String())
@@ -62,5 +62,13 @@ func TestRunUnknown(t *testing.T) {
 	if code := Run([]string{"--colour"}, &o, &e); code != 2 ||
 		e.String() != "Error: unknown flag --colour. Run sliceflow --help.\n" {
 		t.Fatalf("code %d err %q", code, e.String())
+	}
+	for _, flag := range []string{"--colour", "--json", "-x"} {
+		o.Reset()
+		e.Reset()
+		want := "Error: unknown flag " + flag + ". Run sliceflow --help.\n"
+		if code := Run([]string{"slice", flag}, &o, &e); code != 2 || o.Len() != 0 || e.String() != want {
+			t.Fatalf("slice %s: code %d out %q err %q", flag, code, o.String(), e.String())
+		}
 	}
 }

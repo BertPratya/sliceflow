@@ -38,12 +38,15 @@ Run "sliceflow <command> --help" for the usage of one command.
 // the exit code.
 func Run(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 0 || isHelp(args[0]) || (len(args) == 1 && args[0] == "slice") ||
-		(args[0] == "slice" && len(args) > 1 && strings.HasPrefix(args[1], "-")) {
+		(args[0] == "slice" && len(args) > 1 && isHelp(args[1])) {
 		fmt.Fprint(stdout, topUsage)
 		return 0
 	}
 	if strings.HasPrefix(args[0], "-") {
 		return usageError(stderr, "unknown flag "+flagText(args[0]))
+	}
+	if args[0] == "slice" && len(args) > 1 && strings.HasPrefix(args[1], "-") {
+		return usageError(stderr, "unknown flag "+flagText(args[1]))
 	}
 	// A command is one word, or "slice" and a second word.
 	n := 1

@@ -57,7 +57,7 @@ func parseFlags(fs *flag.FlagSet, usage string, args []string, stdout io.Writer)
 			return nil, errors.New("flag needs a value: " + text)
 		}
 		if err := fs.Set(name, value); err != nil {
-			return nil, fmt.Errorf("bad value for %s: %v", text, err)
+			return nil, errors.New("unknown flag " + a)
 		}
 	}
 	return pos, nil
