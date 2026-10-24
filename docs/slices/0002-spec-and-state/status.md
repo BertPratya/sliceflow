@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 19:26 UTC
+- Updated: 2026-10-24 19:32 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-5 of 17 done · 1 doing · 11 todo
+5 of 17 done · 1 in_review · 11 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -29,7 +29,7 @@ None.
 | 03 | spec-reader | core | done | 0 | 3 | - | R18 |
 | 04 | spec-errors | core | done | 0 | 3 | 03 | R15, R18 |
 | 05 | spec-warnings | core | done | 0 | 2 | 04 | R16, R17, R18 |
-| 06 | status-core | core | doing | 0 | 2 | 02 | R1, R3, R29, R30, R34 |
+| 06 | status-core | core | in_review | 0 | 3 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
 | 08 | cli-groups-and-template | core | todo | 0 | 0 | - | R35, R36 |
 | 09 | validate-command | core | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 1 · Waiting for verify: 4 · Closed: 66
+Open: 0 · Waiting for verify: 5 · Closed: 66
 
 ### Doc reviews
 
@@ -105,7 +105,7 @@ Open: 1 · Waiting for verify: 4 · Closed: 66
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-06-2/F1 | low | 06 | A cancel during the compare reads as not changed | open |
+| task-06-2/F1 | low | 06 | A cancel during the compare reads as not changed | fixed (waiting for verify) |
 | task-06-1/F1 | high | 06 | A worktree folder deleted by hand makes slice status and list fail | verified |
 | task-06-1/F2 | low | 06 | findWorktree returns git's path, not a cleaned one | verified |
 | task-06-1/F3 | low | 06 | No test for a refused submit after a pass, with no change | verified |
@@ -149,6 +149,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 19:32 · lead (claude) · task review 3 of task 06 started (the last round allowed)
+- 2026-10-24 19:32 · lead (claude) · task 06 fix committed (e50a196); the checks pass
+- 2026-10-24 19:32 · worker (claude sonnet) · task 06 round 3 handed in: task-06-2/F1 fixed
 - 2026-10-24 19:26 · lead (claude) · task 06 worker round 3 started, to fix the low task-06-2/F1
 - 2026-10-24 19:26 · code-reviewer (claude opus) · task review 2 of task 06 handed in: task-06-1 F1-F4 verified; 1 new low
 - 2026-10-24 19:18 · lead (claude) · task review 2 of task 06 started
