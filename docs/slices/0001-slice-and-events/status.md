@@ -1,12 +1,12 @@
 # Status: 0001-slice-and-events
 
-- Phase: implementing
+- Phase: implementing (blocked)
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 09:08 UTC
+- Updated: 2026-10-24 09:12 UTC
 
 ## Needs human
 
-None.
+- Task 09 is blocked on task-09-1/Q1 (small): Ctrl-C during `git worktree add` leaves the branch and worktree behind, though the error says everything was removed. Let `worktree add` finish before Ctrl-C is honored, or clean up what the stopped `worktree add` left?
 
 ## Documents
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-8 of 13 done · 1 in_review · 4 todo
+8 of 13 done · 1 blocked · 4 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -31,7 +31,7 @@ None.
 | 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | done | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
-| 09 | create-undo | core | in_review | 0 | 1 | 08 | R8, R18 |
+| 09 | create-undo | core | blocked | 0 | 1 | 08 | R8, R18 |
 | 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 1 · Closed: 59
+Open: 4 · Waiting for verify: 0 · Closed: 61
 
 ### Doc reviews
 
@@ -99,11 +99,16 @@ Open: 0 · Waiting for verify: 1 · Closed: 59
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-09-1/Q1 | needs human | 09 | Which plan rule changes so an interrupted worktree add is undone | open |
+| task-09-1/F1 | high | 09 | Ctrl-C during git worktree add leaves the branch and worktree | open |
+| task-09-1/F2 | medium | 09 | Could not remove: does not name the kept branch | open |
+| task-09-1/F3 | low | 09 | slice.Interrupted is a new export not in tasks.md | wontfix: why: used only by the CLI; noted for the integration review |
+| task-09-1/F4 | low | 09 | Could not remove: lists full paths | open |
 | task-08-1/F1 | high | 08 | The base check accepts revision syntax like main~1 | verified |
 | task-08-1/F2 | low | 08 | The folder check reads the base ref, not the commit id | wontfix: why: the fix changes checkCreate's signature, which tasks.md fixes; the window is milliseconds; Flow 1 puts the checks before the commit id |
 | task-07-1/F1 | low | 07 | TestCreateSpecSubmit does not check the log line | verified |
 | task-06-1/F1 | medium | 06 | path.Join drops the // of a Windows network-share root | verified |
-| task-06-1/F2 | low | 06 | Create cannot tell whether it made .sliceflow/ and its .gitignore | fixed (waiting for verify) |
+| task-06-1/F2 | low | 06 | Create cannot tell whether it made .sliceflow/ and its .gitignore | verified |
 | task-03-1/F1 | high | 03 | Any flag after slice prints the help and exits 0 | verified |
 | task-03-1/F3 | low | 03 | A bad bool value gives a text that is not one of R38's | verified |
 | task-03-1/F2 | low | 03 | fail indents later lines; S15's lines have no indent | deferred: task 11 |
@@ -127,6 +132,9 @@ None.
 - 03: task-03-1/F2 goes into task 11's brief: S15's lines must not go through `fail` as one indented message. Why: `fail` indents later lines, as R18 needs for task 09.
 - 07: the `Worktree:` and `Next:` paths are built from the slice name (`.sliceflow/worktrees/<name>`, R5), not by cutting `Repo.Root` off the full path. Why: a prefix that fails to match would print the full path with no error, and tasks 08, 09, 11 copy this file's patterns.
 - 08: task-08-1/F2 is wontfix. Why: resolving the commit once in checkCreate would change its signature, which tasks.md fixes; the race is milliseconds wide; Flow 1 puts the checks before the commit id.
+- 09: task-09-1/F2: when the branch is kept because its worktree could not be removed, `Could not remove:` names the branch too. Why: R18 promises the list of what could not be removed.
+- 09: task-09-1/F4: `Could not remove:` lists paths relative to the main checkout, with `/`. Why: R9's other lines use that form; the spec does not say which form.
+- 09: task-09-1/F3 is wontfix: `slice.Interrupted` stays. Why: only the CLI uses it; the integration review is told.
 
 ## Preview
 
@@ -136,6 +144,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:12 · lead (claude) · task 09 blocked on Q1, a small decision: asked the human
+- 2026-10-24 09:12 · code reviewer (claude opus) · task-09-1 submitted: needs_human; Q1, 1 high (Ctrl-C during worktree add leaves it), 1 medium, 2 low; task-06-1/F2 verified
 - 2026-10-24 09:08 · lead (claude) · task 09 code review started, round 1
 - 2026-10-24 09:08 · lead (claude) · task 09 committed (b99ebcb); checks pass; by hand: a refusing hook and Ctrl-C both leave nothing, with R18's reasons
 - 2026-10-24 09:04 · lead (claude) · task 09 started: worker round 1; brief carries task-06-1/F2
