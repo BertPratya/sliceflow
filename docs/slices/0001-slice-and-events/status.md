@@ -1,26 +1,25 @@
 # Status: 0001-slice-and-events
 
-- Phase: implementing (blocked)
+- Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 09:48 UTC
+- Updated: 2026-10-24 09:51 UTC
 
 ## Needs human
 
-- Task 09 is blocked on task-09-2/Q1 (small): when `git worktree add` fails without a signal, e.g. a failing `post-checkout` hook, git keeps the worktree. Clean it up the same way as after a signal?
-- Task 09, task-09-2/F2 (small, asked with Q1): the reason shown for a failed `worktree add` is git's progress line `Preparing worktree (...)`. Run it with `--quiet`?
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
 | spec.md | approved | 3 | R002 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R002 |
-| plan.md | approved | 3 | R003 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R003 |
+| plan.md | approved | 3 | R004 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R004 |
 | preview.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
-| tasks.md | approved | with plan.md | R003 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R003 |
+| tasks.md | approved | with plan.md | R004 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R004 |
 
 ## Tasks
 
-10 of 13 done · 1 blocked · 2 todo
+10 of 13 done · 1 doing · 2 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -32,7 +31,7 @@
 | 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | done | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
-| 09 | create-undo | core | blocked | 0 | 2 | 08 | R8, R18 |
+| 09 | create-undo | core | doing | 0 | 2 | 08 | R8, R18 |
 | 10 | status-core | core | done | 0 | 2 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | done | 0 | 1 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
@@ -40,12 +39,13 @@
 
 ## Findings
 
-Open: 3 · Waiting for verify: 0 · Closed: 76
+Open: 2 · Waiting for verify: 0 · Closed: 78
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
+| change-8/F1 | medium | The cleanup can remove a stale worktree entry this run did not make | fixed: a path git listed before step 6 stays |
 | change-7/F1 | medium | A worktree entry with no branch yet is skipped | fixed: match the path alone |
 | change-7/F2 | low | .sliceflow/worktrees/ could be removed before the worktree | fixed: it goes into the list before the branch and worktree |
 | change-7/F3 | low | refs/heads/slice/<name> would detach HEAD in worktree add | fixed: the short name |
@@ -111,7 +111,7 @@ Open: 3 · Waiting for verify: 0 · Closed: 76
 |---|---|---|---|---|
 | task-11-1/F1 | low | 11 | R30's object is built inline; task 12 would copy it | deferred: task 12 |
 | task-10-1/F1 | high | 10 | The base goes to git as a bare name, not refs/heads/<base> | verified |
-| task-09-2/Q1 | needs human | 09 | Clean up after every failed worktree add, not only after a signal? | open |
+| task-09-2/Q1 | needs human | 09 | Clean up after every failed worktree add, not only after a signal? | verified: the human chose option 1 (clean up after every failed worktree add); R004 |
 | task-09-2/F1 | high | 09 | A failed post-checkout hook leaves the worktree; the message does not name it | open |
 | task-09-2/F2 | low | 09 | The reason for a failed worktree add is git's progress line | open |
 | task-09-1/Q1 | needs human | 09 | Which plan rule changes so an interrupted worktree add is undone | verified: the human chose option 2 (kill at once, then clean up); R003 |
@@ -159,6 +159,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:51 · lead (claude) · task 09 worker round 3 started: task-09-2/F1 and F2 (R004)
+- 2026-10-24 09:51 · lead (claude) · plan.md and tasks.md approved as R004 (tag on 8511f79); phase back to implementing
+- 2026-10-24 09:51 · doc reviewer (claude opus) · change-8 submitted: 1 medium, fixed by the lead
 - 2026-10-24 09:48 · lead (claude) · task 11 done; F1 deferred to task 12
 - 2026-10-24 09:48 · code reviewer (claude opus) · task-11-1 submitted: pass; task-03-1/F2 verified; 1 low
 - 2026-10-24 09:48 · human · task-09-2/Q1 and F2 answered: "yes both case."
