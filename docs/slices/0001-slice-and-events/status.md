@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 09:51 UTC
+- Updated: 2026-10-24 09:54 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-10 of 13 done · 1 doing · 2 todo
+10 of 13 done · 1 in_review · 2 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -31,7 +31,7 @@ None.
 | 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | done | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
-| 09 | create-undo | core | doing | 0 | 2 | 08 | R8, R18 |
+| 09 | create-undo | core | in_review | 0 | 3 | 08 | R8, R18 |
 | 10 | status-core | core | done | 0 | 2 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | done | 0 | 1 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 2 · Waiting for verify: 0 · Closed: 78
+Open: 0 · Waiting for verify: 2 · Closed: 78
 
 ### Doc reviews
 
@@ -112,8 +112,8 @@ Open: 2 · Waiting for verify: 0 · Closed: 78
 | task-11-1/F1 | low | 11 | R30's object is built inline; task 12 would copy it | deferred: task 12 |
 | task-10-1/F1 | high | 10 | The base goes to git as a bare name, not refs/heads/<base> | verified |
 | task-09-2/Q1 | needs human | 09 | Clean up after every failed worktree add, not only after a signal? | verified: the human chose option 1 (clean up after every failed worktree add); R004 |
-| task-09-2/F1 | high | 09 | A failed post-checkout hook leaves the worktree; the message does not name it | open |
-| task-09-2/F2 | low | 09 | The reason for a failed worktree add is git's progress line | open |
+| task-09-2/F1 | high | 09 | A failed post-checkout hook leaves the worktree; the message does not name it | fixed (waiting for verify) |
+| task-09-2/F2 | low | 09 | The reason for a failed worktree add is git's progress line | fixed (waiting for verify) |
 | task-09-1/Q1 | needs human | 09 | Which plan rule changes so an interrupted worktree add is undone | verified: the human chose option 2 (kill at once, then clean up); R003 |
 | task-09-1/F1 | high | 09 | Ctrl-C during git worktree add leaves the branch and worktree | verified |
 | task-09-1/F2 | medium | 09 | Could not remove: does not name the kept branch | verified |
@@ -160,6 +160,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:54 · lead (claude) · task 09 code review started, round 3 (the last allowed)
+- 2026-10-24 09:54 · lead (claude) · task 09 fixes from review 2 committed (52b9a1a); checks pass; by hand: a failing post-checkout hook, a stale entry, and Ctrl-C all behave as R004 says
 - 2026-10-24 09:51 · lead (claude) · task 12's touches widened with internal/cli/status.go (task-11-1/F1)
 - 2026-10-24 09:51 · lead (claude) · task 09 worker round 3 started: task-09-2/F1 and F2 (R004)
 - 2026-10-24 09:51 · lead (claude) · plan.md and tasks.md approved as R004 (tag on 8511f79); phase back to implementing
