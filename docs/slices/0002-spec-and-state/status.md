@@ -1,13 +1,13 @@
 # Status: 0002-spec-and-state
 
-- Phase: implementing
+- Phase: implementing (blocked)
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:27 UTC
+- Updated: 2026-10-24 17:35 UTC
 
 ## Needs human
 
-None.
+- Task 04 is blocked (small decision): to fix task-04-1/F1, the worker added a field `Preamble Section` to `spec.Doc`, in `internal/spec/doc.go`. That file is outside task 04's touches, and the field is not in task 03's Interfaces in tasks.md. Keep the field, or fix F1 without it?
 
 ## Documents
 
@@ -20,14 +20,14 @@ None.
 
 ## Tasks
 
-3 of 17 done · 1 doing · 13 todo
+3 of 17 done · 1 blocked · 13 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | eventlog-events | core | done | 0 | 2 | - | R5 |
 | 02 | state-machine | core | done | 0 | 2 | 01 | R1, R2, R3, R4 |
 | 03 | spec-reader | core | done | 0 | 3 | - | R18 |
-| 04 | spec-errors | core | doing | 0 | 1 | 03 | R15, R18 |
+| 04 | spec-errors | core | blocked | 0 | 1 | 03 | R15, R18 |
 | 05 | spec-warnings | core | todo | 0 | 0 | 04 | R16, R17, R18 |
 | 06 | status-core | core | todo | 0 | 0 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
@@ -133,6 +133,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:35 · lead (claude) · task 04 blocked: the F1 fix adds Doc.Preamble in doc.go, outside touches and task 03's Interfaces; question to the human (small). The checks pass; the code is not committed
+- 2026-10-24 17:35 · worker (claude sonnet) · task 04 round 2 handed in: F1-F3 fixed, F4 wontfix
 - 2026-10-24 17:27 · lead (claude) · task 04 worker round 2 started, with review task-04-1
 - 2026-10-24 17:27 · lead (claude) · task 04's touches widened to internal/spec/parse.go and parse_test.go, for task-04-1/F1
 - 2026-10-24 17:27 · code-reviewer (claude opus) · task review 1 of task 04 handed in: 1 medium, 3 low
