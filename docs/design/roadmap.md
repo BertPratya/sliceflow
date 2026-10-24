@@ -33,7 +33,7 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 | 0001 | slice and events | create a slice (`sliceflow slice create`), see it (`sliceflow slice status`, `sliceflow slice list`); the event log with its first event, `slice.created` | 1.13, 2.1 |
 | 0002 | spec | the state machine's engine, and the spec's moves: write a spec and check it; see where a slice is and what comes next; set a slice's title | 1.4, 2.2 |
 | 0003 | plan | write the plan, tasks, and preview, review them, and approve the planning once; the slice is ready to build | 2.3 |
-| 0004 | agents | `sliceflow` starts agents itself: the Codex adapter, the permission layers, settings per role; first use: the spec check and the plan review; who caused each event (`by`) | 1.9, 1.12c |
+| 0004 | agents | `sliceflow` starts agents itself: the Codex adapter, the permission layers, settings per role; first use: the spec check and the plan review; who caused each event (`by`); each session sliceflow starts is bound to its slice by its session ID, and commands on other slices are refused | 1.9, 1.12c |
 | 0005 | the run | `sliceflow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; `sliceflow stop`, and `sliceflow run` continues where it stopped | 2.4 |
 | 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue, conflicts | 2.4 |
 | 0007 | reliability | a run survives a killed `sliceflow`, a lost network, a stuck agent: heartbeats, time limits, retries, checking the log against reality on restart; `sliceflow retry` for a failed or stopped step; cleaning up a slice half made by a crash | 1.7, 2.4 |
@@ -42,7 +42,7 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 | 0010 | stacking and cancel | design a slice ahead, on top of another; cancel and reopen | 2.6, 2.7 |
 | 0011 | Claude Code | a second agent tool; proves the adapter shape | 1.9 |
 | 0012 | configurable steps | pick and order the built-in steps | 1.10 |
-| 0013 | local server and dashboard | `sliceflow serve`: see every slice live in the browser, on 127.0.0.1 with a token | 1.7 |
+| 0013 | local server and dashboard | `sliceflow serve`: see every slice live in the browser, with its sessions grouped under it, on 127.0.0.1 with a token | 1.7 |
 | 0014 | web actions | stop, continue, and retry from the browser; start agents | 1.7, 2.4 |
 | 0015 | stable output | errors as JSON with codes; the event log and `--json` documented and versioned | 1.13b |
 | 0016 | user hooks | your own hooks before and after events, with a trust check before a repo's hooks run | - |
@@ -73,6 +73,8 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 |---|---|
 | Set or change a slice's title | 0002 |
 | Who caused an event (`by`) | 0004 |
+| Bind a session to a slice by its session ID; refuse commands on other slices | 0004 for the sessions sliceflow starts; 0011 for Claude Code; the lead's binding (bound or not, the human's choice) decided later, by 0008 |
+| Sessions grouped by slice in the browser | 0013 |
 | You stop a run, and continue it | 0005 |
 | You retry a failed or stopped step | 0007 |
 | Clean up a slice half made by a crash | 0007 |
