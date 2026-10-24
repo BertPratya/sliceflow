@@ -113,8 +113,8 @@ func TestListJSON(t *testing.T) {
 	dir, commit := s20Repo(t)
 	out, errOut, code := run(t, dir, "slice", "list", "--json")
 	want := `{"slices":[` +
-		`{"slice":"spec-submit","phase":"planning","from":{"branch":"main","commit":"` + commit + `"},"created":"2026-10-24T07:42:00Z","warnings":[]},` +
-		`{"slice":"login-google","title":"Login with Google","phase":"planning","from":{"branch":"main","commit":"` + commit + `"},"created":"2026-10-24T08:10:00Z","warnings":[]}` +
+		`{"slice":"spec-submit","phase":"planning","from":{"branch":"main","commit":"` + commit + `"},"created":"2026-10-24T07:42:00Z","docs":[{"doc":"spec.md","status":"draft"}],"next":"write spec.md, then: sliceflow spec submit","warnings":[]},` +
+		`{"slice":"login-google","title":"Login with Google","phase":"planning","from":{"branch":"main","commit":"` + commit + `"},"created":"2026-10-24T08:10:00Z","docs":[{"doc":"spec.md","status":"draft"}],"next":"write spec.md, then: sliceflow spec submit","warnings":[]}` +
 		`],"warnings":[]}` + "\n"
 	if code != 0 || errOut != "" || out != want {
 		t.Fatalf("code %d\nstdout %q\nwant   %q\nstderr %q", code, out, want, errOut)
