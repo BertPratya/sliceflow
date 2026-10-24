@@ -1,8 +1,8 @@
 # Status: 0001-slice-and-events
 
-- Phase: preview
+- Phase: done
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 11:32 UTC
+- Updated: 2026-10-24 11:33 UTC
 
 ## Needs human
 
@@ -175,6 +175,7 @@ Open: 0 · Waiting for verify: 0 · Closed: 86
 
 Newest first.
 
+- 2026-10-24 11:33 · lead (claude) · phase done; updated from main (eec3b1c, backlog only), checks pass; merging into main
 - 2026-10-24 11:32 · human · result approved: "approve. P5 Windows not tried, add it to the backlog."
 - 2026-10-24 11:32 · human · preview: P1 to P5 pass on Linux; P5 on Windows not tried
 - 2026-10-24 10:41 · lead (claude) · phase preview: the preview goes to the human
