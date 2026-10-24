@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:53 UTC
+- Updated: 2026-10-24 08:55 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-6 of 13 done · 1 in_review · 6 todo
+6 of 13 done · 1 doing · 6 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -29,7 +29,7 @@ None.
 | 04 | repo-and-names | core | done | 0 | 1 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | done | 0 | 1 | 01 | R7 |
 | 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
-| 07 | create-command | normal | in_review | 0 | 1 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
+| 07 | create-command | normal | doing | 0 | 1 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | todo | 0 | 0 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
 | 09 | create-undo | core | todo | 0 | 0 | 08 | R8, R18 |
 | 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 0 · Closed: 56
+Open: 1 · Waiting for verify: 0 · Closed: 56
 
 ### Doc reviews
 
@@ -99,6 +99,7 @@ Open: 0 · Waiting for verify: 0 · Closed: 56
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-07-1/F1 | low | 07 | TestCreateSpecSubmit does not check the log line | open |
 | task-06-1/F1 | medium | 06 | path.Join drops the // of a Windows network-share root | verified |
 | task-06-1/F2 | low | 06 | Create cannot tell whether it made .sliceflow/ and its .gitignore | deferred: task 09 |
 | task-03-1/F1 | high | 03 | Any flag after slice prints the help and exits 0 | verified |
@@ -122,6 +123,7 @@ None.
 - 02: the worker adds a TestParseBadLines row for a line of only `\r` (`blank line`). Why: Reading a line says so, and the review showed no test catches it.
 - 03: task-03-1/F3, a bad value for a bool flag, e.g. `--json=yes`, is wrong use: `Error: unknown flag --json=yes. Run sliceflow --help.`, exit 2. Why: R38 allows only its five texts for wrong use, and this is the closest.
 - 03: task-03-1/F2 goes into task 11's brief: S15's lines must not go through `fail` as one indented message. Why: `fail` indents later lines, as R18 needs for task 09.
+- 07: the `Worktree:` and `Next:` paths are built from the slice name (`.sliceflow/worktrees/<name>`, R5), not by cutting `Repo.Root` off the full path. Why: a prefix that fails to match would print the full path with no error, and tasks 08, 09, 11 copy this file's patterns.
 
 ## Preview
 
@@ -131,6 +133,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:55 · lead (claude) · task 07 worker round 2 started: F1, and relative paths from the slice name
+- 2026-10-24 08:55 · code reviewer (claude opus) · task-07-1 submitted: pass; 1 low
 - 2026-10-24 08:53 · lead (claude) · task 07 code review started, round 1
 - 2026-10-24 08:53 · lead (claude) · task 07 committed (2840bb8); checks pass; tried slice create by hand in a temp repo: S1 and S2 output match
 - 2026-10-24 08:52 · lead (claude) · task 07 started: worker round 1
