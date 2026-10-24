@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:19 UTC
+- Updated: 2026-10-24 08:20 UTC
 
 ## Needs human
 
@@ -19,12 +19,12 @@ None.
 
 ## Tasks
 
-1 of 13 done · 12 todo
+1 of 13 done · 1 doing · 11 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | git-runner | core | done | 0 | 2 | - | R40 |
-| 02 | event-log | core | todo | 0 | 0 | 01 | R19, R25, R26, R27 |
+| 02 | event-log | core | doing | 0 | 0 | 01 | R19, R25, R26, R27 |
 | 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | todo | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | todo | 0 | 0 | 01 | R7 |
@@ -118,6 +118,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:20 · lead (claude) · task 02 started: worker round 1
 - 2026-10-24 08:19 · lead (claude) · task 01 done
 - 2026-10-24 08:19 · code reviewer (claude opus) · task-01-2 submitted: pass; F1 wontfix accepted, F2 verified; no new findings
 - 2026-10-24 08:18 · lead (claude) · task 01 code review started, round 2
