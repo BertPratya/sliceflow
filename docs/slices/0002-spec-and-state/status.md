@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 18:23 UTC
+- Updated: 2026-10-24 18:24 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-14 of 17 done · 1 in_review · 2 todo
+15 of 17 done · 1 doing · 1 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -38,13 +38,13 @@ None.
 | 12 | title-command | normal | done | 0 | 2 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | done | 0 | 1 | - | R25, R26, R27 |
 | 14 | submit-core | core | done | 0 | 2 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
-| 15 | review-core | core | in_review | 0 | 3 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
-| 16 | submit-review-commands | normal | todo | 0 | 0 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
+| 15 | review-core | core | done | 0 | 3 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
+| 16 | submit-review-commands | normal | doing | 0 | 0 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
 | 17 | submit-review-failures | normal | todo | 0 | 0 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
 
 ## Findings
 
-Open: 0 · Waiting for verify: 4 · Closed: 88
+Open: 0 · Waiting for verify: 3 · Closed: 89
 
 ### Doc reviews
 
@@ -105,7 +105,7 @@ Open: 0 · Waiting for verify: 4 · Closed: 88
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-15-2/F1 | low | 15 | A test comment says finishing fails; it finishes as needs the human | fixed (waiting for verify) |
+| task-15-2/F1 | low | 15 | A test comment says finishing fails; it finishes as needs the human | verified |
 | task-15-1/F1 | medium | 15 | No test checks what the review passed commit holds | verified |
 | task-15-1/F2 | low | 15 | No test shows the lock is free, or a Ctrl-C, while the reviewer runs | verified |
 | task-14-1/F1 | medium | 14 | With no name, a Ctrl-C while reading the branch gives context canceled, not interrupted | verified |
@@ -176,6 +176,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 18:24 · lead (claude) · task 16 started: worker round 1
+- 2026-10-24 18:24 · lead (claude) · task 15 done
+- 2026-10-24 18:24 · code-reviewer (claude opus) · task review 3 of task 15 handed in: task-15-2/F1 verified; no new findings
 - 2026-10-24 18:23 · lead (claude) · task review 3 of task 15 started (the last round allowed)
 - 2026-10-24 18:23 · lead (claude) · task 15 comment fix committed (941eca1); the checks pass
 - 2026-10-24 18:23 · worker (claude sonnet) · task 15 round 3 handed in: task-15-2/F1 fixed
