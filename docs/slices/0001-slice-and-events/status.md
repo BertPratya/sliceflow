@@ -2,20 +2,22 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 06:52 UTC
+- Updated: 2026-10-24 06:58 UTC
 
 ## Needs human
 
-None.
+- plan-1 Q1: bare `sliceflow`, `sliceflow slice`, `slice create` with no name or two names; the wrong-use texts
+- plan-1 Q2: R18's `<reason>` when git prints nothing, or several lines
+- plan-1 findings to decide: F1-F10 (medium), lows F11-F17
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
-| plan.md | in_review | 1 | - | - |
-| preview.md | in_review | with plan.md | - | - |
-| tasks.md | in_review | with plan.md | - | - |
+| spec.md | draft | 3 | - | - |
+| plan.md | draft | 1 | - | - |
+| preview.md | draft | with plan.md | - | - |
+| tasks.md | draft | with plan.md | - | - |
 
 ## Tasks
 
@@ -37,12 +39,29 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 0 · Closed: 21
+Open: 17 · Waiting for verify: 0 · Closed: 21
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
+| plan-1/F1 | medium | Status and List are each a type and a function | open |
+| plan-1/F2 | medium | Tasks 02 and 05 need go.mod from task 01 | open |
+| plan-1/F3 | medium | Interrupts: undo ctx, WaitDelay, the reason, Ctrl-C during checks | open |
+| plan-1/F4 | medium | Remote check matches any ref ending in /slice/<name> | open |
+| plan-1/F5 | medium | git add fails when the project ignores the files | open |
+| plan-1/F6 | medium | Key concept A slice exists vs R43 and Flow 4 | open |
+| plan-1/F7 | medium | TestSpecNoTitle: wrong placeholder, impossible body | open |
+| plan-1/F8 | medium | Cross-platform paths misses tasks 08-10; Tests rule reaches no task | open |
+| plan-1/F9 | medium | R42 proved only for create | open |
+| plan-1/F10 | medium | Briefs of tasks 06, 07, 09 over 1,500 words | open |
+| plan-1/F11 | low | TD3 both followed and Plan only | open |
+| plan-1/F12 | low | follows names flows and Data subsections | open |
+| plan-1/F13 | low | Some Proves: lines name a requirement not proved | open |
+| plan-1/F14 | low | e2e/ outside the gofmt check | open |
+| plan-1/F15 | low | R26: which reason wins with two faults | open |
+| plan-1/F16 | low | Flow 1: Create finds the repo, but gets a Repo | open |
+| plan-1/F17 | low | git makes .sliceflow/worktrees/, undo list misses it | open |
 | spec-3/F1 | medium | Warning items: drop Warning: and <name>: , the R23 item | verified |
 | spec-3/F2 | low | R37: with no slices, only slices is [] | verified |
 | spec-3/F3 | low | R26: a bad at, by the form of R19 | verified |
@@ -85,6 +104,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 06:58 · doc reviewer (claude opus) · plan-1: 10 medium, 7 low, 2 questions for the human; documents back to draft
 - 2026-10-24 06:52 · lead (claude) · plan review round 1 started (reviews/plan-1.md); spec.md, plan.md, tasks.md, preview.md in_review
 - 2026-10-24 06:52 · lead (claude) · tasks.md written: 11 tasks; plan adds internal/testrepo for test repos
 - 2026-10-24 06:48 · human · plan Q1: a field twice gets its own warning (R26); Q2: a slice/ branch with a bad name is skipped with a repo warning (R43); plan open questions: none
