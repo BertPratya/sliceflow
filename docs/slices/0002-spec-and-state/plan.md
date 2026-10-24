@@ -168,12 +168,72 @@ Covers: {{R1, R2}}
 
 ### Shared rules
 
-#### {{rule name}}
+#### The lock
 
-Covers: {{R5, or none}}
-Project rule: {{where it comes from, for a project rule; otherwise delete this line}}
+Covers: R6, R7
 
-{{the rule}}
+1. To take the lock, sliceflow creates `.sliceflow/locks/<name>.lock`
+   in the root of the main checkout with "create only if it does not
+   exist" (`os.O_CREATE|os.O_EXCL`), and writes the JSON line of Data
+   into it. It first creates `.sliceflow/locks/`, and `.sliceflow/.gitignore`
+   when it is missing.
+2. When the file exists, it tries again every 100 ms, for up to 10 s
+   (TD2). Then it reads the file for R7's message; a file it cannot read
+   or parse gives `unknown` (R7).
+3. It deletes the lock as soon as the event is saved or has failed, also
+   on Ctrl-C (see Interrupts), with a `defer` set right after the lock is
+   taken.
+4. Only `spec submit` and `slice title` take the lock. Reads never do:
+   they read the last commit of the slice branch, which never changes
+   (R24 of 0001-slice-and-events).
+
+#### Saving an event
+
+Covers: R1, R2, R8, R9
+
+With the lock held:
+
+1. Read the log from the last commit of `slice/<name>` (as 0001 reads
+   it), and replay it (`state.Replay`).
+2. Check the move (`state.Allowed`). Not allowed: save nothing, and
+   return the spec's error, e.g. R20's or R6's.
+3. Delete a `.events.jsonl.tmp` left by a crash. Write the committed log,
+   a `\n` when it does not end with one (SD15), and the new line, to
+   `.events.jsonl.tmp`; then rename it over `.events.jsonl` (R9).
+4. Write the event's other files, e.g. the review file.
+5. `git add -f -- <the files>`, then
+   `git commit --only -m "<message>" -- <the files>` in the slice's
+   worktree (TD1). `-f` adds them also when an ignore rule matches, as in
+   0001.
+
+#### Undo after a failed commit
+
+Covers: R10
+
+When step 5 of Saving an event fails, or Ctrl-C comes before it ends:
+
+1. Write the log back as it was committed (by the same temporary file
+   and rename).
+2. Delete the files step 4 created; put back the files it changed, as
+   they were committed.
+3. Unstage what step 5 staged: `git reset -q -- <the files>`.
+4. Never touch `spec.md`: it holds the lead's work.
+
+R10's message then names git's reason, as R18 of 0001-slice-and-events
+says.
+
+#### Leftovers after a crash
+
+Covers: R9, R24
+
+A crash (power loss, `kill -9`) can leave these; none of them breaks the
+committed log:
+
+- `.events.jsonl.tmp`: removed at the next write.
+- A log on disk newer than the commit: the next write starts again from
+  the committed log, and overwrites it.
+- A lock: R7's message; a person deletes it (0007 takes it over later).
+- A review file with no commit: R24's message; a person moves it away.
 
 ## Interfaces
 
@@ -370,12 +430,17 @@ Local, in the slice's worktree, for a moment only:
        Why: it sorts correctly as text and needs no time zone.
        Not chosen: a timestamp, because a due date has no time of day. -->
 
-- **TD1.** {{The choice.}}
-  Why: {{the reason}}
-  Not chosen: {{the main other option, and why not}}
-  Cost: {{optional: the downside we accept, or delete this line}}
-  Plan only: {{why no task's code depends on it, or delete this line}}
-  Replaces: {{an earlier decision, e.g. checkout/TD2}}
+- **TD1.** sliceflow commits with `git commit --only -- <its files>`.
+  Why: git then commits those files as they are on disk, and leaves
+    what is staged for other files staged and out of the commit (R8,
+    S22).
+  Not chosen: a separate index file (`GIT_INDEX_FILE`), because it is
+    more code for the same result.
+- **TD2.** The lock is tried again every 100 ms, for up to 10 s.
+  Why: a write usually takes well under a second, so a second command
+    rarely waits long; 10 s is the spec's limit (R7).
+  Not chosen: a longer wait for slow git hooks, because a real leftover
+    lock would then keep the user waiting (the human's choice; see Risks).
 
 ## Risks and rollout
 
@@ -383,7 +448,12 @@ Local, in the slice's worktree, for a moment only:
      What could go wrong, and how it is reduced. Migration order, feature
      flags, compatibility with older versions. -->
 
-{{A risk, and how it is reduced.}}
+- **A slow git hook gives a false "busy".** The lock is held while
+  `git commit` runs the project's hooks. A hook that takes 40 s makes a
+  second command give up after 10 s, although nothing crashed. This is
+  rare: one lead works on one slice. The message is clear, and running
+  the command again works. The human chose to keep 10 s; if it happens
+  in practice, a later slice can wait longer or show a waiting line.
 
 ## Parked
 
