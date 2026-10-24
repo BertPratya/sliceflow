@@ -170,6 +170,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 10:37 · lead (claude) · integration review started, round 2; main has not moved since 28e9abb; full checks pass
 - 2026-10-24 10:37 · lead (claude) · every task done again; phase back to integration
 - 2026-10-24 10:37 · lead (claude) · task 15 done (be75cfb; low, not code-reviewed); checks pass, no test file changed
 - 2026-10-24 10:35 · lead (claude) · task 15 started: worker round 1 (low: no code review)
