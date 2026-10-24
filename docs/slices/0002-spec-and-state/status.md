@@ -3,7 +3,7 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 14:40 UTC
+- Updated: 2026-10-24 14:55 UTC
 
 ## Needs human
 
@@ -13,7 +13,7 @@ None.
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
+| spec.md | review_passed | 3 | - | - |
 
 ## Tasks
 
@@ -21,16 +21,16 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 4 · Closed: 18
+Open: 0 · Waiting for verify: 0 · Closed: 22
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| spec-2/F1 | medium | An indented ideas item is not a list | fixed |
-| spec-2/F2 | medium | R11's order makes validate take the lock | fixed |
-| spec-2/F3 | low | "last line read without error" is a new term | fixed |
-| spec-2/F4 | low | The third assumption is now confirmed | fixed |
+| spec-2/F1 | medium | An indented ideas item is not a list | verified (fixed) |
+| spec-2/F2 | medium | R11's order makes validate take the lock | verified (fixed) |
+| spec-2/F3 | low | "last line read without error" is a new term | verified (fixed) |
+| spec-2/F4 | low | The third assumption is now confirmed | verified (fixed) |
 | spec-1/Q1 | high | A half-written last line of the log | verified (fixed) |
 | spec-1/F1 | medium | Template comments are not skipped | verified (fixed) |
 | spec-1/F2 | medium | S28's template start is not the real one | verified (fixed) |
@@ -70,6 +70,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 14:55 · lead (claude) · spec.md review_passed
+- 2026-10-24 14:50 · doc-reviewer (claude opus) · change review 3 handed in: spec-2 all verified; no new findings
 - 2026-10-24 14:40 · lead (claude) · spec review 3 started: a change review of the spec-2 fixes only, as for 0001
 - 2026-10-24 14:35 · lead (claude) · human: "yes" to the spec-2 F1, F2 fixes
 - 2026-10-24 14:20 · lead (claude) · spec-2 lows fixed (F3, F4), and S23 uses a commit-msg hook (the reviewer's note); spec.md back to draft
