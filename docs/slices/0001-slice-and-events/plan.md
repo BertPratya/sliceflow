@@ -29,7 +29,7 @@ files inside the worktree, and makes a normal commit there.
 | Git: small functions that each run one git command | internal/git/ | new |
 | Spec template, built into the binary | internal/template/ | new |
 | Test helpers: temporary repos with a test git config; only tests import it | internal/testrepo/ | new |
-| End-to-end tests: build the binary, run it in temporary repos | e2e/ | new |
+| End-to-end tests: build the binary, run it in temporary repos | internal/e2e/ | new |
 
 New dependencies: None.
 
@@ -39,12 +39,12 @@ New dependencies: None.
 
 Covers: R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R19, R20, R41
 
-1. The CLI reads the name and the flags (TD2), and calls `Create`.
-2. `Create` finds the repo: the folder with
+1. The CLI reads the name and the flags (TD2).
+2. The CLI calls `FindRepo`, which finds the folder with
    `git rev-parse --show-toplevel`, and the main checkout's root as the
    first `worktree` line of `git worktree list --porcelain`. That works
    from any worktree, and also when the `.git` folder is somewhere
-   else. (lead's call)
+   else. (lead's call) The CLI passes the `Repo` to `Create`.
 3. It runs the checks of Flow 2, in R11's order. While they run,
    nothing is made.
 4. It picks the base branch (R3), and turns it into a commit id once
@@ -58,9 +58,10 @@ Covers: R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R19, R20, R41
 7. It writes `docs/slices/<name>/spec.md` from the built-in template,
    with the front matter filled (R7), and `.events.jsonl` with one
    `slice.created` line (R19, R20), with `at` from `Repo.Now`.
-8. In the worktree, it runs `git add -- <the two files>` and
+8. In the worktree, it runs `git add -f -- <the two files>` and
    `git commit -m "<name>: slice created"`, so the user's hooks and
-   signing run (R8).
+   signing run (R8). `-f` adds the two files also when the project's or
+   the user's ignore rules match them, e.g. `*.jsonl`.
 9. The CLI prints R9's lines, or R10's JSON, with `/` in every path
    (R41).
 
@@ -74,10 +75,12 @@ Covers: R11, R12, R13, R14, R15, R16, R17, R42
    (lead's call)
 3. R14: the name breaks R2.
 4. R16: `refs/heads/<base>` does not resolve to a commit.
-5. R15, in R15's order: `refs/heads/slice/<name>` exists; a ref under
-   `refs/remotes/` ends in `/slice/<name>`, matched in Go so a remote
-   name with `/` works (lead's call); `git cat-file -e
-   <commit>:docs/slices/<name>` succeeds.
+5. R15, in R15's order: `refs/heads/slice/<name>` exists; for a remote
+   named by `git remote` (it reads only the local config),
+   `refs/remotes/<remote>/slice/<name>` exists, so a remote name with
+   `/` works and a branch like `user/slice/<name>` does not match
+   (lead's call); `git cat-file -e <commit>:docs/slices/<name>`
+   succeeds.
 6. R17: `.sliceflow/worktrees/<name>` exists (`os.Lstat`).
 
 The first check that fails returns an `*Error` with the spec's words.
@@ -90,8 +93,11 @@ Covers: R18
 
 1. A step of Flow 1, 5 to 8, fails, or a signal arrives (Interrupts).
 2. `create` runs Undo on failure.
-3. The CLI prints R18's error, with git's message or `interrupted` as
-   the reason, and exits with 1.
+3. The CLI prints R18's error and exits with 1. The reason is
+   `interrupted` when a signal arrived, whatever git printed. Otherwise
+   it is the first line of git's stderr that is not empty, or
+   `git <command> failed (exit code <n>)`; the other lines follow,
+   each indented by 2 spaces (R18).
 
 ### Flow 4: Status of one slice
 
@@ -142,10 +148,13 @@ Covers: R38, R39
 
 1. `--help` or `-h` on a command prints its usage on stdout, and exits
    with 0 (R39).
-2. An unknown command or flag, or a flag with no value, prints
-   `Error: <what is wrong>. Run sliceflow --help.` on stderr, and exits
-   with 2 (R38).
-3. Both happen in the CLI, before any git command.
+2. `sliceflow` alone and `sliceflow slice` alone print the usage on
+   stdout, and exit with 0 (R38).
+3. An unknown command or flag, a flag with no value, no slice name for
+   `slice create`, or more positional arguments than the command takes,
+   prints `Error: <what is wrong>. Run sliceflow --help.` on stderr with
+   R38's words, and exits with 2.
+4. All of these happen in the CLI, before any git command.
 
 ### Shared rules
 
@@ -168,7 +177,8 @@ Covers: none
 Project rule: AGENTS.md, every change that adds behavior adds a test.
   Tests create their own temporary git repos; never use shared services.
 
-Every task adds the tests its behavior needs, as Testing says. Each
+Every task adds the tests its behavior needs, as Testing says, and
+names this rule in its follows. Each
 test makes its own repo in `t.TempDir()`, with the test git config.
 No test uses the network.
 
@@ -189,9 +199,12 @@ Covers: R18
 `create` keeps a list of what it made in this run. It adds each thing
 right after making it:
 
-1. `.sliceflow/.gitignore`, and the folders `.sliceflow/` and
-   `.sliceflow/worktrees/`, only those that were missing.
+1. `.sliceflow/` and `.sliceflow/.gitignore`, only those that were
+   missing.
 2. The branch and the worktree, after `git worktree add` succeeds.
+   `git worktree add` also makes `.sliceflow/worktrees/` when it is
+   missing, so `create` notes before step 6 whether that folder exists,
+   and adds it to the list after step 6 when it did not.
 
 The files in the worktree and the commit need no entry: removing the
 worktree and the branch removes them. If a step fails, `create`
@@ -219,6 +232,23 @@ few seconds to finish. The signal cancels the `ctx`. A running git
 command is stopped, and `create` waits for it to end; between steps,
 `create` checks the `ctx` before the next one. Then it runs Undo on
 failure, and prints R18's error with the reason `interrupted`.
+
+- **The undo has its own context.** It runs with
+  `context.WithoutCancel(ctx)`, so the signal does not also stop the
+  undo's git commands.
+- **A hook can outlive git.** When git is stopped, a hook it started
+  (e.g. `sh` running `sleep 30`) can keep the output pipe open. So
+  `git.Run` sets `cmd.WaitDelay` to 2 seconds: after that, Go closes
+  the pipes and `Run` returns. (lead's call)
+- **The reason is `interrupted` when a signal arrived.** A real Ctrl-C
+  reaches git and the hook too, so `git commit` may fail first, often
+  with an empty message. `create` checks `ctx.Err()` before it picks
+  git's message.
+- **Ctrl-C during the checks.** The checks also use the `ctx`. When it
+  is cancelled, `git.Run` returns `ctx.Err()`, never a "not found"
+  answer, so `RefExists` cannot report a missing branch by mistake.
+  `create` then prints R18's error with `interrupted`; nothing was made
+  yet, so there is nothing to remove.
 `status` and `list` change nothing, so they keep Go's default: they
 stop at once. (lead's call)
 
@@ -290,8 +320,8 @@ same functions (TD7).
 
 ```go
 func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error)
-func Status(ctx context.Context, r Repo, name string) (Status, error) // name "" = the current branch
-func List(ctx context.Context, r Repo, all bool) (List, error)
+func Status(ctx context.Context, r Repo, name string) (SliceStatus, error) // name "" = the current branch
+func List(ctx context.Context, r Repo, all bool) (SliceList, error)
 
 type CreateOptions struct{ Name, Title, From string }
 type Warning struct{ Slice, Text string } // Slice "" = about the whole repo
@@ -348,13 +378,17 @@ e.g. `data.from.branch`.
   `has the wrong type`. (lead's call)
 - The whole log is read from git in one piece, so a line has no length
   limit. (lead's call)
+- A line with more than one fault gets one warning: the checks run in
+  the order of R26's list of reasons, and the first fault found is the
+  warning, e.g. a line with an unknown field and no `at` gives
+  `unknown field "<f>"`. (lead's call)
 
 ## Testing
 
 | Check | How |
 |---|---|
 | unit | Go tests next to the code. Table tests for the name rules (R2), the flag helper (TD2), the event log writer (R19) and reader (R25 to R27: one bad line for each reason), and paths (R41). The core's tests run real `git` in a temporary repo, with a fixed `Repo.Now`. |
-| e2e | `TestMain` builds the binary once into a temporary folder. Each test runs it in its own temporary repo, and checks stdout, stderr, and the exit code. Shared helpers in `e2e/helpers_test.go`; one file per task: `e2e/<task_name>_test.go`. |
+| e2e | `TestMain` builds the binary once into a temporary folder. Each test runs it in its own temporary repo, and checks stdout, stderr, and the exit code. Shared helpers in `internal/e2e/helpers_test.go`; one file per task: `internal/e2e/<task_name>_test.go`. They live under `internal/` so `gofmt -l cmd internal` checks them. (lead's call) |
 
 `internal/testrepo` makes the temporary repos for both kinds: `New`
 makes a repo on `main` with one commit, with the test git config below.
@@ -399,7 +433,6 @@ How the tests stay apart from the developer's own setup:
   Why: it is the Go version on the development machine, and CI uses the
   version in `go.mod`.
   Not chosen: an older version, because no user needs one yet.
-  Plan only: it picks the Go version; no task's code depends on it.
 - **TD4.** An event is written from Go structs whose fields are
   declared in R19's order, with `encoding/json`.
   Why: the standard library keeps the declared order, so the order

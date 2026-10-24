@@ -109,11 +109,12 @@ a spec to fill in, and an event log.
   **Then** sliceflow prints
   `Error: the repository has no commits yet. Make a first commit, then try again. Nothing was changed.`
   Shows: R13
-- **S12.** **Given** a git pre-commit hook that refuses every commit,
+- **S12.** **Given** a git pre-commit hook that only runs `exit 1`, so
+  it refuses every commit and prints nothing,
   **When** I run `sliceflow slice create spec-submit`,
   **Then** sliceflow removes the worktree and the branch it made, and
   prints
-  `Error: could not create slice spec-submit: <git's message>. Everything sliceflow made was removed.`
+  `Error: could not create slice spec-submit: git commit failed (exit code 1). Everything sliceflow made was removed.`
   and the exit code is 1.
   Shows: R8, R18, R38
 
@@ -254,8 +255,9 @@ A user learns how to use a command, and sees what was wrong.
 - **Event log:** the file `docs/slices/<name>/.events.jsonl`, one event
   per line. It is the only source of truth for a slice. Only sliceflow
   writes it.
-- **A slice exists** when a local branch `slice/<name>` exists, or the
-  folder `docs/slices/<name>/` is on the base branch.
+- **A slice exists** when its name passes R2, and a local branch
+  `slice/<name>` exists, or the folder `docs/slices/<name>/` is on the
+  base branch. A branch like `slice/My_Thing` is not a slice (R43).
 - **In progress:** a slice whose local branch `slice/<name>` exists, and
   whose folder is not on the base branch yet. A branch with no log is in
   progress too.
@@ -362,6 +364,11 @@ stderr, changes nothing, and exits with code 1.
   `Error: could not create slice <name>: <reason>. Everything sliceflow made was removed.`
   If it cannot remove something, the message ends with
   `Could not remove: <list>.` instead of the last sentence.
+  `<reason>` is the first line of git's message that is not empty, or
+  `git <command> failed (exit code <n>)` when git printed nothing, e.g.
+  `git commit failed (exit code 1)`. The other lines of git's message,
+  which hold the output of the user's hooks, follow the error line, each
+  indented by 2 spaces.
   Ctrl-C, or a stop signal from the system, while sliceflow is creating
   counts as a failed step, with the reason `interrupted`.
   Check: e2e
@@ -493,7 +500,12 @@ stderr, changes nothing, and exits with code 1.
   and 2 on wrong use (an unknown command or flag, or a missing value).
   It shall print errors on stderr, and nothing on stdout when a command
   fails. For wrong use, the error is
-  `Error: <what is wrong>. Run sliceflow --help.`
+  `Error: <what is wrong>. Run sliceflow --help.`, where
+  `<what is wrong>` is one of `unknown command "<command>"`,
+  `unknown flag <flag>`, `flag needs a value: <flag>`,
+  `missing slice name`, or `too many arguments`. `sliceflow` alone and
+  `sliceflow slice` alone are not wrong use: they print the usage on
+  stdout, and exit with code 0.
   Check: e2e
 - **R39.** Where `--help` or `-h` is given, sliceflow shall print the
   usage of that command on stdout, and exit with code 0.

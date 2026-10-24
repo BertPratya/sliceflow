@@ -2,13 +2,11 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 06:58 UTC
+- Updated: 2026-10-24 07:11 UTC
 
 ## Needs human
 
-- plan-1 Q1: bare `sliceflow`, `sliceflow slice`, `slice create` with no name or two names; the wrong-use texts
-- plan-1 Q2: R18's `<reason>` when git prints nothing, or several lines
-- plan-1 findings to decide: F1-F10 (medium), lows F11-F17
+None.
 
 ## Documents
 
@@ -21,47 +19,49 @@
 
 ## Tasks
 
-0 of 11 done · 11 todo
+0 of 13 done · 13 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | git-runner | core | todo | 0 | 0 | - | R40 |
-| 02 | event-log | core | todo | 0 | 0 | - | R19, R25, R26, R27 |
-| 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R38, R39 |
+| 02 | event-log | core | todo | 0 | 0 | 01 | R19, R25, R26, R27 |
+| 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | todo | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
-| 05 | spec-template | normal | todo | 0 | 0 | - | R7 |
-| 06 | slice-create | core | todo | 0 | 0 | 02, 03, 04, 05 | R1, R3, R4, R5, R6, R7, R8, R9, R10, R19, R20, R39, R41 |
-| 07 | create-checks | core | todo | 0 | 0 | 06 | R2, R11, R12, R13, R14, R15, R16, R17, R38, R42 |
-| 08 | create-undo | core | todo | 0 | 0 | 07 | R8, R18, R38 |
-| 09 | slice-status | core | todo | 0 | 0 | 02, 03, 04, 06 | R21, R22, R23, R24, R25, R26, R28, R29, R30, R31, R32, R33, R38 |
-| 10 | slice-list | normal | todo | 0 | 0 | 09 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R43 |
-| 11 | no-network-check | normal | todo | 0 | 0 | 08, 10 | R40 |
+| 05 | spec-template | normal | todo | 0 | 0 | 01 | R7 |
+| 06 | create-core | core | todo | 0 | 0 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
+| 07 | create-command | normal | todo | 0 | 0 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
+| 08 | create-checks | core | todo | 0 | 0 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R38, R42 |
+| 09 | create-undo | core | todo | 0 | 0 | 08 | R8, R18, R38 |
+| 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
+| 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R38, R42 |
+| 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
+| 13 | no-network-check | normal | todo | 0 | 0 | 09, 12 | R40 |
 
 ## Findings
 
-Open: 17 · Waiting for verify: 0 · Closed: 21
+Open: 0 · Waiting for verify: 17 · Closed: 21
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-1/F1 | medium | Status and List are each a type and a function | open |
-| plan-1/F2 | medium | Tasks 02 and 05 need go.mod from task 01 | open |
-| plan-1/F3 | medium | Interrupts: undo ctx, WaitDelay, the reason, Ctrl-C during checks | open |
-| plan-1/F4 | medium | Remote check matches any ref ending in /slice/<name> | open |
-| plan-1/F5 | medium | git add fails when the project ignores the files | open |
-| plan-1/F6 | medium | Key concept A slice exists vs R43 and Flow 4 | open |
-| plan-1/F7 | medium | TestSpecNoTitle: wrong placeholder, impossible body | open |
-| plan-1/F8 | medium | Cross-platform paths misses tasks 08-10; Tests rule reaches no task | open |
-| plan-1/F9 | medium | R42 proved only for create | open |
-| plan-1/F10 | medium | Briefs of tasks 06, 07, 09 over 1,500 words | open |
-| plan-1/F11 | low | TD3 both followed and Plan only | open |
-| plan-1/F12 | low | follows names flows and Data subsections | open |
-| plan-1/F13 | low | Some Proves: lines name a requirement not proved | open |
-| plan-1/F14 | low | e2e/ outside the gofmt check | open |
-| plan-1/F15 | low | R26: which reason wins with two faults | open |
-| plan-1/F16 | low | Flow 1: Create finds the repo, but gets a Repo | open |
-| plan-1/F17 | low | git makes .sliceflow/worktrees/, undo list misses it | open |
+| plan-1/F1 | medium | Status and List are each a type and a function | fixed |
+| plan-1/F2 | medium | Tasks 02 and 05 need go.mod from task 01 | fixed |
+| plan-1/F3 | medium | Interrupts: undo ctx, WaitDelay, the reason, Ctrl-C during checks | fixed |
+| plan-1/F4 | medium | Remote check matches any ref ending in /slice/<name> | fixed |
+| plan-1/F5 | medium | git add fails when the project ignores the files | fixed |
+| plan-1/F6 | medium | Key concept A slice exists vs R43 and Flow 4 | fixed |
+| plan-1/F7 | medium | TestSpecNoTitle: wrong placeholder, impossible body | fixed |
+| plan-1/F8 | medium | Cross-platform paths misses tasks 08-10; Tests rule reaches no task | fixed |
+| plan-1/F9 | medium | R42 proved only for create | fixed |
+| plan-1/F10 | medium | Briefs of tasks 06, 07, 09 over 1,500 words | fixed |
+| plan-1/F11 | low | TD3 both followed and Plan only | fixed |
+| plan-1/F12 | low | follows names flows and Data subsections | fixed |
+| plan-1/F13 | low | Some Proves: lines name a requirement not proved | fixed |
+| plan-1/F14 | low | e2e/ outside the gofmt check | fixed |
+| plan-1/F15 | low | R26: which reason wins with two faults | fixed |
+| plan-1/F16 | low | Flow 1: Create finds the repo, but gets a Repo | fixed |
+| plan-1/F17 | low | git makes .sliceflow/worktrees/, undo list misses it | fixed |
 | spec-3/F1 | medium | Warning items: drop Warning: and <name>: , the R23 item | verified |
 | spec-3/F2 | low | R37: with no slices, only slices is [] | verified |
 | spec-3/F3 | low | R26: a bad at, by the form of R19 | verified |
@@ -104,6 +104,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 07:11 · lead (claude) · plan-1 fixed: spec R18 reason, R38 wrong use, key concept; plan F1-F17; tasks now 13 (create and status split), e2e in internal/e2e/
+- 2026-10-24 07:11 · human · plan-1 Q1: bare commands show usage, a missing or extra name is wrong use (R38); Q2: first line as reason, the rest indented (R18); the lead's fixes: ok
 - 2026-10-24 06:58 · doc reviewer (claude opus) · plan-1: 10 medium, 7 low, 2 questions for the human; documents back to draft
 - 2026-10-24 06:52 · lead (claude) · plan review round 1 started (reviews/plan-1.md); spec.md, plan.md, tasks.md, preview.md in_review
 - 2026-10-24 06:52 · lead (claude) · tasks.md written: 11 tasks; plan adds internal/testrepo for test repos
