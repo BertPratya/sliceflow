@@ -2,7 +2,7 @@
 
 - Phase: implementing (blocked)
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 09:46 UTC
+- Updated: 2026-10-24 09:48 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@
 
 ## Tasks
 
-9 of 13 done · 1 blocked · 1 in_review · 2 todo
+10 of 13 done · 1 blocked · 2 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -34,13 +34,13 @@
 | 08 | create-checks | core | done | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
 | 09 | create-undo | core | blocked | 0 | 2 | 08 | R8, R18 |
 | 10 | status-core | core | done | 0 | 2 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
-| 11 | status-command | normal | in_review | 0 | 1 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
+| 11 | status-command | normal | done | 0 | 1 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
 | 13 | no-network-check | normal | todo | 0 | 0 | 09, 12 | R40 |
 
 ## Findings
 
-Open: 3 · Waiting for verify: 1 · Closed: 75
+Open: 3 · Waiting for verify: 0 · Closed: 76
 
 ### Doc reviews
 
@@ -109,6 +109,7 @@ Open: 3 · Waiting for verify: 1 · Closed: 75
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-11-1/F1 | low | 11 | R30's object is built inline; task 12 would copy it | deferred: task 12 |
 | task-10-1/F1 | high | 10 | The base goes to git as a bare name, not refs/heads/<base> | verified |
 | task-09-2/Q1 | needs human | 09 | Clean up after every failed worktree add, not only after a signal? | open |
 | task-09-2/F1 | high | 09 | A failed post-checkout hook leaves the worktree; the message does not name it | open |
@@ -125,7 +126,7 @@ Open: 3 · Waiting for verify: 1 · Closed: 75
 | task-06-1/F2 | low | 06 | Create cannot tell whether it made .sliceflow/ and its .gitignore | verified |
 | task-03-1/F1 | high | 03 | Any flag after slice prints the help and exits 0 | verified |
 | task-03-1/F3 | low | 03 | A bad bool value gives a text that is not one of R38's | verified |
-| task-03-1/F2 | low | 03 | fail indents later lines; S15's lines have no indent | fixed (waiting for verify) |
+| task-03-1/F2 | low | 03 | fail indents later lines; S15's lines have no indent | verified |
 | task-04-1/F1 | low | 04 | FindRepo calls every rev-parse failure "not inside a git repository" | wontfix: why: git gives exit 128 for both, and sliceflow does not read git's error text (Git arguments); the worker's ASSUMED names it |
 | task-02-1/Q1 | needs human | 02 | R27 does not say which seq the first good line must have | verified: the human chose option 1 (expect 1); R002 |
 | task-02-1/F1 | low | 02 | A seq too big for an int gets a wrong value reason R26 does not list | verified |
@@ -158,6 +159,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:48 · lead (claude) · task 11 done; F1 deferred to task 12
+- 2026-10-24 09:48 · code reviewer (claude opus) · task-11-1 submitted: pass; task-03-1/F2 verified; 1 low
+- 2026-10-24 09:48 · human · task-09-2/Q1 and F2 answered: "yes both case."
 - 2026-10-24 09:46 · lead (claude) · task 11 code review started, round 1
 - 2026-10-24 09:46 · lead (claude) · task 11 committed (1abe237); checks pass; tried slice status by hand: S13, S15, JSON match
 - 2026-10-24 09:44 · lead (claude) · task 11 started: worker round 1; brief carries task-03-1/F2
