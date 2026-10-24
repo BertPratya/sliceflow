@@ -7,221 +7,134 @@ round: 5
 reviewer: doc-reviewer (claude opus)
 ---
 
-<!-- HOW TO FILL THIS TEMPLATE
-
-     A review checks one thing. A doc review (kind: spec, plan, or
-     change) checks a spec, a plan with its tasks.md and preview.md, or
-     the documents changed during building. A code review (kind: task or
-     integration) checks one task, or the whole slice. sliceflow
-     creates this file and fills
-     the front matter. You write the sections below, then hand the review
-     in through sliceflow. After that the file is locked: never edit it again.
-
-     sliceflow reads this file and sets the verdict from it.
-     Code review:
-     - Needs human decision is not None.            → needs_human
-     - else any high or medium finding, new or
-       reopened                                     → changes
-     - else                                         → pass
-     (low findings alone pass)
-     Doc review:
-     - Needs human decision is not None.            → needs_human
-     - else                                         → pass
-     (the lead fixes medium findings, and fixes or leaves low ones)
-
-     sliceflow reads this file. Keep every marker exactly as shown: the
-     headings, the finding headings (### F1.), the labeled lines (Level:,
-     Where:, Breaks:, Why:, Fix:, Guess:), the numbers (**Q1.**), and the
-     line forms in Tests, Previous findings, and Requirements check.
-     Don't rename or reorder them. A
-     labeled line may go on over more lines: indent the extra lines 2
-     spaces more than the label.
-
-     Report real problems only: things that break a requirement, a
-     decision, an interface, or a project rule, or that are clearly wrong.
-     Don't invent issues to look thorough. If everything is fine, say so,
-     and write None. under Findings.
-
-     A spec review is short: fill Summary, Checked, Findings (medium and
-     low), and Needs human decision (every high gap, most important
-     first). Write None. in the other sections.
-
-     - Replace every {{...}} with real text.
-     - A section that doesn't apply gets one line: None.
-     - When you are done, delete every comment and check that no {{ is
-       left. Every placeholder of this template counts, even inside
-       code. A {{ or a comment marker you write yourself inside a code
-       block or `inline code` is real content. To name them in plain
-       text, use `inline code`. -->
-
 # Review
 
 ## Summary
 
-<!-- 1-3 sentences. The overall result, and the main problem if there is
-     one.
-
-     Example:
-     The task covers R10 and the tests are real. One high problem: a done
-     task that is overdue still shows OVERDUE (F1). -->
-
-{{1-3 sentences: the overall result, and the main problem if there is one.}}
+The new `spec review` command is in all four documents. Every
+requirement and scenario is covered, each of S1 to S36 has an e2e test
+with the right number, and every `follows` name exists. All five
+plan-4 findings are fixed. One medium gap: since S24 went away, no
+brief or test covers R10's `The steps before it were saved` ending for
+a failed `review.finished` commit (F1). The rest are leftover old
+wording and stale task numbers (F2 to F4). None of them needs the
+human.
 
 ## Checked
 
-<!-- What this review covered: what you read, and what you ran. This
-     shows the review was real, so a "None." under Findings can be
-     trusted. List only what you actually did.
-
-     - Commits: the commits reviewed (task and integration reviews).
-     - Files read: the files you read, including ones the change uses.
-     - Ran: each command you ran, and its result. More than one: one
-       indented line per command under Ran:.
-     - Requirements: the requirements you checked.
-     - Interfaces: the names you checked against the task, if any.
-     Leave out a line that doesn't apply.
-
-     Example:
-     - Commits: a1b2c3d..e4f5a6b
-     - Files read: internal/list/format.go, internal/list/format_test.go,
-       internal/task/overdue.go
-     - Ran: go test ./internal/list/... (pass)
-     - Requirements: R10
-     - Interfaces: Format(tasks, today) matches the task -->
-
-- Files read: {{files}}
+- Files read: docs/slices/0002-spec-and-state/spec.md (all),
+  plan.md (all), tasks.md (tasks 01, 07, 08, 09, 11, 13, 14, 15, 16,
+  17, and the yaml blocks of all tasks), preview.md (all), status.md,
+  reviews/plan-4.md; docs/templates/review.md (via the review file's
+  comments); .agents/prompts/doc-reviewer.md
 - Ran:
-  {{command (result), one per line}}
-- Requirements: {{R1, R2}}
+  git diff 7bca891 29ead4e -- docs/slices/0002-spec-and-state/ (spec.md, plan.md, tasks.md, preview.md, status.md changed)
+  git diff --stat 29ead4e f418bc1 (only status.md changed after it)
+  grep for every `Scenario:` line and yaml `covers`, `depends_on`, and `follows` in tasks.md (S1 to S36 each have one test; every `follows` name is a heading in plan.md)
+  grep for `third error`, `Tail`, `steps before`, `to start review`, `task 1[4-7]`, `Task 1[4-7]`, `Only`, and `submit and title` in the four files (see F3 and F4)
+- Requirements: R6, R10, R11, R12, R19, R20, R23, R24, R25, R29, R36, R37
 
 ## Tests
 
-<!-- Task reviews only. Other kinds: write None.
-     One line per test named in the task's Done when. Read each test,
-     and say whether it really proves what it claims:
-     - ok: it exists, checks the stated input and expected result, and
-       would fail if the code were broken.
-     - weak, see F2: it exists but would pass with broken code, or
-       checks less than Done when says. Add a finding.
-     - missing, see F3: it doesn't exist. Add a finding.
-
-     Example:
-     - `TestParseDueRejectsBadDate`: ok
-     - `TestDueUnknownTask`: weak, see F2
-     - `TestListSortsByDue`: missing, see F3 -->
-
-- `{{TestName}}`: {{ok, or: weak, see F2, or: missing, see F3}}
+None.
 
 ## Previous findings
 
-<!-- Round 2 and later. Every finding from the last round that was marked
-     fixed, wontfix, or deferred. One line each:
-     - <review>/F1: verified (fixed)
-     - <review>/F2: verified (wontfix)
-     - <review>/F3: verified (deferred)
-     - <review>/F4: reopened. why
-
-     verified means: a fixed finding is really fixed, or the reason given
-     for wontfix or deferred is acceptable. In brackets, say which one.
-     Otherwise: reopened.
-
-     Example:
-     - task-04-1/F1: verified (fixed)
-     - task-04-1/F2: reopened. A done task due today still shows OVERDUE.
-
-     Round 1: write None. -->
-
-- {{task-02-1/F1}}: {{verified (fixed, wontfix, or deferred), or: reopened. why}}
+- plan-4/F1: verified (fixed)
+- plan-4/F2: verified (fixed)
+- plan-4/F3: verified (fixed)
+- plan-4/F4: verified (fixed)
+- plan-4/F5: verified (fixed)
 
 ## Findings
 
-<!-- New findings only. Number them F1, F2, ... in this file. Outside
-     this file they are called <review>/F1, e.g. task-04-1/F1. List them
-     high first, then medium, then low.
+### F1. No brief or test covers a failed `review.finished` commit
 
-     Each finding has these lines:
-     - Level: high, medium, or low. In a doc review the level says who
-       deals with it:
-       - high: needs the human's decision. Never a finding: write it as
-         a question under Needs human decision, with a Guess: line.
-       - medium: the lead can decide and fix it alone: one fix is
-         clearly right and changes nothing the human chose.
-       - low: a small thing, e.g. a typo or a missing example. The lead
-         fixes it or leaves it.
-       In a code review the level says how bad it is:
-       - high: wrong behavior, breaks the spec, plan, or contract,
-         security, or data loss. Blocks. Only a human can mark it
-         wontfix, or defer it out of the slice.
-       - medium: a real problem that doesn't break anything yet. Must be
-         fixed, or a reason given.
-       - low: nice to have. Optional.
-     - Where: file:line, or the document and section. A range:
-       file:12-18. More than one place: separate them with commas.
-     - Breaks: what it breaks: a requirement (R5), a decision (SD1,
-       TD2), a task's Interfaces (task 02), or a project rule (name it).
-       A decision without a number: name the document and section,
-       e.g. docs/sliceflow-design.md 2.3.
-       The work adds behavior nothing asks for? Write: scope, and what
-       it adds, e.g. Breaks: scope: adds --color, which no requirement
-       asks for. A scope finding is at least medium: the plan never adds
-       scope.
-       Breaks nothing approved, e.g. a missing rule or a gap? Write:
-       nothing. Choose the level by its effect, as above. With Breaks:
-       nothing, a finding is medium only if Why: names an input and the
-       wrong result it gives. Otherwise it is low.
-     - Why: what is wrong, and how you found it: the test you ran, or
-       the line you read.
-     - Fix: optional, one or two lines. No fix to suggest? Remove the
-       whole Fix: line.
+Level: medium
+Where: tasks.md → Task 15 → Interfaces and Done when, tasks.md →
+  Task 17 → Done when, spec.md → Story 4
+Breaks: R10, R37
+Why: R10 says that when an earlier event of the same command was
+  already saved, the error ends with
+  `The steps before it were saved; spec.md is <state>.` Since this
+  change, `spec review` is the only command that saves two events. The
+  old S24 tested this path: its hook let `spec submitted` through and
+  refused the review. The new S23 refuses every commit with `review`,
+  so the first one, `review 1 started`, already fails, and the error
+  ends with `Nothing was changed.` Task 15's Interfaces never mention
+  `saveOp.Tail`. No test in task 15 or task 17 makes the second save
+  fail. Input: a `commit-msg` hook that refuses only messages with
+  `passed`, then `sliceflow spec review`. `review.started` is
+  committed, and `review.finished` fails. A worker who follows task 15
+  as written leaves `Tail` `""`. The user then reads
+  `... Nothing was changed.`, although a commit was made and
+  `spec.md` is `in_review`. Nothing checks either that
+  `Review 1 started: ...` is still on stdout when the command exits
+  with 1 (R37). `TestSaveTail` in task 11 tests only the mechanism.
+Fix: in task 15's Interfaces, say that the `review.finished` save sets
+  `Tail` to `The steps before it were saved; spec.md is in_review.`, and
+  add a test for it, e.g. `TestReviewFinishCommitFails`. Add an e2e test
+  for it to task 17, with a hook that refuses `passed`: the stdout line,
+  the stderr line, and exit 1.
 
-     Example:
-     ### F1. A done task that is overdue still shows OVERDUE
+### F2. Three spec lines still describe the old submit
 
-     Level: high
-     Where: internal/list/format.go:31
-     Breaks: R12
-     Why: format.go checks only the due date, not whether the task is
-       done. I added a test with a done task due yesterday; it printed
-       OVERDUE.
-     Fix: call task.IsOverdue() instead of comparing the dates here. -->
+Level: low
+Where: spec.md → Out of scope (the 0004 and 0015 items), spec.md →
+  SD7 → Not chosen
+Breaks: nothing
+Why: Out of scope still says "what `spec submit` prints when a review
+  does not pass". A review's result is now printed by `spec review`.
+  The 0015 item lists `--json` for `spec validate`, `spec submit`,
+  `slice title`, and `template show`. It leaves out `spec review`,
+  which R36 now names too. SD7 rejects "no review step until 0004,
+  because submit would then end in a state that 0004 has to change
+  again". But submit now ends at `submitted` either way, so that reason
+  no longer holds.
+Fix: write `spec review` in the 0004 item, and add it to the 0015
+  item. In SD7, give a reason that still holds, e.g. "because a
+  submitted spec would then have no step that moves it on".
 
-### F1. {{title}}
+### F3. The plan still leaves `spec review` out of the lock and Flow 8, and names task 16 for Ctrl-C
 
-Level: {{high, medium, or low}}
-Where: {{file:line, or the document and section}}
-Breaks: {{R5, TD2, task 02, a project rule, scope: what it adds, or nothing}}
-Why: {{what is wrong, and how you found it}}
-Fix: {{optional: one or two lines}}
+Level: low
+Where: plan.md → Shared rules → The lock → step 4, plan.md → Flow 8 →
+  step 3, plan.md → Approach (the `internal/slice/` row), plan.md →
+  Testing ("the e2e test (task 16)")
+Breaks: nothing
+Why: The lock's step 4 says "Only `spec submit` and `slice title` take
+  the lock". Flow 8's step 3 names `spec validate`, `spec submit`, and
+  `slice title`, with "(submit and title only)". Both disagree with R11
+  and with Flow 5, where `spec review` takes the lock. The Approach row
+  names submit, title, validate, and status, but not the review.
+  `TestSubmitInterrupted` is now in task 17, not task 16. Flow 5 and R11
+  say it right, so a worker would probably not go wrong.
+Fix: add `spec review` in the three places, and write task 17 in
+  Testing.
+
+### F4. Stale task numbers and error index in tasks.md
+
+Level: low
+Where: tasks.md → Task 09 → Interfaces (`printProblems`), Task 11 →
+  Interfaces (`saveEvent`) and Out of scope, Task 13 → Interfaces
+  (`Reviewer`) and Out of scope, Task 14 → Done when
+  (`TestSubmitStates`), Task 15 → Done when (`TestReviewStates`)
+Breaks: nothing
+Why: Task 09 says "Task 15 uses it" for `printProblems`; it is task 16
+  now. Task 11 says "Tasks 12 and 14 use it", and its Out of scope says
+  "task 12, task 14". Task 15 calls `saveEvent` too. Task 13 says
+  "Task 14 uses it" for `Reviewer`, and "Saving the review events. Done
+  in: task 14". Both are task 15 now. Tasks 14 and 15 name "R20's third
+  error" for no good `slice.created`. R20 has a new first bullet,
+  `submitted`, so the third bullet is now the `in_review` error, and
+  the `slice.created` error is the fourth.
+Fix: change the numbers, and write "R20's error for no good
+  `slice.created`" in place of "R20's third error".
 
 ## Requirements check
 
-<!-- Integration reviews only. Other kinds: write None.
-     Every requirement in the spec, checked against the finished slice.
-     (A review whose requirements were given with the request, not by a
-     spec, checks those instead.)
-     One line each: ok, fails (with the finding), or manual (goes to the
-     preview). A fails line names the high or medium findings that make
-     it fail; lows may follow, e.g. fails, see F3; also F7. Only low
-     findings against it? It is ok: write ok, see F7.
-
-     Example:
-     - R1: ok
-     - R3: fails, see F2
-     - R14: manual -->
-
-- {{R1}}: {{ok, or: fails, see F2, or: manual}}
+None.
 
 ## Needs human decision
 
-<!-- Questions only the human can answer, numbered Q1, Q2, ... Each one
-     says what is unclear, and has a Guess: line: what a worker would
-     have to guess without the answer. In a doc review, every high gap
-     goes here. Anything here makes the verdict needs_human.
-
-     Example:
-     - **Q1.** What happens when a task's due date is changed after it
-       was marked done? R2 and R12 don't say.
-       Guess: keep it done and change the date, or reopen it. -->
-
-- **Q1.** {{What is unclear.}}
-  Guess: {{what a worker would have to guess without the answer}}
+None.
