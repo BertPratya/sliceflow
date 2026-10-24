@@ -32,7 +32,7 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 |---|---|---|---|
 | 0001 | slice and events | create a slice (`sliceflow slice create`), see it (`sliceflow slice status`, `sliceflow slice list`); the event log with its first event, `slice.created` | 1.13, 2.1 |
 | 0002 | spec | the state machine's engine, and the spec's moves: write a spec and check it; see where a slice is and what comes next; set a slice's title; the spec's draft state comes from `slice.created`, with no extra event | 1.4, 2.2 |
-| 0003 | plan | write the plan, tasks, and preview, review them, and approve the planning once; the slice is ready to build | 2.3 |
+| 0003 | plan | write the plan, tasks, and preview, review them, and approve the planning once; the slice is ready to build; `spec validate` reports a requirement or scenario number reused for something new after approval, by comparing with the approved version | 2.3 |
 | 0004 | agents | `sliceflow` starts agents itself: the Codex adapter, the permission layers, settings per role; first use: the spec check and the plan review; who caused each event (`by`); each session sliceflow starts is bound to its slice by its session ID, and commands on other slices are refused | 1.9, 1.12c |
 | 0005 | the run | `sliceflow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; `sliceflow stop`, and `sliceflow run` continues where it stopped | 2.4 |
 | 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue, conflicts | 2.4 |
@@ -44,7 +44,7 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 | 0012 | configurable steps | pick and order the built-in steps | 1.10 |
 | 0013 | local server and dashboard | `sliceflow serve`: see every slice live in the browser, with its sessions grouped under it, on 127.0.0.1 with a token | 1.7 |
 | 0014 | web actions | stop, continue, and retry from the browser; start agents | 1.7, 2.4 |
-| 0015 | stable output | errors as JSON with codes; the event log and `--json` documented and versioned | 1.13b |
+| 0015 | stable output | errors as JSON with codes; the event log and `--json` documented and versioned; a parsed document as JSON (e.g. `sliceflow spec show --json`) | 1.13b |
 | 0016 | user hooks | your own hooks before and after events, with a trust check before a repo's hooks run | - |
 | 0017 | team view | teammates' slices from remote branches, and whose slice it is | - |
 | 0018 | Spec Kit import | turn a Spec Kit feature into a slice once; the human fills each task's `touches` | 1.13c |
