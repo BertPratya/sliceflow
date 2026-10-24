@@ -28,6 +28,7 @@ files inside the worktree, and makes a normal commit there.
 | Event log: write an event line; read a log into events and warnings | internal/eventlog/ | new |
 | Git: small functions that each run one git command | internal/git/ | new |
 | Spec template, built into the binary | internal/template/ | new |
+| Test helpers: temporary repos with a test git config; only tests import it | internal/testrepo/ | new |
 | End-to-end tests: build the binary, run it in temporary repos | e2e/ | new |
 
 New dependencies: None.
@@ -354,6 +355,10 @@ e.g. `data.from.branch`.
 |---|---|
 | unit | Go tests next to the code. Table tests for the name rules (R2), the flag helper (TD2), the event log writer (R19) and reader (R25 to R27: one bad line for each reason), and paths (R41). The core's tests run real `git` in a temporary repo, with a fixed `Repo.Now`. |
 | e2e | `TestMain` builds the binary once into a temporary folder. Each test runs it in its own temporary repo, and checks stdout, stderr, and the exit code. Shared helpers in `e2e/helpers_test.go`; one file per task: `e2e/<task_name>_test.go`. |
+
+`internal/testrepo` makes the temporary repos for both kinds: `New`
+makes a repo on `main` with one commit, with the test git config below.
+(lead's call)
 
 How the tests stay apart from the developer's own setup:
 

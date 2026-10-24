@@ -2,7 +2,7 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 06:48 UTC
+- Updated: 2026-10-24 06:52 UTC
 
 ## Needs human
 
@@ -15,10 +15,25 @@ None.
 | spec.md | draft | 3 | - | - |
 | plan.md | draft | 0 | - | - |
 | preview.md | draft | with plan.md | - | - |
+| tasks.md | draft | with plan.md | - | - |
 
 ## Tasks
 
-None.
+0 of 11 done · 11 todo
+
+| # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
+|---|---|---|---|---|---|---|---|
+| 01 | git-runner | core | todo | 0 | 0 | - | R40 |
+| 02 | event-log | core | todo | 0 | 0 | - | R19, R25, R26, R27 |
+| 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R38, R39 |
+| 04 | repo-and-names | core | todo | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
+| 05 | spec-template | normal | todo | 0 | 0 | - | R7 |
+| 06 | slice-create | core | todo | 0 | 0 | 02, 03, 04, 05 | R1, R3, R4, R5, R6, R7, R8, R9, R10, R19, R20, R39, R41 |
+| 07 | create-checks | core | todo | 0 | 0 | 06 | R2, R11, R12, R13, R14, R15, R16, R17, R38, R42 |
+| 08 | create-undo | core | todo | 0 | 0 | 07 | R8, R18, R38 |
+| 09 | slice-status | core | todo | 0 | 0 | 02, 03, 04, 06 | R21, R22, R23, R24, R25, R26, R28, R29, R30, R31, R32, R33, R38 |
+| 10 | slice-list | normal | todo | 0 | 0 | 09 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R43 |
+| 11 | no-network-check | normal | todo | 0 | 0 | 08, 10 | R40 |
 
 ## Findings
 
@@ -70,6 +85,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 06:52 · lead (claude) · tasks.md written: 11 tasks; plan adds internal/testrepo for test repos
 - 2026-10-24 06:48 · human · plan Q1: a field twice gets its own warning (R26); Q2: a slice/ branch with a bad name is skipped with a repo warning (R43); plan open questions: none
 - 2026-10-24 06:46 · lead (claude) · plan part 5 (flows, testing) and preview written after the human's yes; reread found plan Q1-Q2
 - 2026-10-24 06:46 · human · plan part 5, flows and testing: yes
