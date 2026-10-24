@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:51 UTC
+- Updated: 2026-10-24 08:52 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-5 of 13 done · 1 in_review · 7 todo
+6 of 13 done · 7 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -28,7 +28,7 @@ None.
 | 03 | cli-skeleton | core | done | 0 | 2 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | done | 0 | 1 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | done | 0 | 1 | 01 | R7 |
-| 06 | create-core | core | in_review | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
+| 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | todo | 0 | 0 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | todo | 0 | 0 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
 | 09 | create-undo | core | todo | 0 | 0 | 08 | R8, R18 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 1 · Closed: 55
+Open: 0 · Waiting for verify: 0 · Closed: 56
 
 ### Doc reviews
 
@@ -99,7 +99,7 @@ Open: 0 · Waiting for verify: 1 · Closed: 55
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-06-1/F1 | medium | 06 | path.Join drops the // of a Windows network-share root | fixed (waiting for verify) |
+| task-06-1/F1 | medium | 06 | path.Join drops the // of a Windows network-share root | verified |
 | task-06-1/F2 | low | 06 | Create cannot tell whether it made .sliceflow/ and its .gitignore | deferred: task 09 |
 | task-03-1/F1 | high | 03 | Any flag after slice prints the help and exits 0 | verified |
 | task-03-1/F3 | low | 03 | A bad bool value gives a text that is not one of R38's | verified |
@@ -131,6 +131,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:52 · lead (claude) · task 06 done
+- 2026-10-24 08:52 · code reviewer (claude opus) · task-06-2 submitted: pass; F1 verified, F2 deferred to task 09; no new findings
 - 2026-10-24 08:51 · lead (claude) · task 06 code review started, round 2
 - 2026-10-24 08:51 · lead (claude) · task 06 fixes from review 1 committed (33ac4e1); checks pass; vet passes for windows and darwin too
 - 2026-10-24 08:50 · lead (claude) · task 06 worker round 2 started: F1; F2 deferred to task 09 (the undo needs it)
