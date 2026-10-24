@@ -2,17 +2,17 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 05:00 UTC
+- Updated: 2026-10-24 05:01 UTC
 
 ## Needs human
 
-None.
+- spec.md: the human chooses to pass the spec now, or one more short check of the last fix.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
+| spec.md | draft | 3 | - | - |
 
 ## Tasks
 
@@ -20,15 +20,15 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 3 · Closed: 18
+Open: 0 · Waiting for verify: 1 · Closed: 20
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
 | spec-3/F1 | medium | Warning items: drop Warning: and <name>: , the R23 item | fixed (waiting for verify) |
-| spec-3/F2 | low | R37: with no slices, only slices is [] | fixed (waiting for verify) |
-| spec-3/F3 | low | R26: a bad at, by the form of R19 | fixed (waiting for verify) |
+| spec-3/F2 | low | R37: with no slices, only slices is [] | verified |
+| spec-3/F3 | low | R26: a bad at, by the form of R19 | verified |
 | spec-2/F1 | medium | R9 vs S1 and R10: what the spec path is relative to | verified |
 | spec-2/F2 | medium | The base-branch warning: its form, in --json, and the ! mark | verified |
 | spec-2/F3 | medium | slice list --json with no slices | verified |
@@ -68,6 +68,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 05:01 · lead (claude) · spec-3/F1 finished: R37's warnings items written as in R30
+- 2026-10-24 05:01 · doc reviewer · change review 1 handed in: F2, F3 verified; F1 reopened (R37's top-level warnings)
 - 2026-10-24 05:00 · lead (claude) · spec fixed for spec-3 F1-F3; change review of only these fixes started (reviews/change-1.md)
 - 2026-10-24 05:00 · human · "2": fix spec-3 F1-F3, then a change review of only the fixes
 - 2026-10-24 04:59 · lead (claude) · spec at the review round limit: planning (blocked)

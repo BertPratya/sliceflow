@@ -469,7 +469,8 @@ stderr, changes nothing, and exits with code 1.
 - **R37.** Where `--json` is given, sliceflow shall print, instead of the
   rows or the `No slices` lines, one JSON object with `slices`, a list of
   objects in the form of R30 in the order of R34, and `warnings`, a list
-  of the warnings about the whole repo (the warning of R23). Each slice
+  of the warnings about the whole repo (the warning of R23), each item
+  written as in R30. Each slice
   object holds only its own warnings. With no slices, `slices` is `[]`,
   e.g. `{"slices":[],"warnings":[]}`.
   Check: e2e
