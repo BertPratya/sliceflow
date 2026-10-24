@@ -20,9 +20,6 @@ func TestParseGoodLog(t *testing.T) {
 		if !reflect.DeepEqual(events[0].Data, want) {
 			t.Errorf("%s: data %v", name, events[0].Data)
 		}
-		if Phase(events) != "planning" {
-			t.Errorf("%s: phase", name)
-		}
 	}
 }
 
@@ -92,12 +89,6 @@ func TestParseSeqFirstGoodLine(t *testing.T) {
 	}
 	if len(events) != 1 || !reflect.DeepEqual(warns, want) {
 		t.Errorf("events %d warns %q", len(events), warns)
-	}
-}
-
-func TestPhaseUnknown(t *testing.T) {
-	if Phase(nil) != "unknown" {
-		t.Error("want unknown")
 	}
 }
 

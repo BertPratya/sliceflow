@@ -196,3 +196,118 @@ func TestStatusBaseConfigHEAD(t *testing.T) {
 		t.Errorf("Warnings = %+v", got.Warnings)
 	}
 }
+
+func appendLog(t *testing.T, worktree, name string, evs ...eventlog.Event) {
+	t.Helper()
+	logFile := filepath.Join(filepath.FromSlash(worktree), "docs", "slices", name, ".events.jsonl")
+	f, err := os.OpenFile(logFile, os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	for _, e := range evs {
+		b, err := eventlog.Encode(e)
+		if err != nil {
+			t.Fatal(err)
+		}
+		f.Write(b)
+		if len(b) == 0 || b[len(b)-1] != '\n' {
+			f.WriteString("\n")
+		}
+	}
+	f.Close()
+	testrepo.Git(t, worktree, "add", "--", logFile)
+	testrepo.Git(t, worktree, "commit", "-m", "events")
+}
+
+func TestStatusState(t *testing.T) {
+	r := newRepo(t)
+	ctx := context.Background()
+	c, err := Create(ctx, r, CreateOptions{Name: "login-google", Title: "Login"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	appendLog(t, c.Worktree, "login-google", eventlog.New(2, fixedNow, "slice.titled", eventlog.Titled{Title: "Sign in with Google"}))
+	// An uncommitted line on disk must not count.
+	logFile := filepath.Join(filepath.FromSlash(c.Worktree), "docs", "slices", "login-google", ".events.jsonl")
+	f, _ := os.OpenFile(logFile, os.O_APPEND|os.O_WRONLY, 0o644)
+	f.WriteString("garbage\n")
+	f.Close()
+	got, err := Status(ctx, r, "login-google")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Phase != "planning" || got.Title != "Sign in with Google" || got.State.Title != got.Title {
+		t.Errorf("got %+v", got)
+	}
+	if got.SpecText != "draft" || got.Next != "write spec.md, then: sliceflow spec submit" || got.Merged || len(got.Warnings) != 0 {
+		t.Errorf("got %+v", got)
+	}
+}
+
+func TestStatusMergedNext(t *testing.T) {
+	r := newRepo(t)
+	ctx := context.Background()
+	c, err := Create(ctx, r, CreateOptions{Name: "spec-submit"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	testrepo.Git(t, r.Dir, "merge", "--no-ff", "-m", "merge", "slice/spec-submit")
+	testrepo.Git(t, r.Dir, "worktree", "remove", "--force", c.Worktree)
+	testrepo.Git(t, r.Dir, "branch", "-D", "slice/spec-submit")
+	got, err := Status(ctx, r, "spec-submit")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.Merged || got.Next != "-" || got.SpecText != "draft" {
+		t.Errorf("got %+v", got)
+	}
+}
+
+func TestStatusChangedAfterReview(t *testing.T) {
+	r := newRepo(t)
+	ctx := context.Background()
+	c, err := Create(ctx, r, CreateOptions{Name: "login-google"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	wt := filepath.FromSlash(c.Worktree)
+	specFile := filepath.Join(wt, "docs", "slices", "login-google", "spec.md")
+	if err := os.WriteFile(specFile, []byte("spec\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	testrepo.Git(t, wt, "add", "--", specFile)
+	testrepo.Git(t, wt, "commit", "-m", "spec")
+	commit := gitOut(t, wt, "rev-parse", "HEAD")
+	appendLog(t, c.Worktree, "login-google",
+		eventlog.New(2, fixedNow, "spec.submitted", eventlog.Submitted{Result: "accepted"}),
+		eventlog.New(3, fixedNow, "review.started", eventlog.ReviewStarted{Doc: "spec.md", Round: 1, Reviewer: "placeholder", File: "reviews/spec-1.md", Commit: commit}),
+		eventlog.New(4, fixedNow, "review.finished", eventlog.ReviewFinished{Doc: "spec.md", Round: 1, Result: "passed"}))
+	got, err := Status(ctx, r, "login-google")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.ChangedAfterReview || got.SpecText != "review_passed (review 1, placeholder)" || got.Next != "write the plan" {
+		t.Errorf("unchanged: %+v", got)
+	}
+	if err := os.WriteFile(specFile, []byte("spec changed\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, err = Status(ctx, r, "login-google")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.ChangedAfterReview || got.SpecText != "passed review 1, but spec.md was changed after it" || got.Next != "sliceflow spec submit" {
+		t.Errorf("changed: %+v", got)
+	}
+}
+
+func TestCurrentSliceNameCommand(t *testing.T) {
+	r := newRepo(t)
+	_, err := currentSliceName(context.Background(), r, "spec validate")
+	want := "not on a slice branch (you are on main).\nGive a name: sliceflow spec validate <name>\nSee all slices: sliceflow slice list"
+	var e *Error
+	if !errors.As(err, &e) || e.Message != want {
+		t.Errorf("err = %v", err)
+	}
+}

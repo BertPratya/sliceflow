@@ -152,7 +152,8 @@ func TestStatusBadLines(t *testing.T) {
 	out, errOut, code := run(t, dir, "slice", "status", "spec-submit")
 	want := statusLines("spec-submit", "spec-submit", "planning", "main @ "+commit[:7], at.Format("2006-01-02 15:04")+" UTC")
 	wantErr := "Warning: spec-submit: .events.jsonl line 2: not valid JSON; skipped\n" +
-		"Warning: spec-submit: .events.jsonl line 3: seq 4, expected 2\n"
+		"Warning: spec-submit: .events.jsonl line 3: seq 4, expected 2\n" +
+		"Warning: spec-submit: .events.jsonl line 3: slice.created is not allowed when spec.md is draft; skipped\n"
 	if code != 0 || out != want || errOut != wantErr {
 		t.Fatalf("code %d\nstdout %q\nwant   %q\nstderr %q\nwant   %q", code, out, want, errOut, wantErr)
 	}
@@ -164,9 +165,10 @@ func TestStatusBadLines(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &got); err != nil {
 		t.Fatalf("json: %v: %q", err, out)
 	}
-	if code != 0 || errOut != wantErr || len(got.Warnings) != 2 ||
+	if code != 0 || errOut != wantErr || len(got.Warnings) != 3 ||
 		got.Warnings[0] != ".events.jsonl line 2: not valid JSON; skipped" ||
-		got.Warnings[1] != ".events.jsonl line 3: seq 4, expected 2" {
+		got.Warnings[1] != ".events.jsonl line 3: seq 4, expected 2" ||
+		got.Warnings[2] != ".events.jsonl line 3: slice.created is not allowed when spec.md is draft; skipped" {
 		t.Fatalf("code %d json %q stderr %q", code, out, errOut)
 	}
 }

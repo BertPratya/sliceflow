@@ -45,17 +45,6 @@ func Parse(log []byte) ([]Event, []string) {
 	return events, warnings
 }
 
-// Phase returns "planning" when there is a good slice.created event,
-// else "unknown".
-func Phase(events []Event) string {
-	for _, e := range events {
-		if e.Event == "slice.created" {
-			return "planning"
-		}
-	}
-	return "unknown"
-}
-
 // findDuplicate walks the tokens and returns the path of the first name
 // that appears twice in one object, or "".
 func findDuplicate(dec *json.Decoder, prefix string) (string, error) {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/BertPratya/sliceflow/internal/eventlog"
 	"github.com/BertPratya/sliceflow/internal/git"
+	"github.com/BertPratya/sliceflow/internal/state"
 )
 
 // SliceStatus is what sliceflow knows about one slice. Title is empty when
@@ -20,6 +21,12 @@ type SliceStatus struct {
 	From                *eventlog.From
 	Created             time.Time
 	Warnings            []Warning
+	// State is the replayed state. SpecText and Next are R29's lines.
+	// ChangedAfterReview is R30. Merged: the log was read from the base branch.
+	State              state.State
+	SpecText, Next     string
+	ChangedAfterReview bool
+	Merged             bool
 }
 
 func noSliceError(name string) error {
@@ -30,7 +37,7 @@ func noSliceError(name string) error {
 // the current branch.
 func Status(ctx context.Context, r Repo, name string) (SliceStatus, error) {
 	if name == "" {
-		n, err := currentSliceName(ctx, r)
+		n, err := currentSliceName(ctx, r, "slice status")
 		if err != nil {
 			return SliceStatus{}, err
 		}
@@ -58,7 +65,7 @@ func Status(ctx context.Context, r Repo, name string) (SliceStatus, error) {
 }
 
 // currentSliceName finds the name from the current branch (R31, R32).
-func currentSliceName(ctx context.Context, r Repo) (string, error) {
+func currentSliceName(ctx context.Context, r Repo, command string) (string, error) {
 	out, err := git.Run(ctx, r.Dir, "symbolic-ref", "--quiet", "--short", "HEAD")
 	branch := strings.TrimSpace(out)
 	if err != nil {
@@ -75,7 +82,7 @@ func currentSliceName(ctx context.Context, r Repo) (string, error) {
 	if branch != "" {
 		where = "on " + branch
 	}
-	return "", &Error{Message: fmt.Sprintf("not on a slice branch (you are %s).\nGive a name: sliceflow slice status <name>\nSee all slices: sliceflow slice list", where)}
+	return "", &Error{Message: fmt.Sprintf("not on a slice branch (you are %s).\nGive a name: sliceflow %s <name>\nSee all slices: sliceflow slice list", where, command)}
 }
 
 // baseWarning picks the base branch (R21) and says whether it exists. When
@@ -103,6 +110,7 @@ func readSlice(ctx context.Context, r Repo, name, base string, baseExists bool) 
 	folder := path.Join("docs", "slices", name)
 	logPath := path.Join(folder, ".events.jsonl")
 	ref := ""
+	merged := false
 	branchRef := "refs/heads/slice/" + name
 	ok, err := git.RefExists(ctx, r.Dir, branchRef)
 	if err != nil {
@@ -116,6 +124,7 @@ func readSlice(ctx context.Context, r Repo, name, base string, baseExists bool) 
 		switch {
 		case err == nil:
 			ref = "refs/heads/" + base
+			merged = true
 		case errors.As(err, &ge):
 		default:
 			return SliceStatus{}, false, err
@@ -132,13 +141,21 @@ func readSlice(ctx context.Context, r Repo, name, base string, baseExists bool) 
 	}
 	if !found {
 		st.Warnings = []Warning{{Slice: name, Text: ".events.jsonl not found"}}
+		st.Merged = merged
+		st.SpecText, st.Next = specNext(st.State, false, merged)
 		return st, true, nil
 	}
 	events, warnings := eventlog.Parse(data)
 	for _, text := range warnings {
 		st.Warnings = append(st.Warnings, Warning{Slice: name, Text: text})
 	}
-	st.Phase = eventlog.Phase(events)
+	st.State, warnings = state.Replay(events)
+	for _, text := range warnings {
+		st.Warnings = append(st.Warnings, Warning{Slice: name, Text: text})
+	}
+	st.Phase = st.State.Phase
+	st.Title = st.State.Title
+	st.Merged = merged
 	for _, e := range events {
 		c, isCreated := e.Data.(eventlog.Created)
 		if e.Event != "slice.created" || !isCreated {
@@ -146,11 +163,23 @@ func readSlice(ctx context.Context, r Repo, name, base string, baseExists bool) 
 		}
 		from := c.From
 		st.From = &from
-		st.Title = c.Title
 		if t, err := time.Parse(eventlog.TimeLayout, e.At); err == nil {
 			st.Created = t.UTC()
 		}
 		break
 	}
+	if !merged && st.State.Spec.Status == "review_passed" && st.State.Spec.Review != nil {
+		wt, ok, err := findWorktree(ctx, r, name)
+		if err != nil {
+			return SliceStatus{}, false, err
+		}
+		if ok {
+			st.ChangedAfterReview, err = specChanged(ctx, wt, name, st.State.Spec.Review.Commit)
+			if err != nil {
+				return SliceStatus{}, false, err
+			}
+		}
+	}
+	st.SpecText, st.Next = specNext(st.State, st.ChangedAfterReview, merged)
 	return st, true, nil
 }
