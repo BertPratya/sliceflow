@@ -7,221 +7,153 @@ round: 1
 reviewer: code-reviewer (claude opus)
 ---
 
-<!-- HOW TO FILL THIS TEMPLATE
-
-     A review checks one thing. A doc review (kind: spec, plan, or
-     change) checks a spec, a plan with its tasks.md and preview.md, or
-     the documents changed during building. A code review (kind: task or
-     integration) checks one task, or the whole slice. sliceflow
-     creates this file and fills
-     the front matter. You write the sections below, then hand the review
-     in through sliceflow. After that the file is locked: never edit it again.
-
-     sliceflow reads this file and sets the verdict from it.
-     Code review:
-     - Needs human decision is not None.            → needs_human
-     - else any high or medium finding, new or
-       reopened                                     → changes
-     - else                                         → pass
-     (low findings alone pass)
-     Doc review:
-     - Needs human decision is not None.            → needs_human
-     - else                                         → pass
-     (the lead fixes medium findings, and fixes or leaves low ones)
-
-     sliceflow reads this file. Keep every marker exactly as shown: the
-     headings, the finding headings (### F1.), the labeled lines (Level:,
-     Where:, Breaks:, Why:, Fix:, Guess:), the numbers (**Q1.**), and the
-     line forms in Tests, Previous findings, and Requirements check.
-     Don't rename or reorder them. A
-     labeled line may go on over more lines: indent the extra lines 2
-     spaces more than the label.
-
-     Report real problems only: things that break a requirement, a
-     decision, an interface, or a project rule, or that are clearly wrong.
-     Don't invent issues to look thorough. If everything is fine, say so,
-     and write None. under Findings.
-
-     A spec review is short: fill Summary, Checked, Findings (medium and
-     low), and Needs human decision (every high gap, most important
-     first). Write None. in the other sections.
-
-     - Replace every {{...}} with real text.
-     - A section that doesn't apply gets one line: None.
-     - When you are done, delete every comment and check that no {{ is
-       left. Every placeholder of this template counts, even inside
-       code. A {{ or a comment marker you write yourself inside a code
-       block or `inline code` is real content. To name them in plain
-       text, use `inline code`. -->
-
 # Review
 
 ## Summary
 
-<!-- 1-3 sentences. The overall result, and the main problem if there is
-     one.
-
-     Example:
-     The task covers R10 and the tests are real. One high problem: a done
-     task that is overdue still shows OVERDUE (F1). -->
-
-{{1-3 sentences: the overall result, and the main problem if there is one.}}
+The write path follows the plan, R10's text matches word for word, `seq`
+is right after skipped lines and seq warnings, and all eleven tests are
+real. One high problem: Ctrl-C after git has made the commit (e.g. during
+a `post-commit` hook, or during the `rev-parse HEAD` after it) undoes the
+files on disk and reports "Nothing was changed.", while the commit is on
+the branch (F1). The `index.lock` removal after Ctrl-C can delete a lock
+that another git command holds (F2).
 
 ## Checked
 
-<!-- What this review covered: what you read, and what you ran. This
-     shows the review was real, so a "None." under Findings can be
-     trusted. List only what you actually did.
-
-     - Commits: the commits reviewed (task and integration reviews).
-     - Files read: the files you read, including ones the change uses.
-     - Ran: each command you ran, and its result. More than one: one
-       indented line per command under Ran:.
-     - Requirements: the requirements you checked.
-     - Interfaces: the names you checked against the task, if any.
-     Leave out a line that doesn't apply.
-
-     Example:
-     - Commits: a1b2c3d..e4f5a6b
-     - Files read: internal/list/format.go, internal/list/format_test.go,
-       internal/task/overdue.go
-     - Ran: go test ./internal/list/... (pass)
-     - Requirements: R10
-     - Interfaces: Format(tasks, today) matches the task -->
-
-- Files read: {{files}}
+- Commits: d994f92
+- Files read: internal/slice/save.go, internal/slice/save_test.go,
+  internal/slice/undo.go, internal/slice/create.go (fail),
+  internal/slice/errors.go, internal/slice/status_test.go (appendLog),
+  internal/git/git.go, internal/eventlog/parse.go, internal/cli/output.go,
+  the brief, docs/slices/0002-spec-and-state/plan.md (Saving an event,
+  Undo after a failed commit, Interrupts, TD1),
+  docs/slices/0001-slice-and-events/plan.md (Undo on failure),
+  docs/slices/0002-spec-and-state/status.md (Findings, spec-1/F9)
 - Ran:
-  {{command (result), one per line}}
-- Requirements: {{R1, R2}}
+  go test ./internal/slice/ -run TestSave -count=1 (pass)
+  a scratch test in a copy of the repo, outside the worktree: a
+    `post-commit` hook `sleep 3`, ctx cancelled after 500 ms (the commit
+    was made: 2 commits before, 3 after; error `could not save the event:
+    interrupted. Nothing was changed.`; `git status` shows
+    `M docs/slices/login-google/.events.jsonl`)
+  the same with a `pre-commit` hook `sleep 3` (undone; the worktree's git
+    folder keeps `next-index-<pid>.lock`)
+- Requirements: R2, R6, R8, R9, R10
+- Interfaces: prepared, saveOp, and saveEvent(ctx, r, name, worktree, op)
+  match the task; takeLock, state.Replay, state.Allowed, eventlog.New,
+  eventlog.Encode, git.Run, git.Show are used
 
 ## Tests
 
-<!-- Task reviews only. Other kinds: write None.
-     One line per test named in the task's Done when. Read each test,
-     and say whether it really proves what it claims:
-     - ok: it exists, checks the stated input and expected result, and
-       would fail if the code were broken.
-     - weak, see F2: it exists but would pass with broken code, or
-       checks less than Done when says. Add a finding.
-     - missing, see F3: it doesn't exist. Add a finding.
-
-     Example:
-     - `TestParseDueRejectsBadDate`: ok
-     - `TestDueUnknownTask`: weak, see F2
-     - `TestListSortsByDue`: missing, see F3 -->
-
-- `{{TestName}}`: {{ok, or: weak, see F2, or: missing, see F3}}
+- `TestSaveCommit`: ok
+- `TestSaveOnlyOwnFiles`: ok
+- `TestSaveNoNewline`: ok
+- `TestSavePrepareFails`: ok
+- `TestSaveNotAllowed`: ok
+- `TestSaveHookFails`: ok
+- `TestSaveTail`: ok
+- `TestSaveCancelled`: ok
+- `TestSaveTwoAtOnce`: ok
+- `TestSaveSeqAfterSkipped`: ok
+- `TestSaveLeftoverTemp`: ok
 
 ## Previous findings
 
-<!-- Round 2 and later. Every finding from the last round that was marked
-     fixed, wontfix, or deferred. One line each:
-     - <review>/F1: verified (fixed)
-     - <review>/F2: verified (wontfix)
-     - <review>/F3: verified (deferred)
-     - <review>/F4: reopened. why
-
-     verified means: a fixed finding is really fixed, or the reason given
-     for wontfix or deferred is acceptable. In brackets, say which one.
-     Otherwise: reopened.
-
-     Example:
-     - task-04-1/F1: verified (fixed)
-     - task-04-1/F2: reopened. A done task due today still shows OVERDUE.
-
-     Round 1: write None. -->
-
-- {{task-02-1/F1}}: {{verified (fixed, wontfix, or deferred), or: reopened. why}}
+None.
 
 ## Findings
 
-<!-- New findings only. Number them F1, F2, ... in this file. Outside
-     this file they are called <review>/F1, e.g. task-04-1/F1. List them
-     high first, then medium, then low.
+### F1. Ctrl-C after the commit is made undoes the disk and says nothing changed
 
-     Each finding has these lines:
-     - Level: high, medium, or low. In a doc review the level says who
-       deals with it:
-       - high: needs the human's decision. Never a finding: write it as
-         a question under Needs human decision, with a Guess: line.
-       - medium: the lead can decide and fix it alone: one fix is
-         clearly right and changes nothing the human chose.
-       - low: a small thing, e.g. a typo or a missing example. The lead
-         fixes it or leaves it.
-       In a code review the level says how bad it is:
-       - high: wrong behavior, breaks the spec, plan, or contract,
-         security, or data loss. Blocks. Only a human can mark it
-         wontfix, or defer it out of the slice.
-       - medium: a real problem that doesn't break anything yet. Must be
-         fixed, or a reason given.
-       - low: nice to have. Optional.
-     - Where: file:line, or the document and section. A range:
-       file:12-18. More than one place: separate them with commas.
-     - Breaks: what it breaks: a requirement (R5), a decision (SD1,
-       TD2), a task's Interfaces (task 02), or a project rule (name it).
-       A decision without a number: name the document and section,
-       e.g. docs/sliceflow-design.md 2.3.
-       The work adds behavior nothing asks for? Write: scope, and what
-       it adds, e.g. Breaks: scope: adds --color, which no requirement
-       asks for. A scope finding is at least medium: the plan never adds
-       scope.
-       Breaks nothing approved, e.g. a missing rule or a gap? Write:
-       nothing. Choose the level by its effect, as above. With Breaks:
-       nothing, a finding is medium only if Why: names an input and the
-       wrong result it gives. Otherwise it is low.
-     - Why: what is wrong, and how you found it: the test you ran, or
-       the line you read.
-     - Fix: optional, one or two lines. No fix to suggest? Remove the
-       whole Fix: line.
+Level: high
+Where: internal/slice/save.go:220-226
+Breaks: R10
+Why: R10 counts only Ctrl-C "before the commit is made" as a failed
+  commit. `git commit` makes the commit and moves the branch before it
+  runs the `post-commit` hook. A Ctrl-C during that hook kills git, Run
+  returns `ctx.Err()`, and `fail` runs the undo: it writes the old log
+  back to disk, deletes the event's new files, and returns `could not
+  save the event: interrupted. Nothing was changed.` But the commit is on
+  `slice/<name>`. My scratch test (post-commit `sleep 3`, cancel after
+  500 ms) gave 3 commits instead of 2, and `git status` then showed the
+  log as modified, older than the commit. A caller (task 14's two events)
+  would also stop with the wrong tail. The same happens when Ctrl-C comes
+  just after a successful commit: `rev-parse HEAD` at line 223 runs with
+  the cancelled ctx and returns the plain error `context canceled`,
+  though the event was saved.
+Fix: note the branch's commit before `git commit`; when the commit
+  fails or is stopped, check it again with `context.WithoutCancel(ctx)`.
+  If it moved, the event is saved: no undo, return success. Run the
+  `rev-parse` with `context.WithoutCancel(ctx)` too.
 
-     Example:
-     ### F1. A done task that is overdue still shows OVERDUE
+### F2. The undo may delete an index.lock that another git command holds
 
-     Level: high
-     Where: internal/list/format.go:31
-     Breaks: R12
-     Why: format.go checks only the due date, not whether the task is
-       done. I added a test with a done task due yesterday; it printed
-       OVERDUE.
-     Fix: call task.IsOverdue() instead of comparing the dates here. -->
+Level: medium
+Where: internal/slice/save.go:151-165
+Breaks: R8
+Why: After Ctrl-C, any failure of `git reset` makes the undo delete the
+  worktree's `index.lock`, without checking why reset failed or whose lock
+  it is. The lock is stale only when Go's kill hit git before git's own
+  signal handler cleaned up. With a normal Ctrl-C in a terminal, git gets
+  the SIGINT too and usually removes its own lock first. Then reset fails
+  only if another git command in that worktree holds the lock right then:
+  the user's `git add`, or an editor's git. The undo then deletes that
+  live lock, and both processes write the index at once. The other
+  command's change to the index is lost, or it fails with "unable to
+  write new index file". R8 says other staged changes stay as they were.
+  0001 never needed this: its undo removes the whole worktree, git folder
+  and all, and "never touches a thing that is not on the list".
+  Neither the plan's "Interrupts" nor "Undo after a failed commit" says to
+  remove git's lock.
+Fix: safest: stop git with an interrupt instead of a kill
+  (`cmd.Cancel` sends `os.Interrupt` on Unix, kill after `WaitDelay`), so
+  git removes its own locks. That is in internal/git, outside this task's
+  touches: the lead's call. Where a stale lock still comes up (Windows, or
+  a git that does not exit), remove it only when reset's error is git's
+  `index.lock': File exists` and the lock file is not newer than the
+  moment the stopped git command ended. While a stale lock exists, no
+  other git can make a new one, so an older lock is surely the dead git's.
 
-### F1. {{title}}
+### F3. A stopped commit leaves next-index-<pid>.lock in the git folder
 
-Level: {{high, medium, or low}}
-Where: {{file:line, or the document and section}}
-Breaks: {{R5, TD2, task 02, a project rule, scope: what it adds, or nothing}}
-Why: {{what is wrong, and how you found it}}
-Fix: {{optional: one or two lines}}
+Level: low
+Where: internal/slice/save.go:220
+Breaks: nothing
+Why: `git commit --only` builds a temporary index named
+  `next-index-<pid>.lock` in the worktree's git folder. When the kill
+  stops git, that file stays; my scratch test found it after the undo. It
+  does not block later commits (the pid differs), but it stays there for
+  good. The hook git was running is not stopped either: after a kill, the
+  `pre-commit` hook's process keeps running on its own.
+Fix: the interrupt in F2's fix lets git remove the file itself.
+
+### F4. The undo deletes a file that was on disk before the run but not in the commit
+
+Level: low
+Where: internal/slice/save.go:193-205
+Breaks: nothing
+Why: A file `Prepare` returns that is not in the commit goes on the
+  `created` list, even when it was already on disk. If the commit then
+  fails, the undo deletes it. The plan says to delete only "the files
+  step 5 created". For the review file, R24's check in `Prepare` should
+  stop this earlier, so no current caller reaches it.
+Fix: before writing, check `exists(target)`; put only files that were
+  not there on the `created` list, and keep the old bytes of the others
+  to write back.
 
 ## Requirements check
 
-<!-- Integration reviews only. Other kinds: write None.
-     Every requirement in the spec, checked against the finished slice.
-     (A review whose requirements were given with the request, not by a
-     spec, checks those instead.)
-     One line each: ok, fails (with the finding), or manual (goes to the
-     preview). A fails line names the high or medium findings that make
-     it fail; lows may follow, e.g. fails, see F3; also F7. Only low
-     findings against it? It is ok: write ok, see F7.
-
-     Example:
-     - R1: ok
-     - R3: fails, see F2
-     - R14: manual -->
-
-- {{R1}}: {{ok, or: fails, see F2, or: manual}}
+None.
 
 ## Needs human decision
 
-<!-- Questions only the human can answer, numbered Q1, Q2, ... Each one
-     says what is unclear, and has a Guess: line: what a worker would
-     have to guess without the answer. In a doc review, every high gap
-     goes here. Anything here makes the verdict needs_human.
-
-     Example:
-     - **Q1.** What happens when a task's due date is changed after it
-       was marked done? R2 and R12 don't say.
-       Guess: keep it done and change the date, or reopen it. -->
-
-- **Q1.** {{What is unclear.}}
-  Guess: {{what a worker would have to guess without the answer}}
+- **Q1.** What does R10's message say when the undo cannot put something
+  back? R10 always ends with `Nothing was changed.` (or the Tail). 0001's
+  R18 replaces its last sentence with `Could not remove: <list>.` in that
+  case. The worker keeps `Nothing was changed.` and adds a second line
+  `Could not put back: <list>.`, so the message says nothing was changed
+  and then lists what was changed. This choice is ASSUMED in the commit
+  and changes what users see.
+  Guess: as R18: `Could not put back: <list>.` replaces the last
+  sentence; or keep the worker's second line.

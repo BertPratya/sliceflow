@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:24 UTC
+- Updated: 2026-10-24 17:29 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-10 of 17 done · 1 in_review · 6 todo
+10 of 17 done · 1 doing · 6 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -34,7 +34,7 @@ None.
 | 08 | cli-groups-and-template | core | done | 0 | 1 | - | R35, R36 |
 | 09 | validate-command | core | done | 0 | 2 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
 | 10 | lock | core | done | 0 | 2 | - | R6, R7 |
-| 11 | save-event | core | in_review | 0 | 1 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
+| 11 | save-event | core | doing | 0 | 1 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | todo | 0 | 0 | - | R25, R26, R27 |
 | 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 4 · Closed: 73
+Open: 4 · Waiting for verify: 4 · Closed: 74
 
 ### Doc reviews
 
@@ -105,6 +105,11 @@ Open: 0 · Waiting for verify: 4 · Closed: 73
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-11-1/Q1 | question | 11 | R10's message when the undo cannot put something back | open (the lead decided: `Could not put back: <list>.` replaces the last sentence, as 0001's R18) |
+| task-11-1/F1 | high | 11 | Ctrl-C after the commit was made is treated as a failure | open |
+| task-11-1/F2 | medium | 11 | After Ctrl-C, the undo removes git's index.lock without checking whose it is | open |
+| task-11-1/F3 | low | 11 | A killed git leaves next-index-<pid>.lock, and its hook keeps running | deferred: backlog |
+| task-11-1/F4 | low | 11 | A file on disk but not in the commit is deleted by the undo | open |
 | task-10-2/F1 | low | 10 | A lasting permission error waits the full lock wait before it shows | wontfix: a rare setup problem; the error is still true; one code path stays tested on every system |
 | task-10-1/F1 | medium | 10 | Freeing the lock tries the remove once; on Windows it can fail and leave the lock | verified |
 | task-10-1/F2 | low | 10 | A lock file being deleted on Windows gives a raw error, not a retry | verified |
@@ -149,6 +154,8 @@ None.
 - Task 07, task-07-1/F1 (low): fixed with two JSON test cases (a refused submit on an unchanged `review_passed` spec, and on a merged slice: no `submit_refused`), not with a new `SliceStatus` field. Why: the tests catch a drift between the two copies of R29's rule, inside task 07's touches; a new field would change `internal/slice` and tasks.md.
 - Task 09, task-09-1/F1: R19's path comes from a private helper in `internal/slice` that builds it from the real worktree path (relative to the main checkout's root, with `/`). Task 14 reuses it; its brief will say so. Why: one way to build R19's path for both commands; a private name changes no document.
 - Task 10, task-10-2/F1 (low): wontfix. A lasting permission error on the lock folder shows after the lock wait (10 s), as itself. Why: it is a rare setup problem, the error is still true, and a Windows-only retry would leave that path untested on Linux and macOS.
+- Task 11, task-11-1/Q1: when the undo cannot put something back, `Could not put back: <list>.` replaces R10's last sentence. Why: R10 says the message follows 0001's R18, and R18 does the same with `Could not remove: <list>.`; no document changes, and the message no longer says "Nothing was changed." when something was not put back. The human may overrule it.
+- Task 11, task-11-1/F2: the undo removes git's `index.lock` only when `git reset` fails because that lock exists, and the lock is not newer than the moment the stopped git ended (so it is the dead git's). Why: it keeps the undo working after Ctrl-C without touching another git's live lock; it stays inside task 11's touches. Stopping git gently in `internal/git` (the reviewer's other idea) changes every git command, so it went to the backlog, with F3.
 
 ## Preview
 
@@ -158,6 +165,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:29 · lead (claude) · task 11 worker round 2 started, with review task-11-1
+- 2026-10-24 17:29 · lead (claude) · decided task-11-1/Q1 and F2; F3 and F2's other idea to the backlog (main 4e94985)
+- 2026-10-24 17:29 · code-reviewer (claude opus) · task review 1 of task 11 handed in: 1 high, 1 medium, 2 low, 1 question
 - 2026-10-24 17:24 · lead (claude) · task review 1 of task 11 started
 - 2026-10-24 17:24 · lead (claude) · task 11 committed (d994f92); the checks pass
 - 2026-10-24 17:24 · worker (claude sonnet) · task 11 round 1 handed in
