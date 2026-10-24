@@ -100,3 +100,62 @@ func TestPhaseUnknown(t *testing.T) {
 		t.Error("want unknown")
 	}
 }
+
+func TestParseNewEvents(t *testing.T) {
+	var log string
+	for _, c := range newEventCases {
+		log += c.line + "\n"
+	}
+	events, warns := Parse([]byte(log))
+	if len(events) != 4 {
+		t.Fatalf("events %v warns %v", events, warns)
+	}
+	for i, c := range newEventCases {
+		want := c.ev
+		want.Line = i + 1
+		if !reflect.DeepEqual(events[i], want) {
+			t.Errorf("line %d: got %+v want %+v", i+1, events[i], want)
+		}
+	}
+	// seq gaps are warned, not skipped; here seq 2,2,4,5 gives warnings
+	if len(warns) == 0 {
+		t.Error("expected seq warnings")
+	}
+}
+
+func TestParseNewEventsBad(t *testing.T) {
+	c := goodCommit
+	ln := func(ev, data string) string {
+		return `{"version":1,"seq":2,"event":"` + ev + `","at":"2026-10-24T07:50:00Z","data":` + data + `}`
+	}
+	started := func(round, doc, commit string) string {
+		return ln("review.started", `{"doc":`+doc+`,"round":`+round+`,"reviewer":"r","file":"f","commit":`+commit+`}`)
+	}
+	q := `"` + c + `"`
+	rows := []struct{ name, bad, reason string }{
+		{"title empty", ln("slice.titled", `{"title":""}`), `field "data.title" has a wrong value`},
+		{"title type", ln("slice.titled", `{"title":3}`), `field "data.title" has the wrong type`},
+		{"title extra", ln("slice.titled", `{"title":"a","x":1}`), `unknown field "data.x"`},
+		{"title missing", ln("slice.titled", `{}`), `missing field "data.title"`},
+		{"data type", ln("slice.titled", `3`), `field "data" has the wrong type`},
+		{"result", ln("spec.submitted", `{"result":"maybe","errors":0,"warnings":0}`), `field "data.result" has a wrong value`},
+		{"errors", ln("spec.submitted", `{"result":"accepted","errors":-1,"warnings":0}`), `field "data.errors" has a wrong value`},
+		{"warnings type", ln("spec.submitted", `{"result":"accepted","errors":0,"warnings":1.5}`), `field "data.warnings" has the wrong type`},
+		{"round 0", started("0", `"spec.md"`, q), `field "data.round" has a wrong value`},
+		{"commit", started("1", `"spec.md"`, `"abc"`), `field "data.commit" has a wrong value`},
+		{"doc", started("1", `"plan.md"`, q), `field "data.doc" has a wrong value`},
+		{"round missing", ln("review.started", `{"doc":"spec.md","reviewer":"r","file":"f","commit":`+q+`}`), `missing field "data.round"`},
+		{"finished result", ln("review.finished", `{"doc":"spec.md","round":1,"result":"ok"}`), `field "data.result" has a wrong value`},
+		{"finished round missing", ln("review.finished", `{"doc":"spec.md","result":"passed"}`), `missing field "data.round"`},
+		{"finished extra", ln("review.finished", `{"doc":"spec.md","round":1,"result":"passed","x":1}`), `unknown field "data.x"`},
+		{"top unknown", `{"version":1,"seq":2,"event":"slice.titled","at":"2026-10-24T07:50:00Z","by":"x","data":{"title":"a"}}`, `unknown field "by"`},
+		{"at", `{"version":1,"seq":2,"event":"slice.titled","at":"yesterday","data":{"title":"a"}}`, `field "at" has a wrong value`},
+	}
+	for _, r := range rows {
+		events, warns := Parse([]byte(r.bad + "\n"))
+		want := ".events.jsonl line 1: " + r.reason + "; skipped"
+		if len(events) != 0 || len(warns) != 1 || warns[0] != want {
+			t.Errorf("%s: events %v warns %q, want %q", r.name, events, warns, want)
+		}
+	}
+}

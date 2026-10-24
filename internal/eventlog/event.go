@@ -19,6 +19,41 @@ type Event struct {
 	Event   string `json:"event"`
 	At      string `json:"at"`
 	Data    any    `json:"data"`
+	// Line is the line number in the log, set by Parse. Never written.
+	Line int `json:"-"`
+}
+
+// Titled is the data of a slice.titled event.
+type Titled struct {
+	Title string `json:"title"`
+}
+
+// Submitted is the data of a spec.submitted event.
+type Submitted struct {
+	Result   string `json:"result"`
+	Errors   int    `json:"errors"`
+	Warnings int    `json:"warnings"`
+}
+
+// ReviewStarted is the data of a review.started event.
+type ReviewStarted struct {
+	Doc      string `json:"doc"`
+	Round    int    `json:"round"`
+	Reviewer string `json:"reviewer"`
+	File     string `json:"file"`
+	Commit   string `json:"commit"`
+}
+
+// ReviewFinished is the data of a review.finished event.
+type ReviewFinished struct {
+	Doc    string `json:"doc"`
+	Round  int    `json:"round"`
+	Result string `json:"result"`
+}
+
+// New returns an event with version 1 and the time in UTC.
+func New(seq int, at time.Time, event string, data any) Event {
+	return Event{Version: 1, Seq: seq, Event: event, At: at.UTC().Format(TimeLayout), Data: data}
 }
 
 // Created is the data of a slice.created event.
