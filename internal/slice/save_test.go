@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/BertPratya/sliceflow/internal/eventlog"
+	"github.com/BertPratya/sliceflow/internal/git"
 	"github.com/BertPratya/sliceflow/internal/state"
 	"github.com/BertPratya/sliceflow/internal/testrepo"
 )
@@ -477,4 +478,46 @@ func TestSaveOldIndexLockKept(t *testing.T) {
 		t.Errorf("old index.lock was removed: %v", err)
 	}
 	os.Remove(lock)
+}
+
+func TestStaleIndexLock(t *testing.T) {
+	started := time.Date(2030, 1, 1, 12, 0, 0, 0, time.UTC)
+	stopped := started.Add(time.Second)
+	resetErr := &git.Error{Args: []string{"reset"}, ExitCode: 128,
+		Stderr: "fatal: Unable to create '/x/index.lock': File exists."}
+	cancelled, cancel := context.WithCancel(context.Background())
+	cancel()
+	cases := []struct {
+		name      string
+		ctx       context.Context
+		mtime     time.Time
+		wantTrue  bool
+		wantAlive bool
+	}{
+		{"inside window, cancelled", cancelled, started.Add(500 * time.Millisecond), true, false},
+		{"inside window, not cancelled", context.Background(), started.Add(500 * time.Millisecond), false, true},
+		{"older than started less margin", cancelled, started.Add(-lockMargin - time.Second), false, true},
+		{"newer than stopped", cancelled, stopped.Add(time.Second), false, true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			_, wt := saveSlice(t)
+			lock := worktreeIndexLock(t, wt)
+			if err := os.WriteFile(lock, nil, 0o644); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Chtimes(lock, c.mtime, c.mtime); err != nil {
+				t.Fatal(err)
+			}
+			got := staleIndexLock(c.ctx, wt, resetErr, started, stopped)
+			if got != c.wantTrue {
+				t.Errorf("returned %v, want %v", got, c.wantTrue)
+			}
+			_, err := os.Stat(lock)
+			if alive := err == nil; alive != c.wantAlive {
+				t.Errorf("lock alive = %v, want %v", alive, c.wantAlive)
+			}
+			os.Remove(lock)
+		})
+	}
 }

@@ -159,10 +159,11 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 		args := append([]string{"reset", "-q", "--"}, gitFiles...)
 		if _, err := git.Run(uctx, worktree, args...); err != nil {
 			// A stopped git commit may leave its index.lock. Remove it only
-			// when reset failed because that lock exists, and the lock is
-			// not newer than the moment the commit returned: then it is
-			// the dead git's, not another command's.
-			if staleIndexLock(uctx, worktree, err, started, stopped) {
+			// when the commit was stopped (ctx cancelled), reset failed
+			// because that lock exists, and the lock is not newer than the
+			// moment the commit returned: then it is the dead git's, not
+			// another command's.
+			if staleIndexLock(ctx, worktree, err, started, stopped) {
 				_, err = git.Run(uctx, worktree, args...)
 			}
 			if err != nil {
@@ -263,10 +264,15 @@ func savedResult(id string, events []eventlog.Event, ev eventlog.Event) (string,
 const lockMargin = 2 * time.Second
 
 // staleIndexLock removes the worktree's index.lock and returns true, only
-// when reset failed because that lock exists and its mtime is in the window
+// when ctx was cancelled (the commit was stopped; a git that failed on its
+// own removes its lock), reset failed because that lock exists and its mtime is in the window
 // of the stopped git commit: not before started (minus a margin for coarse
 // file times), not after stopped.
 func staleIndexLock(ctx context.Context, worktree string, resetErr error, started, stopped time.Time) bool {
+	if ctx.Err() == nil {
+		return false
+	}
+	ctx = context.WithoutCancel(ctx)
 	var ge *git.Error
 	if !errors.As(resetErr, &ge) || !strings.Contains(ge.Stderr, "index.lock") || !strings.Contains(ge.Stderr, "File exists") {
 		return false
