@@ -202,8 +202,11 @@ A user, or an AI agent, sees every slice in progress.
   print normally.
   Shows: R36
 - **S23.** **When** I run `sliceflow slice list --json`,
-  **Then** sliceflow prints one JSON list of objects, each in the form of
-  S16.
+  **Then** sliceflow prints one JSON object, with each slice in the form
+  of S16:
+  ```
+  {"slices":[{"slice":"spec-submit","phase":"planning",...,"warnings":[]},{"slice":"login-google",...}],"warnings":[]}
+  ```
   Shows: R37
 - **S24.** **Given** no slice is in progress,
   **When** I run `sliceflow slice list`,
@@ -300,9 +303,10 @@ A user learns how to use a command, and sees what was wrong.
   Check: e2e
 - **R9.** When the slice is created, sliceflow shall print the lines of
   S1: `Created slice <name>.`, the branch with its base branch and short
-  commit, the worktree path, the spec path, and the `Next:` line. Each
-  relative path is relative to the root of the main checkout, also when
-  the command runs in a subfolder or in another worktree.
+  commit, the worktree path, the spec path, and the `Next:` line. The
+  `Worktree:` and `Next:` paths are relative to the root of the main
+  checkout, also when the command runs in a subfolder or in another
+  worktree. The `Spec:` path is the path inside the worktree.
   Check: e2e
 - **R10.** Where `--json` is given, sliceflow shall print, instead of R9's
   lines, one JSON object with `slice`, `branch`, `from` (`branch` and the
@@ -395,7 +399,10 @@ stderr, changes nothing, and exits with code 1.
   line and add the warning `.events.jsonl line <n>: <reason>; skipped`.
   The reasons are: `blank line`, `not valid JSON`,
   `unknown version <v>`, `unknown event "<e>"`, `unknown field "<f>"`,
-  `missing field "<f>"`, and `field "<f>" has the wrong type`. A field
+  `missing field "<f>"`, `field "<f>" has the wrong type`, and
+  `field "<f>" has a wrong value`. A wrong value is: an `at` that is not
+  a UTC time like `2026-10-24T07:42:00Z`, a `commit` that is not 40 or
+  64 lowercase hex characters, or an empty `branch` or `title`. A field
   inside `data` is named like `data.from.branch`. The order of the fields
   is not checked when reading. If the log does not exist, sliceflow
   shall add the warning `.events.jsonl not found`.
@@ -405,9 +412,10 @@ stderr, changes nothing, and exits with code 1.
   `.events.jsonl line <n>: seq <found>, expected <expected>`. The kept
   line counts as the last good line: `seq` 1, 2, 4, 5 gives one warning.
   Check: unit
-- **R28.** sliceflow shall print each warning on stderr as
-  `Warning: <name>: <warning>`. A warning shall never stop a command or
-  change its exit code.
+- **R28.** sliceflow shall print each warning about a slice on stderr as
+  `Warning: <name>: <warning>`, and the warning of R23 once, as R23
+  writes it. A warning shall never stop a command or change its exit
+  code.
   Check: e2e
 
 ### Status of one slice
@@ -421,8 +429,10 @@ stderr, changes nothing, and exits with code 1.
 - **R30.** Where `--json` is given, sliceflow shall print, instead of
   R29's lines, one JSON object with `slice`, `title` (only when one was
   saved), `phase`, `from`, `created` (RFC 3339 in UTC), and `warnings`
-  (a list, empty when there are none). A value the log does not have is
-  left out.
+  (a list, empty when there are none). Each item of `warnings` is the
+  warning's text only, without `Warning: <name>: `. The list also holds
+  the warning of R23, when there is one. A value the log does not have
+  is left out.
   Check: e2e
 - **R31.** When no name is given and the current branch is
   `slice/<name>`, sliceflow shall show the status of `<name>`.
@@ -442,7 +452,7 @@ stderr, changes nothing, and exits with code 1.
   print a header and one row per slice in progress, with the columns
   `NAME`, `TITLE`, `PHASE`, and `CREATED (UTC)`, oldest first. Columns
   are separated by 2 spaces, and each is as wide as its widest value.
-  Slices
+  Slices with the same created time are in name order, a to z. Slices
   with no created time come last, by name. With no rows, it shall print
   `No slices in progress.` instead.
   Check: e2e
@@ -450,11 +460,16 @@ stderr, changes nothing, and exits with code 1.
   where `--all` is given. With `--all` and no rows, it shall print
   `No slices.`
   Check: e2e
-- **R36.** If a slice has warnings, then sliceflow shall show ` !` after
-  its phase in the list, and still print every other row.
+- **R36.** If a slice has warnings of its own, then sliceflow shall show
+  ` !` after its phase in the list, and still print every other row. The
+  warning of R23 adds no ` !`.
   Check: e2e
-- **R37.** Where `--json` is given, sliceflow shall print one JSON list
-  of objects in the form of R30, in the order of R34.
+- **R37.** Where `--json` is given, sliceflow shall print, instead of the
+  rows or the `No slices` lines, one JSON object with `slices`, a list of
+  objects in the form of R30 in the order of R34, and `warnings`, a list
+  of the warnings about the whole repo (the warning of R23). Each slice
+  object holds only its own warnings. With no slices, it prints
+  `{"slices":[],"warnings":[]}`.
   Check: e2e
 
 ### Every command
