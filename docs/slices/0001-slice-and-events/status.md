@@ -1,12 +1,12 @@
 # Status: 0001-slice-and-events
 
-- Phase: integration
+- Phase: preview
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 10:37 UTC
+- Updated: 2026-10-24 10:41 UTC
 
 ## Needs human
 
-None.
+- The preview: the human tries checks P1 to P5 in preview.md and reports each result.
 
 ## Documents
 
@@ -41,7 +41,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 2 · Closed: 84
+Open: 0 · Waiting for verify: 0 · Closed: 86
 
 ### Doc reviews
 
@@ -142,8 +142,9 @@ Open: 0 · Waiting for verify: 2 · Closed: 84
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| integration-1/F1 | high | removeWorktree runs git worktree prune, which clears other stale entries | fixed (waiting for verify): task 14 |
-| integration-1/F2 | low | Small pieces of logic are copied between files | fixed (waiting for verify): task 15 |
+| integration-2/F1 | low | readSlice's parameter baseExists hides the function baseExists | deferred: backlog |
+| integration-1/F1 | high | removeWorktree runs git worktree prune, which clears other stale entries | verified: task 14 |
+| integration-1/F2 | low | Small pieces of logic are copied between files | verified: task 15 |
 
 ## Lead's decisions
 
@@ -164,12 +165,19 @@ Open: 0 · Waiting for verify: 2 · Closed: 84
 
 ## Preview
 
-None.
+- P1 (S1): not tried
+- P2 (S13): not tried
+- P3 (S20): not tried
+- P4 (S26): not tried
+- P5 (R18): not tried
 
 ## Log
 
 Newest first.
 
+- 2026-10-24 10:41 · lead (claude) · phase preview: the preview goes to the human
+- 2026-10-24 10:41 · lead (claude) · integration-2/F1 (low) deferred to the backlog (main, eec3b1c)
+- 2026-10-24 10:41 · code reviewer (claude opus) · integration-2 submitted: pass; integration-1/F1 and F2 verified; R1 to R43 ok; 1 low
 - 2026-10-24 10:37 · lead (claude) · integration review started, round 2; main has not moved since 28e9abb; full checks pass
 - 2026-10-24 10:37 · lead (claude) · every task done again; phase back to integration
 - 2026-10-24 10:37 · lead (claude) · task 15 done (be75cfb; low, not code-reviewed); checks pass, no test file changed
