@@ -311,3 +311,37 @@ func TestCurrentSliceNameCommand(t *testing.T) {
 		t.Errorf("err = %v", err)
 	}
 }
+
+func TestStatusWorktreeDeletedByHand(t *testing.T) {
+	r := newRepo(t)
+	ctx := context.Background()
+	c, err := Create(ctx, r, CreateOptions{Name: "login-google"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	wt := filepath.FromSlash(c.Worktree)
+	specFile := filepath.Join(wt, "docs", "slices", "login-google", "spec.md")
+	if err := os.WriteFile(specFile, []byte("spec\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	testrepo.Git(t, wt, "add", "--", specFile)
+	testrepo.Git(t, wt, "commit", "-m", "spec")
+	commit := gitOut(t, wt, "rev-parse", "HEAD")
+	appendLog(t, c.Worktree, "login-google",
+		eventlog.New(2, fixedNow, "spec.submitted", eventlog.Submitted{Result: "accepted"}),
+		eventlog.New(3, fixedNow, "review.started", eventlog.ReviewStarted{Doc: "spec.md", Round: 1, Reviewer: "placeholder", File: "reviews/spec-1.md", Commit: commit}),
+		eventlog.New(4, fixedNow, "review.finished", eventlog.ReviewFinished{Doc: "spec.md", Round: 1, Result: "passed"}))
+	if err := os.RemoveAll(wt); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Status(ctx, r, "login-google")
+	if err != nil {
+		t.Fatalf("status: %v", err)
+	}
+	if got.ChangedAfterReview || got.SpecText != "review_passed (review 1, placeholder)" {
+		t.Errorf("got %+v", got)
+	}
+	if _, err := List(ctx, r, false); err != nil {
+		t.Fatalf("list: %v", err)
+	}
+}

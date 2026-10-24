@@ -14,7 +14,7 @@ import (
 // specChanged says whether spec.md in the worktree differs from spec.md in
 // the reviewed commit (R30). git compares through its line-end rules. Any
 // failure other than a difference, e.g. a commit that is not in the repo,
-// means not compared: false, nil.
+// or git that cannot start in the folder, means not compared: false, nil.
 func specChanged(ctx context.Context, worktree, name, commit string) (bool, error) {
 	if worktree == "" || commit == "" {
 		return false, nil
@@ -27,7 +27,8 @@ func specChanged(ctx context.Context, worktree, name, commit string) (bool, erro
 	if errors.As(err, &ge) {
 		return ge.ExitCode == 1, nil
 	}
-	return false, err
+	// Git could not start, e.g. the folder is gone: not compared.
+	return false, nil
 }
 
 func plural(n int, word string) string {

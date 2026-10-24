@@ -33,6 +33,7 @@ func TestSpecNext(t *testing.T) {
 		{"passed", mk("review_passed", rev(1, "passed"), nil, 1), false, false, "review_passed (review 1, placeholder)", "write the plan"},
 		{"passed changed", mk("review_passed", rev(1, "passed"), nil, 1), true, false, "passed review 1, but spec.md was changed after it", "sliceflow spec submit"},
 		{"no created", state.State{Phase: "unknown"}, false, false, "-", "-"},
+		{"passed refused, unchanged", mk("review_passed", rev(1, "passed"), &state.Counts{Errors: 1}, 1), false, false, "review_passed (review 1, placeholder)", "write the plan"},
 		{"merged", mk("review_passed", rev(1, "passed"), nil, 1), false, true, "review_passed (review 1, placeholder)", "-"},
 		{"refused 1 warning", mk("draft", nil, &state.Counts{Warnings: 1}, 0), false, false, "draft (submit refused: 1 warning)", fix},
 		{"refused 2 errors 1 warning", mk("draft", nil, &state.Counts{Errors: 2, Warnings: 1}, 0), false, false, "draft (submit refused: 2 errors, 1 warning)", fix},
@@ -95,5 +96,13 @@ func TestSpecChangedAutoCRLF(t *testing.T) {
 	got, err := specChanged(ctx, r.Dir, "x", commit)
 	if err != nil || got {
 		t.Errorf("crlf only: %v %v", got, err)
+	}
+}
+
+func TestSpecChangedNoFolder(t *testing.T) {
+	gone := filepath.Join(t.TempDir(), "gone")
+	got, err := specChanged(context.Background(), gone, "x", "0123456789abcdef0123456789abcdef01234567")
+	if err != nil || got {
+		t.Errorf("no folder: %v %v", got, err)
 	}
 }

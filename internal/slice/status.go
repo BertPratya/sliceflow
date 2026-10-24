@@ -174,10 +174,7 @@ func readSlice(ctx context.Context, r Repo, name, base string, baseExists bool) 
 			return SliceStatus{}, false, err
 		}
 		if ok {
-			st.ChangedAfterReview, err = specChanged(ctx, wt, name, st.State.Spec.Review.Commit)
-			if err != nil {
-				return SliceStatus{}, false, err
-			}
+			st.ChangedAfterReview, _ = specChanged(ctx, wt, name, st.State.Spec.Review.Commit)
 		}
 	}
 	st.SpecText, st.Next = specNext(st.State, st.ChangedAfterReview, merged)
