@@ -2,20 +2,20 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 07:36 UTC
+- Updated: 2026-10-24 07:37 UTC
 
 ## Needs human
 
-None.
+- The planning is waiting for approval
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
-| plan.md | in_review | 3 | - | - |
-| preview.md | in_review | with plan.md | - | - |
-| tasks.md | in_review | with plan.md | - | - |
+| spec.md | review_passed | 3 | - | - |
+| plan.md | review_passed | 3 | - | - |
+| preview.md | review_passed | with plan.md | - | - |
+| tasks.md | review_passed | with plan.md | - | - |
 
 ## Tasks
 
@@ -39,14 +39,15 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 2 · Closed: 45
+Open: 0 · Waiting for verify: 0 · Closed: 48
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| change-3/F1 | medium | TestReasonFileError fails on Linux and macOS (ToSlash only converts the own separator) | fixed |
-| change-3/F2 | low | Two periods when the reason ends with . | fixed |
+| change-4/F1 | low | The final . is dropped for every reason, but task 09 names only file errors | fixed: task 09 step 3 names Flow 3 step 5; TestCreateHookOutput's first line ends in . |
+| change-3/F1 | medium | TestReasonFileError fails on Linux and macOS (ToSlash only converts the own separator) | verified |
+| change-3/F2 | low | Two periods when the reason ends with . | verified |
 | plan-3/F1 | medium | R18's system error reason: not in Flow 3 or task 09, path with \ on Windows | verified |
 | plan-3/F2 | low | Task 09: how to get <command> from git.Error.Args | verified |
 | plan-2/F1 | medium | Task 08's folder check misses Cross-platform paths | verified |
@@ -113,6 +114,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 07:37 · lead (claude) · change-4/F1 (low) fixed; spec, plan, tasks, preview review_passed; the planning waits for the human's approval
+- 2026-10-24 07:37 · doc reviewer (claude opus) · change-4: both fixes verified; 1 low; nothing for the human to decide
 - 2026-10-24 07:36 · lead (claude) · change-3 fixed (test input with FromSlash; a final . of a reason dropped); change review started (reviews/change-4.md)
 - 2026-10-24 07:36 · human · change-3/F1 fix: yes
 - 2026-10-24 07:28 · doc reviewer (claude opus) · change-3: the three fixes verified; new from the F1 fix: 1 medium, 1 low; nothing for the human to decide
