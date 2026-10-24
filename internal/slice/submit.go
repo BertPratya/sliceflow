@@ -29,6 +29,9 @@ func Submit(ctx context.Context, r Repo, name string) (Submission, error) {
 	if name == "" {
 		n, err := currentSliceName(ctx, r, "spec submit")
 		if err != nil {
+			if ctx.Err() != nil {
+				return Submission{}, InterruptedSave()
+			}
 			return Submission{}, err
 		}
 		name = n

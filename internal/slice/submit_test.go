@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/BertPratya/sliceflow/internal/eventlog"
+	"github.com/BertPratya/sliceflow/internal/spec"
 	"github.com/BertPratya/sliceflow/internal/testrepo"
 )
 
@@ -25,6 +26,20 @@ func writeSpec(t *testing.T, wt, extra string) {
 	}
 	text := strings.Replace(string(b), "slice: 0001-slice-and-events", "slice: "+saveName, 1)
 	if err := os.WriteFile(specPath(wt), []byte(text+extra), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// writeOpenQuestions turns the finished spec's Open questions into S6's
+// two questions: its one warning is "2 open questions left (Q1, Q2)".
+func writeOpenQuestions(t *testing.T, wt string) {
+	t.Helper()
+	b := readFile(t, specPath(wt))
+	text := strings.Replace(b, "## Open questions\n\nNone.\n", "## Open questions\n\n- **Q1.** First?\n- **Q2.** Second?\n", 1)
+	if text == b {
+		t.Fatal("open questions not replaced")
+	}
+	if err := os.WriteFile(specPath(wt), []byte(text), 0o644); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -53,7 +68,8 @@ func wantSubmitFiles() string {
 
 func TestSubmitRefused(t *testing.T) {
 	r, wt := saveSlice(t)
-	writeSpec(t, wt, "\n<!-- todo -->\n")
+	writeSpec(t, wt, "")
+	writeOpenQuestions(t, wt)
 	before := commitCount(t, wt)
 	sub, err := Submit(context.Background(), r, saveName)
 	if err != nil {
@@ -65,8 +81,14 @@ func TestSubmitRefused(t *testing.T) {
 	if sub.Before != "draft" {
 		t.Errorf("before %q", sub.Before)
 	}
-	if len(sub.Problems) == 0 {
-		t.Error("no problems")
+	var warns []string
+	for _, p := range sub.Problems {
+		if p.Level == spec.LevelWarning {
+			warns = append(warns, p.Message)
+		}
+	}
+	if len(warns) != 1 || warns[0] != "2 open questions left (Q1, Q2)" {
+		t.Errorf("warnings %q", warns)
 	}
 	if commitCount(t, wt) == before {
 		t.Fatal("no commit")
@@ -128,6 +150,21 @@ func TestSubmitStates(t *testing.T) {
 		wantErrMsg(t, err, "spec.md is submitted; review it with: sliceflow spec review. Nothing was changed.")
 		if commitCount(t, wt) != before {
 			t.Error("commit made")
+		}
+	})
+
+	t.Run("submitted, no spec.md", func(t *testing.T) {
+		r, wt := saveSlice(t)
+		commitEvents(t, wt, submitted)
+		if err := os.Remove(specPath(wt)); err != nil {
+			t.Fatal(err)
+		}
+		before := commitCount(t, wt)
+		log := readFile(t, saveLogPath(wt))
+		_, err := Submit(ctx, r, saveName)
+		wantErrMsg(t, err, "spec.md is submitted; review it with: sliceflow spec review. Nothing was changed.")
+		if commitCount(t, wt) != before || readFile(t, saveLogPath(wt)) != log {
+			t.Error("something changed")
 		}
 	})
 
@@ -202,7 +239,8 @@ func TestSubmitStates(t *testing.T) {
 
 	t.Run("refused keeps review", func(t *testing.T) {
 		r, wt := reviewed(t, true)
-		writeSpec(t, wt, "\n<!-- todo -->\n")
+		writeSpec(t, wt, "")
+		writeOpenQuestions(t, wt)
 		sub, err := Submit(ctx, r, saveName)
 		if err != nil {
 			t.Fatal(err)
@@ -252,5 +290,18 @@ func TestSubmitNoSpec(t *testing.T) {
 	wantErrMsg(t, err, ".sliceflow/worktrees/login-google/docs/slices/login-google/spec.md not found. Nothing was changed.")
 	if commitCount(t, wt) != before || readFile(t, saveLogPath(wt)) != log {
 		t.Error("something changed")
+	}
+}
+
+func TestSubmitNoNameInterrupted(t *testing.T) {
+	r, wt := saveSlice(t)
+	writeSpec(t, wt, "")
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	before := commitCount(t, wt)
+	_, err := Submit(ctx, r, "")
+	wantErrMsg(t, err, InterruptedSave().(*Error).Message)
+	if commitCount(t, wt) != before {
+		t.Error("commit made")
 	}
 }
