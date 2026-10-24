@@ -39,16 +39,25 @@ var newEventCases = []struct {
 }{
 	{New(2, time.Date(2026, 10, 24, 7, 50, 0, 0, time.UTC), "slice.titled", Titled{Title: "Sign in with Google"}),
 		`{"version":1,"seq":2,"event":"slice.titled","at":"2026-10-24T07:50:00Z","data":{"title":"Sign in with Google"}}`},
-	{New(2, time.Date(2026, 10, 24, 9, 10, 0, 0, time.UTC), "spec.submitted", Submitted{Result: "refused", Errors: 0, Warnings: 1}),
-		`{"version":1,"seq":2,"event":"spec.submitted","at":"2026-10-24T09:10:00Z","data":{"result":"refused","errors":0,"warnings":1}}`},
+	{New(3, time.Date(2026, 10, 24, 10, 0, 0, 0, time.UTC), "spec.submitted", Submitted{Result: "accepted", Errors: 0, Warnings: 0}),
+		`{"version":1,"seq":3,"event":"spec.submitted","at":"2026-10-24T10:00:00Z","data":{"result":"accepted","errors":0,"warnings":0}}`},
 	{New(4, time.Date(2026, 10, 24, 10, 5, 0, 0, time.UTC), "review.started", ReviewStarted{Doc: "spec.md", Round: 1, Reviewer: "placeholder", File: "reviews/spec-1.md", Commit: "3f2a1c9e5b7d4a6f8c0e2b4d6f8a0c2e4b6d8f0a"}),
 		`{"version":1,"seq":4,"event":"review.started","at":"2026-10-24T10:05:00Z","data":{"doc":"spec.md","round":1,"reviewer":"placeholder","file":"reviews/spec-1.md","commit":"3f2a1c9e5b7d4a6f8c0e2b4d6f8a0c2e4b6d8f0a"}}`},
 	{New(5, time.Date(2026, 10, 24, 10, 5, 0, 0, time.UTC), "review.finished", ReviewFinished{Doc: "spec.md", Round: 1, Result: "passed"}),
 		`{"version":1,"seq":5,"event":"review.finished","at":"2026-10-24T10:05:00Z","data":{"doc":"spec.md","round":1,"result":"passed"}}`},
 }
 
+// refusedCase is the S30 line.
+var refusedCase = struct {
+	ev   Event
+	line string
+}{
+	New(2, time.Date(2026, 10, 24, 9, 10, 0, 0, time.UTC), "spec.submitted", Submitted{Result: "refused", Errors: 0, Warnings: 1}),
+	`{"version":1,"seq":2,"event":"spec.submitted","at":"2026-10-24T09:10:00Z","data":{"result":"refused","errors":0,"warnings":1}}`,
+}
+
 func TestEncodeNewEvents(t *testing.T) {
-	for _, c := range newEventCases {
+	for _, c := range append(newEventCases[:len(newEventCases):len(newEventCases)], refusedCase) {
 		got, err := Encode(c.ev)
 		if err != nil || string(got) != c.line+"\n" {
 			t.Errorf("%s: got %q err %v", c.ev.Event, got, err)

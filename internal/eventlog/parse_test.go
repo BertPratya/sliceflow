@@ -117,10 +117,17 @@ func TestParseNewEvents(t *testing.T) {
 			t.Errorf("line %d: got %+v want %+v", i+1, events[i], want)
 		}
 	}
-	// seq gaps are warned, not skipped; here seq 2,2,4,5 gives warnings
-	if len(warns) == 0 {
-		t.Error("expected seq warnings")
+	wantWarns := []string{".events.jsonl line 1: seq 2, expected 1"}
+	if !reflect.DeepEqual(warns, wantWarns) {
+		t.Errorf("warns %q", warns)
 	}
+	evs, warns := Parse([]byte(refusedCase.line + "\n"))
+	want := refusedCase.ev
+	want.Line = 1
+	if len(evs) != 1 || !reflect.DeepEqual(evs[0], want) {
+		t.Errorf("refused: got %+v", evs)
+	}
+	_ = warns
 }
 
 func TestParseNewEventsBad(t *testing.T) {
