@@ -1,8 +1,8 @@
 # Status: 0001-slice-and-events
 
-- Phase: implementing
+- Phase: integration
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 10:14 UTC
+- Updated: 2026-10-24 10:25 UTC
 
 ## Needs human
 
@@ -165,6 +165,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 10:25 · lead (claude) · integration started: every task is done; the human said "yes do it."
 - 2026-10-24 10:14 · lead (claude) · task 13 done; every task is done
 - 2026-10-24 10:14 · code reviewer (claude opus) · task-13-2 submitted: pass; F1 and F2 verified; no new findings
 - 2026-10-24 10:12 · lead (claude) · task 13 code review started, round 2
