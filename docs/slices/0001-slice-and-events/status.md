@@ -2,20 +2,20 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 07:27 UTC
+- Updated: 2026-10-24 07:28 UTC
 
 ## Needs human
 
-None.
+- change-3/F1 (medium): the lead's fix waits for the human's yes
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
-| plan.md | in_review | 3 | - | - |
-| preview.md | in_review | with plan.md | - | - |
-| tasks.md | in_review | with plan.md | - | - |
+| spec.md | draft | 3 | - | - |
+| plan.md | draft | 3 | - | - |
+| preview.md | draft | with plan.md | - | - |
+| tasks.md | draft | with plan.md | - | - |
 
 ## Tasks
 
@@ -39,16 +39,18 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 3 · Closed: 42
+Open: 2 · Waiting for verify: 0 · Closed: 45
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-3/F1 | medium | R18's system error reason: not in Flow 3 or task 09, path with \ on Windows | fixed |
-| plan-3/F2 | low | Task 09: how to get <command> from git.Error.Args | fixed |
+| change-3/F1 | medium | TestReasonFileError fails on Linux and macOS (ToSlash only converts the own separator) | open |
+| change-3/F2 | low | Two periods when the reason ends with . | open |
+| plan-3/F1 | medium | R18's system error reason: not in Flow 3 or task 09, path with \ on Windows | verified |
+| plan-3/F2 | low | Task 09: how to get <command> from git.Error.Args | verified |
 | plan-2/F1 | medium | Task 08's folder check misses Cross-platform paths | verified |
-| plan-2/F2 | low | TestSpecFrontMatter passes with the ideas: example left in | fixed |
+| plan-2/F2 | low | TestSpecFrontMatter passes with the ideas: example left in | verified |
 | plan-2/F3 | low | Ctrl-C during FindRepo prints context canceled | verified |
 | plan-2/F4 | low | R18: <command> for worktree add; a step that is not git | verified |
 | plan-2/F5 | low | R38's short list leaves out the new wrong uses | verified |
@@ -111,6 +113,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 07:28 · doc reviewer (claude opus) · change-3: the three fixes verified; new from the F1 fix: 1 medium, 1 low; nothing for the human to decide
 - 2026-10-24 07:27 · lead (claude) · plan-3 fixed (F1, F2, plan-2/F2); change review started (reviews/change-3.md), it checks only these fixes
 - 2026-10-24 07:27 · human · after the round limit: fix the three, then a change review of only the fixes (option 1); block removed
 - 2026-10-24 07:23 · lead (claude) · round limit reached; slice marked planning (blocked); asking the human
