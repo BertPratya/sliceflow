@@ -2,12 +2,15 @@ package slice
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/BertPratya/sliceflow/internal/eventlog"
+	"github.com/BertPratya/sliceflow/internal/review"
 )
 
 // submittedSlice makes a slice with an accepted spec.submitted. It returns
@@ -49,8 +52,9 @@ func TestReviewPasses(t *testing.T) {
 	if msgs != saveName+": review 1 started\n"+saveName+": review 1 passed" {
 		t.Errorf("messages %q", msgs)
 	}
-	if n := gitOut(t, wt, "rev-list", "--count", "HEAD"); n == before {
-		t.Error("no commits")
+	b, _ := strconv.Atoi(before)
+	if n := commitCount(t, wt); n != strconv.Itoa(b+2) {
+		t.Errorf("commits %s, want %d", n, b+2)
 	}
 	started := gitOut(t, wt, "show", "--name-only", "--format=", "HEAD~1")
 	if started != "docs/slices/"+saveName+"/.events.jsonl\ndocs/slices/"+saveName+"/reviews/spec-1.md" {
@@ -61,6 +65,15 @@ func TestReviewPasses(t *testing.T) {
 	}
 	if got := readFile(t, reviewFilePath(wt, "1")); !strings.Contains(got, "## Needs human decision\n\nNone.") {
 		t.Errorf("file %q", got)
+	}
+	finishedFiles := gitOut(t, wt, "show", "--name-only", "--format=", "HEAD")
+	if finishedFiles != started {
+		t.Errorf("finished files %q", finishedFiles)
+	}
+	fm := string(review.FrontMatter(saveName, 1, "placeholder"))
+	if got := gitOut(t, wt, "show", "HEAD:docs/slices/"+saveName+"/reviews/spec-1.md"); !strings.HasPrefix(got, strings.TrimRight(fm, "\n")+"\n# Review\n") ||
+		!strings.Contains(got, "## Needs human decision\n\nNone.") {
+		t.Errorf("finished file %q", got)
 	}
 	lines := strings.Split(strings.TrimRight(readFile(t, saveLogPath(wt)), "\n"), "\n")
 	l := lines[len(lines)-2]
@@ -224,4 +237,68 @@ func TestReviewMovedFirst(t *testing.T) {
 	if got := gitOut(t, wt, "log", "-1", "--format=%s"); strings.Contains(got, "passed") {
 		t.Errorf("head %q", got)
 	}
+}
+
+// hookReviewer runs fn, then the placeholder reviewer's name only.
+type hookReviewer struct {
+	fn func(ctx context.Context) error
+}
+
+func (hookReviewer) Name() string { return "placeholder" }
+
+func (h hookReviewer) Review(ctx context.Context, req review.Request) error {
+	return h.fn(ctx)
+}
+
+func swapReviewer(t *testing.T, fn func(ctx context.Context) error) {
+	t.Helper()
+	old := reviewer
+	reviewer = hookReviewer{fn: fn}
+	t.Cleanup(func() { reviewer = old })
+}
+
+func TestReviewNoLockWhileReviewing(t *testing.T) {
+	r, _, _ := submittedSlice(t)
+	lock := filepath.Join(r.Root, ".sliceflow", "locks", saveName+".lock")
+	ran := false
+	swapReviewer(t, func(ctx context.Context) error {
+		ran = true
+		if _, err := os.Stat(lock); !os.IsNotExist(err) {
+			t.Errorf("lock file exists while the reviewer runs: %v", err)
+		}
+		if err := SetTitle(ctx, r, saveName, "Saved while reviewing"); err != nil {
+			t.Errorf("save while reviewing: %v", err)
+		}
+		return nil
+	})
+	// The reviewer wrote no file, so finishing fails; only the lock matters.
+	_ = ReviewSpec(context.Background(), r, saveName, func(Step) {})
+	if !ran {
+		t.Fatal("reviewer did not run")
+	}
+}
+
+func TestReviewInterruptedWhileReviewing(t *testing.T) {
+	r, wt, _ := submittedSlice(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	canceled := errors.New("context canceled")
+	swapReviewer(t, func(ctx context.Context) error {
+		cancel()
+		return canceled
+	})
+	var steps []Step
+	err := ReviewSpec(ctx, r, saveName, func(s Step) { steps = append(steps, s) })
+	wantErrMsg(t, err, "could not save the event: interrupted. The steps before it were saved; spec.md is in_review.")
+	if len(steps) != 1 || steps[0].Kind != "started" {
+		t.Errorf("steps %+v", steps)
+	}
+	if got := gitOut(t, wt, "log", "-1", "--format=%s"); got != saveName+": review 1 started" {
+		t.Errorf("head %q", got)
+	}
+	if strings.Contains(readFile(t, saveLogPath(wt)), "review.finished") {
+		t.Error("review.finished saved")
+	}
+	err = ReviewSpec(context.Background(), r, saveName, func(Step) {})
+	wantErrMsg(t, err, "spec.md is in_review: review 1 has started, and has not finished. Nothing was changed.")
 }
