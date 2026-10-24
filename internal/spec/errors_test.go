@@ -301,3 +301,38 @@ func TestErrors0001(t *testing.T) {
 		t.Fatalf("errors: %v", got)
 	}
 }
+
+// F1: a marker above the first "##" heading is checked too.
+func TestErrorMarkerBeforeFirstSection(t *testing.T) {
+	text := strings.Replace(goodSpec, "# Spec\n", "# Spec\n\n- **R9.** x\n- **R2 x\n", 1)
+	got := errorsOf(text, "demo")
+	want := []Problem{
+		{lineOf(text, "- **R9.**", 0), "error", `R9 is outside "## Requirements"`},
+		{lineOf(text, "- **R9.**", 0), "error", `R9 has no Check: line`},
+		{lineOf(text, "- **R2 x", 0), "error", `"**R2 x" is not a marker; write it like **R7.**`},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v\nwant %v", got, want)
+	}
+}
+
+// F2: the user's text is shown as written, with no Go escapes.
+func TestErrorMessagesKeepUserText(t *testing.T) {
+	text := strings.Replace(goodSpec, "- Nothing. Goes to: the backlog", `- Nothing. Goes to: "x\y"`, 1)
+	got := errorsOf(text, "demo")
+	want := []Problem{{lineOf(text, "Goes to:", 0), "error",
+		`Goes to: "` + `"x\y"` + `" is not a place; use the backlog, a later slice (<name>), or not planned`}}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v\nwant %v", got, want)
+	}
+}
+
+// F3: the inline code of a bad marker stays in the message.
+func TestErrorBadMarkerKeepsInlineCode(t *testing.T) {
+	text := strings.Replace(goodSpec, "- **R1.** Thing.", "- **R2 uses `x` here\n- **R1.** Thing.", 1)
+	got := errorsOf(text, "demo")
+	want := []Problem{{lineOf(text, "- **R2 uses", 0), "error", "\"**R2 uses `x` here\" is not a marker; write it like **R7.**"}}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v\nwant %v", got, want)
+	}
+}

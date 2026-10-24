@@ -215,3 +215,15 @@ func TestParseStrayBacktickKeepsNextItem(t *testing.T) {
 		}
 	}
 }
+
+func TestParsePreamble(t *testing.T) {
+	d := Parse([]byte("# Spec\n\n- **R9.** x\n- **R2 y\n\n## Summary\n\ntext\n"))
+	if len(d.Sections) != 1 || d.Sections[0].Name != "Summary" {
+		t.Fatalf("sections = %+v", d.Sections)
+	}
+	p := d.Preamble
+	if len(p.Items) != 1 || p.Items[0].ID != "R9" || p.Items[0].Line != 3 ||
+		len(p.BadMarkers) != 1 || p.BadMarkers[0].Line != 4 {
+		t.Fatalf("preamble = %+v", p)
+	}
+}

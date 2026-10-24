@@ -55,7 +55,7 @@ func Parse(text []byte) Doc {
 		}
 	}
 
-	var cur *Section
+	cur := &Section{} // the lines above the first heading: d.Preamble
 	var curItem *Item
 	var curLabel *Label
 	var labelIndent int
@@ -65,7 +65,11 @@ func Parse(text []byte) Doc {
 		if cur != nil {
 			cur.Text = strings.TrimSpace(strings.Join(text_, "\n"))
 			cur.Empty = !hasContent
-			d.Sections = append(d.Sections, *cur)
+			if cur.Line == 0 {
+				d.Preamble = *cur
+			} else {
+				d.Sections = append(d.Sections, *cur)
+			}
 		}
 		cur, curItem, curLabel, text_, hasContent = nil, nil, nil, nil, false
 	}
@@ -86,9 +90,6 @@ func Parse(text []byte) Doc {
 			cur = &Section{Name: m[1], Line: n}
 			continue
 		}
-		if cur == nil {
-			continue
-		}
 		text_ = append(text_, strings.TrimRight(clean, " \t"))
 		if sc[i].fenced || strings.TrimSpace(sc[i].vis) != "" {
 			hasContent = true
@@ -104,7 +105,7 @@ func Parse(text []byte) Doc {
 			continue
 		}
 		if markerLike.MatchString(clean) {
-			cur.BadMarkers = append(cur.BadMarkers, Mark{n, strings.TrimSpace(clean)})
+			cur.BadMarkers = append(cur.BadMarkers, Mark{n, strings.TrimSpace(sc[i].vis)})
 			continue
 		}
 		if cur.Name == "Out of scope" {

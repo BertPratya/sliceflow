@@ -74,7 +74,7 @@ func frontErrors(d Doc, slice string) []Problem {
 			}
 		}
 		if f == nil {
-			ps = append(ps, errorAt(1, fmt.Sprintf("front matter has no %q", key)))
+			ps = append(ps, errorAt(1, fmt.Sprintf("front matter has no \"%s\"", key)))
 			continue
 		}
 		if isPlaceholder(f.Value) {
@@ -83,7 +83,7 @@ func frontErrors(d Doc, slice string) []Problem {
 		switch key {
 		case "slice":
 			if v := unquote(f.Value); v != slice {
-				ps = append(ps, errorAt(f.Line, fmt.Sprintf("front matter slice is %q, but the slice is %s", v, slice)))
+				ps = append(ps, errorAt(f.Line, fmt.Sprintf("front matter slice is \"%s\", but the slice is %s", v, slice)))
 			}
 		case "created":
 			v := unquote(f.Value)
@@ -93,7 +93,7 @@ func frontErrors(d Doc, slice string) []Problem {
 				ok = err == nil
 			}
 			if !ok {
-				ps = append(ps, errorAt(f.Line, fmt.Sprintf("front matter created is %q, not a date like 2026-10-24", v)))
+				ps = append(ps, errorAt(f.Line, fmt.Sprintf("front matter created is \"%s\", not a date like 2026-10-24", v)))
 			}
 		case "ideas":
 			v := f.Value
@@ -114,16 +114,16 @@ func sectionErrors(d Doc) []Problem {
 	for _, s := range d.Sections {
 		idx := sectionIndex(s.Name)
 		if idx < 0 {
-			ps = append(ps, errorAt(s.Line, fmt.Sprintf("unknown section %q", "## "+s.Name)))
+			ps = append(ps, errorAt(s.Line, fmt.Sprintf("unknown section \"%s\"", "## "+s.Name)))
 			continue
 		}
 		if line, dup := first[s.Name]; dup {
-			ps = append(ps, errorAt(s.Line, fmt.Sprintf("section %q appears twice (also line %d)", "## "+s.Name, line)))
+			ps = append(ps, errorAt(s.Line, fmt.Sprintf("section \"%s\" appears twice (also line %d)", "## "+s.Name, line)))
 			continue
 		}
 		first[s.Name] = s.Line
 		if idx < maxIdx {
-			ps = append(ps, errorAt(s.Line, fmt.Sprintf("section %q must come before %q", "## "+s.Name, "## "+maxName)))
+			ps = append(ps, errorAt(s.Line, fmt.Sprintf("section \"%s\" must come before \"%s\"", "## "+s.Name, "## "+maxName)))
 			continue
 		}
 		maxIdx, maxName = idx, s.Name
@@ -146,7 +146,7 @@ func sectionErrors(d Doc) []Problem {
 				break
 			}
 		}
-		ps = append(ps, errorAt(line, fmt.Sprintf("missing section %q", "## "+ts.name)))
+		ps = append(ps, errorAt(line, fmt.Sprintf("missing section \"%s\"", "## "+ts.name)))
 	}
 	return ps
 }
@@ -191,10 +191,10 @@ func itemErrors(d Doc) []Problem {
 		}
 	}
 	seen := map[string]int{}
-	for _, s := range d.Sections {
+	for _, s := range append([]Section{d.Preamble}, d.Sections...) {
 		for _, m := range s.BadMarkers {
 			text := strings.TrimSpace(strings.TrimPrefix(m.Text, "-"))
-			ps = append(ps, errorAt(m.Line, fmt.Sprintf("%q is not a marker; write it like **R7.**", text)))
+			ps = append(ps, errorAt(m.Line, fmt.Sprintf("\"%s\" is not a marker; write it like **R7.**", text)))
 		}
 		for _, it := range s.Items {
 			if it.ID == "" {
@@ -207,7 +207,7 @@ func itemErrors(d Doc) []Problem {
 			}
 			letters := idLetters(it.ID)
 			if want, ok := markerSections[letters]; ok && want != s.Name {
-				ps = append(ps, errorAt(it.Line, fmt.Sprintf("%s is outside %q", it.ID, "## "+want)))
+				ps = append(ps, errorAt(it.Line, fmt.Sprintf("%s is outside \"%s\"", it.ID, "## "+want)))
 			}
 			if it.Removed {
 				continue
@@ -241,7 +241,7 @@ func requirementErrors(it Item) []Problem {
 		}
 		for _, kind := range splitList(l.Value) {
 			if !checkKinds[kind] {
-				ps = append(ps, errorAt(l.Line, fmt.Sprintf("%s: unknown check %q; use unit, api, e2e, or manual", it.ID, kind)))
+				ps = append(ps, errorAt(l.Line, fmt.Sprintf("%s: unknown check \"%s\"; use unit, api, e2e, or manual", it.ID, kind)))
 			}
 		}
 	}
@@ -318,7 +318,7 @@ func outOfScopeErrors(d Doc) []Problem {
 			}
 			w := strings.ToLower(strings.TrimRight(v, ". "))
 			if w != "the backlog" && w != "not planned" && !strings.HasPrefix(w, "a later slice") {
-				ps = append(ps, errorAt(it.Line, fmt.Sprintf("Goes to: %q is not a place; use the backlog, a later slice (<name>), or not planned", v)))
+				ps = append(ps, errorAt(it.Line, fmt.Sprintf("Goes to: \"%s\" is not a place; use the backlog, a later slice (<name>), or not planned", v)))
 			}
 		}
 	}

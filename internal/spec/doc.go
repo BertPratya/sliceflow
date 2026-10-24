@@ -7,6 +7,7 @@ package spec
 type Doc struct {
 	HasFront     bool
 	Front        []Field
+	Preamble     Section // the lines above the first "##" heading; Name "" and Line 0
 	Sections     []Section
 	Placeholders []Mark // every "{{" outside code and comments
 	Comments     []Mark // each template comment, at its first line
