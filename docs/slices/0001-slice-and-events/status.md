@@ -2,7 +2,7 @@
 
 - Phase: implementing (blocked)
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 09:12 UTC
+- Updated: 2026-10-24 09:26 UTC
 
 ## Needs human
 
@@ -45,6 +45,11 @@ Open: 4 · Waiting for verify: 0 · Closed: 61
 
 | ID | Level | Title | Status |
 |---|---|---|---|
+| change-6/F1 | medium | Another run's worktree passes the ownership test | fixed (waiting for verify): step 6 split into git branch, then git worktree add |
+| change-6/F2 | medium | How the half-made folder is removed is not said | fixed (waiting for verify) |
+| change-6/F3 | medium | The cleanup's place in newest first is not said | fixed (waiting for verify) |
+| change-6/F4 | low | The lock reason initializing is translated by git | fixed (waiting for verify): always --force twice |
+| change-6/F5 | low | The test reaches one state and checks part of the message | fixed (waiting for verify): whole message, and no .sliceflow/ |
 | change-5 | - | No findings: R27's new sentence and TestParseSeqFirstGoodLine | - |
 | change-4/F1 | low | The final . is dropped for every reason, but task 09 names only file errors | fixed: task 09 step 3 names Flow 3 step 5; TestCreateHookOutput's first line ends in . |
 | change-3/F1 | medium | TestReasonFileError fails on Linux and macOS (ToSlash only converts the own separator) | verified |
@@ -144,6 +149,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:26 · lead (claude) · change-6 findings fixed in plan.md and tasks.md (step 6 split: git branch, then git worktree add); change review change-7 started
+- 2026-10-24 09:26 · doc reviewer (claude opus) · change-6 submitted: 3 medium, 2 low; nothing for the human
+- 2026-10-24 09:26 · human · task-09-1/Q1 answered: "kill at once, then clean up what is left"; and tasks 10 and 11 may be built meanwhile: "yes do it if it don't depend on unfinished tasks"
 - 2026-10-24 09:12 · lead (claude) · task 09 blocked on Q1, a small decision: asked the human
 - 2026-10-24 09:12 · code reviewer (claude opus) · task-09-1 submitted: needs_human; Q1, 1 high (Ctrl-C during worktree add leaves it), 1 medium, 2 low; task-06-1/F2 verified
 - 2026-10-24 09:08 · lead (claude) · task 09 code review started, round 1
