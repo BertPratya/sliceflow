@@ -154,7 +154,9 @@ later slices add rows to it.
   started is skipped, with the warning of S3, and the state stays
   `draft`; a `slice.titled` before `slice.created` gives
   `.events.jsonl line 1: slice.titled comes before slice.created; skipped`;
-  a second `slice.created` is not allowed; a `review.finished` with
+  a second `slice.created` at line 2 gives
+  `.events.jsonl line 2: slice.created is not allowed when spec.md is draft; skipped`;
+  a `review.finished` with
   round 2 while review 1 runs gives
   `.events.jsonl line 5: review.finished is for round 2, but review 1 is running; skipped`.
   Proves: R4
@@ -296,7 +298,8 @@ spec; both give 0 errors.
   naming a removed R4 gives `SD2: Rule: names R4, which was removed`.
   Proves: R15
 - `TestErrorPlaceholderValue`: `Check: {{unit, api, e2e, or manual}}`,
-  `Shows: {{R3}}`, and `Goes to: {{a later slice}}` give no error.
+  `Shows: {{R3}}`, `Rule: {{R11}}`, `Goes to: {{a later slice}}`, and
+  the front matter `created: {{date}}` give no error.
   Proves: R18
 - `TestErrorsFresh`: `testdata/fresh.md` gives 0 errors.
   Proves: R15, R18
@@ -316,7 +319,7 @@ covers: [R16, R17, R18]
 depends_on: ["04"]
 touches: [internal/spec/check.go, internal/spec/warnings.go, internal/spec/warnings_test.go]
 follows: [Spec reader, Tests, Testing]
-risk: normal
+risk: core
 ```
 
 ### Goal
@@ -409,8 +412,9 @@ part is R29's refused mark, which depends on both the state and R30.
 ### Interfaces
 
 - `SliceStatus` gains `State state.State`, `SpecText, Next string`, and
-  `ChangedAfterReview bool`: changes. `Phase` and `Title` come from
-  `State`. Task 07 prints them.
+  `ChangedAfterReview bool`: changes. The fields `Phase` and `Title`
+  stay, filled from `State`, so `internal/cli` keeps working. Task 07
+  prints the new ones.
 - `func findWorktree(ctx context.Context, r Repo, name string) (string, bool, error)`:
   creates. The full path of the worktree whose branch is
   `refs/heads/slice/<name>`, from `git worktree list --porcelain -z`.
@@ -451,7 +455,7 @@ part is R29's refused mark, which depends on both the state and R30.
 
 - Printing the lines, and the JSON. Done in: task 07
 
-## Task 07: status-command
+## Task 07: status-spec
 
 ```yaml
 covers: [R4, R29, R31]
@@ -506,7 +510,10 @@ updated for the two new lines.
 - `TestStatusJSONReview`: a log with review 1 `passed` gives
   `"review":{"round":1,"reviewer":"placeholder","file":"reviews/spec-1.md","result":"passed"}`;
   a refused submit gives `"submit_refused":{"errors":0,"warnings":1}`;
-  no `slice.created` gives `"docs":[]` and no `next`.
+  a running review has no `result`; a passed review with `spec.md`
+  edited on disk gives `"changed_after_review":true`; no `slice.created`
+  gives `"docs":[]` and no `next`; `slice list --json` has the same
+  `docs` and `next` for each slice.
   Proves: R31
 
 ### Out of scope
@@ -518,9 +525,9 @@ updated for the two new lines.
 ```yaml
 covers: [R35, R36]
 depends_on: []
-touches: [internal/cli/cli.go, internal/cli/cli_test.go, internal/cli/template.go, internal/template/template.go, internal/template/template_test.go, internal/e2e/cli_skeleton_test.go, internal/e2e/template_show_test.go]
+touches: [internal/cli/cli.go, internal/cli/cli_test.go, internal/cli/template.go, internal/template/template.go, internal/template/template_test.go, internal/e2e/cli_skeleton_test.go, internal/e2e/cli_groups_and_template_test.go]
 follows: ["Flow 7: Show the template", "Flow 8: Wrong use, and the order of the first checks", CLI, Tests, Testing]
-risk: normal
+risk: core
 ```
 
 ### Goal
@@ -546,7 +553,7 @@ the built-in template as it is embedded.
 - `internal/template/template.go`, `internal/template/template_test.go`:
   changed.
 - `internal/e2e/cli_skeleton_test.go`: changed, for the new usage text.
-- `internal/e2e/template_show_test.go`: new.
+- `internal/e2e/cli_groups_and_template_test.go`: new.
 
 ### Interfaces
 
@@ -585,7 +592,7 @@ covers: [R11, R12, R13, R14, R18, R19, R36, R37]
 depends_on: ["05", "06", "08"]
 touches: [internal/slice/validate.go, internal/slice/open.go, internal/slice/validate_test.go, internal/cli/validate.go, internal/cli/problems.go, internal/e2e/validate_command_test.go]
 follows: ["Flow 2: Check a spec", "Flow 8: Wrong use, and the order of the first checks", Core API, CLI, Cross-platform paths, Tests, Testing]
-risk: normal
+risk: core
 ```
 
 ### Goal
@@ -792,6 +799,10 @@ hardest part is the undo, and Ctrl-C during the commit.
 - `TestSaveTwoAtOnce`: two `saveEvent` calls of `slice.titled` started at
   once both succeed, with `seq` 2 and 3.
   Proves: R6
+- `TestSaveSeqAfterSkipped`: a committed log whose last line is a
+  well-formed `review.finished` with `seq` 2 that R4 skips gives the new
+  event `seq` 3.
+  Proves: R9
 - `TestSaveLeftoverTemp`: a `.events.jsonl.tmp` left on disk is gone
   after the next save.
   Proves: R9
@@ -892,7 +903,7 @@ the result from a review file.
 - `type Reviewer interface{ Name() string; Review(ctx context.Context, req Request) error }`:
   creates. Task 14 uses it.
 - `type Request struct{ Slice, Doc, File, Commit, Worktree string; Round int }`:
-  creates. `File` is the review file's full path.
+  creates. `File` is the review file's full path, as in the plan.
 - `func Placeholder() Reviewer`: creates. `Name` is `placeholder`;
   `Review` adds R26's text after the front matter.
 - `func FrontMatter(slice string, round int, reviewer string) []byte`:

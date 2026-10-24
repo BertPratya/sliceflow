@@ -3,20 +3,21 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 18:00 UTC
+- Updated: 2026-10-24 18:40 UTC
 
 ## Needs human
 
-None.
+- plan-1 Q1: template show outside a git repo (changes the spec)
+- plan-1 medium findings F1-F4: the lead's fixes wait for the human's yes
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
-| plan.md | in_review | 1 | - | - |
-| preview.md | in_review | with plan.md | - | - |
-| tasks.md | in_review | with plan.md | - | - |
+| spec.md | draft | 3 | - | - |
+| plan.md | draft | 1 | - | - |
+| preview.md | draft | with plan.md | - | - |
+| tasks.md | draft | with plan.md | - | - |
 
 ## Tasks
 
@@ -28,11 +29,11 @@ None.
 | 02 | state-machine | core | todo | 0 | 0 | 01 | R1, R2, R3, R4 |
 | 03 | spec-reader | core | todo | 0 | 0 | - | R18 |
 | 04 | spec-errors | core | todo | 0 | 0 | 03 | R15, R18 |
-| 05 | spec-warnings | normal | todo | 0 | 0 | 04 | R16, R17, R18 |
+| 05 | spec-warnings | core | todo | 0 | 0 | 04 | R16, R17, R18 |
 | 06 | status-core | core | todo | 0 | 0 | 02 | R1, R3, R29, R30, R34 |
-| 07 | status-command | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
-| 08 | cli-groups-and-template | normal | todo | 0 | 0 | - | R35, R36 |
-| 09 | validate-command | normal | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
+| 07 | status-spec | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
+| 08 | cli-groups-and-template | core | todo | 0 | 0 | - | R35, R36 |
+| 09 | validate-command | core | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
 | 10 | lock | core | todo | 0 | 0 | - | R6, R7 |
 | 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
@@ -42,12 +43,25 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 0 · Closed: 22
+Open: 5 · Waiting for verify: 8 · Closed: 22
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
+| plan-1/Q1 | high | template show outside a git repo | open |
+| plan-1/F1 | medium | saveEvent can't run the command's checks under its lock | open |
+| plan-1/F2 | medium | R12 and R19 for spec submit are in no task | open |
+| plan-1/F3 | medium | Six briefs over 1,500 words; task 15 too big | open |
+| plan-1/F4 | medium | state.Allowed: error in the plan, string in task 02 | open |
+| plan-1/F5 | low | git diff exit 128 for a missing commit | fixed |
+| plan-1/F6 | low | Gaps in Done when | fixed, except the R26/R27 e2e (with F3) |
+| plan-1/F7 | low | Testing and the tasks disagree | fixed, except the Ctrl-C e2e (with F3) |
+| plan-1/F8 | low | Tasks 05, 08, 09 should be core | fixed |
+| plan-1/F9 | low | Task 06's Phase and Title line | fixed |
+| plan-1/F10 | low | Approach's file and dependency lines; Request.File | fixed |
+| plan-1/F11 | low | Plan touches; Parked | fixed |
+| plan-1/F12 | low | Preview P2's exact line | fixed |
 | spec-2/F1 | medium | An indented ideas item is not a list | verified (fixed) |
 | spec-2/F2 | medium | R11's order makes validate take the lock | verified (fixed) |
 | spec-2/F3 | low | "last line read without error" is a new term | verified (fixed) |
@@ -91,6 +105,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 18:40 · lead (claude) · plan-1 lows fixed (F5-F12, two parts wait for F3); documents back to draft
+- 2026-10-24 18:30 · doc-reviewer (claude opus) · plan review 1 handed in: 1 high, 4 medium, 8 low
 - 2026-10-24 18:00 · lead (claude) · plan review 1 started: spec, plan, tasks, and preview together
 - 2026-10-24 17:55 · lead (claude) · tasks written: 15 tasks; plan Open questions: None.
 - 2026-10-24 17:25 · lead (claude) · human: plan Q1 option 1, a value with `{{` is not checked, only warned (spec R18); the plan review checks the spec change

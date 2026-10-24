@@ -1,15 +1,7 @@
 ---
 slice: 0002-spec-and-state
 created: 2026-10-24
-touches:
-  - internal/eventlog/
-  - internal/state/
-  - internal/spec/
-  - internal/review/
-  - internal/slice/
-  - internal/template/
-  - internal/cli/
-  - internal/e2e/
+touches: []
 ---
 
 # Plan
@@ -36,8 +28,10 @@ interface; the placeholder is the only one in this slice.
 | The new commands, and the new status output | internal/cli/ | changed |
 
 The packages depend on each other in one direction only: `cli` uses
-`slice`; `slice` uses `state`, `spec`, `review`, `git`, and `template`;
-`state` uses `eventlog`. Only `slice` and `git` touch files or run git.
+`slice`, and the types of `spec` and `state`; `slice` uses `state`,
+`spec`, `review`, `eventlog`, `git`, and `template`; `state` uses
+`eventlog`. Only `slice`, `git`, and a reviewer (which writes its review
+file) touch files or run git.
 
 New dependencies: None.
 
@@ -62,7 +56,9 @@ Covers: R1, R2, R3, R4, R5, R29, R30, R31, R34
    `git diff --quiet <reviewed commit> -- docs/slices/<name>/spec.md` in
    that worktree. Exit code 1 means changed after its review (R30). git
    compares through the same line-end rules as `git status`, so line
-   ends that git converts do not count.
+   ends that git converts do not count. Any other failure, e.g. exit
+   code 128 when the reviewed commit is missing, means not compared: no
+   change is shown, and the command goes on. (lead's call)
 4. `slice` works out the `Spec:` and `Next:` texts from the `State` and
    step 3, by R29's table.
 5. The CLI prints them after `Created:`, or adds `docs` and `next` to
@@ -400,7 +396,7 @@ type Reviewer interface {
 	Review(ctx context.Context, req Request) error     // writes the review file
 }
 type Request struct {
-	Slice, Doc, File, Commit string // File: the review file's path in the worktree
+	Slice, Doc, File, Commit string // File: the review file's full path
 	Round                    int
 	Worktree                 string
 }
@@ -442,7 +438,7 @@ Local, in the slice's worktree, for a moment only:
 
 | Check | How |
 |---|---|
-| unit | Go tests next to the code. `state`: one table test per row of R2's table, and each warning of R4. `spec`: one small spec per check of R15 to R18 that breaks just that check, plus two real files as test data: a fresh spec from `template.Spec`, which gives 0 errors, and 0001's approved spec, which gives 0 errors and the notes for R11, R40, and R43. `eventlog`: each new event's fields (R5). `slice`: real git in a temporary repo, a fixed `Repo.Now`, and a short lock wait (`Repo.LockWait`, 10 s by default). Two writes started at once both save, with `seq` 6 and 7. (lead's call) |
+| unit | Go tests next to the code. `state`: one table test per row of R2's table, and each warning of R4. `spec`: one small spec per check of R15 to R18 that breaks just that check, plus two real files as test data: a fresh spec from `template.Spec`, which gives 0 errors, and 0001's approved spec, which gives 0 errors and the notes for R11, R40, and R43. `eventlog`: each new event's fields (R5). `slice`: real git in a temporary repo, a fixed `Repo.Now`, and a short lock wait (`Repo.LockWait`, 10 s by default). Two writes started at once both save, with `seq` 2 and 3. (lead's call) |
 | e2e | As in 0001: `TestMain` builds the binary once; each test runs it in its own temporary repo; helpers in `internal/e2e/helpers_test.go`; one file per task: `internal/e2e/<task_name>_test.go`. One test per scenario. |
 
 How the tests make things fail:
@@ -453,8 +449,9 @@ How the tests make things fail:
 - The busy test (S19) makes the lock file itself, and waits the full
   10 s: one slow test, which checks exactly what the user sees. (lead's
   call)
-- Ctrl-C: as in 0001, the e2e test skips on Windows, and a unit test of
-  the undo after a cancelled `ctx` runs on every system.
+- Ctrl-C: as in 0001, the e2e test (task 15) skips on Windows, and a
+  unit test of the undo after a cancelled `ctx` (task 11) runs on every
+  system.
 - A log with a bad line, or a move that is not allowed (S3, S4), is
   written by the test and committed with plain git.
 
@@ -480,10 +477,6 @@ How the tests make things fail:
   rare: one lead works on one slice. The message is clear, and running
   the command again works. The human chose to keep 10 s; if it happens
   in practice, a later slice can wait longer or show a waiting line.
-
-## Parked
-
-None.
 
 ## Open questions
 

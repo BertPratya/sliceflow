@@ -42,7 +42,7 @@ Covers: S5
 2. Delete R7's `Check:` line, and write `- **Q1.** Is this right?`
    under `## Open questions`, in place of `None.`.
 3. Run `sliceflow spec validate`.
-   Expect: an error for R7's missing `Check:` line, the warning
+   Expect: the line `spec.md:<R7's line>: error: R7 has no Check: line`, the warning
    `1 open question left (Q1)`, notes for R11, R40, and R43, and the
    summary `1 error, 1 warning, 3 notes`; the exit code is 1
    (`echo $?`).
