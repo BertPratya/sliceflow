@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -120,4 +121,46 @@ func TestLockCancelled(t *testing.T) {
 	if time.Since(start) > 2*time.Second {
 		t.Error("did not stop on cancel")
 	}
+}
+
+func TestLockFreeRetriesRemove(t *testing.T) {
+	r := newRepo(t)
+	free, err := takeLock(context.Background(), r, "a")
+	if err != nil {
+		t.Fatal(err)
+	}
+	real := lockRemove
+	fails := 3
+	lockRemove = func(p string) error {
+		if fails > 0 {
+			fails--
+			return &os.PathError{Op: "remove", Path: p, Err: fs.ErrPermission}
+		}
+		return real(p)
+	}
+	defer func() { lockRemove = real }()
+	free()
+	if _, err := os.Stat(lockPath(r, "a")); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("lock file still there: %v", err)
+	}
+}
+
+func TestLockCreateRetriesPermission(t *testing.T) {
+	r := newRepo(t)
+	r.LockWait = 2 * time.Second
+	real := lockCreate
+	fails := 3
+	lockCreate = func(p string, flag int, perm os.FileMode) (*os.File, error) {
+		if fails > 0 {
+			fails--
+			return nil, &os.PathError{Op: "open", Path: p, Err: fs.ErrPermission}
+		}
+		return real(p, flag, perm)
+	}
+	defer func() { lockCreate = real }()
+	free, err := takeLock(context.Background(), r, "b")
+	if err != nil {
+		t.Fatal(err)
+	}
+	free()
 }

@@ -18,6 +18,34 @@ const (
 	lockRetry       = 100 * time.Millisecond
 )
 
+// lockCreate and lockRemove are variables so tests can fake the Windows
+// failures (sharing violation, access denied) on every system.
+var (
+	lockCreate = os.OpenFile
+	lockRemove = os.Remove
+)
+
+const (
+	freeTries = 50
+	freePause = 10 * time.Millisecond
+)
+
+// freeLock removes the lock file. On Windows the remove fails while another
+// process has the file open, so it tries again for a short time. A missing
+// file counts as freed.
+func freeLock(path string) {
+	for i := 0; i < freeTries; i++ {
+		err := lockRemove(path)
+		if err == nil || errors.Is(err, fs.ErrNotExist) {
+			return
+		}
+		if _, serr := os.Stat(path); errors.Is(serr, fs.ErrNotExist) {
+			return
+		}
+		time.Sleep(freePause)
+	}
+}
+
 type lockContent struct {
 	Pid   int    `json:"pid"`
 	Since string `json:"since"`
@@ -49,25 +77,30 @@ func takeLock(ctx context.Context, r Repo, name string) (func(), error) {
 	}
 	deadline := time.Now().Add(wait)
 	for {
-		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+		f, err := lockCreate(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 		if err == nil {
 			_, werr := f.Write(line)
 			if cerr := f.Close(); werr == nil {
 				werr = cerr
 			}
 			if werr != nil {
-				os.Remove(path)
+				lockRemove(path)
 				return nil, werr
 			}
-			return func() { os.Remove(path) }, nil
+			return func() { freeLock(path) }, nil
 		}
 		// On Windows a file that is being deleted can give "access denied".
-		if !errors.Is(err, fs.ErrExist) {
+		// That counts as busy, until the wait is over.
+		other := !errors.Is(err, fs.ErrExist)
+		if other && !errors.Is(err, fs.ErrPermission) {
 			if _, serr := os.Stat(path); serr != nil {
 				return nil, err
 			}
 		}
 		if !time.Now().Before(deadline) {
+			if other {
+				return nil, err
+			}
 			return nil, busyError(name, path)
 		}
 		select {
