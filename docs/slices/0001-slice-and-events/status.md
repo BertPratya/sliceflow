@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:36 UTC
+- Updated: 2026-10-24 08:37 UTC
 
 ## Needs human
 
@@ -19,14 +19,14 @@ None.
 
 ## Tasks
 
-2 of 13 done · 1 in_review · 10 todo
+3 of 13 done · 10 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | git-runner | core | done | 0 | 2 | - | R40 |
 | 02 | event-log | core | done | 0 | 2 | 01 | R19, R25, R26, R27 |
 | 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
-| 04 | repo-and-names | core | in_review | 0 | 1 | 01 | R2, R3, R12, R13, R14, R21, R22 |
+| 04 | repo-and-names | core | done | 0 | 1 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | todo | 0 | 0 | 01 | R7 |
 | 06 | create-core | core | todo | 0 | 0 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | todo | 0 | 0 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 0 · Closed: 52
+Open: 0 · Waiting for verify: 0 · Closed: 53
 
 ### Doc reviews
 
@@ -99,6 +99,7 @@ Open: 0 · Waiting for verify: 0 · Closed: 52
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-04-1/F1 | low | 04 | FindRepo calls every rev-parse failure "not inside a git repository" | wontfix: why: git gives exit 128 for both, and sliceflow does not read git's error text (Git arguments); the worker's ASSUMED names it |
 | task-02-1/Q1 | needs human | 02 | R27 does not say which seq the first good line must have | verified: the human chose option 1 (expect 1); R002 |
 | task-02-1/F1 | low | 02 | A seq too big for an int gets a wrong value reason R26 does not list | verified |
 | task-01-1/F1 | low | 01 | Show reports a bad ref or a non-repo folder as a missing file | wontfix: why: in this slice callers check the ref and repo first; Show's doc comment says so |
@@ -123,6 +124,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:37 · lead (claude) · task 04 done; F1 wontfix
+- 2026-10-24 08:37 · code reviewer (claude opus) · task-04-1 submitted: pass; 1 low; 4 deliberate breaks each caught by a test
 - 2026-10-24 08:36 · lead (claude) · task 04 code review started, round 1
 - 2026-10-24 08:36 · lead (claude) · task 04 committed (5550758); checks pass, also with hook variables pointing at a decoy repo
 - 2026-10-24 08:35 · lead (claude) · task 04 started: worker round 1
