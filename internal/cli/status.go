@@ -71,11 +71,7 @@ func runStatus(ctx context.Context, args []string, stdout, stderr io.Writer) int
 	}
 	from, created := "-", "-"
 	if st.From != nil {
-		short := st.From.Commit
-		if len(short) > 7 {
-			short = short[:7]
-		}
-		from = st.From.Branch + " @ " + short
+		from = st.From.Branch + " @ " + shortCommit(st.From.Commit)
 	}
 	if !st.Created.IsZero() {
 		created = st.Created.UTC().Format("2006-01-02 15:04") + " UTC"
@@ -98,6 +94,14 @@ func statusFail(stderr io.Writer, err error) int {
 		return 1
 	}
 	return fail(stderr, err)
+}
+
+// shortCommit returns the first 7 characters of a commit id.
+func shortCommit(id string) string {
+	if len(id) > 7 {
+		return id[:7]
+	}
+	return id
 }
 
 type fromJSON struct {

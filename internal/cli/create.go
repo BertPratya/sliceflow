@@ -67,10 +67,6 @@ func runCreate(ctx context.Context, args []string, stdout, stderr io.Writer) int
 		return fail(stderr, err)
 	}
 	if *asJSON {
-		type fromJSON struct {
-			Branch string `json:"branch"`
-			Commit string `json:"commit"`
-		}
 		b, err := json.Marshal(struct {
 			Slice    string   `json:"slice"`
 			Branch   string   `json:"branch"`
@@ -84,10 +80,7 @@ func runCreate(ctx context.Context, args []string, stdout, stderr io.Writer) int
 		fmt.Fprintf(stdout, "%s\n", b)
 		return 0
 	}
-	short := c.From.Commit
-	if len(short) > 7 {
-		short = short[:7]
-	}
+	short := shortCommit(c.From.Commit)
 	wt := path.Join(".sliceflow", "worktrees", c.Slice)
 	fmt.Fprintf(stdout, "Created slice %s.\n", c.Slice)
 	fmt.Fprintf(stdout, "  Branch:   %s (from %s @ %s)\n", c.Branch, c.From.Branch, short)

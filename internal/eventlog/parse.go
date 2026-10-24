@@ -251,7 +251,7 @@ func parseLine(line string) (Event, string) {
 	bad := func(f string) (Event, string) {
 		return Event{}, fmt.Sprintf("field %q has a wrong value", f)
 	}
-	if t, err := time.Parse(timeLayout, at); err != nil || t.Format(timeLayout) != at {
+	if t, err := time.Parse(TimeLayout, at); err != nil || t.Format(TimeLayout) != at {
 		return bad("at")
 	}
 	if !commitRe.MatchString(commit) {

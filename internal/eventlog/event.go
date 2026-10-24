@@ -8,7 +8,8 @@ import (
 	"time"
 )
 
-const timeLayout = "2006-01-02T15:04:05Z"
+// TimeLayout is the time format of the "at" field of an event (UTC, whole seconds).
+const TimeLayout = "2006-01-02T15:04:05Z"
 
 // Event is one line of the log. Fields are declared in R19's order, so
 // encoding/json writes them in that order.
@@ -38,7 +39,7 @@ func NewCreated(at time.Time, from From, title string) Event {
 		Version: 1,
 		Seq:     1,
 		Event:   "slice.created",
-		At:      at.UTC().Format(timeLayout),
+		At:      at.UTC().Format(TimeLayout),
 		Data:    Created{From: from, Title: title},
 	}
 }

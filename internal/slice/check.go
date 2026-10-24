@@ -20,13 +20,9 @@ func checkCreate(ctx context.Context, r Repo, opts CreateOptions, base, source s
 	}
 	// Only an existing local branch is a base: check the exact ref first, so
 	// main~1, main@{0}, main^ and HEAD are not resolved as commits.
-	ok := true
-	if _, err := git.Run(ctx, r.Dir, "show-ref", "--verify", "--quiet", "refs/heads/"+base); err != nil {
-		var ge *git.Error
-		if !errors.As(err, &ge) || ge.ExitCode != 1 {
-			return err
-		}
-		ok = false
+	ok, err := baseExists(ctx, r, base)
+	if err != nil {
+		return err
 	}
 	if !ok {
 		return &Error{Message: fmt.Sprintf("base branch %s does not exist (%s). Nothing was changed.", base, source)}
@@ -44,6 +40,20 @@ func checkCreate(ctx context.Context, r Repo, opts CreateOptions, base, source s
 		return err
 	}
 	return nil
+}
+
+// baseExists says whether the local branch base exists. Only the exact ref
+// counts, so a tag, HEAD or main~1 never does. Exit code 1 means no; any
+// other error is returned.
+func baseExists(ctx context.Context, r Repo, base string) (bool, error) {
+	if _, err := git.Run(ctx, r.Dir, "show-ref", "--verify", "--quiet", "refs/heads/"+base); err != nil {
+		var ge *git.Error
+		if !errors.As(err, &ge) || ge.ExitCode != 1 {
+			return false, err
+		}
+		return false, nil
+	}
+	return true, nil
 }
 
 // existsWhere returns where the slice name is taken (R15's <where>), or ""
