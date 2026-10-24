@@ -3,7 +3,6 @@ package slice
 import (
 	"context"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/BertPratya/sliceflow/internal/spec"
@@ -34,7 +33,7 @@ func Validate(ctx context.Context, r Repo, name string, strict bool) (Validation
 	}
 	data, err := os.ReadFile(filepath.Join(wt, "docs", "slices", name, "spec.md"))
 	if os.IsNotExist(err) {
-		return Validation{}, &Error{Message: path.Join(".sliceflow", "worktrees", name, "docs", "slices", name, "spec.md") + " not found. Nothing was changed."}
+		return Validation{}, specNotFoundError(r, wt, name)
 	}
 	if err != nil {
 		return Validation{}, err
@@ -51,4 +50,16 @@ func Validate(ctx context.Context, r Repo, name string, strict bool) (Validation
 		}
 	}
 	return v, nil
+}
+
+// specNotFoundError is R19's error: spec.md is missing in the worktree wt.
+// The path is from the root of the main checkout, with "/" on every system
+// (R41 of 0001). A worktree outside the main checkout gives a path that
+// starts with "../". Task 14 (spec submit) uses it too.
+func specNotFoundError(r Repo, wt, name string) *Error {
+	p := filepath.Join(wt, "docs", "slices", name, "spec.md")
+	if rel, err := filepath.Rel(filepath.FromSlash(r.Root), p); err == nil {
+		p = rel
+	}
+	return &Error{Message: filepath.ToSlash(p) + " not found. Nothing was changed."}
 }

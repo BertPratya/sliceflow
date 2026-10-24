@@ -20,11 +20,10 @@ ideas: []
 ---
 
 # Spec
-
 ## Summary
 
 Text.
-
+` + strings.Repeat("More text.\n", 15) + `
 ## Why
 
 Text.
@@ -41,6 +40,7 @@ Text.
 - **R1.** Thing.
   Check: unit
 - **R7.** Other thing.
+  More about it.
 - **R8.** More.
   Check: unit
 
@@ -58,8 +58,7 @@ Text.
 ## Assumptions
 
 - A.
-
-## Open questions
+` + strings.Repeat("- A.\n", 79) + `## Open questions
 
 - **Q1.** a?
 - **Q2.** b?
@@ -85,11 +84,13 @@ func writeSpec(t *testing.T, dir, name, text string) {
 	}
 }
 
-func s6Lines(t *testing.T, text string) (errLine, note, warn string) {
-	t.Helper()
-	return fmt.Sprintf("spec.md:%d: error: R7 has no Check: line\n", lineNo(t, text, "**R7.**")),
-		fmt.Sprintf("spec.md:%d: note: no scenario shows R8\n", lineNo(t, text, "**R8.**")),
-		fmt.Sprintf("spec.md:%d: warning: 2 open questions left (Q1, Q2)\n", lineNo(t, text, "## Open questions"))
+// s6Lines are the three lines of S6, with the line numbers S6 shows, for
+// the spec of s6Spec. S7 and S8 add R7's Check: line, which moves R8 and
+// Open questions down by one line.
+func s6Lines(shift int) (errLine, note, warn string) {
+	return "spec.md:42: error: R7 has no Check: line\n",
+		fmt.Sprintf("spec.md:%d: note: no scenario shows R8\n", 44+shift),
+		fmt.Sprintf("spec.md:%d: warning: 2 open questions left (Q1, Q2)\n", 140+shift)
 }
 
 func TestValidateProblems(t *testing.T) {
@@ -97,7 +98,10 @@ func TestValidateProblems(t *testing.T) {
 	createSlice(t, dir, "login-google")
 	text := s6Spec("login-google")
 	writeSpec(t, dir, "login-google", text)
-	e, n, w := s6Lines(t, text)
+	e, n, w := s6Lines(0)
+	if lineNo(t, text, "**R7.**") != 42 || lineNo(t, text, "**R8.**") != 44 || lineNo(t, text, "## Open questions") != 140 {
+		t.Fatal("the test spec does not match S6's line numbers")
+	}
 	want := e + n + w + "1 error, 1 warning, 1 note\n"
 	head := testrepo.Git(t, sliceWT(dir, "login-google"), "rev-parse", "HEAD")
 	out, errOut, code := run(t, sliceWT(dir, "login-google"), "spec", "validate")
@@ -118,7 +122,7 @@ func TestValidateWarningOnly(t *testing.T) {
 	createSlice(t, dir, "login-google")
 	text := s7Text()
 	writeSpec(t, dir, "login-google", text)
-	_, n, w := s6Lines(t, text)
+	_, n, w := s6Lines(1)
 	want := n + w + "0 errors, 1 warning, 1 note\n"
 	out, errOut, code := run(t, sliceWT(dir, "login-google"), "spec", "validate")
 	if code != 0 || out != want || errOut != "" {
@@ -131,7 +135,7 @@ func TestValidateStrict(t *testing.T) {
 	createSlice(t, dir, "login-google")
 	text := s7Text()
 	writeSpec(t, dir, "login-google", text)
-	_, n, w := s6Lines(t, text)
+	_, n, w := s6Lines(1)
 	want := n + w + "0 errors, 1 warning, 1 note\n"
 	out, errOut, code := run(t, sliceWT(dir, "login-google"), "spec", "validate", "--strict")
 	if code != 1 || out != want || errOut != "" {

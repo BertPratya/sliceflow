@@ -68,6 +68,25 @@ func TestValidateCounts(t *testing.T) {
 	wantErrMsg(t, err, ".sliceflow/worktrees/demo/docs/slices/demo/spec.md not found. Nothing was changed.")
 }
 
+func TestValidateMovedWorktree(t *testing.T) {
+	r := newRepo(t)
+	ctx := context.Background()
+	c, err := Create(ctx, r, CreateOptions{Name: "demo"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	moved := filepath.Join(r.Dir, ".worktrees", "elsewhere", "demo")
+	if err := os.MkdirAll(filepath.Dir(moved), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	testrepo.Git(t, r.Dir, "worktree", "move", filepath.FromSlash(c.Worktree), moved)
+	if err := os.Remove(filepath.Join(moved, "docs", "slices", "demo", "spec.md")); err != nil {
+		t.Fatal(err)
+	}
+	_, err = Validate(ctx, r, "demo", false)
+	wantErrMsg(t, err, ".worktrees/elsewhere/demo/docs/slices/demo/spec.md not found. Nothing was changed.")
+}
+
 func wantErrMsg(t *testing.T, err error, msg string) {
 	t.Helper()
 	se, ok := err.(*Error)
