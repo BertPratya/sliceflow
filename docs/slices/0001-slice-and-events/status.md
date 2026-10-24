@@ -1,25 +1,25 @@
 # Status: 0001-slice-and-events
 
-- Phase: implementing (blocked)
+- Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 09:26 UTC
+- Updated: 2026-10-24 09:31 UTC
 
 ## Needs human
 
-- Task 09 is blocked on task-09-1/Q1 (small): Ctrl-C during `git worktree add` leaves the branch and worktree behind, though the error says everything was removed. Let `worktree add` finish before Ctrl-C is honored, or clean up what the stopped `worktree add` left?
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
 | spec.md | approved | 3 | R002 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R002 |
-| plan.md | approved | 3 | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
+| plan.md | approved | 3 | R003 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R003 |
 | preview.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
-| tasks.md | approved | with plan.md | R002 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R002 |
+| tasks.md | approved | with plan.md | R003 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R003 |
 
 ## Tasks
 
-8 of 13 done · 1 blocked · 4 todo
+8 of 13 done · 1 doing · 4 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -31,7 +31,7 @@
 | 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | done | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
-| 09 | create-undo | core | blocked | 0 | 1 | 08 | R8, R18 |
+| 09 | create-undo | core | doing | 0 | 1 | 08 | R8, R18 |
 | 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
@@ -39,17 +39,21 @@
 
 ## Findings
 
-Open: 4 · Waiting for verify: 0 · Closed: 61
+Open: 3 · Waiting for verify: 0 · Closed: 71
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| change-6/F1 | medium | Another run's worktree passes the ownership test | fixed (waiting for verify): step 6 split into git branch, then git worktree add |
-| change-6/F2 | medium | How the half-made folder is removed is not said | fixed (waiting for verify) |
-| change-6/F3 | medium | The cleanup's place in newest first is not said | fixed (waiting for verify) |
-| change-6/F4 | low | The lock reason initializing is translated by git | fixed (waiting for verify): always --force twice |
-| change-6/F5 | low | The test reaches one state and checks part of the message | fixed (waiting for verify): whole message, and no .sliceflow/ |
+| change-7/F1 | medium | A worktree entry with no branch yet is skipped | fixed: match the path alone |
+| change-7/F2 | low | .sliceflow/worktrees/ could be removed before the worktree | fixed: it goes into the list before the branch and worktree |
+| change-7/F3 | low | refs/heads/slice/<name> would detach HEAD in worktree add | fixed: the short name |
+| change-7/F4 | low | A signal during git branch itself can leave a branch | fixed: named and accepted (microseconds) |
+| change-6/F1 | medium | Another run's worktree passes the ownership test | verified: step 6 split into git branch, then git worktree add |
+| change-6/F2 | medium | How the half-made folder is removed is not said | verified |
+| change-6/F3 | medium | The cleanup's place in newest first is not said | verified |
+| change-6/F4 | low | The lock reason initializing is translated by git | verified: always --force twice |
+| change-6/F5 | low | The test reaches one state and checks part of the message | verified: whole message, and no .sliceflow/ |
 | change-5 | - | No findings: R27's new sentence and TestParseSeqFirstGoodLine | - |
 | change-4/F1 | low | The final . is dropped for every reason, but task 09 names only file errors | fixed: task 09 step 3 names Flow 3 step 5; TestCreateHookOutput's first line ends in . |
 | change-3/F1 | medium | TestReasonFileError fails on Linux and macOS (ToSlash only converts the own separator) | verified |
@@ -104,7 +108,7 @@ Open: 4 · Waiting for verify: 0 · Closed: 61
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-09-1/Q1 | needs human | 09 | Which plan rule changes so an interrupted worktree add is undone | open |
+| task-09-1/Q1 | needs human | 09 | Which plan rule changes so an interrupted worktree add is undone | verified: the human chose option 2 (kill at once, then clean up); R003 |
 | task-09-1/F1 | high | 09 | Ctrl-C during git worktree add leaves the branch and worktree | open |
 | task-09-1/F2 | medium | 09 | Could not remove: does not name the kept branch | open |
 | task-09-1/F3 | low | 09 | slice.Interrupted is a new export not in tasks.md | wontfix: why: used only by the CLI; noted for the integration review |
@@ -149,6 +153,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:31 · lead (claude) · task 09 worker round 2 started: F1 (R003), F2, F4
+- 2026-10-24 09:31 · lead (claude) · plan.md and tasks.md approved as R003 (tag on c9ecb58); phase back to implementing
+- 2026-10-24 09:31 · doc reviewer (claude opus) · change-7 submitted: change-6 findings verified; 1 medium, 3 low, all fixed by the lead
 - 2026-10-24 09:26 · lead (claude) · change-6 findings fixed in plan.md and tasks.md (step 6 split: git branch, then git worktree add); change review change-7 started
 - 2026-10-24 09:26 · doc reviewer (claude opus) · change-6 submitted: 3 medium, 2 low; nothing for the human
 - 2026-10-24 09:26 · human · task-09-1/Q1 answered: "kill at once, then clean up what is left"; and tasks 10 and 11 may be built meanwhile: "yes do it if it don't depend on unfinished tasks"
