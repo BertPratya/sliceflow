@@ -32,6 +32,7 @@ func TestParseBadLines(t *testing.T) {
 	rows := []struct{ name, bad, reason string }{
 		{"blank", "   ", "blank line"},
 		{"json", "{", "not valid JSON"},
+		{"cr only", "\r", "blank line"},
 		{"version", `{"version":2,"seq":2,"event":"slice.created","at":"2026-10-24T07:42:00Z","data":{"from":{"branch":"main","commit":"` + c + `"}}}`, "unknown version 2"},
 		{"event", `{"version":1,"seq":2,"event":"slice.moved","at":"2026-10-24T07:42:00Z","data":{"from":{"branch":"main","commit":"` + c + `"}}}`, `unknown event "slice.moved"`},
 		{"unknown", `{"version":1,"seq":2,"event":"slice.created","at":"2026-10-24T07:42:00Z","by":"x","data":{"from":{"branch":"main","commit":"` + c + `"}}}`, `unknown field "by"`},
@@ -40,6 +41,7 @@ func TestParseBadLines(t *testing.T) {
 		{"missing", `{"version":1,"seq":2,"event":"slice.created","data":{"from":{"branch":"main","commit":"` + c + `"}}}`, `missing field "at"`},
 		{"type string", `{"version":1,"seq":"2","event":"slice.created","at":"2026-10-24T07:42:00Z","data":{"from":{"branch":"main","commit":"` + c + `"}}}`, `field "seq" has the wrong type`},
 		{"type float", `{"version":1,"seq":2.0,"event":"slice.created","at":"2026-10-24T07:42:00Z","data":{"from":{"branch":"main","commit":"` + c + `"}}}`, `field "seq" has the wrong type`},
+		{"type huge", `{"version":1,"seq":99999999999999999999,"event":"slice.created","at":"2026-10-24T07:42:00Z","data":{"from":{"branch":"main","commit":"` + c + `"}}}`, `field "seq" has the wrong type`},
 		{"value at", `{"version":1,"seq":2,"event":"slice.created","at":"2026-10-24 07:42","data":{"from":{"branch":"main","commit":"` + c + `"}}}`, `field "at" has a wrong value`},
 		{"value commit", `{"version":1,"seq":2,"event":"slice.created","at":"2026-10-24T07:42:00Z","data":{"from":{"branch":"main","commit":"9dd7ebf"}}}`, `field "data.from.commit" has a wrong value`},
 		{"value branch", `{"version":1,"seq":2,"event":"slice.created","at":"2026-10-24T07:42:00Z","data":{"from":{"branch":"","commit":"` + c + `"}}}`, `field "data.from.branch" has a wrong value`},
@@ -71,6 +73,24 @@ func TestParseSeqGap(t *testing.T) {
 	}
 	events, warns := Parse([]byte(sb.String()))
 	if len(events) != 4 || len(warns) != 1 || warns[0] != ".events.jsonl line 3: seq 4, expected 3" {
+		t.Errorf("events %d warns %q", len(events), warns)
+	}
+}
+
+func TestParseSeqFirstGoodLine(t *testing.T) {
+	three := strings.Replace(goodLine, `"seq":1`, `"seq":3`, 1)
+	events, warns := Parse([]byte(three + "\n"))
+	if len(events) != 1 || len(warns) != 1 || warns[0] != ".events.jsonl line 1: seq 3, expected 1" {
+		t.Errorf("events %d warns %q", len(events), warns)
+	}
+
+	two := strings.Replace(goodLine, `"seq":1`, `"seq":2`, 1)
+	events, warns = Parse([]byte("{\n" + two + "\n"))
+	want := []string{
+		".events.jsonl line 1: not valid JSON; skipped",
+		".events.jsonl line 2: seq 2, expected 1",
+	}
+	if len(events) != 1 || !reflect.DeepEqual(warns, want) {
 		t.Errorf("events %d warns %q", len(events), warns)
 	}
 }

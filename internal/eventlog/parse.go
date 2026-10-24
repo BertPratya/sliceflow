@@ -215,7 +215,8 @@ func parseLine(line string) (Event, string) {
 	if !isWhole(top["version"]) {
 		return wrong("version")
 	}
-	if !isWhole(top["seq"]) {
+	seq, err := strconv.Atoi(string(top["seq"]))
+	if !isWhole(top["seq"]) || err != nil {
 		return wrong("seq")
 	}
 	if _, ok := asString(top["event"]); !ok {
@@ -263,10 +264,6 @@ func parseLine(line string) (Event, string) {
 		return bad("data.title")
 	}
 
-	seq, err := strconv.Atoi(string(top["seq"]))
-	if err != nil {
-		return bad("seq")
-	}
 	return Event{
 		Version: 1,
 		Seq:     seq,
