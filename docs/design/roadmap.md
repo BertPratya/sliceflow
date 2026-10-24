@@ -19,18 +19,24 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
    The engine lets a mark (blocked, cancelled) sit on top of any phase
    (design 1.4); the marks themselves come with the slices that need
    them.
+5. **Every step sliceflow runs can be stopped and run again** (decided,
+   the human, 2026-10-24). From 0004 on, each step sliceflow runs by
+   itself has the events started, then done, failed, or stopped, and is
+   safe to run twice. Retrying a failed or stopped step is then one
+   more move of the state machine. Each slice that adds a step proves
+   this in its tests.
 
 ## The slices
 
 | # | Slice | What you can do after it | Design |
 |---|---|---|---|
 | 0001 | slice and events | create a slice (`sliceflow slice create`), see it (`sliceflow slice status`, `sliceflow slice list`); the event log with its first event, `slice.created` | 1.13, 2.1 |
-| 0002 | spec | the state machine's engine, and the spec's moves: write a spec and check it; see where a slice is and what comes next | 1.4, 2.2 |
+| 0002 | spec | the state machine's engine, and the spec's moves: write a spec and check it; see where a slice is and what comes next; set a slice's title | 1.4, 2.2 |
 | 0003 | plan | write the plan, tasks, and preview, review them, and approve the planning once; the slice is ready to build | 2.3 |
-| 0004 | agents | `sliceflow` starts agents itself: the Codex adapter, the permission layers, settings per role; first use: the spec check and the plan review | 1.9, 1.12c |
-| 0005 | the run | `sliceflow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge | 2.4 |
+| 0004 | agents | `sliceflow` starts agents itself: the Codex adapter, the permission layers, settings per role; first use: the spec check and the plan review; who caused each event (`by`) | 1.9, 1.12c |
+| 0005 | the run | `sliceflow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; `sliceflow stop`, and `sliceflow run` continues where it stopped | 2.4 |
 | 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue, conflicts | 2.4 |
-| 0007 | reliability | a run survives a killed `sliceflow`, a lost network, a stuck agent: heartbeats, time limits, retries, checking the log against reality on restart | 1.7, 2.4 |
+| 0007 | reliability | a run survives a killed `sliceflow`, a lost network, a stuck agent: heartbeats, time limits, retries, checking the log against reality on restart; `sliceflow retry` for a failed or stopped step; cleaning up a slice half made by a crash | 1.7, 2.4 |
 | 0008 | cases and the lead | each stop goes to the right level: the chat lead, the fallback lead, or the human | 1.6, 1.12c |
 | 0009 | finish | the full path to `main`: integration review, preview, result approval, update from `main`, merge, backlog | 2.5 |
 | 0010 | stacking and cancel | design a slice ahead, on top of another; cancel and reopen | 2.6, 2.7 |
@@ -45,6 +51,22 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
   0002's planning starts.
 - **Codex first:** 0004 builds the Codex adapter; Claude Code comes in
   0011.
+
+## Where the backlog items go (decided, the human, 2026-10-24)
+
+| Backlog item | Goes to |
+|---|---|
+| Set or change a slice's title | 0002 |
+| Who caused an event (`by`) | 0004 |
+| You stop a run, and continue it | 0005 |
+| You retry a failed or stopped step | 0007 |
+| Clean up a slice half made by a crash | 0007 |
+| Cancel a slice | 0010 |
+| User hooks before and after events | after 0012 |
+| Errors as JSON, with codes | after 0012: output other programs can rely on |
+| A local server and browser app; stop, continue, and retry buttons | after 0012: the web dashboard |
+| Teammates' slices in `slice list` | after the first release, with real use |
+| A `status.md` written from the log | decided after the dashboard |
 
 ## Time (the lead's estimate, 2026-10-23)
 
