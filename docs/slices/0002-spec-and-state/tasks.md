@@ -520,7 +520,7 @@ updated for the two new lines. Its brief is about 2,000 words, over the usual 1,
 
 ### Out of scope
 
-- The status after a real submit. Done in: task 15 (S13 to S17), task 16 (S23)
+- The status after a real submit (S13 to S17, S23). Done in: task 15, task 16
 
 ## Task 08: cli-groups-and-template
 

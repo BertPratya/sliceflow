@@ -3,20 +3,20 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 19:55 UTC
+- Updated: 2026-10-24 20:15 UTC
 
 ## Needs human
 
-None.
+- The planning is waiting for approval
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
-| plan.md | in_review | 3 | - | - |
-| preview.md | in_review | with plan.md | - | - |
-| tasks.md | in_review | with plan.md | - | - |
+| spec.md | review_passed | 3 | - | - |
+| plan.md | review_passed | 3 | - | - |
+| preview.md | review_passed | with plan.md | - | - |
+| tasks.md | review_passed | with plan.md | - | - |
 
 ## Tasks
 
@@ -43,24 +43,25 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 5 · Closed: 31
+Open: 0 · Waiting for verify: 1 · Closed: 36
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-2/F1 | low | Leftovers of the round-1 fixes | fixed |
+| plan-3/F1 | low | Task 07's Done in: line form | fixed |
+| plan-2/F1 | low | Leftovers of the round-1 fixes | verified (fixed) |
 | plan-1/Q1 | high | template show outside a git repo | verified (fixed) |
-| plan-1/F1 | medium | saveEvent can't run the command's checks under its lock | reopened in plan-2: fixed |
+| plan-1/F1 | medium | saveEvent can't run the command's checks under its lock | verified (fixed) |
 | plan-1/F2 | medium | R12 and R19 for spec submit are in no task | verified (fixed) |
-| plan-1/F3 | medium | Six briefs over 1,500 words; task 15 too big | reopened in plan-2: fixed |
+| plan-1/F3 | medium | Six briefs over 1,500 words; task 15 too big | verified (fixed) |
 | plan-1/F4 | medium | state.Allowed: error in the plan, string in task 02 | verified (fixed) |
 | plan-1/F5 | low | git diff exit 128 for a missing commit | verified (fixed) |
 | plan-1/F6 | low | Gaps in Done when | verified (fixed) |
-| plan-1/F7 | low | Testing and the tasks disagree | reopened in plan-2: fixed |
+| plan-1/F7 | low | Testing and the tasks disagree | verified (fixed) |
 | plan-1/F8 | low | Tasks 05, 08, 09 should be core | verified (fixed) |
 | plan-1/F9 | low | Task 06's Phase and Title line | verified (fixed) |
-| plan-1/F10 | low | Approach's file and dependency lines; Request.File | reopened in plan-2: fixed |
+| plan-1/F10 | low | Approach's file and dependency lines; Request.File | verified (fixed) |
 | plan-1/F11 | low | Plan touches; Parked | verified (fixed) |
 | plan-1/F12 | low | Preview P2's exact line | verified (fixed) |
 | spec-2/F1 | medium | An indented ideas item is not a list | verified (fixed) |
@@ -106,6 +107,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 20:15 · lead (claude) · plan-3 low fixed; spec, plan, tasks, preview review_passed; waiting for the human's approval
+- 2026-10-24 20:10 · doc-reviewer (claude opus) · change review 3 handed in: all reopened findings verified; 1 new low
 - 2026-10-24 19:55 · lead (claude) · change review 3 of the plan started: only the fixes since round 2 (the last round)
 - 2026-10-24 19:50 · lead (claude) · human: "yes": Prepare also returns the commit message; reasons for the long briefs of tasks 14, 15, 16
 - 2026-10-24 19:40 · lead (claude) · plan-2 lows fixed (plan-1/F7, F10, plan-2/F1); documents back to draft
