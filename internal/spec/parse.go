@@ -283,11 +283,22 @@ func closingRun(s string, from, n int) int {
 // the end of line i, closes on a later line of the same paragraph.
 func spansLines(lines []string, i, n int) bool {
 	for j := i + 1; j < len(lines) && strings.TrimSpace(lines[j]) != ""; j++ {
+		if startsBlock(lines[j]) {
+			return false
+		}
 		if closingRun(lines[j], 0, n) >= 0 {
 			return true
 		}
 	}
 	return false
+}
+
+// startsBlock tells whether a line starts a new block: a list item, a heading,
+// or a fence. Inline code cannot run over it.
+func startsBlock(line string) bool {
+	t := strings.TrimLeft(line, " \t")
+	return strings.HasPrefix(t, "- ") || strings.HasPrefix(t, "#") ||
+		strings.HasPrefix(t, "```") || strings.HasPrefix(t, "~~~")
 }
 
 func blank(s string) string {

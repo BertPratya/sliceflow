@@ -202,3 +202,16 @@ func TestParseInlineCodeAcrossLines(t *testing.T) {
 		t.Fatalf("placeholders = %+v", d.Placeholders)
 	}
 }
+
+func TestParseStrayBacktickKeepsNextItem(t *testing.T) {
+	src := "## Requirements\n\n- **R1.** A lone ` here.\n  Check: unit\n- **R2.** Real `code` here.\n  Check: unit\n"
+	d := Parse([]byte(src))
+	if len(d.Sections) != 1 || len(d.Sections[0].Items) != 2 {
+		t.Fatalf("sections = %+v", d.Sections)
+	}
+	for _, it := range d.Sections[0].Items {
+		if len(it.Labels) != 1 || it.Labels[0].Name != "Check" {
+			t.Fatalf("item %s labels = %+v", it.ID, it.Labels)
+		}
+	}
+}
