@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 19:37 UTC
+- Updated: 2026-10-24 19:46 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-6 of 17 done · 1 doing · 10 todo
+6 of 17 done · 1 in_review · 10 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -30,7 +30,7 @@ None.
 | 04 | spec-errors | core | done | 0 | 3 | 03 | R15, R18 |
 | 05 | spec-warnings | core | done | 0 | 2 | 04 | R16, R17, R18 |
 | 06 | status-core | core | done | 0 | 3 | 02 | R1, R3, R29, R30, R34 |
-| 07 | status-spec | normal | doing | 0 | 0 | 06 | R4, R29, R31 |
+| 07 | status-spec | normal | in_review | 0 | 1 | 06 | R4, R29, R31 |
 | 08 | cli-groups-and-template | core | todo | 0 | 0 | - | R35, R36 |
 | 09 | validate-command | core | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
 | 10 | lock | core | todo | 0 | 0 | - | R6, R7 |
@@ -149,6 +149,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 19:46 · lead (claude) · task review 1 of task 07 started
+- 2026-10-24 19:46 · lead (claude) · task 07 committed (be44aaf); the checks pass
+- 2026-10-24 19:46 · worker (claude sonnet) · task 07 round 1 handed in
 - 2026-10-24 19:37 · lead (claude) · task 07 started: worker round 1
 - 2026-10-24 19:37 · lead (claude) · task 06 done
 - 2026-10-24 19:37 · code-reviewer (claude opus) · task review 3 of task 06 handed in: task-06-2/F1 verified; no new findings
