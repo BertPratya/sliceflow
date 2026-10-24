@@ -190,9 +190,101 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
        decide it here: add an Open question.
      - None? Write: None. -->
 
-### {{kind, e.g. CLI}}
+### CLI
 
-{{What changes. Link the contract file if one exists.}}
+Changed. The spec describes it fully; the code follows the spec's words.
+
+- `sliceflow spec validate [<name>] [--strict]`: R11 to R19, R37.
+- `sliceflow spec submit [<name>]`: R6 to R12, R19 to R28, R37.
+- `sliceflow slice title <name> <title>`: R11, R32 to R34.
+- `sliceflow template show <template>`: R35.
+- `sliceflow slice status [<name>] [--json]`: gains `Spec:` and `Next:`,
+  and `docs` and `next` in JSON (R29 to R31). `slice list --json` gains
+  the same two fields (R31). Both show the newest title (R34).
+- Wrong use, and `sliceflow spec` or `sliceflow template` alone: R36. A
+  command is now one word, or `slice`, `spec`, or `template` and a second
+  word.
+
+### Event log
+
+Changed. Four new events, read and checked as R2, R4, and R5 say, and
+written as R9 says. See Data.
+
+### Review files
+
+New. `docs/slices/<name>/reviews/spec-<round>.md`, as R25 to R27 say.
+sliceflow reads the result from the file, as the review template says
+for a doc review: when `## Needs human decision` is not `None.`, the
+result is `needs_human`; else it is `passed`. A file with no such
+section gives `needs_human`. (The section rule is the human's choice;
+the missing section is the lead's call.)
+
+### Lock file
+
+New. See Data, and R6 and R7.
+
+### Core API
+
+Changed, in `internal/slice`. The CLI calls it; a later server calls
+the same functions (SD13 of 0001-slice-and-events).
+
+```go
+func Validate(ctx context.Context, r Repo, name string, strict bool) (Validation, error)
+func Submit(ctx context.Context, r Repo, name string, step func(Step)) (Submission, error)
+func SetTitle(ctx context.Context, r Repo, name, title string) error
+// Status and List: SliceStatus gains the spec's state and the next step.
+```
+
+- `Submit` calls `step` once for each step done, as it happens (e.g.
+  "Submitted spec.md."), so a long review shows its start at once. The
+  core never prints, as in 0001. (lead's call)
+- Every failure the spec names is an `*Error` with the spec's words, as
+  in 0001.
+
+### State machine
+
+New, in `internal/state`. No files, no git.
+
+```go
+func Replay(events []eventlog.Event) (State, []string) // the state, and R4's warnings
+func Allowed(s State, e eventlog.Event) error          // R2: is this move allowed now?
+```
+
+`State` holds the phase, the title, and for `spec.md`: its state, the
+last review (round, reviewer, file, reviewed commit, result), and the
+last refused submit. The table of moves is one list in this package;
+later slices add rows to it. (lead's call)
+
+### Spec reader
+
+New, in `internal/spec`. No files, no git.
+
+```go
+func Parse(text []byte) Doc               // sections, items, labeled lines, with line numbers
+func Check(d Doc, slice string) []Problem // R15 to R18
+```
+
+`Doc` is meant to be reused, e.g. by a later `spec show --json` (0015).
+(lead's call)
+
+### Reviewer
+
+New, in `internal/review`. A contract for later reviewers (0004, 0011).
+
+```go
+type Reviewer interface {
+	Name() string                                      // "placeholder"; the event's reviewer
+	Review(ctx context.Context, req Request) error     // writes the review file
+}
+type Request struct {
+	Slice, Doc, File, Commit string // File: the review file's path in the worktree
+	Round                    int
+	Worktree                 string
+}
+```
+
+The reviewer writes the review file; sliceflow reads the result from
+it (Review files). The placeholder writes R26's text.
 
 ## Data
 
