@@ -199,7 +199,37 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
      data model doc for full details.
      None? Write: None. -->
 
-{{The stored data that changes, and how old data is moved over.}}
+`slice create` writes three files. This is the first version of each,
+so no old data is moved over.
+
+| File | Where | What it holds |
+|---|---|---|
+| `docs/slices/<name>/.events.jsonl` | committed on the slice branch | one `slice.created` line, as the spec's R19 and R20 say |
+| `docs/slices/<name>/spec.md` | committed on the slice branch | the built-in template |
+| `.sliceflow/.gitignore` | in the main checkout, never committed | the one line `*` |
+
+### Events in the code
+
+One Go type holds any event: `version`, `seq`, `event`, `at`, and
+`data`, declared in that order. `encoding/json` writes struct fields in
+the order they are declared, so every line has R19's order. `data` of
+`slice.created` has its own type: `from` (`branch`, `commit`) and an
+optional `title`, left out when empty. See TD4.
+
+### Reading a line
+
+The reader opens each line as a map of field names first, then checks
+each field itself, so each warning has R26's exact words. See TD5.
+
+- A line of only spaces, tabs, or `\r` is a `blank line`. A good line
+  that ends in `\r\n` reads normally, because JSON counts `\r` as a
+  space. (lead's call)
+- A last line with no `\n` at the end is read normally, with no
+  warning. (lead's call)
+- `version` and `seq` must be JSON whole numbers: `1.0` or `"1"` is
+  `has the wrong type`. (lead's call)
+- The whole log is read from git in one piece, so a line has no length
+  limit. (lead's call)
 
 ## Testing
 
@@ -271,6 +301,26 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
   version in `go.mod`.
   Not chosen: an older version, because no user needs one yet.
   Plan only: it picks the Go version; no task's code depends on it.
+- **TD4.** An event is written from Go structs whose fields are
+  declared in R19's order, with `encoding/json`.
+  Why: the standard library keeps the declared order, so the order
+  needs no extra code and no extra test helper.
+  Not chosen: writing the JSON by hand, because escaping strings by
+  hand is easy to get wrong.
+- **TD5.** An event line is read in two steps: first into a map of
+  field names to raw JSON values, then each field is checked by our own
+  code.
+  Why: R26 needs exact warnings, like `unknown field "f"` and
+  `field "data.from.branch" has the wrong type`. Our own checks give
+  them directly.
+  Not chosen: `json.Decoder` with `DisallowUnknownFields`, because its
+  error messages are not in R26's words, and parsing them would break
+  with a new Go version.
+- **TD6.** sliceflow reads a log with one `git show <ref>:<path>`, as
+  one piece in memory.
+  Why: a log is small, and one piece has no line length limit.
+  Not chosen: `bufio.Scanner` line by line, because it fails on a line
+  over 64 KB.
 
 ## Risks and rollout
 
