@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:13 UTC
+- Updated: 2026-10-24 08:15 UTC
 
 ## Needs human
 
@@ -19,11 +19,11 @@ None.
 
 ## Tasks
 
-0 of 13 done · 1 doing · 12 todo
+0 of 13 done · 1 in_review · 12 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
-| 01 | git-runner | core | doing | 1 | 0 | - | R40 |
+| 01 | git-runner | core | in_review | 0 | 1 | - | R40 |
 | 02 | event-log | core | todo | 0 | 0 | 01 | R19, R25, R26, R27 |
 | 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | todo | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
@@ -115,6 +115,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:15 · lead (claude) · task 01 code review started, round 1
+- 2026-10-24 08:15 · lead (claude) · task 01 committed (ab4fce5) after worker round 2; checks pass, also through the pre-commit hook
 - 2026-10-24 08:13 · lead (claude) · task 01 attempt 1 failed in the pre-commit hook: git's hook variables (GIT_DIR, GIT_INDEX_FILE) leaked into the tests, which then made 7 commits on the slice branch and set alias.env-check in .git/config; both undone (branch back to d8f86fd, never pushed); worker round 2 next
 - 2026-10-24 08:11 · lead (claude) · task 01 started: worker round 1
 - 2026-10-24 08:11 · lead (claude) · implementing started: phase ready, worktree clean; `main` has no Go code, so its checks have nothing to run (see Lead's decisions)
