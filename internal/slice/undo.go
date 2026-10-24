@@ -161,12 +161,15 @@ func removeEmptyDir(dir string) bool {
 }
 
 // removeWorktree removes a worktree. It reports false when the folder stays.
+// When the folder is gone but git still lists this run's entry, e.g. a locked
+// one, it removes only that entry. It never prunes: that would clear the
+// other stale entries in the repo, which are not ours.
 func (u *undoList) removeWorktree(ctx context.Context, wt string) bool {
 	if _, err := git.Run(ctx, u.root, "worktree", "remove", "--force", wt); err != nil {
 		if exists(wt) {
 			return false
 		}
-		_, _ = git.Run(ctx, u.root, "worktree", "prune")
+		_, _ = git.Run(ctx, u.root, "worktree", "remove", "--force", "--force", wt)
 	}
 	return true
 }

@@ -145,6 +145,39 @@ func TestUndoKeepsStaleEntry(t *testing.T) {
 	}
 }
 
+func TestUndoKeepsOtherStaleEntries(t *testing.T) {
+	r := newRepo(t)
+	other := filepath.Join(r.Root, ".sliceflow", "worktrees", "other")
+	testrepo.Git(t, r.Dir, "worktree", "add", "--detach", other)
+	if err := os.RemoveAll(other); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	wt := worktreeDir(r.Root, "spec-submit")
+	setAfterStep(t, func(step string) {
+		if step == "worktree" {
+			testrepo.Git(t, r.Dir, "worktree", "lock", wt)
+			if err := os.RemoveAll(wt); err != nil {
+				t.Error(err)
+			}
+			cancel()
+		}
+	})
+	_, err := Create(ctx, r, CreateOptions{Name: "spec-submit"})
+	wantSliceError(t, err, "could not create slice spec-submit: interrupted. Everything sliceflow made was removed.")
+	list := filepath.ToSlash(gitOut(t, r.Dir, "worktree", "list", "--porcelain"))
+	if !strings.Contains(list, ".sliceflow/worktrees/other") {
+		t.Error("the other stale entry was removed")
+	}
+	if strings.Contains(list, ".sliceflow/worktrees/spec-submit") {
+		t.Error("this run's worktree entry is left")
+	}
+	if branchExists(t, r.Dir, "slice/spec-submit") {
+		t.Error("branch left")
+	}
+}
+
 func TestUndoKeepsOthers(t *testing.T) {
 	r := newRepo(t)
 	testrepo.Git(t, r.Dir, "commit", "--allow-empty", "-m", "second")
