@@ -23,7 +23,7 @@ interface; the placeholder is the only one in this slice.
 | Spec reader, and the checks | internal/spec/ | new |
 | Reviewer interface, the placeholder, and the review file | internal/review/ | new |
 | Event lines: the new events' data, and each event's line number | internal/eventlog/ | changed |
-| The write path (lock, save, undo), submit, title, validate, and status | internal/slice/ | changed |
+| The write path (lock, save, undo), submit, review, title, validate, and status | internal/slice/ | changed |
 | The unfilled spec template, for `template show` | internal/template/ | changed |
 | The new commands, and the new status output | internal/cli/ | changed |
 
@@ -174,7 +174,7 @@ Covers: R11, R36
    the new texts `missing title` and `missing template name`. The new
    commands have no `--json`, so it is `unknown flag --json`.
 3. For `spec validate`, `spec submit`, and `slice title`, the first
-   checks run in R11's order, then the lock (submit and title only),
+   checks run in R11's order, then the lock (submit, review, and title only),
    then the command's own checks.
 
 ### Shared rules
@@ -194,7 +194,7 @@ Covers: R6, R7
 3. It deletes the lock as soon as the event is saved or has failed, also
    on Ctrl-C (see Interrupts), with a `defer` set right after the lock is
    taken.
-4. Only `spec submit` and `slice title` take the lock. Reads never do:
+4. Only `spec submit`, `spec review`, and `slice title` take the lock. Reads never do:
    they read the last commit of the slice branch, which never changes
    (R24 of 0001-slice-and-events).
 
@@ -462,7 +462,7 @@ How the tests make things fail:
 - The busy test (S17) makes the lock file itself, and waits the full
   10 s: one slow test, which checks exactly what the user sees. (lead's
   call)
-- Ctrl-C: as in 0001, the e2e test (task 16) skips on Windows, and a
+- Ctrl-C: as in 0001, the e2e test (task 17) skips on Windows, and a
   unit test of the undo after a cancelled `ctx` (task 11) runs on every
   system.
 - A log with a bad line, or a move that is not allowed (S3, S4), is

@@ -836,14 +836,14 @@ The lead reads the template's rules, which a filled spec no longer holds.
 
 - The plan, the tasks, the preview, and the approval. Goes to: a later slice (0003)
 - A number reused for something new after approval. Goes to: a later slice (0003)
-- A real reviewer, and what `spec submit` prints when a review does not pass. Goes to: a later slice (0004)
+- A real reviewer, and what `spec review` prints when a review does not pass. Goes to: a later slice (0004)
 - A limit on review rounds. Goes to: a later slice (0004)
 - Going on after a review that stopped while `spec.md` is `in_review`. Goes to: a later slice (0007)
 - A general `sliceflow run` for the next step, and steps that start by themselves. Goes to: the backlog
 - Waking the lead when a review ends. Goes to: a later slice (0004)
 - Who caused an event (a `by` field). Goes to: a later slice (0004)
 - Turning the spec review off, and the `review.skipped` event. Goes to: a later slice (0012)
-- The spec as JSON, and `--json` for `spec validate`, `spec submit`, `slice title`, and `template show`. Goes to: a later slice (0015)
+- The spec as JSON, and `--json` for `spec validate`, `spec submit`, `spec review`, `slice title`, and `template show`. Goes to: a later slice (0015)
 - Templates other than the spec in `template show`. Goes to: a later slice (configurable templates)
 - Commands that show the spec as approved, and the difference between two revisions. Goes to: a later slice (0003)
 - Showing the title in `spec.md`, written from the log. Goes to: the backlog
@@ -909,8 +909,9 @@ The lead reads the template's rules, which a filled spec no longer holds.
   Why: the review steps are built and tested now, without an agent. The
     `sliceflow` binary is used only in tests until the first release.
     `reviewer` shows which reviews were real.
-  Not chosen: no review step until 0004, because submit would then end
-    in a state that 0004 has to change again.
+  Not chosen: no review step until 0004, because the review's command,
+    events, and commits would then first be built and tested together
+    with a real agent.
   Cost: a spec can show `review_passed` with no real review.
   Rule: R26
 - **SD8.** A submitted spec always needs a review to pass; nothing skips

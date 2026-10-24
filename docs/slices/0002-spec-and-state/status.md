@@ -3,20 +3,20 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 23:00 UTC
+- Updated: 2026-10-24 23:20 UTC
 
 ## Needs human
 
-None.
+- plan-5/F1: the lead's fix waits for the human's yes
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
-| plan.md | in_review | 5 | - | - |
-| preview.md | in_review | with plan.md | - | - |
-| tasks.md | in_review | with plan.md | - | - |
+| spec.md | draft | 3 | - | - |
+| plan.md | draft | 5 | - | - |
+| preview.md | draft | with plan.md | - | - |
+| tasks.md | draft | with plan.md | - | - |
 
 ## Tasks
 
@@ -44,17 +44,21 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 5 · Closed: 37
+Open: 1 · Waiting for verify: 3 · Closed: 42
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-4/F1 | low | R31: next for a merged slice | fixed |
-| plan-4/F2 | low | R29: refused mark on a merged slice | fixed |
-| plan-4/F3 | low | Task 09: how openSlice finds a merged slice | fixed |
-| plan-4/F4 | low | The Make one: path works only from the root | fixed: full path (the human's choice) |
-| plan-4/F5 | low | Task 07's brief reason names S1 to S4 | fixed |
+| plan-5/F1 | medium | A failed review.finished commit has no brief and no test | open |
+| plan-5/F2 | low | Three leftover lines in spec.md | fixed |
+| plan-5/F3 | low | plan.md leaves out spec review; wrong task for Ctrl-C | fixed |
+| plan-5/F4 | low | Stale task numbers; R20's error index | fixed |
+| plan-4/F1 | low | R31: next for a merged slice | verified (fixed) |
+| plan-4/F2 | low | R29: refused mark on a merged slice | verified (fixed) |
+| plan-4/F3 | low | Task 09: how openSlice finds a merged slice | verified (fixed) |
+| plan-4/F4 | low | The Make one: path works only from the root | verified (fixed) |
+| plan-4/F5 | low | Task 07's brief reason names S1 to S4 | verified (fixed) |
 | plan-3/F1 | low | Task 07's Done in: line form | verified (fixed) |
 | plan-2/F1 | low | Leftovers of the round-1 fixes | verified (fixed) |
 | plan-1/Q1 | high | template show outside a git repo | verified (fixed) |
@@ -113,6 +117,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 23:20 · lead (claude) · plan-5 lows fixed; documents back to draft
+- 2026-10-24 23:15 · doc-reviewer (claude opus) · change review 5 handed in: plan-4 all verified; 1 medium, 3 low
 - 2026-10-24 23:00 · lead (claude) · change review 5 started: the review as its own command
 - 2026-10-24 22:55 · lead (claude) · human: the review is its own command, `sliceflow spec review`; `spec submit` ends at submitted; a general `sliceflow run` goes to the backlog. Spec (Stories 3 and 4, R20, R23, R24, SD8, SD13), plan (Flows 3 to 5), tasks (14 to 17), preview (P3, P4) changed
 - 2026-10-24 21:30 · lead (claude) · human: the Make one: line prints the full path (R11, S12); the review question goes to a brainstorm first

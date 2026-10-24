@@ -638,7 +638,7 @@ two that write. Its brief is about 2,300 words, over the usual 1,500, because S6
 - `func Validate(ctx context.Context, r Repo, name string, strict bool) (Validation, error)`:
   creates. `name` `""` means the current branch's slice.
 - `func printProblems(w io.Writer, ps []spec.Problem)`: creates. One
-  `spec.md:<line>: <level>: <message>` line each. Task 15 uses it.
+  `spec.md:<line>: <level>: <message>` line each. Task 16 uses it.
 - `currentSliceName`, `findWorktree`, `BaseBranch`, `git.RefExists`,
   `spec.Parse`, `spec.Check`: uses. A merged slice is one with no local
   branch `refs/heads/slice/<name>`; `<base branch>` comes from
@@ -787,7 +787,7 @@ hardest part is the undo, and Ctrl-C during the commit. Its brief is about 2,700
   sentence, `""` for `Nothing was changed.`.
 - `func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (string, state.State, error)`:
   creates. Returns the new commit's full id and the state after the
-  event. Tasks 12 and 14 use it.
+  event. Tasks 12, 14, and 15 use it.
 - `takeLock`, `state.Replay`, `state.Allowed`, `eventlog.New`,
   `eventlog.Encode`, `git.Run`, `git.Show`: uses.
 
@@ -836,7 +836,7 @@ hardest part is the undo, and Ctrl-C during the commit. Its brief is about 2,700
 
 ### Out of scope
 
-- The commands that call it. Done in: task 12, task 14
+- The commands that call it. Done in: task 12, task 14, task 15
 
 ## Task 12: title-command
 
@@ -928,7 +928,7 @@ the result from a review file.
 ### Interfaces
 
 - `type Reviewer interface{ Name() string; Review(ctx context.Context, req Request) error }`:
-  creates. Task 14 uses it.
+  creates. Task 15 uses it.
 - `type Request struct{ Slice, Doc, File, Commit, Worktree string; Round int }`:
   creates. `File` is the review file's full path, as in the plan.
 - `func Placeholder() Reviewer`: creates. `Name` is `placeholder`;
@@ -953,7 +953,7 @@ the result from a review file.
 
 ### Out of scope
 
-- Saving the review events. Done in: task 14
+- Saving the review events. Done in: task 15
 
 ## Task 14: submit-core
 
@@ -1004,7 +1004,7 @@ and `spec.submitted`, all in one `Prepare` under the lock. It ends at
   Proves: R21, R23
 - `TestSubmitStates`: `submitted` gives S16's error; `review_passed`
   unchanged gives S27's; `in_review` gives R20's `in_review` error; no
-  `slice.created` gives R20's third error; `review_passed` with an
+  `slice.created` gives R20's fourth error; `review_passed` with an
   edited `spec.md` is accepted.
   Proves: R20
 - `TestSubmitNoName`: on `main` with no name, the error's second line is
@@ -1068,7 +1068,7 @@ lock, and finding the commit of the last accepted `spec.submitted`.
   `slice.titled` came after it.
   Proves: R25, R27, R28
 - `TestReviewStates`: `draft` gives S21's error; `in_review` gives S25's;
-  `review_passed` gives S26's; no `slice.created` gives R20's third
+  `review_passed` gives S26's; no `slice.created` gives R20's fourth
   error; none saves an event.
   Proves: R24
 - `TestReviewFileExists`: S22's file gives S22's error, no commit.
