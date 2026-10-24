@@ -93,11 +93,6 @@ func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error) {
 	}, nil
 }
 
-// checkCreate runs the checks before anything is made. Task 08 fills it.
-func checkCreate(ctx context.Context, r Repo, opts CreateOptions, base, source string) error {
-	return nil
-}
-
 // worktreeDir is the slice worktree folder, in the native form. It uses
 // filepath.Join so a Windows network share root keeps its leading "//".
 func worktreeDir(root, name string) string {
