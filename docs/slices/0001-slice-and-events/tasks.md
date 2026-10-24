@@ -728,7 +728,10 @@ what this run did not make. Its brief is about 1,950 words, over the usual 1,500
 1. Write the tests listed under Done when. Run them, and see them fail.
 2. `internal/slice/undo.go`: the undo list, as Undo on failure says;
    it runs with `context.WithoutCancel(ctx)`.
-3. In `internal/slice/create.go`: add each made thing to the list;
+3. In `internal/slice/create.go`: split step 6 into
+   `git branch slice/<name> <commit>`, then
+   `git worktree add <worktree> slice/<name>`, as Flow 1 step 6 now
+   says (task 06 built it as one `worktree add -b`); add each made thing to the list;
    note whether `.sliceflow/worktrees/` exists before step 6; check
    `ctx` between steps; on an error, run the undo and return R18's
    `*Error`. The reason is `interrupted` when `ctx.Err()` is set;
@@ -786,8 +789,17 @@ what this run did not make. Its brief is about 1,950 words, over the usual 1,500
 - `TestUndoCancelledDuringChecks` (unit): `Create` with a `ctx`
   cancelled before it starts returns the `interrupted` error, not R16's.
   Proves: R18
+- `TestUndoInterruptedWorktreeAdd` (unit, skipped on Windows): a
+  `post-checkout` hook, which `git worktree add` runs, writes a marker
+  file and then sleeps 30 seconds; the test cancels the `ctx` when the
+  marker appears: `Create` returns the error
+  `could not create slice spec-submit: interrupted. Everything sliceflow made was removed.`
+  within 10 seconds, and leaves no branch `slice/spec-submit`, no
+  worktree in `git worktree list --porcelain`, no
+  `.sliceflow/worktrees/spec-submit`, and no `.sliceflow/`.
+  Proves: R18
 - `TestUndoKeepsOthers` (unit): with the checks skipped, a branch
-  `slice/x` that already exists makes `git worktree add` fail; after
+  `slice/x` that already exists makes `git branch` fail; after
   the undo, `slice/x` still exists at its old commit.
   Proves: R18
 - `TestUndoCouldNotRemove` (unit): when the worktree folder cannot be

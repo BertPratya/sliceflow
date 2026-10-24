@@ -16,8 +16,8 @@ git step by running `git` as its own process, one command at a time,
 with its own arguments. The event log format is its own small package,
 with no file or git access, so it is easy to test.
 
-`slice create` never touches the main checkout. `git worktree add`
-makes the branch and the worktree in one step. sliceflow writes the two
+`slice create` never touches the main checkout. `git branch` makes the
+branch, then `git worktree add` makes the worktree on it. sliceflow writes the two
 files inside the worktree, and makes a normal commit there.
 
 | Part | Folder | Change |
@@ -51,10 +51,15 @@ Covers: R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R19, R20, R41
    (Git arguments).
 5. It makes `.sliceflow/` and `.sliceflow/.gitignore` when missing
    (R6), and adds each to the undo list.
-6. It runs `git worktree add -b slice/<name> <worktree> <commit>` from
-   the main checkout's root. This makes the branch and the worktree (R4,
-   R5), and both go on the undo list. The main checkout's own files do
-   not change.
+6. From the main checkout's root, it runs
+   `git branch slice/<name> <commit>`, then
+   `git worktree add <worktree> slice/<name>`, with the short branch
+   name: with `refs/heads/slice/<name>`, git would make a detached
+   HEAD, and the commit would not land on the branch. This makes the branch
+   and the worktree (R4, R5), and each goes on the undo list right
+   after its command succeeds. `git branch` refuses a branch that
+   already exists, so a branch it made is this run's (Undo on
+   failure). The main checkout's own files do not change.
 7. It writes `docs/slices/<name>/spec.md` from the built-in template,
    with the front matter filled (R7), and `.events.jsonl` with one
    `slice.created` line (R19, R20), with `at` from `Repo.Now`.
@@ -211,10 +216,14 @@ right after making it:
 
 1. `.sliceflow/` and `.sliceflow/.gitignore`, only those that were
    missing.
-2. The branch and the worktree, after `git worktree add` succeeds.
+2. The branch, after `git branch` succeeds, and the worktree, after
+   `git worktree add` succeeds.
    `git worktree add` also makes `.sliceflow/worktrees/` when it is
    missing, so `create` notes before step 6 whether that folder exists,
-   and adds it to the list after step 6 when it did not.
+   and adds it to the list after step 6, also when step 6 failed or was
+   stopped, when it exists now and did not before. It goes into the
+   list before the branch and the worktree, so the undo removes it
+   after them, when it is empty.
 
 The files in the worktree and the commit need no entry: removing the
 worktree and the branch removes them. If a step fails, `create`
@@ -229,6 +238,35 @@ It never removes a thing that is not on the list. So when two `create`
 commands with the same name run at once, the one that loses never
 removes the other's branch. Anything it could not remove goes into
 `Could not remove: <list>.` (R18).
+
+One exception: when the signal stops `git worktree add` (Interrupts),
+git may already have made the worktree, or part of it, and the command
+did not succeed, so it is not on the list. The branch is on the list:
+`git branch` made it in this run, so no other run can have a worktree
+on it. Then, before it removes the list's items, `create` cleans up
+what the stopped command left at `.sliceflow/worktrees/<name>`:
+
+- if `git worktree list --porcelain` shows a worktree at that path,
+  it removes it with
+  `git worktree remove --force --force`. The second `--force` also
+  removes a worktree that git locked while adding it. This also clears
+  git's own entry for it in the repo's git folder, so a later `create`
+  with the same name works. It matches the path alone: while git adds
+  a worktree, its entry has no branch for a moment;
+- if the folder still exists after that, it removes it with
+  `os.RemoveAll`. R17 proved it was not there before, and only this
+  run's `git worktree add` can have made it, because only this run
+  owns the branch.
+
+Then the list's items are removed, newest first, as above. Anything it
+could not remove goes into `Could not remove: <list>.` When `git branch`
+itself fails, e.g. because another run made the branch first, this run
+made neither the branch nor the worktree, and removes neither. If the
+signal stops `git branch` itself, git may have made the branch, or a
+`.lock` file, in the moment before it was stopped. This run cannot tell
+that branch from another run's, so it keeps it. The window is a few
+microseconds, so this case is accepted.
+(the human's answer to task-09-1/Q1: kill git at once, then clean up)
 
 #### Interrupts
 
