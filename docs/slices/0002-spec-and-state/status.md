@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:52 UTC
+- Updated: 2026-10-24 17:54 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-12 of 17 done · 1 doing · 4 todo
+12 of 17 done · 1 in_review · 4 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -36,7 +36,7 @@ None.
 | 10 | lock | core | done | 0 | 2 | - | R6, R7 |
 | 11 | save-event | core | done | 0 | 3 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | done | 0 | 2 | 08, 09, 11 | R32, R33, R34, R36 |
-| 13 | reviewer | core | doing | 0 | 0 | - | R25, R26, R27 |
+| 13 | reviewer | core | in_review | 0 | 1 | - | R25, R26, R27 |
 | 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
 | 15 | review-core | core | todo | 0 | 0 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | normal | todo | 0 | 0 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
@@ -169,6 +169,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:54 · lead (claude) · task review 1 of task 13 started
+- 2026-10-24 17:54 · lead (claude) · task 13 committed (d10236e); the checks pass
+- 2026-10-24 17:54 · worker (claude sonnet) · task 13 round 1 handed in
 - 2026-10-24 17:52 · lead (claude) · task 13 started: worker round 1
 - 2026-10-24 17:52 · lead (claude) · task 12 done
 - 2026-10-24 17:52 · code-reviewer (claude opus) · task review 2 of task 12 handed in: F1, F2 verified; no new findings
