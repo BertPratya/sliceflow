@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:56 UTC
+- Updated: 2026-10-24 18:00 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-13 of 17 done · 1 doing · 3 todo
+13 of 17 done · 1 in_review · 3 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -37,7 +37,7 @@ None.
 | 11 | save-event | core | done | 0 | 3 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | done | 0 | 2 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | done | 0 | 1 | - | R25, R26, R27 |
-| 14 | submit-core | core | doing | 0 | 0 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
+| 14 | submit-core | core | in_review | 0 | 1 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
 | 15 | review-core | core | todo | 0 | 0 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | normal | todo | 0 | 0 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
 | 17 | submit-review-failures | normal | todo | 0 | 0 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
@@ -170,6 +170,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 18:00 · lead (claude) · task review 1 of task 14 started
+- 2026-10-24 18:00 · lead (claude) · task 14 committed (a1be3eb); the checks pass
+- 2026-10-24 18:00 · worker (claude sonnet) · task 14 round 1 handed in
 - 2026-10-24 17:56 · lead (claude) · task 14 started: worker round 1
 - 2026-10-24 17:56 · lead (claude) · task 13 done; task-13-1/F1 deferred to the backlog (main 1ba225f), for 0004's real reviewers
 - 2026-10-24 17:56 · code-reviewer (claude opus) · task review 1 of task 13 handed in: 1 low
