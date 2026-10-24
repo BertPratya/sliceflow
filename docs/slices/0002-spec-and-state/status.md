@@ -3,7 +3,7 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 15:00 UTC
+- Updated: 2026-10-24 18:00 UTC
 
 ## Needs human
 
@@ -13,13 +13,32 @@ None.
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 0 | - | - |
-| preview.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 1 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
-None.
+0 of 15 done · 15 todo
+
+| # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
+|---|---|---|---|---|---|---|---|
+| 01 | eventlog-events | core | todo | 0 | 0 | - | R5 |
+| 02 | state-machine | core | todo | 0 | 0 | 01 | R1, R2, R3, R4 |
+| 03 | spec-reader | core | todo | 0 | 0 | - | R18 |
+| 04 | spec-errors | core | todo | 0 | 0 | 03 | R15, R18 |
+| 05 | spec-warnings | normal | todo | 0 | 0 | 04 | R16, R17, R18 |
+| 06 | status-core | core | todo | 0 | 0 | 02 | R1, R3, R29, R30, R34 |
+| 07 | status-command | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
+| 08 | cli-groups-and-template | normal | todo | 0 | 0 | - | R35, R36 |
+| 09 | validate-command | normal | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
+| 10 | lock | core | todo | 0 | 0 | - | R6, R7 |
+| 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
+| 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
+| 13 | reviewer | core | todo | 0 | 0 | - | R25, R26, R27 |
+| 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11, 13 | R20, R21, R22, R23, R24, R25, R27, R28 |
+| 15 | submit-command | normal | todo | 0 | 0 | 07, 12, 14 | R6, R7, R8, R9, R10, R20, R21, R22, R23, R24, R25, R28, R29, R30, R37 |
 
 ## Findings
 
@@ -72,6 +91,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 18:00 · lead (claude) · plan review 1 started: spec, plan, tasks, and preview together
+- 2026-10-24 17:55 · lead (claude) · tasks written: 15 tasks; plan Open questions: None.
 - 2026-10-24 17:25 · lead (claude) · human: plan Q1 option 1, a value with `{{` is not checked, only warned (spec R18); the plan review checks the spec change
 - 2026-10-24 17:10 · lead (claude) · plan flows, testing, and preview written; plan Q1 shows a gap in the spec, so spec.md is back to draft
 - 2026-10-24 16:30 · lead (claude) · human: keep the 10 s lock wait (a slow hook is a listed risk). Shared rules for the lock, saving, undo, and crash leftovers; TD1, TD2
