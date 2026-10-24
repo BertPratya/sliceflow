@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:58 UTC
+- Updated: 2026-10-24 08:59 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-7 of 13 done · 1 doing · 5 todo
+7 of 13 done · 1 in_review · 5 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -30,7 +30,7 @@ None.
 | 05 | spec-template | normal | done | 0 | 1 | 01 | R7 |
 | 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
-| 08 | create-checks | core | doing | 0 | 0 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
+| 08 | create-checks | core | in_review | 0 | 1 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
 | 09 | create-undo | core | todo | 0 | 0 | 08 | R8, R18 |
 | 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
@@ -133,6 +133,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:59 · lead (claude) · task 08 code review started, round 1
+- 2026-10-24 08:59 · lead (claude) · task 08 committed (9cdc0eb); checks pass, also with hook variables pointing at a decoy repo
 - 2026-10-24 08:58 · lead (claude) · task 08 started: worker round 1
 - 2026-10-24 08:58 · lead (claude) · task 07 done
 - 2026-10-24 08:58 · code reviewer (claude opus) · task-07-2 submitted: pass; F1 verified; no new findings
