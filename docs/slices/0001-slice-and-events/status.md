@@ -20,7 +20,7 @@
 
 ## Tasks
 
-8 of 13 done · 1 blocked · 4 todo
+8 of 13 done · 1 blocked · 1 doing · 3 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -33,7 +33,7 @@
 | 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | done | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
 | 09 | create-undo | core | blocked | 0 | 2 | 08 | R8, R18 |
-| 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
+| 10 | status-core | core | doing | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
 | 13 | no-network-check | normal | todo | 0 | 0 | 09, 12 | R40 |
@@ -157,6 +157,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:37 · lead (claude) · task 10 started: worker round 1 (task 09 blocked; the human allowed tasks 10 and 11 meanwhile)
 - 2026-10-24 09:37 · lead (claude) · task 09 blocked on task-09-2/Q1 and F2 (small): asked the human; task 10 started meanwhile, as the human allowed
 - 2026-10-24 09:37 · code reviewer (claude opus) · task-09-2 submitted: needs_human; round-1 findings verified (10 interrupt runs on 20,000 files left nothing); Q1, 1 high, 1 low
 - 2026-10-24 09:33 · lead (claude) · task 09 code review started, round 2
