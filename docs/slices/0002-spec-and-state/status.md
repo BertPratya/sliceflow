@@ -1,9 +1,9 @@
 # Status: 0002-spec-and-state
 
-- Phase: ready
+- Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 15:46 UTC
+- Updated: 2026-10-24 15:49 UTC
 
 ## Needs human
 
@@ -117,6 +117,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 15:49 · lead (claude) · main's checks pass (base-check at be47b4a); phase implementing
 - 2026-10-24 15:46 · human · planning approved, R001: "yes, okay, and I approve" (the plan-5/F1 fix went in with this approval, with no separate review)
 - 2026-10-24 15:46 · lead (claude) · plan-5/F1 fixed: task 15 sets R10's last sentence for a failed review.finished, with tests in tasks 15 and 17
 - 2026-10-24 15:40 · lead (claude) · plan-5 lows fixed; documents back to draft
