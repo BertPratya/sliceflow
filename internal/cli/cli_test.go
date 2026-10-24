@@ -38,12 +38,12 @@ func TestUsageError(t *testing.T) {
 }
 
 func TestRunTopHelp(t *testing.T) {
-	for _, args := range [][]string{nil, {"slice"}, {"--help"}, {"-h"}, {"slice", "--help"}, {"slice", "-h"}} {
+	for _, args := range [][]string{nil, {"slice"}, {"--help"}, {"-h"}, {"slice", "--help"}, {"slice", "-h"}, {"spec"}, {"template"}, {"spec", "--help"}} {
 		var o, e bytes.Buffer
 		if code := Run(args, &o, &e); code != 0 || e.Len() != 0 {
 			t.Fatalf("%v: code %d stderr %q", args, code, e.String())
 		}
-		for _, n := range []string{"slice create", "slice status", "slice list"} {
+		for _, n := range []string{"slice create", "slice status", "slice list", "slice title <name> <title>", "spec validate [<name>] [--strict]", "spec submit [<name>]", "spec review [<name>]", "template show <template>"} {
 			if !strings.Contains(o.String(), n) {
 				t.Fatalf("%v: usage lacks %q", args, n)
 			}

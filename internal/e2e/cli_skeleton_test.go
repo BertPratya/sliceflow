@@ -9,12 +9,12 @@ import (
 
 func TestHelpTop(t *testing.T) {
 	dir := testrepo.New(t)
-	for _, args := range [][]string{{"--help"}, {}, {"slice"}} {
+	for _, args := range [][]string{{"--help"}, {}, {"slice"}, {"spec"}, {"template"}} {
 		out, errOut, code := run(t, dir, args...)
 		if code != 0 || errOut != "" {
 			t.Fatalf("%v: code %d stderr %q", args, code, errOut)
 		}
-		for _, n := range []string{"slice create", "slice status", "slice list"} {
+		for _, n := range []string{"slice create", "slice status", "slice list", "slice title <name> <title>", "spec validate [<name>] [--strict]", "spec submit [<name>]", "spec review [<name>]", "template show <template>"} {
 			if !strings.Contains(out, n) {
 				t.Errorf("%v: usage lacks %q", args, n)
 			}

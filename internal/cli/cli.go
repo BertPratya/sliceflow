@@ -30,6 +30,11 @@ Commands:
   slice create <name> [--title <title>] [--from <branch>] [--json]
   slice status [<name>] [--json]
   slice list [--all] [--json]
+  slice title <name> <title>
+  spec validate [<name>] [--strict]
+  spec submit [<name>]
+  spec review [<name>]
+  template show <template>
 
 Run "sliceflow <command> --help" for the usage of one command.
 `
@@ -37,20 +42,20 @@ Run "sliceflow <command> --help" for the usage of one command.
 // Run runs sliceflow with the arguments after the program name. It returns
 // the exit code.
 func Run(args []string, stdout, stderr io.Writer) int {
-	if len(args) == 0 || isHelp(args[0]) || (len(args) == 1 && args[0] == "slice") ||
-		(args[0] == "slice" && len(args) > 1 && isHelp(args[1])) {
+	if len(args) == 0 || isHelp(args[0]) || (len(args) == 1 && isGroup(args[0])) ||
+		(isGroup(args[0]) && len(args) > 1 && isHelp(args[1])) {
 		fmt.Fprint(stdout, topUsage)
 		return 0
 	}
 	if strings.HasPrefix(args[0], "-") {
 		return usageError(stderr, "unknown flag "+flagText(args[0]))
 	}
-	if args[0] == "slice" && len(args) > 1 && strings.HasPrefix(args[1], "-") {
+	if isGroup(args[0]) && len(args) > 1 && strings.HasPrefix(args[1], "-") {
 		return usageError(stderr, "unknown flag "+flagText(args[1]))
 	}
-	// A command is one word, or "slice" and a second word.
+	// A command is one word, or a group and a second word.
 	n := 1
-	if args[0] == "slice" {
+	if isGroup(args[0]) {
 		n = 2
 	}
 	name := strings.Join(args[:n], " ")
@@ -60,6 +65,9 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	}
 	return c.Run(context.Background(), args[n:], stdout, stderr)
 }
+
+// isGroup tells if a is a command group: "slice", "spec", or "template".
+func isGroup(a string) bool { return a == "slice" || a == "spec" || a == "template" }
 
 func isHelp(a string) bool { return a == "-h" || a == "--help" }
 

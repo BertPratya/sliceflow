@@ -66,3 +66,13 @@ func TestSpecLineEndings(t *testing.T) {
 		t.Fatal("output has \\r")
 	}
 }
+
+func TestRaw(t *testing.T) {
+	want, err := os.ReadFile("spec.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(Raw(), want) {
+		t.Fatal("Raw differs from spec.md")
+	}
+}
