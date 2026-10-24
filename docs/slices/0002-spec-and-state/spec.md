@@ -700,8 +700,8 @@ The lead reads the template's rules, which a filled spec no longer holds.
   | no good `slice.created` | `-` | `-` |
   | the slice is merged: its log is read from the base branch | as in the rows above | `-` |
 
-  When the last spec event is a refused `spec.submitted`, and `spec.md`
-  is `draft` or changed after its review, `Spec:` instead shows `draft`,
+  When the last spec event is a refused `spec.submitted`, the slice is
+  not merged, and `spec.md` is `draft` or changed after its review, `Spec:` instead shows `draft`,
   or `passed review <n>, but spec.md was changed after it`, followed by
   ` (submit refused: <counts>)`, and `Next:` shows
   `fix spec.md, then: sliceflow spec submit`. `<counts>` names only the
@@ -725,6 +725,7 @@ The lead reads the template's rules, which a filled spec no longer holds.
   - `next`: the text of R29's `Next:`.
 
   With no good `slice.created`, `docs` is `[]`, and `next` is left out.
+  For a merged slice, `next` is left out too.
   Each slice in `slice list --json` has these two fields too.
   Check: e2e
 

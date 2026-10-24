@@ -74,8 +74,10 @@ Covers: R12, R13, R14, R15, R16, R17, R18, R19, R37
    `spec validate`.
 2. The first checks run in R11's order. The slice's worktree is the
    entry of `git worktree list --porcelain` whose branch is
-   `refs/heads/slice/<name>`. A slice with no such branch is merged, and
-   gets R11's merged error. No lock is taken.
+   `refs/heads/slice/<name>`. A slice with no local branch
+   `refs/heads/slice/<name>`, only its folder on the base branch (R21 of
+   0001-slice-and-events), is merged, and gets R11's merged error; a
+   branch with no worktree gets R11's two lines. No lock is taken.
 3. `slice` reads `docs/slices/<name>/spec.md` from that worktree, from
    disk. A missing file gives R19's error.
 4. `spec.Parse` reads the text into a `Doc`; `spec.Check` returns the

@@ -472,7 +472,7 @@ risk: normal
 
 `slice status` prints the `Spec:` and `Next:` lines, and `--json` adds
 `docs` and `next`, also in `slice list --json`. 0001's e2e tests are
-updated for the two new lines. Its brief is about 2,000 words, over the usual 1,500, because S1 to S4 hold the exact output.
+updated for the two new lines. Its brief is about 2,000 words, over the usual 1,500, because S1 to S5 hold the exact output.
 
 ### Steps
 
@@ -520,7 +520,7 @@ updated for the two new lines. Its brief is about 2,000 words, over the usual 1,
   a running review has no `result`; a passed review with `spec.md`
   edited on disk gives `"changed_after_review":true`; no `slice.created`
   gives `"docs":[]` and no `next`; `slice list --json` has the same
-  `docs` and `next` for each slice.
+  `docs` and `next` for each slice; a merged slice has no `next`.
   Proves: R31
 
 ### Out of scope
@@ -638,7 +638,10 @@ two that write. Its brief is about 2,300 words, over the usual 1,500, because S6
   creates. `name` `""` means the current branch's slice.
 - `func printProblems(w io.Writer, ps []spec.Problem)`: creates. One
   `spec.md:<line>: <level>: <message>` line each. Task 15 uses it.
-- `currentSliceName`, `findWorktree`, `spec.Parse`, `spec.Check`: uses.
+- `currentSliceName`, `findWorktree`, `BaseBranch`, `git.RefExists`,
+  `spec.Parse`, `spec.Check`: uses. A merged slice is one with no local
+  branch `refs/heads/slice/<name>`; `<base branch>` comes from
+  `BaseBranch` (R21 of 0001-slice-and-events).
 
 ### Done when
 
@@ -670,10 +673,16 @@ two that write. Its brief is about 2,300 words, over the usual 1,500, because S6
 - `TestValidateJSON`: S32 prints S32's error, exit 2.
   Proves: R36
   Scenario: S32
+- `TestValidateMerged`: `sliceflow spec validate login-google` on `main`,
+  after `login-google` was merged with `git merge --no-ff` and its branch
+  deleted, prints
+  `Error: slice login-google is merged into main, so it has no worktree. Nothing was changed.`
+  on stderr, exit 1.
+  Proves: R11
 - `TestOpenSliceOrder`: `spec validate Bad_Name` gives R14's error of
   0001-slice-and-events; `no-such-slice` gives R33's; a slice with no
-  worktree gives R11's two lines; a merged slice gives
-  `slice login-google is merged into main, so it has no worktree. Nothing was changed.`
+  worktree gives R11's two lines; a merged slice gives R11's merged
+  error.
   Proves: R11
 
 ### Out of scope

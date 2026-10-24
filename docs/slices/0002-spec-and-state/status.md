@@ -3,20 +3,21 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 20:45 UTC
+- Updated: 2026-10-24 21:20 UTC
 
 ## Needs human
 
-None.
+- Review as its own node: `sliceflow run`, or keep it inside `spec submit`
+- plan-4/F4: the `Make one:` line's path
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
-| plan.md | in_review | 4 | - | - |
-| preview.md | in_review | with plan.md | - | - |
-| tasks.md | in_review | with plan.md | - | - |
+| spec.md | draft | 3 | - | - |
+| plan.md | draft | 4 | - | - |
+| preview.md | draft | with plan.md | - | - |
+| tasks.md | draft | with plan.md | - | - |
 
 ## Tasks
 
@@ -43,13 +44,18 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 1 · Closed: 36
+Open: 1 · Waiting for verify: 4 · Closed: 37
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-3/F1 | low | Task 07's Done in: line form | fixed |
+| plan-4/F1 | low | R31: next for a merged slice | fixed |
+| plan-4/F2 | low | R29: refused mark on a merged slice | fixed |
+| plan-4/F3 | low | Task 09: how openSlice finds a merged slice | fixed |
+| plan-4/F4 | low | The Make one: path works only from the root | open: the human's call |
+| plan-4/F5 | low | Task 07's brief reason names S1 to S4 | fixed |
+| plan-3/F1 | low | Task 07's Done in: line form | verified (fixed) |
 | plan-2/F1 | low | Leftovers of the round-1 fixes | verified (fixed) |
 | plan-1/Q1 | high | template show outside a git repo | verified (fixed) |
 | plan-1/F1 | medium | saveEvent can't run the command's checks under its lock | verified (fixed) |
@@ -107,6 +113,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 21:20 · lead (claude) · plan-4 lows F1, F2, F3, F5 fixed; F4 and the human's question (review as its own node) are open; documents back to draft
+- 2026-10-24 21:10 · doc-reviewer (claude opus) · change review 4 handed in: 5 low
 - 2026-10-24 20:50 · lead (claude) · change review 4 started: only the human's two changes before approval
 - 2026-10-24 20:45 · lead (claude) · human, before approval: R11 gets a 'Make one:' line and a merged-slice error; a merged slice shows Next: - (R29, new S5; S5-S31 renumbered to S6-S32). Documents back to draft
 - 2026-10-24 20:15 · lead (claude) · plan-3 low fixed; spec, plan, tasks, preview review_passed; waiting for the human's approval
