@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:38 UTC
+- Updated: 2026-10-24 08:39 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-3 of 13 done · 1 in_review · 9 todo
+4 of 13 done · 9 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -27,7 +27,7 @@ None.
 | 02 | event-log | core | done | 0 | 2 | 01 | R19, R25, R26, R27 |
 | 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | done | 0 | 1 | 01 | R2, R3, R12, R13, R14, R21, R22 |
-| 05 | spec-template | normal | in_review | 0 | 1 | 01 | R7 |
+| 05 | spec-template | normal | done | 0 | 1 | 01 | R7 |
 | 06 | create-core | core | todo | 0 | 0 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | todo | 0 | 0 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | todo | 0 | 0 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
@@ -124,6 +124,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:39 · lead (claude) · task 05 done
+- 2026-10-24 08:39 · code reviewer (claude opus) · task-05-1 submitted: pass; no findings
 - 2026-10-24 08:38 · lead (claude) · task 05 code review started, round 1
 - 2026-10-24 08:38 · lead (claude) · task 05 committed (4e23950); checks pass
 - 2026-10-24 08:38 · lead (claude) · task 05 started: worker round 1
