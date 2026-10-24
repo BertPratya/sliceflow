@@ -58,9 +58,10 @@ func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error) {
 	}
 	root := filepath.FromSlash(r.Root)
 	u := &undoList{root: root}
+	var stopped []string // what a stopped "git worktree add" left and we could not remove
 	// fail undoes this run's work and builds R18's error.
 	fail := func(err error, gitCmd string) (Created, error) {
-		failed := u.run(ctx)
+		failed := append(stopped, u.run(ctx)...)
 		reason, extra := "interrupted", []string(nil)
 		if ctx.Err() == nil {
 			reason, extra = failureReason(err, gitCmd)
@@ -130,18 +131,31 @@ func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error) {
 	worktreesDir := filepath.Join(sliceflowDir, "worktrees")
 	_, statErr := os.Lstat(worktreesDir)
 	hadWorktrees := statErr == nil
-	_, wtErr := git.Run(ctx, root, "worktree", "add", "-b", branch, wtDir, commit)
 	// git makes .sliceflow/worktrees/ when it is missing. It goes on the list
-	// before the worktree, so the undo removes it after the worktree.
-	if !hadWorktrees {
-		if _, err := os.Lstat(worktreesDir); err == nil {
-			u.addFolder(worktreesDir)
+	// before the branch and the worktree, so the undo removes it after them.
+	listPos := len(u.items)
+	addWorktreesDir := func() {
+		if !hadWorktrees && exists(worktreesDir) {
+			u.insertFolder(listPos, worktreesDir)
 		}
 	}
-	if wtErr != nil {
+	if _, err := git.Run(ctx, root, "branch", branch, commit); err != nil {
+		return fail(err, "branch")
+	}
+	u.addBranch(branch, commit, subject)
+	if err := next("branch"); err != nil {
+		return fail(err, "")
+	}
+	if _, wtErr := git.Run(ctx, root, "worktree", "add", wtDir, branch); wtErr != nil {
+		if ctx.Err() != nil {
+			// The signal stopped git: it may have left a worktree.
+			stopped = u.cleanStopped(ctx, wtDir)
+		}
+		addWorktreesDir()
 		return fail(wtErr, "worktree add")
 	}
-	u.addSlice(wtDir, branch, commit, subject)
+	addWorktreesDir()
+	u.addWorktree(wtDir)
 	if err := next("worktree"); err != nil {
 		return fail(err, "")
 	}

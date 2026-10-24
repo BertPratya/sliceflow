@@ -6,8 +6,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/BertPratya/sliceflow/internal/git"
 	"github.com/BertPratya/sliceflow/internal/testrepo"
@@ -31,11 +33,6 @@ func setAfterStep(t *testing.T, f func(step string)) {
 	t.Helper()
 	afterStep = f
 	t.Cleanup(func() { afterStep = nil })
-}
-
-func exists(p string) bool {
-	_, err := os.Lstat(p)
-	return err == nil
 }
 
 func branchExists(t *testing.T, dir, branch string) bool {
@@ -75,6 +72,41 @@ func TestUndoCancelledDuringChecks(t *testing.T) {
 	wantSliceError(t, err, interruptedMsg)
 	if exists(filepath.Join(r.Root, ".sliceflow")) {
 		t.Error(".sliceflow made")
+	}
+}
+
+func TestUndoInterruptedWorktreeAdd(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("hooks that sleep are not portable here")
+	}
+	r := newRepo(t)
+	marker := filepath.Join(t.TempDir(), "marker")
+	writeHook(t, r.Dir, "post-checkout", "echo started > '"+filepath.ToSlash(marker)+"'\nsleep 30")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() {
+		for i := 0; i < 400 && ctx.Err() == nil; i++ {
+			if exists(marker) {
+				cancel()
+				return
+			}
+			time.Sleep(25 * time.Millisecond)
+		}
+	}()
+	start := time.Now()
+	_, err := Create(ctx, r, CreateOptions{Name: "spec-submit"})
+	if d := time.Since(start); d > 10*time.Second {
+		t.Errorf("took %v", d)
+	}
+	wantSliceError(t, err, "could not create slice spec-submit: interrupted. Everything sliceflow made was removed.")
+	if branchExists(t, r.Dir, "slice/spec-submit") {
+		t.Error("branch left")
+	}
+	if strings.Contains(gitOut(t, r.Dir, "worktree", "list", "--porcelain"), "spec-submit") {
+		t.Error("worktree left")
+	}
+	if exists(filepath.Join(r.Root, ".sliceflow", "worktrees", "spec-submit")) || exists(filepath.Join(r.Root, ".sliceflow")) {
+		t.Error(".sliceflow left")
 	}
 }
 
@@ -140,7 +172,7 @@ func TestUndoCouldNotRemove(t *testing.T) {
 	if err == nil {
 		t.Fatal("want error")
 	}
-	want := "Could not remove: " + filepath.ToSlash(worktreeDir(r.Root, "x")) + "."
+	want := "Could not remove: .sliceflow/worktrees/x, branch slice/x."
 	if !strings.HasSuffix(err.Error(), want) {
 		t.Errorf("err = %q, want suffix %q", err, want)
 	}

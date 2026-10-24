@@ -6,23 +6,25 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
 	"github.com/BertPratya/sliceflow/internal/git"
 )
 
-// undoItem is one thing Create made in this run.
+// undoItem is one thing Create made in this run: a file or folder (path), a
+// worktree (worktree), or a branch (branch).
 type undoItem struct {
 	// A file or folder made by this run. A folder is removed only if empty.
 	path  string
 	isDir bool
-	// A branch and its worktree, made by one "git worktree add". commit is
-	// the commit the branch started at.
+	// A worktree made by "git worktree add".
 	worktree string
-	branch   string
-	commit   string
-	subject  string // the subject of the commit Create makes on the branch
+	// A branch made by "git branch". commit is the commit it started at.
+	branch  string
+	commit  string
+	subject string // the subject of the commit Create makes on the branch
 }
 
 // undoList is what Create made in this run, oldest first.
@@ -33,13 +35,30 @@ type undoList struct {
 
 func (u *undoList) addFile(p string)   { u.items = append(u.items, undoItem{path: p}) }
 func (u *undoList) addFolder(p string) { u.items = append(u.items, undoItem{path: p, isDir: true}) }
-func (u *undoList) addSlice(worktree, branch, commit, subject string) {
-	u.items = append(u.items, undoItem{worktree: worktree, branch: branch, commit: commit, subject: subject})
+func (u *undoList) addBranch(branch, commit, subject string) {
+	u.items = append(u.items, undoItem{branch: branch, commit: commit, subject: subject})
+}
+func (u *undoList) addWorktree(p string) { u.items = append(u.items, undoItem{worktree: p}) }
+
+// insertFolder puts a folder into the list at index i, so the undo removes it
+// after the items that come later.
+func (u *undoList) insertFolder(i int, p string) {
+	u.items = append(u.items, undoItem{})
+	copy(u.items[i+1:], u.items[i:])
+	u.items[i] = undoItem{path: p, isDir: true}
+}
+
+// rel writes p relative to the main checkout, with "/".
+func (u *undoList) rel(p string) string {
+	if r, err := filepath.Rel(u.root, p); err == nil {
+		return filepath.ToSlash(r)
+	}
+	return filepath.ToSlash(p)
 }
 
 // run removes the items, newest first, and returns what it could not remove,
-// with "/" in paths. It never touches a thing that is not on the list. It
-// does not use a done context.
+// with "/" in paths relative to the main checkout. It never touches a thing
+// that is not on the list. It does not use a done context.
 func (u *undoList) run(ctx context.Context) []string {
 	ctx = context.WithoutCancel(ctx)
 	var failed []string
@@ -47,18 +66,68 @@ func (u *undoList) run(ctx context.Context) []string {
 		it := u.items[i]
 		switch {
 		case it.worktree != "":
-			failed = append(failed, u.removeSlice(ctx, it)...)
+			if !u.removeWorktree(ctx, it.worktree) {
+				failed = append(failed, u.rel(it.worktree))
+			}
+		case it.branch != "":
+			if !u.removeBranch(ctx, it) {
+				failed = append(failed, "branch "+it.branch)
+			}
 		case it.isDir:
 			if !removeEmptyDir(it.path) {
-				failed = append(failed, filepath.ToSlash(it.path))
+				failed = append(failed, u.rel(it.path))
 			}
 		default:
 			if err := os.Remove(it.path); err != nil && !errors.Is(err, fs.ErrNotExist) {
-				failed = append(failed, filepath.ToSlash(it.path))
+				failed = append(failed, u.rel(it.path))
 			}
 		}
 	}
 	return failed
+}
+
+// cleanStopped removes what a stopped "git worktree add" left at wtDir: the
+// worktree git registered there, then the folder. It returns what it could
+// not remove. R17 proved the folder was not there before this run.
+func (u *undoList) cleanStopped(ctx context.Context, wtDir string) []string {
+	ctx = context.WithoutCancel(ctx)
+	var failed []string
+	if out, err := git.Run(ctx, u.root, "worktree", "list", "--porcelain"); err == nil {
+		want := normPath(wtDir)
+		for _, line := range strings.Split(out, "\n") {
+			p, ok := strings.CutPrefix(strings.TrimRight(line, "\r"), "worktree ")
+			if ok && normPath(p) == want {
+				_, _ = git.Run(ctx, u.root, "worktree", "remove", "--force", "--force", p)
+				break
+			}
+		}
+	}
+	if exists(wtDir) {
+		if err := os.RemoveAll(wtDir); err != nil && exists(wtDir) {
+			failed = append(failed, u.rel(wtDir))
+		}
+	}
+	return failed
+}
+
+func exists(p string) bool {
+	_, err := os.Lstat(p)
+	return err == nil
+}
+
+// normPath makes two spellings of one path equal: it resolves links in the
+// folder part (macOS /var, Windows short names), and ignores case on Windows
+// and macOS.
+func normPath(p string) string {
+	p = filepath.Clean(filepath.FromSlash(p))
+	dir, base := filepath.Split(p)
+	if r, err := filepath.EvalSymlinks(filepath.Clean(dir)); err == nil {
+		p = filepath.Join(r, base)
+	}
+	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+		p = strings.ToLower(p)
+	}
+	return p
 }
 
 // removeEmptyDir removes dir only if it is empty. A folder with files in it
@@ -76,23 +145,26 @@ func removeEmptyDir(dir string) bool {
 	return err == nil || errors.Is(err, fs.ErrNotExist)
 }
 
-func (u *undoList) removeSlice(ctx context.Context, it undoItem) []string {
-	var failed []string
-	if _, err := git.Run(ctx, u.root, "worktree", "remove", "--force", it.worktree); err != nil {
-		if _, statErr := os.Lstat(it.worktree); statErr == nil {
-			// The folder is still there, and it holds the branch.
-			return []string{filepath.ToSlash(it.worktree)}
+// removeWorktree removes a worktree. It reports false when the folder stays.
+func (u *undoList) removeWorktree(ctx context.Context, wt string) bool {
+	if _, err := git.Run(ctx, u.root, "worktree", "remove", "--force", wt); err != nil {
+		if exists(wt) {
+			return false
 		}
 		_, _ = git.Run(ctx, u.root, "worktree", "prune")
 	}
+	return true
+}
+
+// removeBranch deletes the branch, only if it still points at the commit
+// Create started from, or at Create's own commit on top of it. It reports
+// false when a branch that is ours could not be deleted.
+func (u *undoList) removeBranch(ctx context.Context, it undoItem) bool {
 	ref := "refs/heads/" + it.branch
 	tip, err := git.Run(ctx, u.root, "rev-parse", "--verify", "--quiet", ref+"^{commit}")
 	if err != nil {
 		var ge *git.Error
-		if errors.As(err, &ge) && ge.ExitCode == 1 {
-			return failed // no branch
-		}
-		return append(failed, it.branch)
+		return errors.As(err, &ge) && ge.ExitCode == 1 // no branch
 	}
 	tip = strings.TrimSpace(tip)
 	if tip != it.commit {
@@ -100,13 +172,11 @@ func (u *undoList) removeSlice(ctx context.Context, it undoItem) []string {
 		parent, perr := git.Run(ctx, u.root, "rev-parse", "--verify", "--quiet", ref+"~1^{commit}")
 		subject, serr := git.Run(ctx, u.root, "log", "-1", "--format=%s", ref)
 		if perr != nil || serr != nil || strings.TrimSpace(parent) != it.commit || strings.TrimSpace(subject) != it.subject {
-			return failed // not ours any more
+			return true // not ours any more
 		}
 	}
-	if _, err := git.Run(ctx, u.root, "branch", "-D", "--", it.branch); err != nil {
-		failed = append(failed, it.branch)
-	}
-	return failed
+	_, err = git.Run(ctx, u.root, "branch", "-D", "--", it.branch)
+	return err == nil
 }
 
 // failureReason returns the reason of R18 and the lines that follow it.
