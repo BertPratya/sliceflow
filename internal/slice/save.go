@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/BertPratya/sliceflow/internal/eventlog"
 	"github.com/BertPratya/sliceflow/internal/git"
@@ -116,8 +117,10 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 	newLog = append(newLog, line...)
 
 	// What the undo needs.
-	var created []string // files and folders this run made, in order
-	var changed []string // files that existed in the commit, to put back
+	var created []string           // files and folders this run made, in order
+	var changed []string           // files that existed in the commit, to put back
+	kept := map[string][]byte{}    // files on disk but not in the commit: their old bytes
+	var started, stopped time.Time // just before git commit ran, and when it returned
 	gitFiles := []string{logRel}
 	undo := func() []string {
 		uctx := context.WithoutCancel(ctx)
@@ -138,6 +141,11 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 				failed = append(failed, filepath.ToSlash(c))
 			}
 		}
+		for rel, old := range kept {
+			if err := os.WriteFile(filepath.Join(dir, filepath.FromSlash(rel)), old, 0o644); err != nil {
+				failed = append(failed, path.Join(folder, rel))
+			}
+		}
 		for _, rel := range changed {
 			gp := path.Join(folder, rel)
 			old, _, err := git.Show(uctx, worktree, ref, gp)
@@ -150,13 +158,11 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 		}
 		args := append([]string{"reset", "-q", "--"}, gitFiles...)
 		if _, err := git.Run(uctx, worktree, args...); err != nil {
-			// A git command that was killed by Ctrl-C leaves its
-			// index.lock. It is dead (Run waited for it), so the lock is
-			// stale: remove it, then try again.
-			if ctx.Err() != nil {
-				if lp, perr := git.Run(uctx, worktree, "rev-parse", "--path-format=absolute", "--git-path", "index.lock"); perr == nil {
-					_ = os.Remove(strings.TrimSpace(lp))
-				}
+			// A stopped git commit may leave its index.lock. Remove it only
+			// when reset failed because that lock exists, and the lock is
+			// not newer than the moment the commit returned: then it is
+			// the dead git's, not another command's.
+			if staleIndexLock(uctx, worktree, err, started, stopped) {
 				_, err = git.Run(uctx, worktree, args...)
 			}
 			if err != nil {
@@ -190,8 +196,16 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 		if err != nil {
 			return fail(err, "show")
 		}
+		onDisk := exists(target)
 		if inCommit {
 			changed = append(changed, rel)
+		} else if onDisk {
+			// Already there before this run: put back as it was.
+			old, err := os.ReadFile(target)
+			if err != nil {
+				return fail(err, "")
+			}
+			kept[rel] = old
 		} else {
 			// Folders this run makes are removed too, if empty.
 			var made []string
@@ -217,15 +231,56 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 	if _, err := git.Run(ctx, worktree, append([]string{"add", "-f", "--"}, gitFiles...)...); err != nil {
 		return fail(err, "add")
 	}
-	if _, err := git.Run(ctx, worktree, append([]string{"commit", "--only", "-m", p.Message, "--"}, gitFiles...)...); err != nil {
-		return fail(err, "commit")
+	headBefore, err := git.Run(ctx, worktree, "rev-parse", "HEAD")
+	if err != nil {
+		return fail(err, "rev-parse")
 	}
-	out, err := git.Run(ctx, worktree, "rev-parse", "HEAD")
+	started = time.Now()
+	_, err = git.Run(ctx, worktree, append([]string{"commit", "--only", "-m", p.Message, "--"}, gitFiles...)...)
+	stopped = time.Now()
+	if err != nil {
+		// git moves the branch before it runs the post-commit hook. If the
+		// branch moved, the event is saved: do not undo.
+		now, perr := git.Run(context.WithoutCancel(ctx), worktree, "rev-parse", "HEAD")
+		if perr != nil || strings.TrimSpace(now) == strings.TrimSpace(headBefore) {
+			return fail(err, "commit")
+		}
+		return savedResult(now, events, ev)
+	}
+	out, err := git.Run(context.WithoutCancel(ctx), worktree, "rev-parse", "HEAD")
 	if err != nil {
 		return "", state.State{}, err
 	}
+	return savedResult(out, events, ev)
+}
+
+func savedResult(id string, events []eventlog.Event, ev eventlog.Event) (string, state.State, error) {
 	newState, _ := state.Replay(append(events, ev))
-	return strings.TrimSpace(out), newState, nil
+	return strings.TrimSpace(id), newState, nil
+}
+
+// lockMargin allows for file systems that round mtimes (FAT, network disks).
+const lockMargin = 2 * time.Second
+
+// staleIndexLock removes the worktree's index.lock and returns true, only
+// when reset failed because that lock exists and its mtime is in the window
+// of the stopped git commit: not before started (minus a margin for coarse
+// file times), not after stopped.
+func staleIndexLock(ctx context.Context, worktree string, resetErr error, started, stopped time.Time) bool {
+	var ge *git.Error
+	if !errors.As(resetErr, &ge) || !strings.Contains(ge.Stderr, "index.lock") || !strings.Contains(ge.Stderr, "File exists") {
+		return false
+	}
+	lp, err := git.Run(ctx, worktree, "rev-parse", "--path-format=absolute", "--git-path", "index.lock")
+	if err != nil {
+		return false
+	}
+	lock := strings.TrimSpace(lp)
+	fi, err := os.Lstat(lock)
+	if err != nil || fi.ModTime().After(stopped) || fi.ModTime().Before(started.Add(-lockMargin)) {
+		return false
+	}
+	return os.Remove(lock) == nil
 }
 
 // failSave builds R10's error for a failed step.
@@ -235,7 +290,7 @@ func failSave(ctx context.Context, err error, gitCmd, tail string, failed []stri
 		reason, extra = failureReason(err, gitCmd)
 	}
 	if len(failed) > 0 {
-		extra = append([]string{"Could not put back: " + strings.Join(failed, ", ") + "."}, extra...)
+		tail = "Could not put back: " + strings.Join(failed, ", ") + "."
 	}
 	return saveError(reason, tail, extra)
 }

@@ -323,3 +323,158 @@ func TestSaveLeftoverTemp(t *testing.T) {
 		t.Errorf("temp file still there: %v", err)
 	}
 }
+
+// saveWithFile is a Prepare that returns one review file.
+func saveWithFile(title string) saveOp {
+	op := titleOp(title)
+	op.Prepare = func(state.State) (prepared, error) {
+		return prepared{
+			Data:    eventlog.Titled{Title: title},
+			Files:   map[string][]byte{"reviews/spec-1.md": []byte("new\n")},
+			Message: saveName + ": title set",
+		}, nil
+	}
+	return op
+}
+
+func TestSaveCancelAfterCommit(t *testing.T) {
+	r, wt := saveSlice(t)
+	r.LockWait = 5 * time.Second
+	before := commitCount(t, wt)
+	writeSaveHook(t, r, "post-commit", "sleep 3")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	time.AfterFunc(500*time.Millisecond, cancel)
+	id, st, err := saveEvent(ctx, r, saveName, wt, saveWithFile("A"))
+	if err != nil {
+		t.Fatalf("err = %v", err)
+	}
+	if commitCount(t, wt) == before {
+		t.Fatal("no commit")
+	}
+	if id != gitOut(t, wt, "rev-parse", "HEAD") || st.Title != "A" {
+		t.Errorf("id = %q, title = %q", id, st.Title)
+	}
+	if readFile(t, saveLogPath(wt)) != gitOut(t, wt, "show", "HEAD:docs/slices/"+saveName+"/.events.jsonl")+"\n" {
+		t.Error("log on disk differs from the committed log")
+	}
+	if _, err := os.Stat(filepath.Join(wt, "docs", "slices", saveName, "reviews", "spec-1.md")); err != nil {
+		t.Errorf("review file gone: %v", err)
+	}
+	if _, err := os.Stat(lockPath(r, saveName)); err == nil {
+		t.Error("lock not freed")
+	}
+}
+
+// indexLockHook makes a pre-commit hook that creates the worktree's
+// index.lock, with the given touch -t time ("" for now), and then sleeps.
+func indexLockHook(t *testing.T, r Repo, touchTime string) {
+	body := `L=$(git rev-parse --absolute-git-dir)/index.lock
+: > "$L"
+`
+	if touchTime != "" {
+		body += `touch -t ` + touchTime + ` "$L"
+`
+	}
+	body += "sleep 3"
+	writeSaveHook(t, r, "pre-commit", body)
+}
+
+func cancelledSave(t *testing.T, r Repo, wt string) error {
+	r.LockWait = 5 * time.Second
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	time.AfterFunc(700*time.Millisecond, cancel)
+	_, _, err := saveEvent(ctx, r, saveName, wt, titleOp("X"))
+	return err
+}
+
+func worktreeIndexLock(t *testing.T, wt string) string {
+	return filepath.Join(gitOut(t, wt, "rev-parse", "--absolute-git-dir"), "index.lock")
+}
+
+func TestSaveStaleIndexLockRemoved(t *testing.T) {
+	r, wt := saveSlice(t)
+	indexLockHook(t, r, "")
+	err := cancelledSave(t, r, wt)
+	want := "could not save the event: interrupted. Nothing was changed."
+	if err == nil || err.Error() != want {
+		t.Errorf("err = %v", err)
+	}
+	if _, err := os.Stat(worktreeIndexLock(t, wt)); err == nil {
+		t.Error("stale index.lock still there")
+	}
+}
+
+func TestSaveNewerIndexLockKept(t *testing.T) {
+	r, wt := saveSlice(t)
+	indexLockHook(t, r, "203012312359")
+	err := cancelledSave(t, r, wt)
+	want := "could not save the event: interrupted. Could not put back: index."
+	if err == nil || err.Error() != want {
+		t.Errorf("err = %v", err)
+	}
+	if _, err := os.Stat(worktreeIndexLock(t, wt)); err != nil {
+		t.Errorf("newer index.lock was removed: %v", err)
+	}
+	os.Remove(worktreeIndexLock(t, wt))
+}
+
+func TestSaveKeepsFileAlreadyOnDisk(t *testing.T) {
+	r, wt := saveSlice(t)
+	writeSaveHook(t, r, "pre-commit", "exit 1")
+	f := filepath.Join(wt, "docs", "slices", saveName, "reviews", "spec-1.md")
+	if err := os.MkdirAll(filepath.Dir(f), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(f, []byte("old\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := saveEvent(context.Background(), r, saveName, wt, saveWithFile("K")); err == nil {
+		t.Fatal("want an error")
+	}
+	if got := readFile(t, f); got != "old\n" {
+		t.Errorf("file = %q", got)
+	}
+}
+
+func TestSaveCouldNotPutBack(t *testing.T) {
+	r, wt := saveSlice(t)
+	op := titleOp("P")
+	op.Tail = "The steps before it were saved."
+	op.Prepare = func(state.State) (prepared, error) {
+		return prepared{Data: eventlog.Titled{Title: "P"}, Message: "m"}, nil
+	}
+	// The hook replaces the log with a non-empty folder, so the undo
+	// cannot put the log back.
+	writeSaveHook(t, r, "pre-commit", `L=docs/slices/`+saveName+`/.events.jsonl
+rm -f "$L"
+mkdir "$L"
+: > "$L/x"
+exit 1`)
+	_, _, err := saveEvent(context.Background(), r, saveName, wt, op)
+	want := "could not save the event: git commit failed (exit code 1). Could not put back: docs/slices/login-google/.events.jsonl."
+	if err == nil || err.Error() != want {
+		t.Errorf("err = %v", err)
+	}
+}
+
+func TestSaveOldIndexLockKept(t *testing.T) {
+	r, wt := saveSlice(t)
+	lock := worktreeIndexLock(t, wt)
+	if err := os.WriteFile(lock, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	old := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+	if err := os.Chtimes(lock, old, old); err != nil {
+		t.Fatal(err)
+	}
+	_, _, err := saveEvent(context.Background(), r, saveName, wt, titleOp("O"))
+	if err == nil || !strings.Contains(err.Error(), "Could not put back: index.") {
+		t.Errorf("err = %v", err)
+	}
+	if _, err := os.Stat(lock); err != nil {
+		t.Errorf("old index.lock was removed: %v", err)
+	}
+	os.Remove(lock)
+}
