@@ -2,6 +2,7 @@ package slice
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -104,5 +105,16 @@ func TestSpecChangedNoFolder(t *testing.T) {
 	got, err := specChanged(context.Background(), gone, "x", "0123456789abcdef0123456789abcdef01234567")
 	if err != nil || got {
 		t.Errorf("no folder: %v %v", got, err)
+	}
+}
+
+func TestSpecChangedCancelled(t *testing.T) {
+	r := newRepo(t)
+	_, commit := specCommit(t, r.Dir, "one\ntwo\n")
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	got, err := specChanged(ctx, r.Dir, "x", commit)
+	if !errors.Is(err, context.Canceled) || got {
+		t.Errorf("cancelled: %v %v", got, err)
 	}
 }

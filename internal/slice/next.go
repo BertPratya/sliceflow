@@ -15,6 +15,7 @@ import (
 // the reviewed commit (R30). git compares through its line-end rules. Any
 // failure other than a difference, e.g. a commit that is not in the repo,
 // or git that cannot start in the folder, means not compared: false, nil.
+// A done context is the exception: its error is returned.
 func specChanged(ctx context.Context, worktree, name, commit string) (bool, error) {
 	if worktree == "" || commit == "" {
 		return false, nil
@@ -22,6 +23,10 @@ func specChanged(ctx context.Context, worktree, name, commit string) (bool, erro
 	_, err := git.Run(ctx, worktree, "diff", "--quiet", commit, "--", path.Join("docs", "slices", name, "spec.md"))
 	if err == nil {
 		return false, nil
+	}
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		// A cancel is not "not compared": the caller must stop.
+		return false, ctxErr
 	}
 	var ge *git.Error
 	if errors.As(err, &ge) {
