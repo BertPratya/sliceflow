@@ -3,24 +3,24 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 18:50 UTC
+- Updated: 2026-10-24 19:10 UTC
 
 ## Needs human
 
-- plan-1 medium findings F1-F4: the lead's fixes wait for the human's yes
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 1 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 2 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
-0 of 15 done · 15 todo
+0 of 16 done · 16 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -37,25 +37,26 @@
 | 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | todo | 0 | 0 | - | R25, R26, R27 |
-| 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11, 13 | R20, R21, R22, R23, R24, R25, R27, R28 |
-| 15 | submit-command | normal | todo | 0 | 0 | 07, 12, 14 | R6, R7, R8, R9, R10, R20, R21, R22, R23, R24, R25, R28, R29, R30, R37 |
+| 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11, 13 | R12, R19, R20, R21, R22, R23, R24, R25, R27, R28 |
+| 15 | submit-command | normal | todo | 0 | 0 | 07, 12, 14 | R20, R21, R22, R23, R25, R26, R27, R28, R29, R30, R37 |
+| 16 | submit-failures | normal | todo | 0 | 0 | 15 | R6, R7, R8, R9, R10, R20, R24, R29 |
 
 ## Findings
 
-Open: 4 · Waiting for verify: 9 · Closed: 22
+Open: 0 · Waiting for verify: 13 · Closed: 22
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
 | plan-1/Q1 | high | template show outside a git repo | fixed: R35 |
-| plan-1/F1 | medium | saveEvent can't run the command's checks under its lock | open |
-| plan-1/F2 | medium | R12 and R19 for spec submit are in no task | open |
-| plan-1/F3 | medium | Six briefs over 1,500 words; task 15 too big | open |
-| plan-1/F4 | medium | state.Allowed: error in the plan, string in task 02 | open |
+| plan-1/F1 | medium | saveEvent can't run the command's checks under its lock | fixed |
+| plan-1/F2 | medium | R12 and R19 for spec submit are in no task | fixed |
+| plan-1/F3 | medium | Six briefs over 1,500 words; task 15 too big | fixed |
+| plan-1/F4 | medium | state.Allowed: error in the plan, string in task 02 | fixed |
 | plan-1/F5 | low | git diff exit 128 for a missing commit | fixed |
-| plan-1/F6 | low | Gaps in Done when | fixed, except the R26/R27 e2e (with F3) |
-| plan-1/F7 | low | Testing and the tasks disagree | fixed, except the Ctrl-C e2e (with F3) |
+| plan-1/F6 | low | Gaps in Done when | fixed |
+| plan-1/F7 | low | Testing and the tasks disagree | fixed |
 | plan-1/F8 | low | Tasks 05, 08, 09 should be core | fixed |
 | plan-1/F9 | low | Task 06's Phase and Title line | fixed |
 | plan-1/F10 | low | Approach's file and dependency lines; Request.File | fixed |
@@ -104,6 +105,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 19:10 · lead (claude) · plan review 2 started
+- 2026-10-24 19:05 · lead (claude) · human: "yes" to the plan-1 F1-F4 fixes: a Prepare step under the lock; R12 and R19 in task 14; task 15 split into 15 and 16; Allowed returns a string
 - 2026-10-24 18:50 · lead (claude) · human: plan-1 Q1 option 1, template show works outside a git repo (spec R35)
 - 2026-10-24 18:40 · lead (claude) · plan-1 lows fixed (F5-F12, two parts wait for F3); documents back to draft
 - 2026-10-24 18:30 · doc-reviewer (claude opus) · plan review 1 handed in: 1 high, 4 medium, 8 low

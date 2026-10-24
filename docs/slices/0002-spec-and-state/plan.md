@@ -203,13 +203,19 @@ With the lock held:
 
 1. Read the log from the last commit of `slice/<name>` (as 0001 reads
    it), and replay it (`state.Replay`).
-2. Check the move (`state.Allowed`). Not allowed: save nothing, and
-   return the spec's error, e.g. R20's or R6's.
-3. Delete a `.events.jsonl.tmp` left by a crash. Write the committed log,
+2. Run the command's prepare step on the state. It does the command's
+   own checks, in the spec's order, and gives the spec's error when one
+   fails, e.g. R20's, R19's, R24's, R32's, R33's, or R6's: then nothing
+   is saved. Otherwise it gives the event's `data` and the files to
+   write. (lead's call)
+3. Check the move with `state.Allowed`, as a last guard. A prepare step
+   that passed but a move that is not allowed is a bug: save nothing,
+   and return a plain error.
+4. Delete a `.events.jsonl.tmp` left by a crash. Write the committed log,
    a `\n` when it does not end with one (SD15), and the new line, to
    `.events.jsonl.tmp`; then rename it over `.events.jsonl` (R9).
-4. Write the event's other files, e.g. the review file.
-5. `git add -f -- <the files>`, then
+5. Write the event's other files, e.g. the review file.
+6. `git add -f -- <the files>`, then
    `git commit --only -m "<message>" -- <the files>` in the slice's
    worktree (TD1). `-f` adds them also when an ignore rule matches, as in
    0001.
@@ -218,13 +224,13 @@ With the lock held:
 
 Covers: R10
 
-When step 5 of Saving an event fails, or Ctrl-C comes before it ends:
+When step 6 of Saving an event fails, or Ctrl-C comes before it ends:
 
 1. Write the log back as it was committed (by the same temporary file
    and rename).
-2. Delete the files step 4 created; put back the files it changed, as
+2. Delete the files step 5 created; put back the files it changed, as
    they were committed.
-3. Unstage what step 5 staged: `git reset -q -- <the files>`.
+3. Unstage what step 6 staged: `git reset -q -- <the files>`.
 4. Never touch `spec.md`: it holds the lead's work.
 
 R10's message then names git's reason, as R18 of 0001-slice-and-events
@@ -366,7 +372,7 @@ New, in `internal/state`. No files, no git.
 
 ```go
 func Replay(events []eventlog.Event) (State, []string) // the state, and R4's warnings
-func Allowed(s State, e eventlog.Event) error          // R2: is this move allowed now?
+func Allowed(s State, e eventlog.Event) string         // R2: "" when allowed, else R4's reason
 ```
 
 `State` holds the phase, the title, and for `spec.md`: its state, the
