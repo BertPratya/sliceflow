@@ -282,8 +282,10 @@ spec; both give 0 errors.
 - `internal/spec/testdata/fresh.md`, `internal/spec/testdata/0001-spec.md`:
   new.
 - `internal/spec/parse.go`, `internal/spec/parse_test.go`,
-  `internal/spec/doc.go`: changed, for review task-04-1/F1 only: the
-  lines above the first `##` heading are read too, into `Doc.Preamble`.
+  `internal/spec/doc.go`: changed, for review task-04-1 F1 and F3 only:
+  the lines above the first `##` heading are read too, into
+  `Doc.Preamble` (F1); a bad marker's `Mark.Text` keeps its inline code
+  (F3).
 
 ### Interfaces
 
@@ -291,10 +293,11 @@ spec; both give 0 errors.
   `Level` is `error`, `warning`, or `note`. Tasks 05, 09, and 14 use it.
 - `func Check(d Doc, slice string) []Problem`: creates. Task 05 adds the
   warnings and notes; task 09 calls it.
-- `Doc.Preamble Section`: changes `Doc`, for review task-04-1/F1. The
-  lines above the first `##` heading, as a `Section` with `Name` `""`
-  and `Line` 0; not in `Sections`. `Check` checks its items and bad
-  markers as R15 says.
+- `type Doc struct{ HasFront bool; Front []Field; Preamble Section; Sections []Section; Placeholders []Mark; Comments []Mark; LastLine int }`:
+  changes, for review task-04-1/F1. `Preamble` holds the lines above the
+  first `##` heading, as a `Section` with `Name` `""` and `Line` 0; it is
+  not in `Sections`. `Check` checks its items and bad markers as R15
+  says.
 - `Parse`, `Doc`: uses.
 
 ### Done when
@@ -313,6 +316,9 @@ spec; both give 0 errors.
   Proves: R15, R18
 - `TestErrors0001`: `testdata/0001-spec.md`, checked as slice
   `0001-slice-and-events`, gives 0 errors.
+  Proves: R15
+- `TestErrorMarkerBeforeFirstSection`: `- **R9.** x` between `# Spec`
+  and `## Summary` gives `R9 is outside "## Requirements"` at its line.
   Proves: R15
 
 ### Out of scope

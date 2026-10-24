@@ -3,7 +3,7 @@
 - Phase: implementing (blocked)
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:44 UTC
+- Updated: 2026-10-24 17:52 UTC
 
 ## Needs human
 
@@ -16,7 +16,7 @@
 | spec.md | approved | 3 | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
 | plan.md | approved | 5 | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
 | preview.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
-| tasks.md | in_review | with plan.md | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
+| tasks.md | approved | with plan.md | R002 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R002 |
 
 ## Tasks
 
@@ -44,12 +44,16 @@
 
 ## Findings
 
-Open: 4 · Waiting for verify: 4 · Closed: 51
+Open: 4 · Waiting for verify: 4 · Closed: 55
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
+| change-1/F1 | medium | Task 04 Files says F1 only; parse.go also has the F3 fix | fixed |
+| change-1/F2 | low | Task 04 Done when names no test for a marker above the first heading | fixed |
+| change-1/F3 | low | Doc not written the way task 03 writes it | fixed |
+| change-1/F4 | low | Lead's decision on task-04-1/F1 is out of date | fixed |
 | plan-5/F1 | medium | A failed review.finished commit has no brief and no test | fixed (not re-reviewed: the human approved) |
 | plan-5/F2 | low | Three leftover lines in spec.md | fixed |
 | plan-5/F3 | low | plan.md leaves out spec review; wrong task for Ctrl-C | fixed |
@@ -123,7 +127,7 @@ None.
 
 - Task 03, task-03-1/F3: a front matter with no closing `---` gives `HasFront` false, so task 04 reports R15's `no front matter` error. Why: R15 asks for front matter between two `---` lines, and `Doc` keeps the fields of tasks.md (no new field).
 - Task 02, task-02-1/F1 (low): fixed in a worker round, not left. Why: tasks 06, 11, and 15 rely on the review's reviewer, file, and commit, and on the title from `slice.created`; no other task's tests check them in `state`.
-- Task 04, task-04-1/F1: task 04's touches widened to `internal/spec/parse.go` and `parse_test.go` (tasks.md changed). Why: the fix is in the reader, which drops the lines above the first `##` heading; it is the same package, no interface changes, and no later task touches those files.
+- Task 04, task-04-1/F1: task 04's touches widened to `internal/spec/parse.go` and `parse_test.go` (tasks.md changed). Why: the fix is in the reader, which drops the lines above the first `##` heading; it is the same package, and no later task touches those files. Later, by the human's answer, `Doc` also gets `Preamble`, and `doc.go` joined the touches (R002).
 
 ## Preview
 
@@ -133,6 +137,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:52 · lead (claude) · change-1 findings fixed; tasks.md approved again, R002 (the human's answer is the approval)
+- 2026-10-24 17:52 · doc-reviewer (claude opus) · change review 1 handed in: 1 medium, 3 low; nothing for the human
 - 2026-10-24 17:44 · lead (claude) · change review 1 started: tasks.md, task 04 (touches, Files, Doc.Preamble)
 - 2026-10-24 17:44 · lead (claude) · tasks.md changed: task 04 changes Doc with Preamble, and touches internal/spec/doc.go
 - 2026-10-24 17:44 · human · task 04's question, option 1, keep Doc.Preamble: "your recommentation"
