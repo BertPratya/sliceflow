@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:17 UTC
+- Updated: 2026-10-24 08:18 UTC
 
 ## Needs human
 
@@ -23,7 +23,7 @@ None.
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
-| 01 | git-runner | core | in_review | 0 | 1 | - | R40 |
+| 01 | git-runner | core | in_review | 0 | 2 | - | R40 |
 | 02 | event-log | core | todo | 0 | 0 | 01 | R19, R25, R26, R27 |
 | 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | todo | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 2 · Waiting for verify: 0 · Closed: 48
+Open: 0 · Waiting for verify: 2 · Closed: 48
 
 ### Doc reviews
 
@@ -98,8 +98,8 @@ Open: 2 · Waiting for verify: 0 · Closed: 48
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-01-1/F1 | low | 01 | Show reports a bad ref or a non-repo folder as a missing file | open |
-| task-01-1/F2 | low | 01 | The no-network test can pass against a broken Run | open |
+| task-01-1/F1 | low | 01 | Show reports a bad ref or a non-repo folder as a missing file | wontfix: why: in this slice callers check the ref and repo first; Show's doc comment says so (waiting for verify) |
+| task-01-1/F2 | low | 01 | The no-network test can pass against a broken Run | fixed (waiting for verify) |
 
 ### Integration review
 
@@ -118,6 +118,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:18 · lead (claude) · task 01 code review started, round 2
+- 2026-10-24 08:18 · lead (claude) · task 01 fixes from review 1 committed (d95a9de); checks pass
 - 2026-10-24 08:17 · lead (claude) · task 01: fix F2 in a worker round; F1 to be wontfix with a doc comment (callers check the ref and repo first)
 - 2026-10-24 08:17 · code reviewer (claude opus) · task-01-1 submitted: pass; 2 low; leaving git.Run's environment as is is fine for this slice
 - 2026-10-24 08:15 · lead (claude) · task 01 code review started, round 1
