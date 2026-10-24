@@ -86,20 +86,35 @@ func (u *undoList) run(ctx context.Context) []string {
 	return failed
 }
 
-// cleanStopped removes what a stopped "git worktree add" left at wtDir: the
-// worktree git registered there, then the folder. It returns what it could
-// not remove. R17 proved the folder was not there before this run.
-func (u *undoList) cleanStopped(ctx context.Context, wtDir string) []string {
+// listedWorktree returns the path git lists for the worktree at wtDir, and
+// whether there is one. It matches the path alone. ok is false when the list
+// could not be read.
+func (u *undoList) listedWorktree(ctx context.Context, wtDir string) (listed string, found, ok bool) {
+	out, err := git.Run(ctx, u.root, "worktree", "list", "--porcelain")
+	if err != nil {
+		return "", false, false
+	}
+	want := normPath(wtDir)
+	for _, line := range strings.Split(out, "\n") {
+		p, cut := strings.CutPrefix(strings.TrimRight(line, "\r"), "worktree ")
+		if cut && normPath(p) == want {
+			return p, true, true
+		}
+	}
+	return "", false, true
+}
+
+// cleanFailedAdd removes what a failed or stopped "git worktree add" left at
+// wtDir: the worktree git registered there, then the folder. It returns what
+// it could not remove. R17 proved the folder was not there before this run.
+// listedBefore says git already listed a worktree at wtDir before the
+// command: that entry is not this run's, so it stays.
+func (u *undoList) cleanFailedAdd(ctx context.Context, wtDir string, listedBefore bool) []string {
 	ctx = context.WithoutCancel(ctx)
 	var failed []string
-	if out, err := git.Run(ctx, u.root, "worktree", "list", "--porcelain"); err == nil {
-		want := normPath(wtDir)
-		for _, line := range strings.Split(out, "\n") {
-			p, ok := strings.CutPrefix(strings.TrimRight(line, "\r"), "worktree ")
-			if ok && normPath(p) == want {
-				_, _ = git.Run(ctx, u.root, "worktree", "remove", "--force", "--force", p)
-				break
-			}
+	if !listedBefore {
+		if p, found, _ := u.listedWorktree(ctx, wtDir); found {
+			_, _ = git.Run(ctx, u.root, "worktree", "remove", "--force", "--force", p)
 		}
 	}
 	if exists(wtDir) {

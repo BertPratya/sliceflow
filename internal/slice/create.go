@@ -58,7 +58,7 @@ func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error) {
 	}
 	root := filepath.FromSlash(r.Root)
 	u := &undoList{root: root}
-	var stopped []string // what a stopped "git worktree add" left and we could not remove
+	var stopped []string // what a failed "git worktree add" left and we could not remove
 	// fail undoes this run's work and builds R18's error.
 	fail := func(err error, gitCmd string) (Created, error) {
 		failed := append(stopped, u.run(ctx)...)
@@ -133,6 +133,10 @@ func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error) {
 	hadWorktrees := statErr == nil
 	// git makes .sliceflow/worktrees/ when it is missing. It goes on the list
 	// before the branch and the worktree, so the undo removes it after them.
+	// A worktree git already lists at this path is not this run's: it stays.
+	// If the list cannot be read, assume it is listed, and leave it alone.
+	_, listedBefore, listOK := u.listedWorktree(ctx, wtDir)
+	listedBefore = listedBefore || !listOK
 	listPos := len(u.items)
 	addWorktreesDir := func() {
 		if !hadWorktrees && exists(worktreesDir) {
@@ -146,11 +150,10 @@ func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error) {
 	if err := next("branch"); err != nil {
 		return fail(err, "")
 	}
-	if _, wtErr := git.Run(ctx, root, "worktree", "add", wtDir, branch); wtErr != nil {
-		if ctx.Err() != nil {
-			// The signal stopped git: it may have left a worktree.
-			stopped = u.cleanStopped(ctx, wtDir)
-		}
+	if _, wtErr := git.Run(ctx, root, "worktree", "add", "--quiet", wtDir, branch); wtErr != nil {
+		// Git may have left a worktree, or part of one, also when a hook
+		// failed or a signal stopped it.
+		stopped = u.cleanFailedAdd(ctx, wtDir, listedBefore)
 		addWorktreesDir()
 		return fail(wtErr, "worktree add")
 	}

@@ -110,6 +110,41 @@ func TestUndoInterruptedWorktreeAdd(t *testing.T) {
 	}
 }
 
+func TestUndoFailedWorktreeAdd(t *testing.T) {
+	r := newRepo(t)
+	writeHook(t, r.Dir, "post-checkout", "exit 3")
+	_, err := Create(context.Background(), r, CreateOptions{Name: "spec-submit"})
+	wantSliceError(t, err, "could not create slice spec-submit: git worktree add failed (exit code 3). Everything sliceflow made was removed.")
+	if branchExists(t, r.Dir, "slice/spec-submit") {
+		t.Error("branch left")
+	}
+	if strings.Contains(gitOut(t, r.Dir, "worktree", "list", "--porcelain"), "spec-submit") {
+		t.Error("worktree left")
+	}
+	if exists(filepath.Join(r.Root, ".sliceflow", "worktrees", "spec-submit")) || exists(filepath.Join(r.Root, ".sliceflow")) {
+		t.Error(".sliceflow left")
+	}
+}
+
+func TestUndoKeepsStaleEntry(t *testing.T) {
+	r := newRepo(t)
+	wt := filepath.Join(r.Root, ".sliceflow", "worktrees", "spec-submit")
+	testrepo.Git(t, r.Dir, "worktree", "add", "--detach", wt)
+	if err := os.RemoveAll(wt); err != nil {
+		t.Fatal(err)
+	}
+	_, err := Create(context.Background(), r, CreateOptions{Name: "spec-submit"})
+	if err == nil || !strings.HasPrefix(err.Error(), "could not create slice spec-submit: ") {
+		t.Fatalf("err = %v", err)
+	}
+	if !strings.Contains(filepath.ToSlash(gitOut(t, r.Dir, "worktree", "list", "--porcelain")), ".sliceflow/worktrees/spec-submit") {
+		t.Error("the stale entry was removed")
+	}
+	if branchExists(t, r.Dir, "slice/spec-submit") {
+		t.Error("branch left")
+	}
+}
+
 func TestUndoKeepsOthers(t *testing.T) {
 	r := newRepo(t)
 	testrepo.Git(t, r.Dir, "commit", "--allow-empty", "-m", "second")
