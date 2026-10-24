@@ -188,9 +188,56 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
        decide it here: add an Open question.
      - None? Write: None. -->
 
-### {{kind, e.g. CLI}}
+### CLI
 
-{{What changes. Link the contract file if one exists.}}
+New. The spec describes it fully; the code follows the spec's words.
+
+- `sliceflow slice create <name> [--title <title>] [--from <branch>] [--json]`:
+  R1 to R18, R42; output R9 and R10.
+- `sliceflow slice status [<name>] [--json]`: R21 to R33.
+- `sliceflow slice list [--all] [--json]`: R21 to R28, R34 to R37.
+- `--help` and `-h` on every command: R39.
+- Flags may come before or after the name (TD2).
+- Exit codes 0, 1, and 2, errors on stderr, nothing on stdout when a
+  command fails: R38, R42.
+
+### Event log
+
+New. The file `docs/slices/<name>/.events.jsonl`, as R19 and R20 say,
+read as R26 and R27 say. See Data.
+
+### Settings
+
+New. `git config sliceflow.base`: the base branch, as R3 and R21 say.
+sliceflow only reads it.
+
+### Core API
+
+New, in `internal/slice`. The CLI calls it; a later server calls the
+same functions (TD7).
+
+```go
+func Create(ctx context.Context, r Repo, opts CreateOptions) (Created, error)
+func Status(ctx context.Context, r Repo, name string) (Status, error) // name "" = the current branch
+func List(ctx context.Context, r Repo, all bool) (List, error)
+
+type CreateOptions struct{ Name, Title, From string }
+type Warning struct{ Slice, Text string } // Slice "" = about the whole repo
+type Error struct{ Message string }
+```
+
+- `Repo` holds the folder the command runs in, and the root of the main
+  checkout (for R5 and R9).
+- A result holds its own warnings. The core never prints. The CLI
+  prints each warning as R28 says, and `--json` adds its text to
+  `warnings` (R30, R37).
+- Every failure the spec names is an `*Error` with the spec's words,
+  without `Error: `. The CLI prints `Error: ` and the message, and exits
+  with 1. Any other error is a bug, also printed with exit 1.
+- Wrong use (an unknown flag, a missing value) is found by the CLI, and
+  exits with 2. It never reaches the core.
+- `Repo` has a `Now func() time.Time` for `at` and `created`; tests set
+  a fixed time. (lead's call)
 
 ## Data
 
@@ -321,6 +368,20 @@ each field itself, so each warning has R26's exact words. See TD5.
   Why: a log is small, and one piece has no line length limit.
   Not chosen: `bufio.Scanner` line by line, because it fails on a line
   over 64 KB.
+- **TD7.** The core is three plain functions, `Create`, `Status`, and
+  `List`, as in Interfaces, Core API. Results carry their warnings, and
+  errors carry the spec's words.
+  Why: the CLI and a later server share one core, and neither copies
+  the other's logic. With no shared state in this slice, plain
+  functions are enough.
+  Not chosen: an object with methods, because there is no state to
+  keep yet; and calling git and the log from the CLI directly, because
+  a server would have to copy that logic.
+- **TD8.** sliceflow finds `git` once on `PATH`, and runs each git
+  command with the repo folder as its working directory. (lead's call)
+  Why: it uses the git the user already runs, with their settings.
+  Not chosen: `git -C <dir>` on every call, because a working
+  directory is the same thing without an extra argument.
 
 ## Risks and rollout
 

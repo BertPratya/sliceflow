@@ -2,7 +2,7 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 06:35 UTC
+- Updated: 2026-10-24 06:38 UTC
 
 ## Needs human
 
@@ -70,6 +70,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 06:38 · human · plan part 3, interfaces: core API option 1, three plain functions
 - 2026-10-24 06:35 · human · plan part 2, the data: yes
 - 2026-10-24 06:32 · human · errors stay text on stderr with --json (R42, S29); JSON errors with codes go to the backlog; spec.md back to draft, the plan review checks it
 - 2026-10-24 06:30 · human · plan part 1: package layout yes; module path github.com/BertPratya/sliceflow; flag package plus a small helper
