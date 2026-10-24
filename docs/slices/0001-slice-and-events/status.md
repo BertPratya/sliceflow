@@ -150,6 +150,7 @@ None.
 - 09: task-09-1/F2: when the branch is kept because its worktree could not be removed, `Could not remove:` names the branch too. Why: R18 promises the list of what could not be removed.
 - 09: task-09-1/F4: `Could not remove:` lists paths relative to the main checkout, with `/`. Why: R9's other lines use that form; the spec does not say which form.
 - 09: task-09-1/F3 is wontfix: `slice.Interrupted` stays. Why: only the CLI uses it; the integration review is told.
+- 12: `internal/cli/status.go` is added to task 12's touches (task-11-1/F1), so R30's object can move into one helper that `slice status` and `slice list` share. Why: R37 says each slice in `slice list --json` has R30's form; a copy could drift.
 
 ## Preview
 
@@ -159,6 +160,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:51 · lead (claude) · task 12's touches widened with internal/cli/status.go (task-11-1/F1)
 - 2026-10-24 09:51 · lead (claude) · task 09 worker round 3 started: task-09-2/F1 and F2 (R004)
 - 2026-10-24 09:51 · lead (claude) · plan.md and tasks.md approved as R004 (tag on 8511f79); phase back to implementing
 - 2026-10-24 09:51 · doc reviewer (claude opus) · change-8 submitted: 1 medium, fixed by the lead

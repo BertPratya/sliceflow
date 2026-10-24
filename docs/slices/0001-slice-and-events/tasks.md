@@ -983,7 +983,8 @@ changed log is committed on the slice branch.
 covers: [R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43]
 depends_on: ["11"]
 touches: [internal/slice/list.go, internal/slice/list_test.go,
-  internal/cli/list.go, internal/e2e/slice_list_test.go]
+  internal/cli/list.go, internal/cli/status.go,
+  internal/e2e/slice_list_test.go]
 follows: ["Flow 5: List of slices", CLI, Cross-platform paths, Tests, Testing]
 risk: normal
 ```
