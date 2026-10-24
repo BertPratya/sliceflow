@@ -3,7 +3,7 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 14:55 UTC
+- Updated: 2026-10-24 15:00 UTC
 
 ## Needs human
 
@@ -14,6 +14,8 @@ None.
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
 | spec.md | review_passed | 3 | - | - |
+| plan.md | draft | 0 | - | - |
+| preview.md | draft | with plan.md | - | - |
 
 ## Tasks
 
@@ -70,6 +72,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 15:00 · lead (claude) · plan started: plan.md and preview.md copied; preview's fixed checks P1-P5
 - 2026-10-24 14:55 · lead (claude) · spec.md review_passed
 - 2026-10-24 14:50 · doc-reviewer (claude opus) · change review 3 handed in: spec-2 all verified; no new findings
 - 2026-10-24 14:40 · lead (claude) · spec review 3 started: a change review of the spec-2 fixes only, as for 0001
