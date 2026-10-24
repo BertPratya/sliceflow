@@ -53,9 +53,12 @@ Covers: R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R19, R20, R41
    (R6), and adds each to the undo list.
 6. From the main checkout's root, it runs
    `git branch slice/<name> <commit>`, then
-   `git worktree add <worktree> slice/<name>`, with the short branch
-   name: with `refs/heads/slice/<name>`, git would make a detached
-   HEAD, and the commit would not land on the branch. This makes the branch
+   `git worktree add --quiet <worktree> slice/<name>`, with the short
+   branch name: with `refs/heads/slice/<name>`, git would make a
+   detached HEAD, and the commit would not land on the branch.
+   `--quiet` drops git's progress line `Preparing worktree (...)`, so
+   R18's reason is git's real error, or the output of the user's
+   `post-checkout` hook. This makes the branch
    and the worktree (R4, R5), and each goes on the undo list right
    after its command succeeds. `git branch` refuses a branch that
    already exists, so a branch it made is this run's (Undo on
@@ -239,20 +242,24 @@ commands with the same name run at once, the one that loses never
 removes the other's branch. Anything it could not remove goes into
 `Could not remove: <list>.` (R18).
 
-One exception: when the signal stops `git worktree add` (Interrupts),
-git may already have made the worktree, or part of it, and the command
-did not succeed, so it is not on the list. The branch is on the list:
+One exception: when `git worktree add` fails, or the signal stops it
+(Interrupts), git may already have made the worktree, or part of it,
+and the command did not succeed, so it is not on the list. E.g. git
+keeps the whole worktree when the user's `post-checkout` hook fails. The branch is on the list:
 `git branch` made it in this run, so no other run can have a worktree
 on it. Then, before it removes the list's items, `create` cleans up
-what the stopped command left at `.sliceflow/worktrees/<name>`:
+what the failed or stopped command left at `.sliceflow/worktrees/<name>`:
 
 - if `git worktree list --porcelain` shows a worktree at that path,
-  it removes it with
+  and it did not before step 6, it removes it with
   `git worktree remove --force --force`. The second `--force` also
   removes a worktree that git locked while adding it. This also clears
   git's own entry for it in the repo's git folder, so a later `create`
   with the same name works. It matches the path alone: while git adds
-  a worktree, its entry has no branch for a moment;
+  a worktree, its entry has no branch for a moment. So `create` notes
+  before step 6 whether git already lists that path, e.g. an old
+  worktree whose folder the user deleted by hand; such an entry is not
+  this run's, and it stays;
 - if the folder still exists after that, it removes it with
   `os.RemoveAll`. R17 proved it was not there before, and only this
   run's `git worktree add` can have made it, because only this run
@@ -266,7 +273,8 @@ signal stops `git branch` itself, git may have made the branch, or a
 `.lock` file, in the moment before it was stopped. This run cannot tell
 that branch from another run's, so it keeps it. The window is a few
 microseconds, so this case is accepted.
-(the human's answer to task-09-1/Q1: kill git at once, then clean up)
+(the human's answers to task-09-1/Q1: kill git at once, then clean up;
+and to task-09-2/Q1: clean up after every failed `git worktree add`)
 
 #### Interrupts
 

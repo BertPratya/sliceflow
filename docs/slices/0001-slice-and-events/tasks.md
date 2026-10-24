@@ -730,8 +730,8 @@ what this run did not make. Its brief is about 1,950 words, over the usual 1,500
    it runs with `context.WithoutCancel(ctx)`.
 3. In `internal/slice/create.go`: split step 6 into
    `git branch slice/<name> <commit>`, then
-   `git worktree add <worktree> slice/<name>`, as Flow 1 step 6 now
-   says (task 06 built it as one `worktree add -b`); add each made thing to the list;
+   `git worktree add --quiet <worktree> slice/<name>`, as Flow 1 step
+   6 now says (task 06 built it as one `worktree add -b`); add each made thing to the list;
    note whether `.sliceflow/worktrees/` exists before step 6; check
    `ctx` between steps; on an error, run the undo and return R18's
    `*Error`. The reason is `interrupted` when `ctx.Err()` is set;
@@ -797,6 +797,19 @@ what this run did not make. Its brief is about 1,950 words, over the usual 1,500
   within 10 seconds, and leaves no branch `slice/spec-submit`, no
   worktree in `git worktree list --porcelain`, no
   `.sliceflow/worktrees/spec-submit`, and no `.sliceflow/`.
+  Proves: R18
+- `TestUndoFailedWorktreeAdd` (unit): a `post-checkout` hook that
+  only runs `exit 3`: `Create` returns the error
+  `could not create slice spec-submit: git worktree add failed (exit code 3). Everything sliceflow made was removed.`
+  and leaves no branch `slice/spec-submit`, no worktree in
+  `git worktree list --porcelain`, no `.sliceflow/worktrees/spec-submit`,
+  and no `.sliceflow/`.
+  Proves: R18
+- `TestUndoKeepsStaleEntry` (unit): a worktree at
+  `.sliceflow/worktrees/spec-submit` on a detached HEAD, whose folder
+  is then deleted by hand, makes `git worktree add` fail; after the
+  error, `git worktree list --porcelain` still lists that path, and no
+  branch `slice/spec-submit` is left.
   Proves: R18
 - `TestUndoKeepsOthers` (unit): with the checks skipped, a branch
   `slice/x` that already exists makes `git branch` fail; after
