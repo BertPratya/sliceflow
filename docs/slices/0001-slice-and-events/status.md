@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:11 UTC
+- Updated: 2026-10-24 08:13 UTC
 
 ## Needs human
 
@@ -23,7 +23,7 @@ None.
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
-| 01 | git-runner | core | doing | 0 | 0 | - | R40 |
+| 01 | git-runner | core | doing | 1 | 0 | - | R40 |
 | 02 | event-log | core | todo | 0 | 0 | 01 | R19, R25, R26, R27 |
 | 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | todo | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
@@ -105,6 +105,7 @@ None.
 ## Lead's decisions
 
 - before 01: `main` counts as passing its checks. Why: `main` has no Go code yet (no `go.mod`, `cmd/`, or `internal/`), so the checks cannot run there, and nothing on `main` can make a task fail.
+- 01 to 02: the gofmt check runs on the folders that exist, as `.githooks/pre-commit` does. Why: `cmd/` comes with task 03; until then `gofmt -l cmd internal` fails with "stat cmd", which is not a format error.
 
 ## Preview
 
@@ -114,6 +115,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:13 · lead (claude) · task 01 attempt 1 failed in the pre-commit hook: git's hook variables (GIT_DIR, GIT_INDEX_FILE) leaked into the tests, which then made 7 commits on the slice branch and set alias.env-check in .git/config; both undone (branch back to d8f86fd, never pushed); worker round 2 next
 - 2026-10-24 08:11 · lead (claude) · task 01 started: worker round 1
 - 2026-10-24 08:11 · lead (claude) · implementing started: phase ready, worktree clean; `main` has no Go code, so its checks have nothing to run (see Lead's decisions)
 - 2026-10-24 08:06 · human · planning approved, R001: "yes leave it to 0002, and I approve."
