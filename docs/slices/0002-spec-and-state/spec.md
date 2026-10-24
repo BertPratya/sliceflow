@@ -315,7 +315,8 @@ The lead reads the template's rules, which a filled spec no longer holds.
   ---
   slice: {{slice}}
   created: {{date}}
-  ideas: []
+  ideas:
+    - {{an idea file this slice builds on, e.g. docs/ideas/2026-10-23-due-dates.md; none: ideas: []}}
   ---
   ```
   and the exit code is 0.
@@ -360,7 +361,7 @@ The lead reads the template's rules, which a filled spec no longer holds.
 
   | Event | Allowed when `spec.md` is | `spec.md` becomes |
   |---|---|---|
-  | `slice.created` | (the first good event only) | `draft` |
+  | `slice.created` | only when no good `slice.created` came before it | `draft` |
   | `slice.titled` | any state | as it was; the title becomes the event's `title` |
   | `spec.submitted`, `accepted` | `draft` or `review_passed` | `submitted` |
   | `spec.submitted`, `refused` | `draft` or `review_passed` | as it was |
@@ -406,7 +407,11 @@ The lead reads the template's rules, which a filled spec no longer holds.
   With the lock held, it replays the committed log, checks the move by
   R2, and saves the event. Then it removes the lock, also when the
   command failed or was stopped with Ctrl-C. It holds the lock for one
-  event only, and never while a reviewer runs.
+  event only, and never while a reviewer runs. If a later event of the
+  same command is no longer allowed by R2, because another command moved
+  the state first, then sliceflow shall save no event, print
+  `Error: another sliceflow command changed slice <name> first; spec.md is now <state>. The steps before it were saved.`
+  and exit with code 1.
   Check: unit, e2e
 - **R7.** If the lock file already exists, then sliceflow shall try again
   for up to 10 seconds, and then print
@@ -422,11 +427,19 @@ The lead reads the template's rules, which a filled spec no longer holds.
   never make an empty commit.
   Check: e2e
 - **R9.** sliceflow shall write the new log as the committed log plus the
-  one new line. The log file on disk shall never be half written, also
-  when sliceflow stops in the middle of writing it.
+  one new line. When the committed log does not end with `\n`, sliceflow
+  first adds a `\n`, so the new event starts on a line of its own. The
+  last line is kept as it is; when it is bad, it is skipped with a
+  warning, as R26 of 0001-slice-and-events says. The new event's `seq` is
+  1 more than the `seq` of the last line read without error, also when R4
+  skipped that line, and 1 when there is none. The log file on disk shall
+  never be half written, also when sliceflow stops in the middle of
+  writing it.
   Check: unit
 - **R10.** If the commit fails, then sliceflow shall put the log file back
-  as it was committed, and print
+  as it was committed, remove the files it created for that event, and
+  unstage what it staged for it. It never changes `spec.md`. Then it
+  prints
   `Error: could not save the event: <reason>. Nothing was changed.`
   with `<reason>`, and git's other lines, as R18 of 0001-slice-and-events
   says. Ctrl-C, or a stop signal from the system, before the commit is
@@ -438,7 +451,11 @@ The lead reads the template's rules, which a filled spec no longer holds.
 - **R11.** If no worktree has the branch `slice/<name>` checked out, then
   `spec validate`, `spec submit`, and `slice title` shall print
   `Error: slice <name> has no worktree: no worktree has the branch slice/<name> checked out. Nothing was changed.`
-  and exit with code 1.
+  and exit with code 1. These three commands check in this order, and
+  stop at the first that fails: R12 and R13 of 0001-slice-and-events (a
+  git repo, with commits), R14 of 0001-slice-and-events (the name), R33
+  of 0001-slice-and-events (the slice exists), this requirement, then the
+  lock (R6), then the command's own checks.
   Check: e2e
 
 ### Which slice
@@ -517,7 +534,10 @@ The lead reads the template's rules, which a filled spec no longer holds.
   Check: unit
 - **R18.** When checking, sliceflow shall read `\r\n` line ends as `\n`,
   and skip everything inside fenced code blocks and `inline code`: no
-  marker, `{{`, or `<!--` there is reported. A labeled line belongs to the
+  marker, `{{`, or `<!--` there is reported. It shall also skip
+  everything inside a template comment: no marker or `{{` there is
+  reported, and the comment gets only the warning `template comment left`.
+  A labeled line belongs to the
   item above it. A removed item, e.g. `**R4.** (removed in R002: why)`,
   needs no labeled lines, and gets no note.
   Check: unit
@@ -575,8 +595,8 @@ The lead reads the template's rules, which a filled spec no longer holds.
 ### The review
 
 - **R25.** sliceflow shall save `review.started`, with `doc` `spec.md`,
-  `round` (1 more than the highest round of `spec.md` in the log, else
-  1), `reviewer`, `file` (`reviews/spec-<round>.md`), and `commit` (the
+  `round` (1 more than the highest round of a `review.started` for
+  `spec.md` that the replay allowed by R2, else 1), `reviewer`, `file` (`reviews/spec-<round>.md`), and `commit` (the
   full id of the commit of the last accepted `spec.submitted`). The commit holds the new file
   `docs/slices/<name>/reviews/spec-<round>.md` and the log. The file holds
   only this front matter:
@@ -690,7 +710,10 @@ The lead reads the template's rules, which a filled spec no longer holds.
 - **R32.** When the user runs `sliceflow slice title <name> <title>`,
   sliceflow shall save `slice.titled` with `title`, and print
   `Title of <name> is now "<title>".` The commit holds only the log. Its
-  message is `<name>: title set`. This works in any phase.
+  message is `<name>: title set`. This works in any phase. When the log
+  has no good `slice.created`, sliceflow shall instead print
+  `Error: slice <name> has no slice.created event, so its state is unknown. Nothing was changed.`
+  and exit with code 1.
   Check: e2e
 - **R33.** If `<title>` is the title the slice has now, then sliceflow
   shall print
@@ -724,7 +747,8 @@ The lead reads the template's rules, which a filled spec no longer holds.
   on stdout, and exit with code 0.
   Check: e2e
 - **R37.** `spec validate` and `spec submit` shall print their problem
-  lines, the summary line, and the `Submit refused:` line on stdout, also
+  lines, the summary line, the `Submit refused:` line, and the lines of
+  steps already done, e.g. `Submitted spec.md.`, on stdout, also
   when they exit with code 1. This is the one exception to R38 of
   0001-slice-and-events, which prints nothing on stdout when a command
   fails. Every `Error:` line goes on stderr.
@@ -863,6 +887,15 @@ The lead reads the template's rules, which a filled spec no longer holds.
     forget.
   Cost: one exception to R38 of 0001-slice-and-events.
   Rule: R37
+- **SD15.** When the committed log's last line is bad or has no `\n`,
+  sliceflow keeps it, and starts the new event on a new line.
+  Why: nothing is deleted, and a bad line is skipped with a warning and
+    never stops a command, as SD5 of 0001-slice-and-events says.
+  Not chosen: cutting off the bad last line, because sliceflow would then
+    delete a line from the log. Also refusing to write, because nobody
+    edits the log by hand.
+  Cost: the warning about that line stays for good.
+  Rule: R9
 
 ## Assumptions
 
@@ -881,6 +914,4 @@ The lead reads the template's rules, which a filled spec no longer holds.
 
 ## Open questions
 
-- **Q1.** The committed log's last line can be half written, or have no
-  `\n` at its end. When sliceflow adds a new event, what happens to that
-  line? R9 only says "the committed log plus the one new line".
+None.
