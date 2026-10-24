@@ -141,3 +141,58 @@ func TestStatusBaseMissing(t *testing.T) {
 		t.Errorf("baseWarning = %q %v %+v %v", base, exists, w, err)
 	}
 }
+
+func TestStatusTagIsNotBase(t *testing.T) {
+	r := newRepo(t)
+	ctx := context.Background()
+	if _, err := Create(ctx, r, CreateOptions{Name: "spec-submit"}); err != nil {
+		t.Fatal(err)
+	}
+	testrepo.Git(t, r.Dir, "branch", "-m", "main", "master")
+	testrepo.Git(t, r.Dir, "tag", "main")
+	got, err := Status(ctx, r, "spec-submit")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := Warning{Text: "base branch main does not exist (the default); merged slices are not shown"}
+	if len(got.Warnings) != 1 || got.Warnings[0] != want {
+		t.Errorf("Warnings = %+v", got.Warnings)
+	}
+}
+
+func TestStatusOldTagSameNameAsBase(t *testing.T) {
+	r := newRepo(t)
+	ctx := context.Background()
+	testrepo.Git(t, r.Dir, "tag", "main")
+	c, err := Create(ctx, r, CreateOptions{Name: "spec-submit"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	testrepo.Git(t, r.Dir, "merge", "--no-ff", "-m", "merge", "slice/spec-submit")
+	testrepo.Git(t, r.Dir, "worktree", "remove", "--force", c.Worktree)
+	testrepo.Git(t, r.Dir, "branch", "-D", "slice/spec-submit")
+	got, err := Status(ctx, r, "spec-submit")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Phase != "planning" || got.From == nil {
+		t.Errorf("got %+v", got)
+	}
+}
+
+func TestStatusBaseConfigHEAD(t *testing.T) {
+	r := newRepo(t)
+	ctx := context.Background()
+	if _, err := Create(ctx, r, CreateOptions{Name: "spec-submit"}); err != nil {
+		t.Fatal(err)
+	}
+	testrepo.Git(t, r.Dir, "config", "sliceflow.base", "HEAD")
+	got, err := Status(ctx, r, "spec-submit")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := Warning{Text: "base branch HEAD does not exist (from git config sliceflow.base); merged slices are not shown"}
+	if len(got.Warnings) != 1 || got.Warnings[0] != want {
+		t.Errorf("Warnings = %+v", got.Warnings)
+	}
+}

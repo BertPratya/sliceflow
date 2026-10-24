@@ -85,9 +85,15 @@ func baseWarning(ctx context.Context, r Repo) (base string, exists bool, w *Warn
 	if err != nil {
 		return "", false, nil, err
 	}
-	exists, err = git.RefExists(ctx, r.Dir, base)
-	if err != nil {
-		return "", false, nil, err
+	// Only an existing local branch is a base (as in checkCreate): check the
+	// exact ref, so a tag or HEAD or main~1 never counts.
+	exists = true
+	if _, err := git.Run(ctx, r.Dir, "show-ref", "--verify", "--quiet", "refs/heads/"+base); err != nil {
+		var ge *git.Error
+		if !errors.As(err, &ge) || ge.ExitCode != 1 {
+			return "", false, nil, err
+		}
+		exists = false
 	}
 	if !exists {
 		w = &Warning{Text: fmt.Sprintf("base branch %s does not exist (%s); merged slices are not shown", base, source)}
@@ -109,11 +115,11 @@ func readSlice(ctx context.Context, r Repo, name, base string, baseExists bool) 
 	if ok {
 		ref = branchRef
 	} else if baseExists {
-		_, err := git.Run(ctx, r.Dir, "cat-file", "-e", base+":"+folder)
+		_, err := git.Run(ctx, r.Dir, "cat-file", "-e", "refs/heads/"+base+":"+folder)
 		var ge *git.Error
 		switch {
 		case err == nil:
-			ref = base
+			ref = "refs/heads/" + base
 		case errors.As(err, &ge):
 		default:
 			return SliceStatus{}, false, err
