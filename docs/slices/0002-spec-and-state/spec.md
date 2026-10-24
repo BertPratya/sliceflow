@@ -540,7 +540,9 @@ The lead reads the template's rules, which a filled spec no longer holds.
   marker, `{{`, or `<!--` there is reported. It shall also skip
   everything inside a template comment: no marker or `{{` there is
   reported, and the comment gets only the warning `template comment left`.
-  A labeled line belongs to the
+  A value that holds a `{{`, in a labeled line, a `Goes to:`, or the
+  front matter, is not checked by R15: it gets only R16's placeholder
+  warning. A labeled line belongs to the
   item above it. A removed item, e.g. `**R4.** (removed in R002: why)`,
   needs no labeled lines, and gets no note.
   Check: unit

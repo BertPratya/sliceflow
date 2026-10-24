@@ -689,8 +689,4 @@ How the tests make things fail:
      that does not block the build moves to Parked and the backlog.
      The tasks are written only when this section says None. -->
 
-- **Q1.** A fresh spec from the template has labeled lines whose value is
-  still a placeholder, e.g. `Check: {{unit, api, e2e, or manual}}` and
-  `Shows: {{R3}}`. As R15 is written, each gives an error, e.g.
-  `R1: unknown check "{{unit"`. Testing expects 0 errors for a fresh spec.
-  Which is right? This changes the spec (R18).
+None.
