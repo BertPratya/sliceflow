@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 10:03 UTC
+- Updated: 2026-10-24 10:04 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-11 of 13 done · 1 doing · 1 todo
+11 of 13 done · 1 in_review · 1 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -34,12 +34,12 @@ None.
 | 09 | create-undo | core | done | 0 | 3 | 08 | R8, R18 |
 | 10 | status-core | core | done | 0 | 2 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | done | 0 | 1 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
-| 12 | slice-list | normal | doing | 0 | 1 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
+| 12 | slice-list | normal | in_review | 0 | 2 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
 | 13 | no-network-check | normal | todo | 0 | 0 | 09, 12 | R40 |
 
 ## Findings
 
-Open: 1 · Waiting for verify: 0 · Closed: 81
+Open: 0 · Waiting for verify: 1 · Closed: 81
 
 ### Doc reviews
 
@@ -109,7 +109,7 @@ Open: 1 · Waiting for verify: 0 · Closed: 81
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-12-1/F1 | high | 12 | In a subfolder, slice list does not see merged slices | open |
+| task-12-1/F1 | high | 12 | In a subfolder, slice list does not see merged slices | fixed (waiting for verify) |
 | task-11-1/F1 | low | 11 | R30's object is built inline; task 12 would copy it | verified |
 | task-10-1/F1 | high | 10 | The base goes to git as a bare name, not refs/heads/<base> | verified |
 | task-09-2/Q1 | needs human | 09 | Clean up after every failed worktree add, not only after a signal? | verified: the human chose option 1 (clean up after every failed worktree add); R004 |
@@ -162,6 +162,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 10:04 · lead (claude) · task 12 code review started, round 2
+- 2026-10-24 10:04 · lead (claude) · task 12 fixes from review 1 committed (e3cbe38); checks pass; by hand: a merged slice with its branch kept is left out from a subfolder too
 - 2026-10-24 10:03 · lead (claude) · found `git worktree prune` in undo.go (clears every stale entry); low risk; passed to the integration review (Lead's decisions)
 - 2026-10-24 10:02 · lead (claude) · task 12 worker round 2 started: F1
 - 2026-10-24 10:02 · code reviewer (claude opus) · task-12-1 submitted: changes; 1 high (ls-tree path is relative to the subfolder); task-11-1/F1 verified
