@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 18:31 UTC
+- Updated: 2026-10-24 18:36 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-4 of 17 done · 1 doing · 12 todo
+4 of 17 done · 1 in_review · 12 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -28,7 +28,7 @@ None.
 | 02 | state-machine | core | done | 0 | 2 | 01 | R1, R2, R3, R4 |
 | 03 | spec-reader | core | done | 0 | 3 | - | R18 |
 | 04 | spec-errors | core | done | 0 | 3 | 03 | R15, R18 |
-| 05 | spec-warnings | core | doing | 0 | 1 | 04 | R16, R17, R18 |
+| 05 | spec-warnings | core | in_review | 0 | 2 | 04 | R16, R17, R18 |
 | 06 | status-core | core | todo | 0 | 0 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
 | 08 | cli-groups-and-template | core | todo | 0 | 0 | - | R35, R36 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 2 · Waiting for verify: 4 · Closed: 60
+Open: 0 · Waiting for verify: 6 · Closed: 60
 
 ### Doc reviews
 
@@ -105,8 +105,8 @@ Open: 2 · Waiting for verify: 4 · Closed: 60
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-05-1/Q1 | question | 05 | An empty Open questions: one warning or both of R16's | open (the lead decided: both, as R16 says) |
-| task-05-1/F1 | low | 05 | No test proves the error comes before the warning at one line | open |
+| task-05-1/Q1 | question | 05 | An empty Open questions: one warning or both of R16's | fixed (waiting for verify; the lead decided: both, as R16 says) |
+| task-05-1/F1 | low | 05 | No test proves the error comes before the warning at one line | fixed (waiting for verify) |
 | task-04-2/F1 | low | 04 | A requirement above the first heading also gives "shows R9, which does not exist" | verified |
 | task-04-1/F1 | medium | 04 | A marker above the first ## heading is never checked | verified |
 | task-04-1/F2 | low | 04 | Quotes in a value show with backslashes | verified |
@@ -142,6 +142,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 18:36 · lead (claude) · task review 2 of task 05 started
+- 2026-10-24 18:36 · lead (claude) · task 05 fixes committed (adfc0fd); the checks pass
+- 2026-10-24 18:36 · worker (claude sonnet) · task 05 round 2 handed in: F1, Q1 fixed
 - 2026-10-24 18:31 · lead (claude) · task 05 worker round 2 started, with review task-05-1
 - 2026-10-24 18:31 · lead (claude) · decided task-05-1/Q1: both warnings, as R16 says
 - 2026-10-24 18:31 · code-reviewer (claude opus) · task review 1 of task 05 handed in: 1 low, 1 question
