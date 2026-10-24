@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:51 UTC
+- Updated: 2026-10-24 17:52 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-11 of 17 done · 1 in_review · 5 todo
+12 of 17 done · 1 doing · 4 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -35,8 +35,8 @@ None.
 | 09 | validate-command | core | done | 0 | 2 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
 | 10 | lock | core | done | 0 | 2 | - | R6, R7 |
 | 11 | save-event | core | done | 0 | 3 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
-| 12 | title-command | normal | in_review | 0 | 2 | 08, 09, 11 | R32, R33, R34, R36 |
-| 13 | reviewer | core | todo | 0 | 0 | - | R25, R26, R27 |
+| 12 | title-command | normal | done | 0 | 2 | 08, 09, 11 | R32, R33, R34, R36 |
+| 13 | reviewer | core | doing | 0 | 0 | - | R25, R26, R27 |
 | 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
 | 15 | review-core | core | todo | 0 | 0 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | normal | todo | 0 | 0 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 6 · Closed: 79
+Open: 0 · Waiting for verify: 4 · Closed: 81
 
 ### Doc reviews
 
@@ -105,8 +105,8 @@ Open: 0 · Waiting for verify: 6 · Closed: 79
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-12-1/F1 | low | 12 | Ctrl-C during the first checks prints git's error, not R10's interrupted | fixed (waiting for verify) |
-| task-12-1/F2 | low | 12 | No test for an untitled slice given its own name as the title | fixed (waiting for verify) |
+| task-12-1/F1 | low | 12 | Ctrl-C during the first checks prints git's error, not R10's interrupted | verified |
+| task-12-1/F2 | low | 12 | No test for an untitled slice given its own name as the title | verified |
 | task-11-2/F1 | medium | 11 | With no Ctrl-C, the undo can still remove another git's live index.lock | verified |
 | task-11-1/Q1 | question | 11 | R10's message when the undo cannot put something back | open (the lead decided: `Could not put back: <list>.` replaces the last sentence, as 0001's R18; verified) |
 | task-11-1/F1 | high | 11 | Ctrl-C after the commit was made is treated as a failure | verified |
@@ -169,6 +169,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:52 · lead (claude) · task 13 started: worker round 1
+- 2026-10-24 17:52 · lead (claude) · task 12 done
+- 2026-10-24 17:52 · code-reviewer (claude opus) · task review 2 of task 12 handed in: F1, F2 verified; no new findings
 - 2026-10-24 17:51 · lead (claude) · task review 2 of task 12 started
 - 2026-10-24 17:51 · lead (claude) · task 12 fixes committed (aaf12ed); the checks pass
 - 2026-10-24 17:51 · worker (claude sonnet) · task 12 round 2 handed in: F1, F2 fixed
