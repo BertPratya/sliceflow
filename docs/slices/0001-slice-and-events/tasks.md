@@ -200,6 +200,12 @@ field that appears twice. Its brief is about 2,100 words, over the usual 1,500, 
 - `TestParseSeqGap`: lines with `seq` 1, 2, 4, 5 give all four events
   and one warning `.events.jsonl line 3: seq 4, expected 3`.
   Proves: R27
+- `TestParseSeqFirstGoodLine`: a log of one line with `seq` 3 gives
+  that event and one warning `.events.jsonl line 1: seq 3, expected 1`;
+  a log of `{` and then a good line with `seq` 2 gives one event and
+  the warnings `.events.jsonl line 1: not valid JSON; skipped` and
+  `.events.jsonl line 2: seq 2, expected 1`.
+  Proves: R27
 - `TestPhaseUnknown`: `Phase(nil)` is `unknown`.
   Proves: R25
 

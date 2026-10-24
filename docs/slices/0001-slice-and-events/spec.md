@@ -429,6 +429,7 @@ stderr, changes nothing, and exits with code 1.
   `seq`, then sliceflow shall keep the line and add the warning
   `.events.jsonl line <n>: seq <found>, expected <expected>`. The kept
   line counts as the last good line: `seq` 1, 2, 4, 5 gives one warning.
+  With no good line before it, the expected `seq` is 1.
   Check: unit
 - **R28.** sliceflow shall print each warning about a slice on stderr as
   `Warning: <name>: <warning>`, and each warning about the whole repo
