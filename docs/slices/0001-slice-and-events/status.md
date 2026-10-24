@@ -20,7 +20,7 @@
 
 ## Tasks
 
-9 of 13 done · 1 blocked · 3 todo
+9 of 13 done · 1 blocked · 1 doing · 2 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -34,7 +34,7 @@
 | 08 | create-checks | core | done | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
 | 09 | create-undo | core | blocked | 0 | 2 | 08 | R8, R18 |
 | 10 | status-core | core | done | 0 | 2 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
-| 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
+| 11 | status-command | normal | doing | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
 | 13 | no-network-check | normal | todo | 0 | 0 | 09, 12 | R40 |
 
@@ -158,6 +158,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:44 · lead (claude) · task 11 started: worker round 1; brief carries task-03-1/F2
 - 2026-10-24 09:44 · lead (claude) · task 10 done
 - 2026-10-24 09:44 · code reviewer (claude opus) · task-10-2 submitted: pass; F1 verified; no new findings
 - 2026-10-24 09:42 · lead (claude) · task 10 code review started, round 2
