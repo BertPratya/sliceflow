@@ -160,11 +160,140 @@ New dependencies: None.
      Paths are built with filepath.Join, never with "/". The tests run
      on all three systems in CI. -->
 
-### Flow 1: {{name}}
+### Flow 1: Replay a slice, and show its status
 
-Covers: {{R1, R2}}
+Covers: R1, R2, R3, R4, R5, R29, R30, R31, R34
 
-1. {{step}}
+1. `slice status` and `slice list` read the log from the last commit, as
+   0001 does. `eventlog.Parse` now also checks the new events' `data`
+   (R5), and keeps each event's line number, for R4's warnings. The line
+   number is never written to the log.
+2. `state.Replay` goes through the events in order. For each one,
+   `state.Allowed` says whether the move is allowed now: allowed, it is
+   applied; not allowed, it is skipped with R4's warning. The result is
+   the `State`: the phase (R3, which replaces `eventlog.Phase`), the
+   title (R34), and `spec.md`'s state, last review, and last refused
+   submit.
+3. When `spec.md` is `review_passed`, and a worktree has the branch
+   `slice/<name>`, `slice` runs
+   `git diff --quiet <reviewed commit> -- docs/slices/<name>/spec.md` in
+   that worktree. Exit code 1 means changed after its review (R30). git
+   compares through the same line-end rules as `git status`, so line
+   ends that git converts do not count.
+4. `slice` works out the `Spec:` and `Next:` texts from the `State` and
+   step 3, by R29's table.
+5. The CLI prints them after `Created:`, or adds `docs` and `next` to
+   the JSON (R31), also in `slice list --json`.
+
+### Flow 2: Check a spec
+
+Covers: R12, R13, R14, R15, R16, R17, R18, R19, R37
+
+1. The name is the argument, else the slice of the current branch
+   (R12); the second line of R32 of 0001-slice-and-events names
+   `spec validate`.
+2. The first checks run in R11's order. The slice's worktree is the
+   entry of `git worktree list --porcelain` whose branch is
+   `refs/heads/slice/<name>`. No lock is taken.
+3. `slice` reads `docs/slices/<name>/spec.md` from that worktree, from
+   disk. A missing file gives R19's error.
+4. `spec.Parse` reads the text into a `Doc`; `spec.Check` returns the
+   problems (R15 to R18), sorted by line, then errors before warnings
+   before notes.
+5. The CLI prints the problem lines and the summary on stdout (R13,
+   R37), and exits with R14's code.
+
+### Flow 3: Submit, refused
+
+Covers: R19, R20, R21, R22
+
+1. Steps 1 and 2 of Flow 2, with `spec submit` in R32's line. Then
+   `slice` takes the lock, and replays.
+2. The state decides (R20): `draft`, or `review_passed` and changed after
+   its review (Flow 1, step 3), go on; `submitted` goes to Flow 5; any
+   other state gives R20's error, with no event.
+3. `slice` reads `spec.md` from disk (R19), and checks it as
+   `spec validate --strict` would.
+4. With an error or a warning, it saves `spec.submitted` with `refused`
+   (Saving an event: the files are `spec.md` and the log; the message is
+   `<name>: spec submit refused`), and frees the lock.
+5. `step` gets the problems first, then the result. The CLI prints the
+   problem lines, then R22's line, whose last sentence depends on the
+   state before (R22), on stdout, and exits with 1.
+
+### Flow 4: Submit, accepted, and the review
+
+Covers: R23, R24, R25, R26, R27, R28
+
+1. Flow 3, steps 1 to 3, find no error and no warning.
+2. If `reviews/spec-<next round>.md` exists in the slice folder on disk,
+   R24's error; no event.
+3. `slice` saves `spec.submitted` with `accepted` (files: `spec.md` and
+   the log; message `<name>: spec submitted`), frees the lock, and calls
+   `step`: the CLI prints `Submitted spec.md.` (R23).
+4. It takes the lock again, replays, and checks that `review.started` is
+   allowed; when another command moved the state first, R6's error. It
+   writes the review file with only R25's front matter, saves
+   `review.started` (files: the review file and the log; message
+   `<name>: review <n> started`), frees the lock, and calls `step` (R25).
+   `commit` is the commit step 3 made.
+5. With no lock held, it calls the reviewer. The placeholder writes R26's
+   text after the front matter.
+6. It reads the result from the file (Interfaces → Review files).
+7. It takes the lock again, replays, checks that `review.finished` is
+   allowed, saves it (files: the review file and the log; R27's
+   message), frees the lock, and calls `step`. The CLI prints
+   `Review <n> passed.` and `Next: write the plan.` (R28), and exits
+   with 0.
+
+### Flow 5: Submit again from submitted
+
+Covers: R20, R24, R25
+
+1. Flow 3, step 2, finds `spec.md` `submitted`: `slice` skips the check
+   and `spec.submitted`.
+2. Flow 4 goes on from step 2 (R24), then step 4. `Submitted spec.md.` is
+   not printed.
+3. `commit` in `review.started` is the commit that added the last
+   accepted `spec.submitted`. `slice` finds it by reading the log of each
+   commit that changed it, newest first (`git log --format=%H -- <log>`),
+   and takes the oldest one whose log still holds that event's `seq`.
+   (lead's call)
+
+### Flow 6: Set a title
+
+Covers: R11, R32, R33, R34
+
+1. The CLI needs exactly two arguments (R36).
+2. The first checks run in R11's order; then `slice` takes the lock, and
+   replays.
+3. No good `slice.created`: R32's error. An empty title, or the title
+   the slice has now: R33's error. No event.
+4. `slice` saves `slice.titled` (files: only the log; message
+   `<name>: title set`), frees the lock, and the CLI prints R32's line.
+
+### Flow 7: Show the template
+
+Covers: R35
+
+1. `template show spec` prints the built-in template file as it is
+   embedded, with its own front matter and every comment, on stdout.
+2. It needs no git repo, and runs no git command. (lead's call)
+3. Any other name gives R35's error.
+
+### Flow 8: Wrong use, and the order of the first checks
+
+Covers: R11, R36
+
+1. The CLI knows the command groups `slice`, `spec`, and `template`; a
+   command is a group and a second word. `sliceflow spec` or
+   `sliceflow template` alone prints the usage, and exits with 0.
+2. Wrong use exits with 2, as R38 of 0001-slice-and-events says, with
+   the new texts `missing title` and `missing template name`. The new
+   commands have no `--json`, so it is `unknown flag --json`.
+3. For `spec validate`, `spec submit`, and `slice title`, the first
+   checks run in R11's order, then the lock (submit and title only),
+   then the command's own checks.
 
 ### Shared rules
 
@@ -234,6 +363,70 @@ committed log:
   the committed log, and overwrites it.
 - A lock: R7's message; a person deletes it (0007 takes it over later).
 - A review file with no commit: R24's message; a person moves it away.
+
+#### Interrupts
+
+Covers: R6, R10
+
+`spec submit` and `slice title` catch Ctrl-C and `SIGTERM` as
+`slice create` does in 0001 (its plan, Interrupts): the signal cancels
+the `ctx`, a running git command is stopped, and the undo runs with
+`context.WithoutCancel(ctx)`. R10's reason is then `interrupted`. The
+lock is freed last. A signal while the reviewer runs stops it; no event
+is saved for that step, so `spec.md` stays `submitted` or `in_review`.
+Read commands keep Go's default: they stop at once.
+
+#### Cross-platform paths
+
+Covers: R7, R13, R19
+Project rule: AGENTS.md, paths, line endings, and processes must work
+  on Windows, macOS, and Linux.
+
+As in 0001: files on disk use `filepath`, paths inside git use `path`,
+and every printed path goes through `filepath.ToSlash`. The spec reader
+reads `\r\n` as `\n` (R18). Renaming over an existing file works on
+all three systems with `os.Rename`.
+
+#### Tests
+
+Covers: none
+Project rule: AGENTS.md, every change that adds behavior adds a test.
+  Tests create their own temporary git repos; never use shared services.
+
+Every task adds the tests its behavior needs, as Testing says, and
+names this rule in its follows. Each test makes its own repo with
+`internal/testrepo`. No test uses the network.
+
+#### Shared logic in internal
+
+Covers: none
+Project rule: AGENTS.md, shared Go logic goes in `internal/`, not
+  `cmd/`.
+
+`cmd/sliceflow/main.go` does not change. Everything new is in
+`internal/`, as in Approach.
+
+#### Git arguments
+
+Covers: R8
+Project rule: AGENTS.md, run each check or git command as its own
+  process with its own arguments, never as one shell string.
+
+As in 0001: every git command runs through `git.Run`, with its
+arguments as a list. The file paths come after `--`. The slice name
+passes R2 of 0001-slice-and-events before any git command uses it. The
+title only goes into the JSON line and the output, never into a git
+argument or a commit message.
+
+#### No network
+
+Covers: none
+Project rule: AGENTS.md, sliceflow sends no data out: no telemetry, no
+  uploads, no calls home.
+
+0002 adds no network use. Every git command still goes through
+`git.Run`, which keeps 0001's settings, and R40 of 0001-slice-and-events
+keeps holding: 0001's no-network test runs the new commands too.
 
 ## Interfaces
 
@@ -402,7 +595,21 @@ Local, in the slice's worktree, for a moment only:
 
 | Check | How |
 |---|---|
-| {{unit, api, or e2e}} | {{test tools, fakes, test data}} |
+| unit | Go tests next to the code. `state`: one table test per row of R2's table, and each warning of R4. `spec`: one small spec per check of R15 to R18 that breaks just that check, plus two real files as test data: a fresh spec from `template.Spec`, which gives 0 errors, and 0001's approved spec, which gives 0 errors and the notes for R11, R40, and R43. `eventlog`: each new event's fields (R5). `slice`: real git in a temporary repo, a fixed `Repo.Now`, and a short lock wait (`Repo.LockWait`, 10 s by default). Two writes started at once both save, with `seq` 6 and 7. (lead's call) |
+| e2e | As in 0001: `TestMain` builds the binary once; each test runs it in its own temporary repo; helpers in `internal/e2e/helpers_test.go`; one file per task: `internal/e2e/<task_name>_test.go`. One test per scenario. |
+
+How the tests make things fail:
+
+- A failed commit comes from a test git hook that exits with 1: a
+  `pre-commit` hook, or a `commit-msg` hook that refuses only messages
+  with `review` (S23). Git for Windows runs `#!/bin/sh` hooks too.
+- The busy test (S19) makes the lock file itself, and waits the full
+  10 s: one slow test, which checks exactly what the user sees. (lead's
+  call)
+- Ctrl-C: as in 0001, the e2e test skips on Windows, and a unit test of
+  the undo after a cancelled `ctx` runs on every system.
+- A log with a bad line, or a move that is not allowed (S3, S4), is
+  written by the test and committed with plain git.
 
 ## Decisions
 
