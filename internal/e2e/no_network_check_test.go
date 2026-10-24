@@ -9,12 +9,12 @@ import (
 	"github.com/BertPratya/sliceflow/internal/testrepo"
 )
 
-// gitSubcommand returns the git subcommand that a GIT_TRACE line runs, or ""
-// when the line does not start a git command. It handles the lines
-// "trace: built-in: git <args>", "trace: exec: git <args>" and
-// "trace: run_command: git <args>", with or without quotes, and the helper
-// form "git-<name>".
-func gitSubcommand(line string) string {
+// gitCommand returns the git subcommand that a GIT_TRACE line runs, and the
+// words after it, or "" when the line does not start a git command. It
+// handles the lines "trace: built-in: git <args>", "trace: exec: git <args>"
+// and "trace: run_command: git <args>", with or without quotes, and the
+// helper form "git-<name>".
+func gitCommand(line string) (string, []string) {
 	for _, kind := range []string{"trace: built-in: ", "trace: exec: ", "trace: run_command: "} {
 		i := strings.Index(line, kind)
 		if i < 0 {
@@ -25,16 +25,16 @@ func gitSubcommand(line string) string {
 			fields[j] = strings.Trim(fields[j], `'"`)
 		}
 		if len(fields) == 0 {
-			return ""
+			return "", nil
 		}
 		prog := filepath.Base(fields[0])
 		prog = strings.TrimSuffix(prog, ".exe")
 		if strings.HasPrefix(prog, "git-") {
-			return strings.TrimPrefix(prog, "git-")
+			return strings.TrimPrefix(prog, "git-"), fields[1:]
 		}
 		if prog != "git" {
-			// A helper such as "remote-curl" or "git-remote-https" run by name.
-			return prog
+			// A helper such as "remote-curl" run by name.
+			return prog, fields[1:]
 		}
 		args := fields[1:]
 		for k := 0; k < len(args); k++ {
@@ -44,43 +44,75 @@ func gitSubcommand(line string) string {
 				k++
 			case strings.HasPrefix(a, "-"):
 			default:
-				return a
+				return a, args[k+1:]
 			}
 		}
-		return ""
+		return "", nil
 	}
-	return ""
+	return "", nil
 }
 
-func forbiddenGitCommand(sub string) bool {
+// forbiddenGitCommand reports whether a git command can connect to a remote.
+// Plain "git remote" and "git remote -v" only read the config, so they stay
+// allowed. "git remote show|update|prune|set-head" connect.
+func forbiddenGitCommand(sub string, rest []string) bool {
 	switch sub {
-	case "fetch", "pull", "push":
+	case "fetch", "pull", "push", "ls-remote",
+		"upload-pack", "receive-pack", "fetch-pack", "send-pack":
 		return true
+	case "remote":
+		for _, a := range rest {
+			if strings.HasPrefix(a, "-") {
+				continue
+			}
+			switch a {
+			case "show", "update", "prune", "set-head":
+				return true
+			}
+			return false
+		}
+		return false
 	}
 	return strings.HasPrefix(sub, "remote-")
 }
 
 func TestGitSubcommand(t *testing.T) {
+	const b = "12:00:00.000000 git.c:460 trace: built-in: "
 	cases := []struct {
 		line string
 		sub  string
 		bad  bool
 	}{
-		{"12:00:00.000000 git.c:460 trace: built-in: git fetch origin", "fetch", true},
-		{"12:00:00.000000 git.c:460 trace: built-in: git -c a=b pull", "pull", true},
-		{"12:00:00.000000 git.c:460 trace: built-in: git push origin main", "push", true},
+		{b + "git fetch origin", "fetch", true},
+		{b + "git -c a=b pull", "pull", true},
+		{b + "git push origin main", "push", true},
 		{"12:00:00.000000 run-command.c:657 trace: run_command: 'git-remote-https' 'origin' 'https://x'", "remote-https", true},
 		{"12:00:00.000000 run-command.c:657 trace: run_command: git remote-curl origin", "remote-curl", true},
 		{"12:00:00.000000 git.c:460 trace: exec: git-remote-https origin", "remote-https", true},
-		{"12:00:00.000000 git.c:460 trace: built-in: git remote add origin /tmp/push/fetch", "remote", false},
-		{"12:00:00.000000 git.c:460 trace: built-in: git -C /tmp/push status", "status", false},
-		{"12:00:00.000000 git.c:460 trace: built-in: git commit -m fetch", "commit", false},
+		{b + "git ls-remote origin", "ls-remote", true},
+		{"12:00:00.000000 git.c:460 trace: exec: git-upload-pack /tmp/r", "upload-pack", true},
+		{b + "git upload-pack /tmp/r", "upload-pack", true},
+		{b + "git receive-pack /tmp/r", "receive-pack", true},
+		{b + "git fetch-pack /tmp/r", "fetch-pack", true},
+		{b + "git send-pack /tmp/r", "send-pack", true},
+		{b + "git remote show origin", "remote", true},
+		{b + "git remote update", "remote", true},
+		{b + "git remote prune origin", "remote", true},
+		{b + "git remote set-head origin -a", "remote", true},
+		{b + "git -C /tmp/r remote show origin", "remote", true},
+		{b + "git remote", "remote", false},
+		{b + "git remote -v", "remote", false},
+		{b + "git remote add origin /tmp/push/fetch", "remote", false},
+		{b + "git remote add show /tmp/r", "remote", false},
+		{b + "git -C /tmp/push status", "status", false},
+		{b + "git commit -m fetch", "commit", false},
+		{b + "git ls-files", "ls-files", false},
 		{"12:00:00.000000 something else", "", false},
 	}
 	for _, c := range cases {
-		sub := gitSubcommand(c.line)
-		if sub != c.sub || forbiddenGitCommand(sub) != c.bad {
-			t.Errorf("%q: got %q (forbidden %v), want %q (%v)", c.line, sub, forbiddenGitCommand(sub), c.sub, c.bad)
+		sub, rest := gitCommand(c.line)
+		if sub != c.sub || forbiddenGitCommand(sub, rest) != c.bad {
+			t.Errorf("%q: got %q (forbidden %v), want %q (%v)", c.line, sub, forbiddenGitCommand(sub, rest), c.sub, c.bad)
 		}
 	}
 }
@@ -111,18 +143,21 @@ func TestNoNetwork(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	lines := strings.Split(string(b), "\n")
-	seen := 0
-	for _, line := range lines {
-		sub := gitSubcommand(line)
-		if sub != "" {
-			seen++
-		}
-		if forbiddenGitCommand(sub) {
+	// The test's own setup also writes git lines into the trace, so the guard
+	// needs lines only the binary writes: "slice create" runs git worktree,
+	// and "slice list" runs git for-each-ref. If git does not trace for the
+	// binary, a fetch would hide, so the test must fail.
+	seen := map[string]bool{}
+	for _, line := range strings.Split(string(b), "\n") {
+		sub, rest := gitCommand(line)
+		seen[sub] = true
+		if forbiddenGitCommand(sub, rest) {
 			t.Errorf("forbidden git command in trace: %s", line)
 		}
 	}
-	if seen == 0 {
-		t.Fatalf("the trace has no git command; GIT_TRACE does not work?\n%s", b)
+	for _, want := range []string{"worktree", "for-each-ref"} {
+		if !seen[want] {
+			t.Errorf("the trace has no git %s line from the binary; GIT_TRACE does not work?\n%s", want, b)
+		}
 	}
 }
