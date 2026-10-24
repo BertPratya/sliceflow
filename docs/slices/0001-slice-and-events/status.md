@@ -2,17 +2,17 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 04:53 UTC
+- Updated: 2026-10-24 04:56 UTC
 
 ## Needs human
 
-None.
+- spec review 2: the lead's proposed fixes wait for the human's yes.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 2 | - | - |
+| spec.md | draft | 2 | - | - |
 
 ## Tasks
 
@@ -20,27 +20,30 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 14 · Closed: 1
+Open: 5 · Waiting for verify: 0 · Closed: 13
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| spec-1/F1 | medium | Order of the checks, and which place R14 names | fixed (waiting for verify) |
-| spec-1/F2 | medium | Built-in template vs R7 and SD12; created date form | fixed (waiting for verify) |
-| spec-1/F3 | medium | Relative paths in the output: relative to what | fixed (waiting for verify) |
-| spec-1/F4 | medium | When a slice exists, in progress, merged | fixed (waiting for verify) |
-| spec-1/F5 | medium | Base branch and errors for status and list | fixed (waiting for verify) |
-| spec-1/F6 | medium | Exact warning texts; wrong types, bad data | fixed (waiting for verify) |
-| spec-1/F7 | medium | Does a kept line with a wrong seq count | fixed (waiting for verify) |
-| spec-1/F8 | medium | Message for wrong use; --help | fixed (waiting for verify) |
-| spec-1/F9 | medium | Git hooks and signing on the slice commit | fixed (waiting for verify) |
-| spec-1/F10 | low | List column widths | fixed (waiting for verify) |
-| spec-1/F11 | low | Short commit length | fixed (waiting for verify) |
+| spec-2/F1 | medium | R9 vs S1 and R10: what the spec path is relative to | open |
+| spec-2/F2 | medium | The base-branch warning: its form, in --json, and the ! mark | open |
+| spec-2/F3 | medium | slice list --json with no slices | open |
+| spec-1/F1 | medium | Order of the checks, and which place R14 names | verified |
+| spec-1/F2 | medium | Built-in template vs R7 and SD12; created date form | verified |
+| spec-1/F3 | medium | Relative paths in the output: relative to what | verified |
+| spec-1/F4 | medium | When a slice exists, in progress, merged | verified |
+| spec-1/F5 | medium | Base branch and errors for status and list | verified |
+| spec-1/F6 | medium | Exact warning texts; wrong types, bad data | reopened |
+| spec-1/F7 | medium | Does a kept line with a wrong seq count | verified |
+| spec-1/F8 | medium | Message for wrong use; --help | verified |
+| spec-1/F9 | medium | Git hooks and signing on the slice commit | verified |
+| spec-1/F10 | low | List column widths | reopened |
+| spec-1/F11 | low | Short commit length | verified |
 | spec-1/F12 | low | SD13 is about how it is built | wontfix: why: the human's decision, and Rule: none already says it changes no behavior |
-| spec-1/F13 | low | Committed log is never used | fixed (waiting for verify) |
-| spec-1/F14 | low | S12 may not make git fail | fixed (waiting for verify) |
-| spec-1/F15 | low | No .gitignore when .sliceflow/ exists without one | fixed (waiting for verify) |
+| spec-1/F13 | low | Committed log is never used | verified |
+| spec-1/F14 | low | S12 may not make git fail | verified |
+| spec-1/F15 | low | No .gitignore when .sliceflow/ exists without one | verified |
 
 ### Task reviews
 
@@ -62,6 +65,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 04:56 · doc reviewer · spec review 2 handed in: 12 verified, 2 reopened (F6, F10), 3 new medium
 - 2026-10-24 04:53 · lead (claude) · spec review round 2 started
 - 2026-10-24 04:53 · lead (claude) · spec fixed for spec-1 F1-F11, F13-F15; F12 left as is; requirements renumbered (now R1-R41)
 - 2026-10-24 04:53 · human · yes to the lead's fixes for spec review 1

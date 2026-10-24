@@ -7,221 +7,115 @@ round: 2
 reviewer: doc-reviewer (claude opus)
 ---
 
-<!-- HOW TO FILL THIS TEMPLATE
-
-     A review checks one thing. A doc review (kind: spec, plan, or
-     change) checks a spec, a plan with its tasks.md and preview.md, or
-     the documents changed during building. A code review (kind: task or
-     integration) checks one task, or the whole slice. sliceflow
-     creates this file and fills
-     the front matter. You write the sections below, then hand the review
-     in through sliceflow. After that the file is locked: never edit it again.
-
-     sliceflow reads this file and sets the verdict from it.
-     Code review:
-     - Needs human decision is not None.            → needs_human
-     - else any high or medium finding, new or
-       reopened                                     → changes
-     - else                                         → pass
-     (low findings alone pass)
-     Doc review:
-     - Needs human decision is not None.            → needs_human
-     - else                                         → pass
-     (the lead fixes medium findings, and fixes or leaves low ones)
-
-     sliceflow reads this file. Keep every marker exactly as shown: the
-     headings, the finding headings (### F1.), the labeled lines (Level:,
-     Where:, Breaks:, Why:, Fix:, Guess:), the numbers (**Q1.**), and the
-     line forms in Tests, Previous findings, and Requirements check.
-     Don't rename or reorder them. A
-     labeled line may go on over more lines: indent the extra lines 2
-     spaces more than the label.
-
-     Report real problems only: things that break a requirement, a
-     decision, an interface, or a project rule, or that are clearly wrong.
-     Don't invent issues to look thorough. If everything is fine, say so,
-     and write None. under Findings.
-
-     A spec review is short: fill Summary, Checked, Findings (medium and
-     low), and Needs human decision (every high gap, most important
-     first). Write None. in the other sections.
-
-     - Replace every {{...}} with real text.
-     - A section that doesn't apply gets one line: None.
-     - When you are done, delete every comment and check that no {{ is
-       left. Every placeholder of this template counts, even inside
-       code. A {{ or a comment marker you write yourself inside a code
-       block or `inline code` is real content. To name them in plain
-       text, use `inline code`. -->
-
 # Review
 
 ## Summary
 
-<!-- 1-3 sentences. The overall result, and the main problem if there is
-     one.
-
-     Example:
-     The task covers R10 and the tests are real. One high problem: a done
-     task that is overdue still shows OVERDUE (F1). -->
-
-{{1-3 sentences: the overall result, and the main problem if there is one.}}
+The fixes from spec-1 hold, and the spec has no gap that needs the
+human. Two fixes are not complete (F6: the form of `at`; F10: two slices
+with the same time). One fix made a new conflict: R9 says every relative
+path is relative to the main checkout, but S1's `Spec:` path is relative
+to the worktree (F1).
 
 ## Checked
 
-<!-- What this review covered: what you read, and what you ran. This
-     shows the review was real, so a "None." under Findings can be
-     trusted. List only what you actually did.
-
-     - Commits: the commits reviewed (task and integration reviews).
-     - Files read: the files you read, including ones the change uses.
-     - Ran: each command you ran, and its result. More than one: one
-       indented line per command under Ran:.
-     - Requirements: the requirements you checked.
-     - Interfaces: the names you checked against the task, if any.
-     Leave out a line that doesn't apply.
-
-     Example:
-     - Commits: a1b2c3d..e4f5a6b
-     - Files read: internal/list/format.go, internal/list/format_test.go,
-       internal/task/overdue.go
-     - Ran: go test ./internal/list/... (pass)
-     - Requirements: R10
-     - Interfaces: Format(tasks, today) matches the task -->
-
-- Files read: {{files}}
+- Files read: docs/slices/0001-slice-and-events/spec.md,
+  docs/slices/0001-slice-and-events/status.md,
+  docs/slices/0001-slice-and-events/reviews/spec-1.md,
+  docs/templates/spec.md, docs/templates/review.md,
+  .agents/prompts/doc-reviewer.md, AGENTS.md
 - Ran:
-  {{command (result), one per line}}
-- Requirements: {{R1, R2}}
+  grep for leftover `{{` and `<!--` in spec.md (none found)
+  git show 622ae40 --stat, to see the fix commit
+  counted the column widths of the S20 table against R34 (all match)
+- Requirements: R1-R41, S1-S28, SD1-SD13, every Shows: and Rule: line
 
 ## Tests
 
-<!-- Task reviews only. Other kinds: write None.
-     One line per test named in the task's Done when. Read each test,
-     and say whether it really proves what it claims:
-     - ok: it exists, checks the stated input and expected result, and
-       would fail if the code were broken.
-     - weak, see F2: it exists but would pass with broken code, or
-       checks less than Done when says. Add a finding.
-     - missing, see F3: it doesn't exist. Add a finding.
-
-     Example:
-     - `TestParseDueRejectsBadDate`: ok
-     - `TestDueUnknownTask`: weak, see F2
-     - `TestListSortsByDue`: missing, see F3 -->
-
-- `{{TestName}}`: {{ok, or: weak, see F2, or: missing, see F3}}
+None.
 
 ## Previous findings
 
-<!-- Round 2 and later. Every finding from the last round that was marked
-     fixed, wontfix, or deferred. One line each:
-     - <review>/F1: verified (fixed)
-     - <review>/F2: verified (wontfix)
-     - <review>/F3: verified (deferred)
-     - <review>/F4: reopened. why
-
-     verified means: a fixed finding is really fixed, or the reason given
-     for wontfix or deferred is acceptable. In brackets, say which one.
-     Otherwise: reopened.
-
-     Example:
-     - task-04-1/F1: verified (fixed)
-     - task-04-1/F2: reopened. A done task due today still shows OVERDUE.
-
-     Round 1: write None. -->
-
-- {{task-02-1/F1}}: {{verified (fixed, wontfix, or deferred), or: reopened. why}}
+- spec-1/F1: verified (fixed)
+- spec-1/F2: verified (fixed)
+- spec-1/F3: verified (fixed)
+- spec-1/F4: verified (fixed)
+- spec-1/F5: verified (fixed)
+- spec-1/F6: reopened. R26's reasons name only the type of a field, not
+  its form. Input: `"at":"yesterday"`, or `"at":"2026-10-24 07:42"`
+  (a string, so the type is right), or a `data.from.commit` that is not
+  a full commit id. One worker skips the line with `field "at" has the
+  wrong type`; another keeps it, and S13 prints a bad `Created:`. Add a
+  reason for a field with the wrong form, e.g. `field "<f>" has the wrong
+  form`, and say which fields have a form (`at`, `data.from.commit`).
+- spec-1/F7: verified (fixed)
+- spec-1/F8: verified (fixed)
+- spec-1/F9: verified (fixed)
+- spec-1/F10: reopened. The widths are fixed, and S20 now matches R34.
+  Two slices with the same created time still have no order. `at` is to
+  the second, so an e2e test that creates two slices in a row often gets
+  the same time, and the row order changes from run to run. Say they
+  sort by name.
+- spec-1/F11: verified (fixed)
+- spec-1/F12: verified (wontfix)
+- spec-1/F13: verified (fixed)
+- spec-1/F14: verified (fixed)
+- spec-1/F15: verified (fixed)
 
 ## Findings
 
-<!-- New findings only. Number them F1, F2, ... in this file. Outside
-     this file they are called <review>/F1, e.g. task-04-1/F1. List them
-     high first, then medium, then low.
+### F1. R9 says the Spec: path is relative to the main checkout, but S1 shows it relative to the worktree
 
-     Each finding has these lines:
-     - Level: high, medium, or low. In a doc review the level says who
-       deals with it:
-       - high: needs the human's decision. Never a finding: write it as
-         a question under Needs human decision, with a Guess: line.
-       - medium: the lead can decide and fix it alone: one fix is
-         clearly right and changes nothing the human chose.
-       - low: a small thing, e.g. a typo or a missing example. The lead
-         fixes it or leaves it.
-       In a code review the level says how bad it is:
-       - high: wrong behavior, breaks the spec, plan, or contract,
-         security, or data loss. Blocks. Only a human can mark it
-         wontfix, or defer it out of the slice.
-       - medium: a real problem that doesn't break anything yet. Must be
-         fixed, or a reason given.
-       - low: nice to have. Optional.
-     - Where: file:line, or the document and section. A range:
-       file:12-18. More than one place: separate them with commas.
-     - Breaks: what it breaks: a requirement (R5), a decision (SD1,
-       TD2), a task's Interfaces (task 02), or a project rule (name it).
-       A decision without a number: name the document and section,
-       e.g. docs/sliceflow-design.md 2.3.
-       The work adds behavior nothing asks for? Write: scope, and what
-       it adds, e.g. Breaks: scope: adds --color, which no requirement
-       asks for. A scope finding is at least medium: the plan never adds
-       scope.
-       Breaks nothing approved, e.g. a missing rule or a gap? Write:
-       nothing. Choose the level by its effect, as above. With Breaks:
-       nothing, a finding is medium only if Why: names an input and the
-       wrong result it gives. Otherwise it is low.
-     - Why: what is wrong, and how you found it: the test you ran, or
-       the line you read.
-     - Fix: optional, one or two lines. No fix to suggest? Remove the
-       whole Fix: line.
+Level: medium
+Where: spec.md → Requirements → R9, Story 1 → S1
+Breaks: R9
+Why: The F3 fix added to R9: "Each relative path is relative to the root
+  of the main checkout". S1 prints `Spec:     docs/slices/spec-submit/spec.md`.
+  From the main checkout, that file does not exist; it is in the
+  worktree. The `Next:` line follows R9, the `Spec:` line does not.
+  Input: `sliceflow slice create spec-submit`. A worker who follows R9
+  prints `Spec:     .sliceflow/worktrees/spec-submit/docs/slices/spec-submit/spec.md`;
+  a worker who follows S1 prints the short path. R10 says `spec` in
+  `--json` is "the path inside the worktree", which matches S1.
+Fix: in R9, say the `Spec:` line is the path inside the worktree, as in
+  R10, and every other relative path is relative to the root of the main
+  checkout.
 
-     Example:
-     ### F1. A done task that is overdue still shows OVERDUE
+### F2. The base-branch warning does not fit R28, and its place in --json is not given
 
-     Level: high
-     Where: internal/list/format.go:31
-     Breaks: R12
-     Why: format.go checks only the due date, not whether the task is
-       done. I added a test with a done task due yesterday; it printed
-       OVERDUE.
-     Fix: call task.IsOverdue() instead of comparing the dates here. -->
+Level: medium
+Where: spec.md → Requirements → R23, R28, R30, R36; Story 3 → S25
+Breaks: nothing
+Why: R28 says every warning prints as `Warning: <name>: <warning>`, but
+  R23's warning (added for spec-1/F5) has no slice name, as S25 shows. A
+  worker must guess whether R23 is an exception to R28. It is also not
+  said whether that warning goes in each slice's `warnings` list in
+  `--json`, and whether it makes R36 show ` !` on every row. Input: S25's
+  repo, then `sliceflow slice list --json`. One worker prints the warning
+  on stderr only; another adds it to the `warnings` of every object.
+  The form of an item in `warnings` is not given either: with or without
+  `Warning: <name>: ` before it.
+Fix: say R28 covers the warnings of one slice (R26, R27); R23's warning
+  goes to stderr only, and not in `warnings` or ` !`. Say each item in
+  `warnings` is the `<warning>` text alone, e.g.
+  `.events.jsonl line 2: not valid JSON; skipped`.
 
-### F1. {{title}}
+### F3. slice list --json with no slices has no output given
 
-Level: {{high, medium, or low}}
-Where: {{file:line, or the document and section}}
-Breaks: {{R5, TD2, task 02, a project rule, scope: what it adds, or nothing}}
-Why: {{what is wrong, and how you found it}}
-Fix: {{optional: one or two lines}}
+Level: medium
+Where: spec.md → Requirements → R34, R35, R37
+Breaks: nothing
+Why: R34 and R35 print `No slices in progress.` or `No slices.` when
+  there are no rows. R37 says `--json` prints one JSON list. Input:
+  `sliceflow slice list --json` in a repo with no slices. One worker
+  prints `[]`; another prints `No slices in progress.`, which an agent
+  cannot parse.
+Fix: say R37 prints `[]` when there are no rows.
 
 ## Requirements check
 
-<!-- Integration reviews only. Other kinds: write None.
-     Every requirement in the spec, checked against the finished slice.
-     (A review whose requirements were given with the request, not by a
-     spec, checks those instead.)
-     One line each: ok, fails (with the finding), or manual (goes to the
-     preview). A fails line names the high or medium findings that make
-     it fail; lows may follow, e.g. fails, see F3; also F7. Only low
-     findings against it? It is ok: write ok, see F7.
-
-     Example:
-     - R1: ok
-     - R3: fails, see F2
-     - R14: manual -->
-
-- {{R1}}: {{ok, or: fails, see F2, or: manual}}
+None.
 
 ## Needs human decision
 
-<!-- Questions only the human can answer, numbered Q1, Q2, ... Each one
-     says what is unclear, and has a Guess: line: what a worker would
-     have to guess without the answer. In a doc review, every high gap
-     goes here. Anything here makes the verdict needs_human.
-
-     Example:
-     - **Q1.** What happens when a task's due date is changed after it
-       was marked done? R2 and R12 don't say.
-       Guess: keep it done and change the date, or reopen it. -->
-
-- **Q1.** {{What is unclear.}}
-  Guess: {{what a worker would have to guess without the answer}}
+None.
