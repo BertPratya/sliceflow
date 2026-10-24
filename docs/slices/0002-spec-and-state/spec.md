@@ -455,8 +455,9 @@ The lead reads the template's rules, which a filled spec no longer holds.
   and exit with code 1. These three commands check in this order, and
   stop at the first that fails: R12 and R13 of 0001-slice-and-events (a
   git repo, with commits), R14 of 0001-slice-and-events (the name), R33
-  of 0001-slice-and-events (the slice exists), this requirement, then the
-  lock (R6), then the command's own checks.
+  of 0001-slice-and-events (the slice exists), this requirement, then,
+  for `spec submit` and `slice title` only, the lock (R6), then the
+  command's own checks. `spec validate` takes no lock.
   Check: e2e
 
 ### Which slice
@@ -512,7 +513,8 @@ The lead reads the template's rules, which a filled spec no longer holds.
   scope, Decisions, Assumptions, Open questions. Keys other than
   `slice`, `created`, and `ideas` in the front matter are not checked.
   `ideas` is a list when it is `[]`, a list in brackets like
-  `[docs/ideas/a.md]`, or is followed by lines that start with `- `.
+  `[docs/ideas/a.md]`, or is followed by lines that start with `- `,
+  with or without spaces before the `-`.
   A `Rule:` that names a removed requirement gets
   `<id>: Rule: names <R>, which was removed`.
   Check: unit
