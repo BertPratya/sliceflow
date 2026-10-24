@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 1 · Closed: 58
+Open: 0 · Waiting for verify: 1 · Closed: 59
 
 ### Doc reviews
 
