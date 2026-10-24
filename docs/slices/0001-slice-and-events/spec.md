@@ -406,7 +406,7 @@ stderr, changes nothing, and exits with code 1.
   line and add the warning `.events.jsonl line <n>: <reason>; skipped`.
   The reasons are: `blank line`, `not valid JSON`,
   `unknown version <v>`, `unknown event "<e>"`, `unknown field "<f>"`,
-  `missing field "<f>"`, `field "<f>" has the wrong type`, and
+  `field "<f>" appears twice`, `missing field "<f>"`, `field "<f>" has the wrong type`, and
   `field "<f>" has a wrong value`. A wrong value is: an `at` that is not
   in the form of R19, e.g. `2026-10-24T07:42:00Z`, a `commit` that is not 40 or
   64 lowercase hex characters, or an empty `branch` or `title`. A field
@@ -420,8 +420,8 @@ stderr, changes nothing, and exits with code 1.
   line counts as the last good line: `seq` 1, 2, 4, 5 gives one warning.
   Check: unit
 - **R28.** sliceflow shall print each warning about a slice on stderr as
-  `Warning: <name>: <warning>`, and the warning of R23 once, as R23
-  writes it. A warning shall never stop a command or change its exit
+  `Warning: <name>: <warning>`, and each warning about the whole repo
+  (R23, R43) once, as `Warning: <warning>`. A warning shall never stop a command or change its exit
   code.
   Check: e2e
 
@@ -470,16 +470,21 @@ stderr, changes nothing, and exits with code 1.
   `No slices.`
   Check: e2e
 - **R36.** If a slice has warnings of its own, then sliceflow shall show
-  ` !` after its phase in the list, and still print every other row. The
-  warning of R23 adds no ` !`.
+  ` !` after its phase in the list, and still print every other row. A
+  warning about the whole repo (R23, R43) adds no ` !`.
   Check: e2e
 - **R37.** Where `--json` is given, sliceflow shall print, instead of the
   rows or the `No slices` lines, one JSON object with `slices`, a list of
   objects in the form of R30 in the order of R34, and `warnings`, a list
-  of the warnings about the whole repo (the warning of R23), each item
+  of the warnings about the whole repo (R23, R43), each item
   written as in R30. Each slice
   object holds only its own warnings. With no slices, `slices` is `[]`,
   e.g. `{"slices":[],"warnings":[]}`.
+  Check: e2e
+- **R43.** If a local branch `slice/<x>` has an `<x>` that breaks R2,
+  e.g. `slice/My_Thing` or `slice/team/login`, then `slice list` shall
+  leave it out, and add the warning about the whole repo
+  `branch slice/<x>: not a valid slice name; skipped`.
   Check: e2e
 
 ### Every command

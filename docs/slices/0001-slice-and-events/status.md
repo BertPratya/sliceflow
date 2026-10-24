@@ -2,11 +2,11 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 06:46 UTC
+- Updated: 2026-10-24 06:48 UTC
 
 ## Needs human
 
-- plan.md Open questions Q1 (a field twice in a log line) and Q2 (a slice/ branch whose name breaks R2)
+None.
 
 ## Documents
 
@@ -70,6 +70,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 06:48 · human · plan Q1: a field twice gets its own warning (R26); Q2: a slice/ branch with a bad name is skipped with a repo warning (R43); plan open questions: none
 - 2026-10-24 06:46 · lead (claude) · plan part 5 (flows, testing) and preview written after the human's yes; reread found plan Q1-Q2
 - 2026-10-24 06:46 · human · plan part 5, flows and testing: yes
 - 2026-10-24 06:43 · human · plan part 4: undo, safety, and crash notes ok; Ctrl-C and SIGTERM undo like a failed step (R18); a hard kill is cleaned up later, with cancel in the backlog

@@ -119,11 +119,13 @@ Covers: R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R31, R32, R33
 
 ### Flow 5: List of slices
 
-Covers: R21, R22, R23, R24, R28, R34, R35, R36, R37
+Covers: R21, R22, R23, R24, R28, R34, R35, R36, R37, R43
 
 1. The CLI calls `List`. Steps 1 and 2 of Flow 4 run first.
 2. It lists the local branches with
-   `git for-each-ref --format=%(refname) refs/heads/slice/`.
+   `git for-each-ref --format=%(refname) refs/heads/slice/`. A branch
+   whose name after `slice/` breaks R2 is left out, with R43's warning
+   about the whole repo.
 3. It lists the merged slices: the folders under `docs/slices/` on the
    base branch, with `git ls-tree -d --name-only <base> docs/slices/`.
 4. In progress: a local branch whose folder is not on the base branch.
@@ -264,7 +266,7 @@ New. The spec describes it fully; the code follows the spec's words.
 - `sliceflow slice create <name> [--title <title>] [--from <branch>] [--json]`:
   R1 to R18, R42; output R9 and R10.
 - `sliceflow slice status [<name>] [--json]`: R21 to R33.
-- `sliceflow slice list [--all] [--json]`: R21 to R28, R34 to R37.
+- `sliceflow slice list [--all] [--json]`: R21 to R28, R34 to R37, R43.
 - `--help` and `-h` on every command: R39.
 - Flags may come before or after the name (TD2).
 - Exit codes 0, 1, and 2, errors on stderr, nothing on stdout when a
@@ -331,6 +333,10 @@ optional `title`, left out when empty. See TD4.
 
 The reader opens each line as a map of field names first, then checks
 each field itself, so each warning has R26's exact words. See TD5.
+A map keeps only one value per name, so before that, the reader walks
+the line's tokens with `json.Decoder.Token` and finds a name that
+appears twice in the same object: `field "<f>" appears twice` (R26),
+e.g. `data.from.branch`.
 
 - A line of only spaces, tabs, or `\r` is a `blank line`. A good line
   that ends in `\r\n` reads normally, because JSON counts `\r` as a
@@ -444,9 +450,4 @@ How the tests stay apart from the developer's own setup:
 
 ## Open questions
 
-- **Q1.** A log line with the same field twice, e.g.
-  `{"version":1,"seq":1,"seq":2,...}`. R26 does not say what this is.
-  `encoding/json` would quietly keep the last value.
-- **Q2.** A local branch under `slice/` whose name breaks R2, e.g.
-  `slice/My_Thing` or `slice/team/login`, made by hand. The spec does
-  not say whether `slice list` shows it, skips it, or warns about it.
+None.
