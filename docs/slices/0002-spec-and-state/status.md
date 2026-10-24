@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 19:18 UTC
+- Updated: 2026-10-24 19:26 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-5 of 17 done · 1 in_review · 11 todo
+5 of 17 done · 1 doing · 11 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -29,7 +29,7 @@ None.
 | 03 | spec-reader | core | done | 0 | 3 | - | R18 |
 | 04 | spec-errors | core | done | 0 | 3 | 03 | R15, R18 |
 | 05 | spec-warnings | core | done | 0 | 2 | 04 | R16, R17, R18 |
-| 06 | status-core | core | in_review | 0 | 2 | 02 | R1, R3, R29, R30, R34 |
+| 06 | status-core | core | doing | 0 | 2 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
 | 08 | cli-groups-and-template | core | todo | 0 | 0 | - | R35, R36 |
 | 09 | validate-command | core | todo | 0 | 0 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 8 · Closed: 62
+Open: 1 · Waiting for verify: 4 · Closed: 66
 
 ### Doc reviews
 
@@ -105,10 +105,11 @@ Open: 0 · Waiting for verify: 8 · Closed: 62
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-06-1/F1 | high | 06 | A worktree folder deleted by hand makes slice status and list fail | fixed (waiting for verify) |
-| task-06-1/F2 | low | 06 | findWorktree returns git's path, not a cleaned one | fixed (waiting for verify) |
-| task-06-1/F3 | low | 06 | No test for a refused submit after a pass, with no change | fixed (waiting for verify) |
-| task-06-1/F4 | low | 06 | A refused submit with 0 errors and 0 warnings shows an empty mark | wontfix: R29 says nothing, and R21 never writes one (waiting for verify) |
+| task-06-2/F1 | low | 06 | A cancel during the compare reads as not changed | open |
+| task-06-1/F1 | high | 06 | A worktree folder deleted by hand makes slice status and list fail | verified |
+| task-06-1/F2 | low | 06 | findWorktree returns git's path, not a cleaned one | verified |
+| task-06-1/F3 | low | 06 | No test for a refused submit after a pass, with no change | verified |
+| task-06-1/F4 | low | 06 | A refused submit with 0 errors and 0 warnings shows an empty mark | verified (wontfix: R29 says nothing, and R21 never writes one) |
 | task-05-1/Q1 | question | 05 | An empty Open questions: one warning or both of R16's | verified (the lead decided: both, as R16 says) |
 | task-05-1/F1 | low | 05 | No test proves the error comes before the warning at one line | verified |
 | task-04-2/F1 | low | 04 | A requirement above the first heading also gives "shows R9, which does not exist" | verified |
@@ -138,6 +139,7 @@ None.
 - Task 04, task-04-2/F1 (low): fixed in round 3, not left. Why: users would see a wrong extra error (`shows R9, which does not exist`), and the fix is one line.
 - Task 05, task-05-1/Q1: an empty Open questions section gets both of R16's warnings, "is empty" and "is not None.". Why: that is R16 as written, so no document changes; only the other answer (one warning) would change the spec. The human may overrule it.
 - Task 06: touches widened to `internal/e2e/status_command_test.go` and `internal/e2e/slice_list_test.go` (tasks.md changed). Their tests (`TestStatusBadLines`, `TestListBadLine`, from 0001) now expect R4's third warning, `.events.jsonl line 3: slice.created is not allowed when spec.md is draft; skipped`. Why: replay now skips the second `slice.created`, as R2 and R4 say; task 06 changes what these tests check. The test logs stay as 0001 wrote them.
+- Task 06, task-06-2/F1 (low): fixed in round 3, not left or deferred. Why: task 14 uses `specChanged` in a command that writes, where a cancel must stop it; task 14's touches do not hold `next.go`.
 
 ## Preview
 
@@ -147,6 +149,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 19:26 · lead (claude) · task 06 worker round 3 started, to fix the low task-06-2/F1
+- 2026-10-24 19:26 · code-reviewer (claude opus) · task review 2 of task 06 handed in: task-06-1 F1-F4 verified; 1 new low
 - 2026-10-24 19:18 · lead (claude) · task review 2 of task 06 started
 - 2026-10-24 19:18 · lead (claude) · task 06 fixes committed (0716b44); the checks pass
 - 2026-10-24 19:18 · worker (claude sonnet) · task 06 round 2 handed in: F1-F3 fixed, F4 wontfix
