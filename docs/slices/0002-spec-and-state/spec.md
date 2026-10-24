@@ -243,7 +243,7 @@ The lead hands in a finished spec, and it is reviewed at once.
   **Then** none of sliceflow's commits holds `src/app.go`, and the change
   is still staged afterwards.
   Shows: R8
-- **S23.** **Given** a git pre-commit hook that refuses every commit
+- **S23.** **Given** a git commit-msg hook that refuses every commit
   whose message has `review`,
   **When** I run `sliceflow spec submit` on a finished spec,
   **Then** sliceflow prints `Submitted spec.md.`, then prints on stderr
@@ -431,8 +431,9 @@ The lead reads the template's rules, which a filled spec no longer holds.
   first adds a `\n`, so the new event starts on a line of its own. The
   last line is kept as it is; when it is bad, it is skipped with a
   warning, as R26 of 0001-slice-and-events says. The new event's `seq` is
-  1 more than the `seq` of the last line read without error, also when R4
-  skipped that line, and 1 when there is none. The log file on disk shall
+  1 more than the `seq` of the last good line, as R27 of
+  0001-slice-and-events says: a line kept with a `seq` warning counts,
+  and so does a line that R4 skipped. With no good line, it is 1. The log file on disk shall
   never be half written, also when sliceflow stops in the middle of
   writing it.
   Check: unit
@@ -907,10 +908,6 @@ The lead reads the template's rules, which a filled spec no longer holds.
   id in a lock file means something.
   Noticed: two computers share a repo folder over a network, and the busy
   message names a process that is not there.
-- 0001 is built as its spec says: an event that sliceflow does not know is
-  skipped with a warning, so an older sliceflow can still read a newer
-  log.
-  Noticed: the change review of 0002 after 0001 merges.
 
 ## Open questions
 
