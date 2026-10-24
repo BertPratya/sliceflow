@@ -195,12 +195,13 @@ removes the other's branch. Anything it could not remove goes into
 
 Covers: R18
 
-While `create` runs, sliceflow catches Ctrl-C (`os.Interrupt`) and, on
-Linux and macOS, `SIGTERM`, which a system shutdown sends first. The
-signal cancels the `ctx` of the running git command. `create` waits for
-that command to end, runs Undo on failure, and prints R18's error with
-the reason `interrupted`. On Windows, closing the terminal also sends
-`os.Interrupt` to Go programs, with a few seconds to finish.
+While `create` runs, sliceflow catches `os.Interrupt` (Ctrl-C) and
+`syscall.SIGTERM`, on every system. On Linux and macOS, a system
+shutdown sends `SIGTERM` first. On Windows, Go turns closing the
+console window, logging off, and shutting down into `SIGTERM`, with a
+few seconds to finish. The signal cancels the `ctx` of the running git
+command. `create` waits for that command to end, runs Undo on failure,
+and prints R18's error with the reason `interrupted`.
 `status` and `list` change nothing, so they keep Go's default: they
 stop at once. (lead's call)
 
