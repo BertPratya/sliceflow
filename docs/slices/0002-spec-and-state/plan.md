@@ -28,7 +28,7 @@ interface; the placeholder is the only one in this slice.
 | The new commands, and the new status output | internal/cli/ | changed |
 
 The packages depend on each other in one direction only: `cli` uses
-`slice`, and the types of `spec` and `state`; `slice` uses `state`,
+`slice`, `template`, and the types of `spec` and `state`; `slice` uses `state`,
 `spec`, `review`, `eventlog`, `git`, and `template`; `state` uses
 `eventlog`. Only `slice`, `git`, and a reviewer (which writes its review
 file) touch files or run git.
@@ -455,7 +455,7 @@ How the tests make things fail:
 - The busy test (S19) makes the lock file itself, and waits the full
   10 s: one slow test, which checks exactly what the user sees. (lead's
   call)
-- Ctrl-C: as in 0001, the e2e test (task 15) skips on Windows, and a
+- Ctrl-C: as in 0001, the e2e test (task 16) skips on Windows, and a
   unit test of the undo after a cancelled `ctx` (task 11) runs on every
   system.
 - A log with a bad line, or a move that is not allowed (S3, S4), is

@@ -445,7 +445,9 @@ part is R29's refused mark, which depends on both the state and R30. Its brief i
   Proves: R1, R3, R34
 - `TestSpecChanged`: in a temporary repo, a commit with `spec.md`, then
   an edit on disk, gives true; no edit gives false; with
-  `core.autocrlf true`, a file that differs only by `\r\n` gives false.
+  `core.autocrlf true`, a file that differs only by `\r\n` gives false;
+  a reviewed commit id that is not in the repo gives false, with no
+  error.
   Proves: R30
 - `TestFindWorktree`: finds the worktree of `slice/login-google`; a slice
   whose worktree was removed gives false.
@@ -518,7 +520,7 @@ updated for the two new lines. Its brief is about 2,000 words, over the usual 1,
 
 ### Out of scope
 
-- The status after a real submit (S13 to S17, S23). Done in: task 15
+- The status after a real submit. Done in: task 15 (S13 to S17), task 16 (S23)
 
 ## Task 08: cli-groups-and-template
 
@@ -791,8 +793,8 @@ hardest part is the undo, and Ctrl-C during the commit. Its brief is about 2,700
   reason.
   Proves: R2
 - `TestSaveHookFails`: with a `pre-commit` hook that exits with 1, no
-  commit is made, the log on disk equals the committed log, a file in
-  `Write` is gone, nothing is staged, and the error is
+  commit is made, the log on disk equals the committed log, a file that
+  `Prepare` returned is gone, nothing is staged, and the error is
   `could not save the event: git commit failed (exit code 1). Nothing was changed.`
   Proves: R10
 - `TestSaveTail`: with `Tail` `The steps before it were saved; spec.md is submitted.`,
