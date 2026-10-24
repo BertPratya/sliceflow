@@ -166,12 +166,79 @@ Covers: {{R1, R2}}
 
 ### Shared rules
 
-#### {{rule name}}
+#### Undo on failure
 
-Covers: {{R5, or none}}
-Project rule: {{where it comes from, for a project rule; otherwise delete this line}}
+Covers: R18
 
-{{the rule}}
+`create` keeps a list of what it made in this run. It adds each thing
+right after making it:
+
+1. `.sliceflow/.gitignore`, and the folders `.sliceflow/` and
+   `.sliceflow/worktrees/`, only those that were missing.
+2. The branch and the worktree, after `git worktree add` succeeds.
+
+The files in the worktree and the commit need no entry: removing the
+worktree and the branch removes them. If a step fails, `create`
+removes the list's items, newest first:
+
+- the worktree with `git worktree remove --force`;
+- the branch with `git branch -D`, only if it still points at the
+  commit `create` made or started from;
+- the files and folders with an OS call, a folder only if it is empty.
+
+It never removes a thing that is not on the list. So when two `create`
+commands with the same name run at once, the one that loses never
+removes the other's branch. Anything it could not remove goes into
+`Could not remove: <list>.` (R18).
+
+#### Interrupts
+
+Covers: R18
+
+While `create` runs, sliceflow catches Ctrl-C (`os.Interrupt`) and, on
+Linux and macOS, `SIGTERM`, which a system shutdown sends first. The
+signal cancels the `ctx` of the running git command. `create` waits for
+that command to end, runs Undo on failure, and prints R18's error with
+the reason `interrupted`. On Windows, closing the terminal also sends
+`os.Interrupt` to Go programs, with a few seconds to finish.
+`status` and `list` change nothing, so they keep Go's default: they
+stop at once. (lead's call)
+
+#### Git arguments
+
+Covers: R3, R4, R40
+Project rule: AGENTS.md, run each check or git command as its own
+  process with its own arguments, never as one shell string.
+
+Each git command runs with `os/exec`, with its arguments as a list,
+never through a shell (TD8).
+
+- A branch from `--from` or `sliceflow.base` is passed as
+  `refs/heads/<branch>`, so it never starts with `-` and is never read
+  as an option.
+- The base branch is turned into a commit id once, at the start.
+  Every later step uses that id, so the base cannot move during
+  `create`.
+- The slice name passes R2 before any git command uses it, so it has
+  no `/`, `..`, or leading `-`.
+- The title only goes into the JSON line, never into a git argument.
+- sliceflow reads only output meant for programs: `rev-parse`,
+  `for-each-ref`, `show`, and `worktree list --porcelain`. Git's own
+  error text is only passed on, as R18's `<reason>`. (lead's call)
+
+#### No network
+
+Covers: R40
+Project rule: AGENTS.md, sliceflow sends no data out: no telemetry, no
+  uploads, no calls home.
+
+sliceflow never runs `git fetch`, `git pull`, or `git push`, and reads
+remote branches only from what git already has (`refs/remotes/`).
+Every git command runs with `GIT_TERMINAL_PROMPT=0`, so git never asks
+for a password, and `GIT_NO_LAZY_FETCH=1`, so a partial clone does not
+download a missing file. Git 2.44 and newer honor it; older git ignores
+it. (lead's call) The user's own git hooks run as the user set them up
+(R8); they are the user's code, not sliceflow's.
 
 ## Interfaces
 
@@ -389,7 +456,20 @@ each field itself, so each warning has R26's exact words. See TD5.
      What could go wrong, and how it is reduced. Migration order, feature
      flags, compatibility with older versions. -->
 
-{{A risk, and how it is reduced.}}
+- **A hard kill leaves a half-made slice.** A crash, `kill -9`, or a
+  power cut stops `create` before Undo on failure can run. What is left
+  depends on the step:
+  - after step 1: `.sliceflow/.gitignore`, which is ignored and harmless;
+  - after the branch and worktree are made: a branch `slice/<name>`
+    with no committed log. `slice list` shows it with `!`, `slice
+    status` shows `Phase: unknown` and `.events.jsonl not found` (S18),
+    and a new `create` with that name says it already exists.
+
+  The commit itself is all or nothing in git. The user removes the
+  leftover by hand:
+  `git worktree remove --force .sliceflow/worktrees/<name>` and
+  `git branch -D slice/<name>`. A command for this is in the backlog,
+  with cancelling a slice.
 
 ## Parked
 

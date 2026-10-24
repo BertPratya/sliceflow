@@ -362,6 +362,8 @@ stderr, changes nothing, and exits with code 1.
   `Error: could not create slice <name>: <reason>. Everything sliceflow made was removed.`
   If it cannot remove something, the message ends with
   `Could not remove: <list>.` instead of the last sentence.
+  Ctrl-C, or a stop signal from the system, while sliceflow is creating
+  counts as a failed step, with the reason `interrupted`.
   Check: e2e
 
 ### The event log

@@ -2,7 +2,7 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 06:38 UTC
+- Updated: 2026-10-24 06:43 UTC
 
 ## Needs human
 
@@ -70,6 +70,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 06:43 · human · plan part 4: undo, safety, and crash notes ok; Ctrl-C and SIGTERM undo like a failed step (R18); a hard kill is cleaned up later, with cancel in the backlog
 - 2026-10-24 06:38 · human · plan part 3, interfaces: core API option 1, three plain functions
 - 2026-10-24 06:35 · human · plan part 2, the data: yes
 - 2026-10-24 06:32 · human · errors stay text on stderr with --json (R42, S29); JSON errors with codes go to the backlog; spec.md back to draft, the plan review checks it
