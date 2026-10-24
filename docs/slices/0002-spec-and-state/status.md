@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:19 UTC
+- Updated: 2026-10-24 17:20 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-9 of 17 done · 1 in_review · 7 todo
+10 of 17 done · 1 doing · 6 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -33,8 +33,8 @@ None.
 | 07 | status-spec | normal | done | 0 | 2 | 06 | R4, R29, R31 |
 | 08 | cli-groups-and-template | core | done | 0 | 1 | - | R35, R36 |
 | 09 | validate-command | core | done | 0 | 2 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
-| 10 | lock | core | in_review | 0 | 2 | - | R6, R7 |
-| 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
+| 10 | lock | core | done | 0 | 2 | - | R6, R7 |
+| 11 | save-event | core | doing | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | todo | 0 | 0 | - | R25, R26, R27 |
 | 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 6 · Closed: 70
+Open: 0 · Waiting for verify: 4 · Closed: 73
 
 ### Doc reviews
 
@@ -105,8 +105,9 @@ Open: 0 · Waiting for verify: 6 · Closed: 70
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-10-1/F1 | medium | 10 | Freeing the lock tries the remove once; on Windows it can fail and leave the lock | fixed (waiting for verify) |
-| task-10-1/F2 | low | 10 | A lock file being deleted on Windows gives a raw error, not a retry | fixed (waiting for verify) |
+| task-10-2/F1 | low | 10 | A lasting permission error waits the full lock wait before it shows | wontfix: a rare setup problem; the error is still true; one code path stays tested on every system |
+| task-10-1/F1 | medium | 10 | Freeing the lock tries the remove once; on Windows it can fail and leave the lock | verified |
+| task-10-1/F2 | low | 10 | A lock file being deleted on Windows gives a raw error, not a retry | verified |
 | task-09-1/F1 | high | 09 | R19's path is built from fixed parts, wrong for a moved worktree | verified |
 | task-09-1/F2 | low | 09 | S6's test does not use S6's line numbers 42, 44, 140 | verified |
 | task-07-1/F1 | low | 07 | R29's refused-mark rule is in two places, and no test catches a drift | verified |
@@ -147,6 +148,7 @@ None.
 - Task 06, task-06-2/F1 (low): fixed in round 3, not left or deferred. Why: task 14 uses `specChanged` in a command that writes, where a cancel must stop it; task 14's touches do not hold `next.go`.
 - Task 07, task-07-1/F1 (low): fixed with two JSON test cases (a refused submit on an unchanged `review_passed` spec, and on a merged slice: no `submit_refused`), not with a new `SliceStatus` field. Why: the tests catch a drift between the two copies of R29's rule, inside task 07's touches; a new field would change `internal/slice` and tasks.md.
 - Task 09, task-09-1/F1: R19's path comes from a private helper in `internal/slice` that builds it from the real worktree path (relative to the main checkout's root, with `/`). Task 14 reuses it; its brief will say so. Why: one way to build R19's path for both commands; a private name changes no document.
+- Task 10, task-10-2/F1 (low): wontfix. A lasting permission error on the lock folder shows after the lock wait (10 s), as itself. Why: it is a rare setup problem, the error is still true, and a Windows-only retry would leave that path untested on Linux and macOS.
 
 ## Preview
 
@@ -156,6 +158,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:20 · lead (claude) · task 11 started: worker round 1
+- 2026-10-24 17:20 · lead (claude) · task 10 done; task-10-2/F1 wontfix
+- 2026-10-24 17:20 · code-reviewer (claude opus) · task review 2 of task 10 handed in: F1, F2 verified; 1 new low
 - 2026-10-24 17:19 · lead (claude) · task review 2 of task 10 started
 - 2026-10-24 17:19 · lead (claude) · task 10 fixes committed (2e8f5ea); the checks pass
 - 2026-10-24 17:19 · worker (claude sonnet) · task 10 round 2 handed in: F1, F2 fixed
