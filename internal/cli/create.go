@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"path"
+	"syscall"
 
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
@@ -47,12 +49,17 @@ func runCreate(ctx context.Context, args []string, stdout, stderr io.Writer) int
 	case len(pos) > 1:
 		return usageError(stderr, "too many arguments")
 	}
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
 	wd, err := os.Getwd()
 	if err != nil {
 		return fail(stderr, err)
 	}
 	r, err := slice.FindRepo(ctx, wd)
 	if err != nil {
+		if ctx.Err() != nil {
+			return fail(stderr, slice.Interrupted(pos[0]))
+		}
 		return fail(stderr, err)
 	}
 	c, err := slice.Create(ctx, r, slice.CreateOptions{Name: pos[0], Title: *title, From: *from})
