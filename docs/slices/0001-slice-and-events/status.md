@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 09:01 UTC
+- Updated: 2026-10-24 09:03 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-7 of 13 done · 1 doing · 5 todo
+7 of 13 done · 1 in_review · 5 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -30,7 +30,7 @@ None.
 | 05 | spec-template | normal | done | 0 | 1 | 01 | R7 |
 | 06 | create-core | core | done | 0 | 2 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
-| 08 | create-checks | core | doing | 0 | 1 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
+| 08 | create-checks | core | in_review | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
 | 09 | create-undo | core | todo | 0 | 0 | 08 | R8, R18 |
 | 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 1 · Waiting for verify: 0 · Closed: 58
+Open: 0 · Waiting for verify: 1 · Closed: 58
 
 ### Doc reviews
 
@@ -99,7 +99,7 @@ Open: 1 · Waiting for verify: 0 · Closed: 58
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-08-1/F1 | high | 08 | The base check accepts revision syntax like main~1 | open |
+| task-08-1/F1 | high | 08 | The base check accepts revision syntax like main~1 | fixed (waiting for verify) |
 | task-08-1/F2 | low | 08 | The folder check reads the base ref, not the commit id | wontfix: why: the fix changes checkCreate's signature, which tasks.md fixes; the window is milliseconds; Flow 1 puts the checks before the commit id |
 | task-07-1/F1 | low | 07 | TestCreateSpecSubmit does not check the log line | verified |
 | task-06-1/F1 | medium | 06 | path.Join drops the // of a Windows network-share root | verified |
@@ -136,6 +136,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:03 · lead (claude) · task 08 code review started, round 2
+- 2026-10-24 09:03 · lead (claude) · task 08 fixes from review 1 committed (f73cd3b); checks pass; the binary refuses --from main~1 and main@{0}
 - 2026-10-24 09:01 · lead (claude) · task 08 worker round 2 started: F1; F2 wontfix
 - 2026-10-24 09:01 · code reviewer (claude opus) · task-08-1 submitted: changes; 1 high (--from main~1 makes a slice), 1 low
 - 2026-10-24 08:59 · lead (claude) · task 08 code review started, round 1
