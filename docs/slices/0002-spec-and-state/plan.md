@@ -206,8 +206,9 @@ With the lock held:
 2. Run the command's prepare step on the state. It does the command's
    own checks, in the spec's order, and gives the spec's error when one
    fails, e.g. R20's, R19's, R24's, R32's, R33's, or R6's: then nothing
-   is saved. Otherwise it gives the event's `data` and the files to
-   write. (lead's call)
+   is saved. Otherwise it gives the event's `data`, the files to write,
+   and the commit message, e.g. `<name>: spec submitted` or
+   `<name>: spec submit refused` (R21). (lead's call)
 3. Check the move with `state.Allowed`, as a last guard. A prepare step
    that passed but a move that is not allowed is a bug: save nothing,
    and return a plain error.

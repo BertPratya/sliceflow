@@ -3,20 +3,20 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 19:40 UTC
+- Updated: 2026-10-24 19:55 UTC
 
 ## Needs human
 
-- plan-1/F1 and F3, reopened: the lead's fixes wait for the human's yes
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 2 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 3 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
@@ -43,7 +43,7 @@
 
 ## Findings
 
-Open: 2 · Waiting for verify: 3 · Closed: 31
+Open: 0 · Waiting for verify: 5 · Closed: 31
 
 ### Doc reviews
 
@@ -51,9 +51,9 @@ Open: 2 · Waiting for verify: 3 · Closed: 31
 |---|---|---|---|
 | plan-2/F1 | low | Leftovers of the round-1 fixes | fixed |
 | plan-1/Q1 | high | template show outside a git repo | verified (fixed) |
-| plan-1/F1 | medium | saveEvent can't run the command's checks under its lock | reopened in plan-2: open |
+| plan-1/F1 | medium | saveEvent can't run the command's checks under its lock | reopened in plan-2: fixed |
 | plan-1/F2 | medium | R12 and R19 for spec submit are in no task | verified (fixed) |
-| plan-1/F3 | medium | Six briefs over 1,500 words; task 15 too big | reopened in plan-2: open |
+| plan-1/F3 | medium | Six briefs over 1,500 words; task 15 too big | reopened in plan-2: fixed |
 | plan-1/F4 | medium | state.Allowed: error in the plan, string in task 02 | verified (fixed) |
 | plan-1/F5 | low | git diff exit 128 for a missing commit | verified (fixed) |
 | plan-1/F6 | low | Gaps in Done when | verified (fixed) |
@@ -106,6 +106,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 19:55 · lead (claude) · change review 3 of the plan started: only the fixes since round 2 (the last round)
+- 2026-10-24 19:50 · lead (claude) · human: "yes": Prepare also returns the commit message; reasons for the long briefs of tasks 14, 15, 16
 - 2026-10-24 19:40 · lead (claude) · plan-2 lows fixed (plan-1/F7, F10, plan-2/F1); documents back to draft
 - 2026-10-24 19:35 · doc-reviewer (claude opus) · plan review 2 handed in: nothing for the human; plan-1/F1, F3 reopened (medium), F7, F10 reopened (low); 1 new low
 - 2026-10-24 19:10 · lead (claude) · plan review 2 started

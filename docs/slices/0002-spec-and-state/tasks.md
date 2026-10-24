@@ -759,11 +759,14 @@ hardest part is the undo, and Ctrl-C during the commit. Its brief is about 2,700
 
 ### Interfaces
 
-- `type saveOp struct{ Event, Message string; Keep []string; Prepare func(state.State) (any, map[string][]byte, error); Tail string }`:
+- `type prepared struct{ Data any; Files map[string][]byte; Message string }`:
+  creates. What `Prepare` returns: the event's `data`, the files to
+  write, by path in the slice folder (e.g. `reviews/spec-1.md`), and
+  the commit message.
+- `type saveOp struct{ Event string; Keep []string; Prepare func(state.State) (prepared, error); Tail string }`:
   creates. `Prepare` runs under the lock, after the replay (Saving an
-  event, step 2): it does the command's own checks and returns the
-  event's `data` and the files to write, by path in the slice folder
-  (e.g. `reviews/spec-1.md`), or the spec's error. `Keep`: files
+  event, step 2): it does the command's own checks and returns
+  `prepared`, or the spec's error. `Keep`: files
   committed as they are on disk (e.g. `spec.md`). `Tail`: R10's last
   sentence, `""` for `Nothing was changed.`.
 - `func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (string, state.State, error)`:
@@ -774,7 +777,8 @@ hardest part is the undo, and Ctrl-C during the commit. Its brief is about 2,700
 
 ### Done when
 
-- `TestSaveCommit`: saving `slice.titled` makes one commit
+- `TestSaveCommit`: saving `slice.titled`, with the message `Prepare`
+  returns, makes one commit
   `login-google: title set` holding only the log, whose last line has
   `seq` 2.
   Proves: R8, R9
@@ -951,7 +955,7 @@ risk: core
 check, `spec.submitted`, and the review with its two events, reporting
 each step as it happens. The hardest parts are the three separate
 saves, each under its own lock, and finding the submit's commit when it
-goes on from `submitted`. Its brief is about 2,700 words, over the usual 1,500, because Flows 3 to 5 and their scenarios hold the exact steps.
+goes on from `submitted`. Its brief is about 3,000 words, over the usual 1,500, because Flows 3 to 5 and their scenarios hold the exact steps; splitting it would put one flow into several tasks.
 
 ### Steps
 
@@ -1030,7 +1034,9 @@ risk: normal
 
 `sliceflow spec submit [<name>]` prints each step as it happens, with
 R22's and R28's lines, on stdout, and exits as the spec says. Its e2e
-tests cover the normal submit cases, S13 to S18.
+tests cover the normal submit cases, S13 to S18. Its brief is about
+3,000 words, over the usual 1,500, because S13 to S18 hold the exact
+output of each step.
 
 ### Steps
 
@@ -1092,7 +1098,9 @@ risk: normal
 The e2e tests for the ways a submit can fail or stop: the lock, a
 refused commit, a leftover review file, the lead's staged files, a stop
 halfway and going on, and Ctrl-C. 0001's no-network test runs the new
-commands too. This task adds tests only.
+commands too. This task adds tests only. Its brief is about 3,000
+words, over the usual 1,500, because S19 to S24 and the write path's
+rules hold the exact failure output.
 
 ### Steps
 
