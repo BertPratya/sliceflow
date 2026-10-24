@@ -42,6 +42,9 @@ func TestRunErrorHasStderr(t *testing.T) {
 }
 
 func TestRunSetsNoNetworkEnv(t *testing.T) {
+	// Set the opposite values, so the test passes only if Run sets them.
+	t.Setenv("GIT_TERMINAL_PROMPT", "1")
+	t.Setenv("GIT_NO_LAZY_FETCH", "0")
 	dir := testrepo.New(t)
 	testrepo.Git(t, dir, "config", "alias.env-check", "!env")
 	out, err := git.Run(context.Background(), dir, "env-check")

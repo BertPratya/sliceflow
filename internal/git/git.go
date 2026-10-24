@@ -85,7 +85,8 @@ func RefExists(ctx context.Context, dir, ref string) (bool, error) {
 }
 
 // Show returns the file at path in the commit ref. The bool is false when
-// the file is not in that commit.
+// the file is not in that commit. A bad ref or a folder that is not a repo
+// also returns false, nil, so callers check those first.
 func Show(ctx context.Context, dir, ref, path string) ([]byte, bool, error) {
 	spec := ref + ":" + path
 	if _, err := Run(ctx, dir, "cat-file", "-e", spec); err != nil {
