@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:45 UTC
+- Updated: 2026-10-24 08:46 UTC
 
 ## Needs human
 
@@ -19,13 +19,13 @@ None.
 
 ## Tasks
 
-4 of 13 done · 1 doing · 8 todo
+4 of 13 done · 1 in_review · 8 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | git-runner | core | done | 0 | 2 | - | R40 |
 | 02 | event-log | core | done | 0 | 2 | 01 | R19, R25, R26, R27 |
-| 03 | cli-skeleton | core | doing | 0 | 1 | 01, 04 | R28, R38, R39 |
+| 03 | cli-skeleton | core | in_review | 0 | 2 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | done | 0 | 1 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | done | 0 | 1 | 01 | R7 |
 | 06 | create-core | core | todo | 0 | 0 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 2 · Waiting for verify: 0 · Closed: 53
+Open: 0 · Waiting for verify: 2 · Closed: 53
 
 ### Doc reviews
 
@@ -99,8 +99,8 @@ Open: 2 · Waiting for verify: 0 · Closed: 53
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-03-1/F1 | high | 03 | Any flag after slice prints the help and exits 0 | open |
-| task-03-1/F3 | low | 03 | A bad bool value gives a text that is not one of R38's | open |
+| task-03-1/F1 | high | 03 | Any flag after slice prints the help and exits 0 | fixed (waiting for verify) |
+| task-03-1/F3 | low | 03 | A bad bool value gives a text that is not one of R38's | fixed (waiting for verify) |
 | task-03-1/F2 | low | 03 | fail indents later lines; S15's lines have no indent | deferred: task 11 |
 | task-04-1/F1 | low | 04 | FindRepo calls every rev-parse failure "not inside a git repository" | wontfix: why: git gives exit 128 for both, and sliceflow does not read git's error text (Git arguments); the worker's ASSUMED names it |
 | task-02-1/Q1 | needs human | 02 | R27 does not say which seq the first good line must have | verified: the human chose option 1 (expect 1); R002 |
@@ -129,6 +129,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:46 · lead (claude) · task 03 code review started, round 2
+- 2026-10-24 08:46 · lead (claude) · task 03 fixes from review 1 committed (622be4e); checks pass; the binary gives exit 2 for slice --colour
 - 2026-10-24 08:45 · lead (claude) · task 03 worker round 2 started: F1 and F3; F2 deferred to task 11
 - 2026-10-24 08:45 · code reviewer (claude opus) · task-03-1 submitted: changes; 1 high (slice --colour exits 0), 2 low
 - 2026-10-24 08:42 · lead (claude) · task 03 code review started, round 1
