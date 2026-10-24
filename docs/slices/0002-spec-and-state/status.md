@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 16:56 UTC
+- Updated: 2026-10-24 17:01 UTC
 
 ## Needs human
 
@@ -20,12 +20,12 @@ None.
 
 ## Tasks
 
-2 of 17 done · 1 in_review · 14 todo
+2 of 17 done · 1 doing · 14 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | eventlog-events | core | done | 0 | 2 | - | R5 |
-| 02 | state-machine | core | in_review | 0 | 1 | 01 | R1, R2, R3, R4 |
+| 02 | state-machine | core | doing | 0 | 1 | 01 | R1, R2, R3, R4 |
 | 03 | spec-reader | core | done | 0 | 3 | - | R18 |
 | 04 | spec-errors | core | todo | 0 | 0 | 03 | R15, R18 |
 | 05 | spec-warnings | core | todo | 0 | 0 | 04 | R16, R17, R18 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 4 · Closed: 50
+Open: 1 · Waiting for verify: 4 · Closed: 50
 
 ### Doc reviews
 
@@ -101,6 +101,7 @@ Open: 0 · Waiting for verify: 4 · Closed: 50
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-02-1/F1 | low | 02 | No test checks the review's reviewer, file, commit, or the created title | open |
 | task-03-2/F1 | medium | 03 | A lone backtick in one item hides the next item | verified |
 | task-03-1/F1 | high | 03 | An ideas list item with no space before - is dropped | verified |
 | task-03-1/F2 | high | 03 | Markers like **R 7.** are neither items nor bad markers | verified |
@@ -117,6 +118,7 @@ None.
 ## Lead's decisions
 
 - Task 03, task-03-1/F3: a front matter with no closing `---` gives `HasFront` false, so task 04 reports R15's `no front matter` error. Why: R15 asks for front matter between two `---` lines, and `Doc` keeps the fields of tasks.md (no new field).
+- Task 02, task-02-1/F1 (low): fixed in a worker round, not left. Why: tasks 06, 11, and 15 rely on the review's reviewer, file, and commit, and on the title from `slice.created`; no other task's tests check them in `state`.
 
 ## Preview
 
@@ -126,6 +128,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:01 · lead (claude) · task 02 worker round 2 started, to fix the low task-02-1/F1
+- 2026-10-24 17:01 · code-reviewer (claude opus) · task review 1 of task 02 handed in: 1 low
 - 2026-10-24 16:56 · lead (claude) · task review 1 of task 02 started
 - 2026-10-24 16:56 · lead (claude) · task 02 committed (804587e); the checks pass
 - 2026-10-24 16:56 · worker (claude sonnet) · task 02 round 1 handed in
