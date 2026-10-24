@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:01 UTC
+- Updated: 2026-10-24 17:08 UTC
 
 ## Needs human
 
@@ -20,12 +20,12 @@ None.
 
 ## Tasks
 
-2 of 17 done · 1 doing · 14 todo
+2 of 17 done · 1 in_review · 14 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | eventlog-events | core | done | 0 | 2 | - | R5 |
-| 02 | state-machine | core | doing | 0 | 1 | 01 | R1, R2, R3, R4 |
+| 02 | state-machine | core | in_review | 0 | 2 | 01 | R1, R2, R3, R4 |
 | 03 | spec-reader | core | done | 0 | 3 | - | R18 |
 | 04 | spec-errors | core | todo | 0 | 0 | 03 | R15, R18 |
 | 05 | spec-warnings | core | todo | 0 | 0 | 04 | R16, R17, R18 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 1 · Waiting for verify: 4 · Closed: 50
+Open: 0 · Waiting for verify: 5 · Closed: 50
 
 ### Doc reviews
 
@@ -101,7 +101,7 @@ Open: 1 · Waiting for verify: 4 · Closed: 50
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-02-1/F1 | low | 02 | No test checks the review's reviewer, file, commit, or the created title | open |
+| task-02-1/F1 | low | 02 | No test checks the review's reviewer, file, commit, or the created title | fixed (waiting for verify) |
 | task-03-2/F1 | medium | 03 | A lone backtick in one item hides the next item | verified |
 | task-03-1/F1 | high | 03 | An ideas list item with no space before - is dropped | verified |
 | task-03-1/F2 | high | 03 | Markers like **R 7.** are neither items nor bad markers | verified |
@@ -128,6 +128,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:08 · lead (claude) · task review 2 of task 02 started
+- 2026-10-24 17:08 · lead (claude) · task 02 fixes committed (e309867); the checks pass
+- 2026-10-24 17:08 · worker (claude sonnet) · task 02 round 2 handed in: F1 fixed (the lead asked once for values that differ per round)
 - 2026-10-24 17:01 · lead (claude) · task 02 worker round 2 started, to fix the low task-02-1/F1
 - 2026-10-24 17:01 · code-reviewer (claude opus) · task review 1 of task 02 handed in: 1 low
 - 2026-10-24 16:56 · lead (claude) · task review 1 of task 02 started
