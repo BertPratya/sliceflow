@@ -836,6 +836,15 @@ The lead reads the template's rules, which a filled spec no longer holds.
     then, and a second one would start.
   Cost: a slice that stopped at `in_review` stays there until 0007.
   Rule: R20
+- **SD14.** `spec validate` and `spec submit` print the spec's problems
+  on stdout, also when they exit with code 1.
+  Why: a list of problems is the command's answer, not a broken
+    command, as in linters like ESLint. A pipe, e.g. to `grep`, sees it.
+  Not chosen: stderr, as R38 of 0001-slice-and-events says for errors,
+    because a pipe or a saved file then needs `2>&1`, which is easy to
+    forget.
+  Cost: one exception to R38 of 0001-slice-and-events.
+  Rule: R37
 
 ## Assumptions
 
@@ -854,6 +863,4 @@ The lead reads the template's rules, which a filled spec no longer holds.
 
 ## Open questions
 
-- **Q1.** `spec validate` prints its problems on stdout, also when it
-  exits with 1. That is an exception to R38 of 0001-slice-and-events
-  (R37). Is that right, or should they go on stderr?
+None.
