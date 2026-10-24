@@ -1,21 +1,21 @@
 # Status: 0001-slice-and-events
 
-- Phase: planning
+- Phase: ready
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 07:37 UTC
+- Updated: 2026-10-24 08:06 UTC
 
 ## Needs human
 
-- The planning is waiting for approval
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | review_passed | 3 | - | - |
-| plan.md | review_passed | 3 | - | - |
-| preview.md | review_passed | with plan.md | - | - |
-| tasks.md | review_passed | with plan.md | - | - |
+| spec.md | approved | 3 | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
+| plan.md | approved | 3 | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
+| preview.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
+| tasks.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0001-slice-and-events/planning/R001 |
 
 ## Tasks
 
@@ -114,6 +114,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:06 · human · planning approved, R001: "yes leave it to 0002, and I approve."
 - 2026-10-24 07:37 · lead (claude) · change-4/F1 (low) fixed; spec, plan, tasks, preview review_passed; the planning waits for the human's approval
 - 2026-10-24 07:37 · doc reviewer (claude opus) · change-4: both fixes verified; 1 low; nothing for the human to decide
 - 2026-10-24 07:36 · lead (claude) · change-3 fixed (test input with FromSlash; a final . of a reason dropped); change review started (reviews/change-4.md)
