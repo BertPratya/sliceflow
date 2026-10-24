@@ -1,8 +1,8 @@
 # Status: 0001-slice-and-events
 
-- Phase: ready
+- Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:06 UTC
+- Updated: 2026-10-24 08:11 UTC
 
 ## Needs human
 
@@ -104,7 +104,7 @@ None.
 
 ## Lead's decisions
 
-None.
+- before 01: `main` counts as passing its checks. Why: `main` has no Go code yet (no `go.mod`, `cmd/`, or `internal/`), so the checks cannot run there, and nothing on `main` can make a task fail.
 
 ## Preview
 
@@ -114,6 +114,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:11 · lead (claude) · implementing started: phase ready, worktree clean; `main` has no Go code, so its checks have nothing to run (see Lead's decisions)
 - 2026-10-24 08:06 · human · planning approved, R001: "yes leave it to 0002, and I approve."
 - 2026-10-24 07:37 · lead (claude) · change-4/F1 (low) fixed; spec, plan, tasks, preview review_passed; the planning waits for the human's approval
 - 2026-10-24 07:37 · doc reviewer (claude opus) · change-4: both fixes verified; 1 low; nothing for the human to decide
