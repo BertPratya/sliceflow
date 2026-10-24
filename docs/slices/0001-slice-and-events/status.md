@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:40 UTC
+- Updated: 2026-10-24 08:42 UTC
 
 ## Needs human
 
@@ -19,13 +19,13 @@ None.
 
 ## Tasks
 
-4 of 13 done · 1 doing · 8 todo
+4 of 13 done · 1 in_review · 8 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | git-runner | core | done | 0 | 2 | - | R40 |
 | 02 | event-log | core | done | 0 | 2 | 01 | R19, R25, R26, R27 |
-| 03 | cli-skeleton | core | doing | 0 | 0 | 01, 04 | R28, R38, R39 |
+| 03 | cli-skeleton | core | in_review | 0 | 1 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | done | 0 | 1 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | done | 0 | 1 | 01 | R7 |
 | 06 | create-core | core | todo | 0 | 0 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
@@ -124,6 +124,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:42 · lead (claude) · task 03 code review started, round 1
+- 2026-10-24 08:42 · lead (claude) · task 03 committed (b887065); full checks pass (gofmt on cmd and internal again)
+- 2026-10-24 08:42 · lead (claude) · found and fixed more damage from task 01 attempt 1: the stray git init had set core.bare = true in .git/config, which broke the main checkout and go build's VCS stamping; set back to false; main checkout clean on main at db185d4
 - 2026-10-24 08:40 · lead (claude) · task 03 started: worker round 1
 - 2026-10-24 08:39 · lead (claude) · task 05 done
 - 2026-10-24 08:39 · code reviewer (claude opus) · task-05-1 submitted: pass; no findings
