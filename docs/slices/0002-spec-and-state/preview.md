@@ -34,7 +34,7 @@ Covers: S1
 
 ### P2. Check a spec with problems
 
-Covers: S5
+Covers: S6
 
 1. Copy `docs/slices/0001-slice-and-events/spec.md` from the sliceflow
    repo over `docs/slices/login-google/spec.md`, and change its front
@@ -52,7 +52,7 @@ Covers: S5
 
 ### P3. Submit a spec, refused and then accepted
 
-Covers: S13, S14
+Covers: S14, S15
 
 1. With the spec of P2 (still with Q1), run `sliceflow spec submit`.
    Expect: the problem lines, then
@@ -77,7 +77,7 @@ Covers: S13, S14
 
 ### P4. Set a new title
 
-Covers: S25
+Covers: S26
 
 1. Run `sliceflow slice title login-google "Sign in with Google"`.
    Expect: `Title of login-google is now "Sign in with Google".`
@@ -89,7 +89,7 @@ Covers: S25
 
 ### P5. Read the spec template's rules
 
-Covers: S29
+Covers: S30
 
 1. Run `sliceflow template show spec`.
    Expect: the whole spec template with its rule comments, starting with

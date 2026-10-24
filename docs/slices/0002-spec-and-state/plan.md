@@ -60,7 +60,8 @@ Covers: R1, R2, R3, R4, R5, R29, R30, R31, R34
    code 128 when the reviewed commit is missing, means not compared: no
    change is shown, and the command goes on. (lead's call)
 4. `slice` works out the `Spec:` and `Next:` texts from the `State` and
-   step 3, by R29's table.
+   step 3, by R29's table. A slice whose log was read from the base
+   branch is merged: its `Next:` is `-`.
 5. The CLI prints them after `Created:`, or adds `docs` and `next` to
    the JSON (R31), also in `slice list --json`.
 
@@ -73,7 +74,8 @@ Covers: R12, R13, R14, R15, R16, R17, R18, R19, R37
    `spec validate`.
 2. The first checks run in R11's order. The slice's worktree is the
    entry of `git worktree list --porcelain` whose branch is
-   `refs/heads/slice/<name>`. No lock is taken.
+   `refs/heads/slice/<name>`. A slice with no such branch is merged, and
+   gets R11's merged error. No lock is taken.
 3. `slice` reads `docs/slices/<name>/spec.md` from that worktree, from
    disk. A missing file gives R19's error.
 4. `spec.Parse` reads the text into a `Doc`; `spec.Check` returns the
@@ -452,8 +454,8 @@ How the tests make things fail:
 
 - A failed commit comes from a test git hook that exits with 1: a
   `pre-commit` hook, or a `commit-msg` hook that refuses only messages
-  with `review` (S23). Git for Windows runs `#!/bin/sh` hooks too.
-- The busy test (S19) makes the lock file itself, and waits the full
+  with `review` (S24). Git for Windows runs `#!/bin/sh` hooks too.
+- The busy test (S20) makes the lock file itself, and waits the full
   10 s: one slow test, which checks exactly what the user sees. (lead's
   call)
 - Ctrl-C: as in 0001, the e2e test (task 16) skips on Windows, and a
@@ -467,7 +469,7 @@ How the tests make things fail:
 - **TD1.** sliceflow commits with `git commit --only -- <its files>`.
   Why: git then commits those files as they are on disk, and leaves
     what is staged for other files staged and out of the commit (R8,
-    S22).
+    S23).
   Not chosen: a separate index file (`GIT_INDEX_FILE`), because it is
     more code for the same result.
 - **TD2.** The lock is tried again every 100 ms, for up to 10 s.

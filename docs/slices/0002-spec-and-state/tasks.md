@@ -60,7 +60,7 @@ R26's reasons of 0001-slice-and-events, in the same order of checks.
 ### Done when
 
 - `TestEncodeNewEvents`: `Encode` of each new event gives exactly the
-  JSON lines of S13, S14, and S25, e.g.
+  JSON lines of S14, S15, and S26, e.g.
   `{"version":1,"seq":2,"event":"slice.titled","at":"2026-10-24T07:50:00Z","data":{"title":"Sign in with Google"}}`.
   Proves: R5
 - `TestParseNewEvents`: those lines parse back to the same values, with
@@ -361,7 +361,7 @@ the notes for R11, R40, and R43.
 - `TestWarnings0001`: `testdata/0001-spec.md` gives 0 warnings and
   exactly the notes for R11, R40, and R43.
   Proves: R16, R17
-- `TestCheckOrder`: problems at lines 42, 44, and 140 of S5 come in line
+- `TestCheckOrder`: problems at lines 42, 44, and 140 of S6 come in line
   order; at one line, the error comes before the warning.
   Proves: R16
 
@@ -411,8 +411,9 @@ part is R29's refused mark, which depends on both the state and R30. Its brief i
 
 ### Interfaces
 
-- `SliceStatus` gains `State state.State`, `SpecText, Next string`, and
-  `ChangedAfterReview bool`: changes. The fields `Phase` and `Title`
+- `SliceStatus` gains `State state.State`, `SpecText, Next string`,
+  `ChangedAfterReview bool`, and `Merged bool` (its log was read from the
+  base branch): changes. The fields `Phase` and `Title`
   stay, filled from `State`, so `internal/cli` keeps working. Task 07
   prints the new ones.
 - `func findWorktree(ctx context.Context, r Repo, name string) (string, bool, error)`:
@@ -421,7 +422,7 @@ part is R29's refused mark, which depends on both the state and R30. Its brief i
   Tasks 09, 11, 12, and 14 use it.
 - `func specChanged(ctx context.Context, worktree, name, commit string) (bool, error)`:
   creates. Flow 1, step 3. Task 14 uses it for R20.
-- `func specNext(st state.State, changed bool) (spec, next string)`:
+- `func specNext(st state.State, changed, merged bool) (spec, next string)`:
   creates. R29's table and refused mark.
 - `func currentSliceName(ctx context.Context, r Repo, command string) (string, error)`:
   changes. `command` like `slice status` or `spec validate` goes into
@@ -436,7 +437,7 @@ part is R29's refused mark, which depends on both the state and R30. Its brief i
   `fix spec.md, then: sliceflow spec submit`; with 2 errors and 1
   warning, `(submit refused: 2 errors, 1 warning)`; changed after review
   1 gives `passed review 1, but spec.md was changed after it` and
-  `sliceflow spec submit`.
+  `sliceflow spec submit`; a merged slice gives `-` as `Next:`.
   Proves: R29
 - `TestStatusState`: a slice whose committed log has `slice.created` and
   `slice.titled` "Sign in with Google" gives phase `planning`, that
@@ -509,6 +510,10 @@ updated for the two new lines. Its brief is about 2,000 words, over the usual 1,
 - `TestStatusReviewChanges`: S4's log prints S4's two lines.
   Proves: R29
   Scenario: S4
+- `TestStatusMerged`: S5's slice, merged with `git merge --no-ff` and its
+  branch deleted, prints S5's two lines.
+  Proves: R29
+  Scenario: S5
 - `TestStatusJSONReview`: a log with review 1 `passed` gives
   `"review":{"round":1,"reviewer":"placeholder","file":"reviews/spec-1.md","result":"passed"}`;
   a refused submit gives `"submit_refused":{"errors":0,"warnings":1}`;
@@ -520,7 +525,7 @@ updated for the two new lines. Its brief is about 2,000 words, over the usual 1,
 
 ### Out of scope
 
-- The status after a real submit (S13 to S17, S23). Done in: task 15, task 16
+- The status after a real submit (S14 to S18, S24). Done in: task 15, task 16
 
 ## Task 08: cli-groups-and-template
 
@@ -568,14 +573,14 @@ the built-in template as it is embedded.
 
 ### Done when
 
-- `TestTemplateShow`: S29's command prints exactly `template.Raw()` on
-  stdout, starting with S29's lines, exit code 0, in a folder that is
+- `TestTemplateShow`: S30's command prints exactly `template.Raw()` on
+  stdout, starting with S30's lines, exit code 0, in a folder that is
   not a git repo.
   Proves: R35
-  Scenario: S29
-- `TestTemplateShowUnknown`: S30's command prints S30's error, exit 1.
-  Proves: R35
   Scenario: S30
+- `TestTemplateShowUnknown`: S31's command prints S31's error, exit 1.
+  Proves: R35
+  Scenario: S31
 - `TestGroupsAlone`: `sliceflow spec` and `sliceflow template` print the
   usage on stdout, exit 0; `sliceflow template show` prints
   `Error: missing template name. Run sliceflow --help.`, exit 2;
@@ -601,7 +606,7 @@ risk: core
 
 `sliceflow spec validate [<name>] [--strict]` works as Flow 2 says.
 `openSlice` runs R11's first checks in order, for this command and the
-two that write. Its brief is about 2,300 words, over the usual 1,500, because S5 to S12 and R15's table hold the exact output.
+two that write. Its brief is about 2,300 words, over the usual 1,500, because S6 to S13 and R15's table hold the exact output.
 
 ### Steps
 
@@ -625,7 +630,7 @@ two that write. Its brief is about 2,300 words, over the usual 1,500, because S5
 
 - `func openSlice(ctx context.Context, r Repo, name string) (string, error)`:
   creates. R14 of 0001-slice-and-events for a bad name, R33 for no
-  slice, R11 for no worktree; returns the worktree. Tasks 12 and 14 use
+  slice, R11 for no worktree or a merged slice; returns the worktree. Tasks 12 and 14 use
   it.
 - `type Validation struct{ Problems []spec.Problem; Errors, Warnings, Notes int }`:
   creates.
@@ -637,37 +642,38 @@ two that write. Its brief is about 2,300 words, over the usual 1,500, because S5
 
 ### Done when
 
-- `TestValidateProblems`: S5's spec prints S5's 4 lines on stdout, exit 1.
+- `TestValidateProblems`: S6's spec prints S6's 4 lines on stdout, exit 1.
   Proves: R13, R14, R37
-  Scenario: S5
-- `TestValidateWarningOnly`: S6 prints `0 errors, 1 warning, 1 note`,
+  Scenario: S6
+- `TestValidateWarningOnly`: S7 prints `0 errors, 1 warning, 1 note`,
   exit 0.
   Proves: R14
-  Scenario: S6
-- `TestValidateStrict`: S7 exits with 1.
-  Proves: R14
   Scenario: S7
-- `TestValidateByName`: S8 on `main` prints `0 errors, 0 warnings, 0 notes`.
-  Proves: R13
+- `TestValidateStrict`: S8 exits with 1.
+  Proves: R14
   Scenario: S8
-- `TestValidateNoBranch`: S9 prints S9's 3 lines on stderr, exit 1.
-  Proves: R12
+- `TestValidateByName`: S9 on `main` prints `0 errors, 0 warnings, 0 notes`.
+  Proves: R13
   Scenario: S9
-- `TestValidateSkipsCode`: S10's spec reports neither line.
-  Proves: R18
+- `TestValidateNoBranch`: S10 prints S10's 3 lines on stderr, exit 1.
+  Proves: R12
   Scenario: S10
-- `TestValidateNoWorktree`: S11 prints S11's error, exit 1.
-  Proves: R11
+- `TestValidateSkipsCode`: S11's spec reports neither line.
+  Proves: R18
   Scenario: S11
-- `TestValidateNoSpec`: S12 prints S12's error, exit 1.
-  Proves: R19
+- `TestValidateNoWorktree`: S12 prints S12's two lines on stderr, exit 1.
+  Proves: R11
   Scenario: S12
-- `TestValidateJSON`: S31 prints S31's error, exit 2.
+- `TestValidateNoSpec`: S13 prints S13's error, exit 1.
+  Proves: R19
+  Scenario: S13
+- `TestValidateJSON`: S32 prints S32's error, exit 2.
   Proves: R36
-  Scenario: S31
+  Scenario: S32
 - `TestOpenSliceOrder`: `spec validate Bad_Name` gives R14's error of
   0001-slice-and-events; `no-such-slice` gives R33's; a slice with no
-  worktree gives R11's.
+  worktree gives R11's two lines; a merged slice gives
+  `slice login-google is merged into main, so it has no worktree. Nothing was changed.`
   Proves: R11
 
 ### Out of scope
@@ -859,19 +865,19 @@ says.
 
 ### Done when
 
-- `TestTitleSet`: S25 prints S25's line, makes S25's commit and log
-  line, and `slice list` then shows S25's row.
+- `TestTitleSet`: S26 prints S26's line, makes S26's commit and log
+  line, and `slice list` then shows S26's row.
   Proves: R32, R34
-  Scenario: S25
-- `TestTitleSame`: S26 prints S26's error, exit 1, no commit.
-  Proves: R33
   Scenario: S26
-- `TestTitleEmpty`: S27 prints S27's error, exit 1.
+- `TestTitleSame`: S27 prints S27's error, exit 1, no commit.
   Proves: R33
   Scenario: S27
-- `TestTitleMissing`: S28 prints S28's error, exit 2.
-  Proves: R36
+- `TestTitleEmpty`: S28 prints S28's error, exit 1.
+  Proves: R33
   Scenario: S28
+- `TestTitleMissing`: S29 prints S29's error, exit 2.
+  Proves: R36
+  Scenario: S29
 - `TestTitleUnknownState`: a slice whose log has no good `slice.created`
   gives R32's error, exit 1.
   Proves: R32
@@ -985,20 +991,20 @@ goes on from `submitted`. Its brief is about 3,000 words, over the usual 1,500, 
 
 ### Done when
 
-- `TestSubmitRefused`: S13's spec gives the steps `problems` and
+- `TestSubmitRefused`: S14's spec gives the steps `problems` and
   `refused` (0 errors, 1 warning, before `draft`), one commit
   `login-google: spec submit refused` holding `spec.md` and the log.
   Proves: R21, R22
 - `TestSubmitAccepted`: a finished spec gives `submitted`, `started`
   (round 1, `placeholder`, `reviews/spec-1.md`), and `finished`
-  (`passed`), three commits as S14, and `review.started`'s `commit` is
+  (`passed`), three commits as S15, and `review.started`'s `commit` is
   the first of them.
   Proves: R21, R23, R25, R27, R28
-- `TestSubmitStates`: `review_passed` unchanged gives S15's error;
-  `in_review` gives S18's; no `slice.created` gives R20's third error;
+- `TestSubmitStates`: `review_passed` unchanged gives S16's error;
+  `in_review` gives S19's; no `slice.created` gives R20's third error;
   `review_passed` with an edited `spec.md` is accepted with round 2.
   Proves: R20
-- `TestSubmitReviewFileExists`: S21's file gives R24's error, no commit.
+- `TestSubmitReviewFileExists`: S22's file gives R24's error, no commit.
   Proves: R24
 - `TestSubmitGoOn`: a log ending with an accepted `spec.submitted`,
   then a `slice.titled`, goes on with `started` and `finished` only;
@@ -1034,8 +1040,8 @@ risk: normal
 
 `sliceflow spec submit [<name>]` prints each step as it happens, with
 R22's and R28's lines, on stdout, and exits as the spec says. Its e2e
-tests cover the normal submit cases, S13 to S18. Its brief is about
-3,000 words, over the usual 1,500, because S13 to S18 hold the exact
+tests cover the normal submit cases, S14 to S19. Its brief is about
+3,000 words, over the usual 1,500, because S14 to S19 hold the exact
 output of each step.
 
 ### Steps
@@ -1056,31 +1062,31 @@ output of each step.
 
 ### Done when
 
-- `TestSubmitRefusedCmd`: S13's output, exit 1, commit, log line, and
+- `TestSubmitRefusedCmd`: S14's output, exit 1, commit, log line, and
   status lines.
   Proves: R20, R21, R22, R29, R37
-  Scenario: S13
-- `TestSubmitAcceptedCmd`: S14's output, exit 0, three commits, three
+  Scenario: S14
+- `TestSubmitAcceptedCmd`: S15's output, exit 0, three commits, three
   log lines, and status lines; `reviews/spec-1.md` is R25's front matter
   and then R26's text.
   Proves: R21, R23, R25, R26, R27, R28, R29
-  Scenario: S14
-- `TestSubmitUnchanged`: S15's error, exit 1, no commit.
-  Proves: R20
   Scenario: S15
-- `TestSubmitChangedStatus`: S16's status lines.
-  Proves: R29, R30
-  Scenario: S16
-- `TestSubmitRound2`: S17's lines.
-  Proves: R20, R25, R30
-  Scenario: S17
-- `TestSubmitInReview`: S18's error, exit 1.
+- `TestSubmitUnchanged`: S16's error, exit 1, no commit.
   Proves: R20
+  Scenario: S16
+- `TestSubmitChangedStatus`: S17's status lines.
+  Proves: R29, R30
+  Scenario: S17
+- `TestSubmitRound2`: S18's lines.
+  Proves: R20, R25, R30
   Scenario: S18
+- `TestSubmitInReview`: S19's error, exit 1.
+  Proves: R20
+  Scenario: S19
 
 ### Out of scope
 
-- The failure cases, S19 to S24. Done in: task 16
+- The failure cases, S20 to S25. Done in: task 16
 - A real reviewer. Done in: not in this slice
 
 ## Task 16: submit-failures
@@ -1099,7 +1105,7 @@ The e2e tests for the ways a submit can fail or stop: the lock, a
 refused commit, a leftover review file, the lead's staged files, a stop
 halfway and going on, and Ctrl-C. 0001's no-network test runs the new
 commands too. This task adds tests only. Its brief is about 3,000
-words, over the usual 1,500, because S19 to S24 and the write path's
+words, over the usual 1,500, because S20 to S25 and the write path's
 rules hold the exact failure output.
 
 ### Steps
@@ -1117,27 +1123,27 @@ rules hold the exact failure output.
 
 ### Done when
 
-- `TestSubmitBusy`: S19's error after 10 s, exit 1, no commit.
+- `TestSubmitBusy`: S20's error after 10 s, exit 1, no commit.
   Proves: R6, R7
-  Scenario: S19
-- `TestSubmitHookFails`: S20's error, exit 1, log as committed, no
+  Scenario: S20
+- `TestSubmitHookFails`: S21's error, exit 1, log as committed, no
   commit.
   Proves: R9, R10
-  Scenario: S20
-- `TestSubmitFileExists`: S21's error, exit 1.
-  Proves: R24
   Scenario: S21
-- `TestSubmitOwnFiles`: S22: `src/app.go` is in no new commit, and still
+- `TestSubmitFileExists`: S22's error, exit 1.
+  Proves: R24
+  Scenario: S22
+- `TestSubmitOwnFiles`: S23: `src/app.go` is in no new commit, and still
   staged.
   Proves: R8
-  Scenario: S22
-- `TestSubmitStopsHalfway`: S23's output with a `commit-msg` hook, exit
+  Scenario: S23
+- `TestSubmitStopsHalfway`: S24's output with a `commit-msg` hook, exit
   1, and its status lines.
   Proves: R10, R29
-  Scenario: S23
-- `TestSubmitGoesOn`: S24's output, exit 0, two new commits.
-  Proves: R20
   Scenario: S24
+- `TestSubmitGoesOn`: S25's output, exit 0, two new commits.
+  Proves: R20
+  Scenario: S25
 - `TestSubmitInterrupted`: with a `pre-commit` hook that sleeps 30 s,
   `os.Interrupt` during the first commit gives R10's error with the
   reason `interrupted`, the log as committed, and no lock file left.
