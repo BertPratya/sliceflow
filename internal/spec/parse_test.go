@@ -133,6 +133,7 @@ func TestParseFrontMatter(t *testing.T) {
 		{"---\nideas: []\n---\n", "[]", nil},
 		{"---\nideas: [docs/ideas/a.md]\n---\n", "[docs/ideas/a.md]", nil},
 		{"---\nideas:\n  - docs/ideas/a.md\n---\n", "", []string{"docs/ideas/a.md"}},
+		{"---\nideas:\n- docs/ideas/a.md\n---\n", "", []string{"docs/ideas/a.md"}},
 	}
 	for _, c := range cases {
 		d := Parse([]byte(c.src))
@@ -151,5 +152,53 @@ func TestParseFrontMatter(t *testing.T) {
 	d = Parse([]byte("---\nslice: {{slice}}\n---\n"))
 	if len(d.Placeholders) != 1 || d.Placeholders[0].Line != 2 {
 		t.Fatalf("front placeholder: %+v", d.Placeholders)
+	}
+}
+
+func TestParseBadMarkers(t *testing.T) {
+	src := "## Requirements\n\n" +
+		"- **R 7.** a\n" +
+		"- **SD 1.** b\n" +
+		"- **R1** c\n" +
+		"- **R2.** good\n" +
+		"**R9.** not a list item\n" +
+		"- **AB12** other letters\n" +
+		"  - **R8.** nested\n"
+	d := Parse([]byte(src))
+	bad := d.Sections[0].BadMarkers
+	if len(bad) != 3 || bad[0].Line != 3 || bad[1].Line != 4 || bad[2].Line != 5 {
+		t.Fatalf("bad = %+v", bad)
+	}
+	if len(d.Sections[0].Items) != 1 || d.Sections[0].Items[0].ID != "R2" {
+		t.Fatalf("items = %+v", d.Sections[0].Items)
+	}
+}
+
+func TestParseUnclosedFront(t *testing.T) {
+	d := Parse([]byte("---\nslice: x\n\n## Summary\n\ntext\n"))
+	if d.HasFront || len(d.Front) != 0 {
+		t.Fatalf("front = %+v", d)
+	}
+	if len(d.Sections) != 1 || d.Sections[0].Name != "Summary" || d.Sections[0].Line != 4 {
+		t.Fatalf("sections = %+v", d.Sections)
+	}
+}
+
+func TestParseEmptyWithCode(t *testing.T) {
+	src := "## Why\n\n```\ncode\n```\n\n## Assumptions\n\n`only`\n\n## Open questions\n\n<!-- c -->\n\n## Summary\n"
+	d := Parse([]byte(src))
+	want := map[string]bool{"Why": false, "Assumptions": false, "Open questions": true, "Summary": true}
+	for _, s := range d.Sections {
+		if s.Empty != want[s.Name] {
+			t.Errorf("%s: Empty = %v", s.Name, s.Empty)
+		}
+	}
+}
+
+func TestParseInlineCodeAcrossLines(t *testing.T) {
+	src := "## Why\n\nstart `code {{a}}\nend` then {{real}} and `x`\n"
+	d := Parse([]byte(src))
+	if len(d.Placeholders) != 1 || d.Placeholders[0].Line != 4 || d.Placeholders[0].Text != "{{real}}" {
+		t.Fatalf("placeholders = %+v", d.Placeholders)
 	}
 }

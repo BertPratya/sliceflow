@@ -8,11 +8,11 @@ import (
 var (
 	fenceOpen   = regexp.MustCompile("^\\s*(`{3,}|~{3,})")
 	itemRe      = regexp.MustCompile(`^- \*\*([A-Z]+[0-9]+)\.\*\*(?:\s+(.*))?$`)
-	markerLike  = regexp.MustCompile(`^\s*(?:- )?\*\*[A-Z]+[0-9]+`)
+	markerLike  = regexp.MustCompile(`^- +\*\*(?:R|S|SD|SC|Q)[0-9 ]`)
 	bulletRe    = regexp.MustCompile(`^- +(.*)$`)
 	sectionRe   = regexp.MustCompile(`^##\s+(.+?)\s*$`)
 	fieldRe     = regexp.MustCompile(`^([A-Za-z_][A-Za-z0-9_-]*):\s*(.*?)\s*$`)
-	listItemRe  = regexp.MustCompile(`^\s+-\s+(.*?)\s*$`)
+	listItemRe  = regexp.MustCompile(`^\s*-\s+(.*?)\s*$`)
 	labelRe     = regexp.MustCompile(`^(\s+)(Check|Shows|Measured|Why|Not chosen|Cost|Rule|Noticed|Replaces):\s*(.*?)\s*$`)
 	removedRe   = regexp.MustCompile(`^\(removed in `)
 	frontMarker = "---"
@@ -20,9 +20,10 @@ var (
 
 // scanned is one line, read for what to skip.
 type scanned struct {
-	raw   string // the line as written
-	vis   string // comments and fenced lines blanked; inline code kept
-	clean string // comments, fenced lines, and inline code blanked
+	raw    string // the line as written
+	vis    string // comments and fenced lines blanked; inline code kept
+	clean  string // comments, fenced lines, and inline code blanked
+	fenced bool   // the line is in or on a fenced code block
 }
 
 // Parse reads the text of a spec. It never fails: what it cannot read, it
@@ -41,14 +42,16 @@ func Parse(text []byte) Doc {
 
 	i := 0
 	if len(lines) > 0 && strings.TrimRight(lines[0], " \t") == frontMarker {
-		d.HasFront = true
-		i = 1
-		for ; i < len(lines); i++ {
-			if strings.TrimRight(lines[i], " \t") == frontMarker {
-				i++
+		// The front matter counts only when its closing --- is found.
+		for j := 1; j < len(lines); j++ {
+			if strings.TrimRight(lines[j], " \t") == frontMarker {
+				d.HasFront = true
+				for k := 1; k < j; k++ {
+					readFront(&d, sc[k], k+1)
+				}
+				i = j + 1
 				break
 			}
-			readFront(&d, sc[i], i+1)
 		}
 	}
 
@@ -57,13 +60,14 @@ func Parse(text []byte) Doc {
 	var curLabel *Label
 	var labelIndent int
 	var text_ []string
+	hasContent := false
 	finish := func() {
 		if cur != nil {
 			cur.Text = strings.TrimSpace(strings.Join(text_, "\n"))
-			cur.Empty = cur.Text == ""
+			cur.Empty = !hasContent
 			d.Sections = append(d.Sections, *cur)
 		}
-		cur, curItem, curLabel, text_ = nil, nil, nil, nil
+		cur, curItem, curLabel, text_, hasContent = nil, nil, nil, nil, false
 	}
 	flushItem := func() {
 		if curItem != nil {
@@ -86,6 +90,9 @@ func Parse(text []byte) Doc {
 			continue
 		}
 		text_ = append(text_, strings.TrimRight(clean, " \t"))
+		if sc[i].fenced || strings.TrimSpace(sc[i].vis) != "" {
+			hasContent = true
+		}
 		vis := strings.TrimRight(sc[i].vis, " \t")
 		if m := itemRe.FindStringSubmatch(clean); m != nil {
 			flushItem()
@@ -157,12 +164,13 @@ func readFront(d *Doc, l scanned, n int) {
 func scanLines(lines []string, d *Doc) []scanned {
 	out := make([]scanned, len(lines))
 	inComment := false
-	fence := "" // the fence that opened, e.g. "```"
+	fence := ""  // the fence that opened, e.g. "```"
+	codeRun := 0 // backticks of an inline code that goes on from the line before
 	for i, raw := range lines {
 		n := i + 1
 		s := scanned{raw: raw}
 		if fence != "" {
-			s.vis, s.clean = blank(raw), blank(raw)
+			s.vis, s.clean, s.fenced = blank(raw), blank(raw), true
 			t := strings.TrimSpace(raw)
 			if len(t) >= len(fence) && strings.Trim(t, fence[:1]) == "" {
 				fence = ""
@@ -170,10 +178,10 @@ func scanLines(lines []string, d *Doc) []scanned {
 			out[i] = s
 			continue
 		}
-		if !inComment {
+		if !inComment && codeRun == 0 {
 			if m := fenceOpen.FindStringSubmatch(raw); m != nil && !(m[1][0] == '`' && strings.Contains(raw[len(m[0]):], "`")) {
 				fence = m[1]
-				s.vis, s.clean = blank(raw), blank(raw)
+				s.vis, s.clean, s.fenced = blank(raw), blank(raw), true
 				out[i] = s
 				continue
 			}
@@ -193,6 +201,16 @@ func scanLines(lines []string, d *Doc) []scanned {
 				j = end
 				continue
 			}
+			if codeRun > 0 {
+				end := len(raw)
+				if e := closingRun(raw, j, codeRun); e >= 0 {
+					end = e
+					codeRun = 0
+				}
+				blankRange(clean, j, end)
+				j = end
+				continue
+			}
 			c := raw[j]
 			if c == '`' {
 				k := j
@@ -203,6 +221,10 @@ func scanLines(lines []string, d *Doc) []scanned {
 				if e := closingRun(raw, k, len(run)); e >= 0 {
 					blankRange(clean, j, e)
 					j = e
+				} else if spansLines(lines, i, len(run)) {
+					blankRange(clean, j, len(raw))
+					codeRun = len(run)
+					j = len(raw)
 				} else {
 					j = k
 				}
@@ -255,6 +277,17 @@ func closingRun(s string, from, n int) int {
 		j = k
 	}
 	return -1
+}
+
+// spansLines tells whether an inline code with a run of n backticks, open at
+// the end of line i, closes on a later line of the same paragraph.
+func spansLines(lines []string, i, n int) bool {
+	for j := i + 1; j < len(lines) && strings.TrimSpace(lines[j]) != ""; j++ {
+		if closingRun(lines[j], 0, n) >= 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func blank(s string) string {
