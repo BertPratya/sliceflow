@@ -2,11 +2,11 @@
 
 - Phase: preview
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 10:41 UTC
+- Updated: 2026-10-24 11:32 UTC
 
 ## Needs human
 
-- The preview: the human tries checks P1 to P5 in preview.md and reports each result.
+None.
 
 ## Documents
 
@@ -165,16 +165,18 @@ Open: 0 · Waiting for verify: 0 · Closed: 86
 
 ## Preview
 
-- P1 (S1): not tried
-- P2 (S13): not tried
-- P3 (S20): not tried
-- P4 (S26): not tried
-- P5 (R18): not tried
+- P1 (S1): pass
+- P2 (S13): pass
+- P3 (S20): pass
+- P4 (S26): pass
+- P5 (R18): pass on Linux; Windows (step 5) not tried, the human's choice; in the backlog
 
 ## Log
 
 Newest first.
 
+- 2026-10-24 11:32 · human · result approved: "approve. P5 Windows not tried, add it to the backlog."
+- 2026-10-24 11:32 · human · preview: P1 to P5 pass on Linux; P5 on Windows not tried
 - 2026-10-24 10:41 · lead (claude) · phase preview: the preview goes to the human
 - 2026-10-24 10:41 · lead (claude) · integration-2/F1 (low) deferred to the backlog (main, eec3b1c)
 - 2026-10-24 10:41 · code reviewer (claude opus) · integration-2 submitted: pass; integration-1/F1 and F2 verified; R1 to R43 ok; 1 low
