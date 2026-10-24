@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-13 of 15 done · 2 todo
+13 of 15 done · 1 doing · 1 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -36,7 +36,7 @@ None.
 | 11 | status-command | normal | done | 0 | 1 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | done | 0 | 2 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
 | 13 | no-network-check | normal | done | 0 | 2 | 09, 12 | R40 |
-| 14 | fix-undo-prune | core | todo | 0 | 0 | 09 | R18 |
+| 14 | fix-undo-prune | core | doing | 0 | 0 | 09 | R18 |
 | 15 | dedupe-helpers | low | todo (waiting: 14) | 0 | 0 | 14 | - |
 
 ## Findings
@@ -170,6 +170,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 10:32 · lead (claude) · task 14 started: worker round 1
 - 2026-10-24 10:32 · lead (claude) · fix tasks 14 (integration-1/F1) and 15 (integration-1/F2) added; phase back to implementing
 - 2026-10-24 10:32 · code reviewer (claude opus) · integration-1 submitted: changes; 1 high (the prune), 1 low; R1 to R43 ok
 - 2026-10-24 10:25 · lead (claude) · integration review started, round 1
