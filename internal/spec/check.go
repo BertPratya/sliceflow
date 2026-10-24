@@ -23,6 +23,7 @@ func Check(d Doc, slice string) []Problem {
 	ps = append(ps, sectionErrors(d)...)
 	ps = append(ps, itemErrors(d)...)
 	ps = append(ps, outOfScopeErrors(d)...)
+	ps = append(ps, warnings(d)...)
 	sortProblems(ps)
 	return ps
 }
