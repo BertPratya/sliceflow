@@ -10,13 +10,22 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 2. The slices follow the order of the workflow: each one uses the one
    before it.
 3. Each slice stays under about 25-30 requirements.
+4. **The state machine grows slice by slice** (decided, the human,
+   2026-10-24). 0002 builds the engine once: how a move is described
+   (an event, when it is allowed, the state it moves to), replaying the
+   log through the moves, refusing a move that is not allowed, and
+   showing where a slice is and what comes next. Each slice then adds
+   only the moves of its own step, never the whole loop ahead of time.
+   The engine lets a mark (blocked, cancelled) sit on top of any phase
+   (design 1.4); the marks themselves come with the slices that need
+   them.
 
 ## The slices
 
 | # | Slice | What you can do after it | Design |
 |---|---|---|---|
-| 0001 | slice and events | create a slice (`sliceflow slice new`) and see it (`sliceflow status`); every event in the event log, `status.md` written from it | 1.13, 2.1 |
-| 0002 | spec | write a spec and check it | 2.2 |
+| 0001 | slice and events | create a slice (`sliceflow slice create`), see it (`sliceflow slice status`, `sliceflow slice list`); the event log with its first event, `slice.created` | 1.13, 2.1 |
+| 0002 | spec | the state machine's engine, and the spec's moves: write a spec and check it; see where a slice is and what comes next | 1.4, 2.2 |
 | 0003 | plan | write the plan, tasks, and preview, review them, and approve the planning once; the slice is ready to build | 2.3 |
 | 0004 | agents | `sliceflow` starts agents itself: the Codex adapter, the permission layers, settings per role; first use: the spec check and the plan review | 1.9, 1.12c |
 | 0005 | the run | `sliceflow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge | 2.4 |
