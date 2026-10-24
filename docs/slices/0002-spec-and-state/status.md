@@ -3,24 +3,23 @@
 - Phase: planning
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 21:20 UTC
+- Updated: 2026-10-24 23:00 UTC
 
 ## Needs human
 
-- Review as its own node, or inside `spec submit`: brainstorm with the human
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 4 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 5 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
-0 of 16 done · 16 todo
+0 of 17 done · 17 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -37,9 +36,10 @@
 | 11 | save-event | core | todo | 0 | 0 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
 | 12 | title-command | normal | todo | 0 | 0 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | todo | 0 | 0 | - | R25, R26, R27 |
-| 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11, 13 | R12, R19, R20, R21, R22, R23, R24, R25, R27, R28 |
-| 15 | submit-command | normal | todo | 0 | 0 | 07, 12, 14 | R20, R21, R22, R23, R25, R26, R27, R28, R29, R30, R37 |
-| 16 | submit-failures | normal | todo | 0 | 0 | 15 | R6, R7, R8, R9, R10, R20, R24, R29 |
+| 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
+| 15 | review-core | core | todo | 0 | 0 | 09, 11, 13 | R12, R24, R25, R27, R28 |
+| 16 | submit-review-commands | normal | todo | 0 | 0 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
+| 17 | submit-review-failures | normal | todo | 0 | 0 | 16 | R6, R7, R8, R9, R10, R24, R25, R29 |
 
 ## Findings
 
@@ -112,6 +112,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 23:00 · lead (claude) · change review 5 started: the review as its own command
+- 2026-10-24 22:55 · lead (claude) · human: the review is its own command, `sliceflow spec review`; `spec submit` ends at submitted; a general `sliceflow run` goes to the backlog. Spec (Stories 3 and 4, R20, R23, R24, SD8, SD13), plan (Flows 3 to 5), tasks (14 to 17), preview (P3, P4) changed
 - 2026-10-24 21:30 · lead (claude) · human: the Make one: line prints the full path (R11, S12); the review question goes to a brainstorm first
 - 2026-10-24 21:20 · lead (claude) · plan-4 lows F1, F2, F3, F5 fixed; F4 and the human's question (review as its own node) are open; documents back to draft
 - 2026-10-24 21:10 · doc-reviewer (claude opus) · change review 4 handed in: 5 low

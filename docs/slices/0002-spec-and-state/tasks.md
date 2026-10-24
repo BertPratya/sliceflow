@@ -60,7 +60,7 @@ R26's reasons of 0001-slice-and-events, in the same order of checks.
 ### Done when
 
 - `TestEncodeNewEvents`: `Encode` of each new event gives exactly the
-  JSON lines of S14, S15, and S26, e.g.
+  JSON lines of S14, S15, S20, and S30, e.g.
   `{"version":1,"seq":2,"event":"slice.titled","at":"2026-10-24T07:50:00Z","data":{"title":"Sign in with Google"}}`.
   Proves: R5
 - `TestParseNewEvents`: those lines parse back to the same values, with
@@ -525,7 +525,7 @@ updated for the two new lines. Its brief is about 2,000 words, over the usual 1,
 
 ### Out of scope
 
-- The status after a real submit (S14 to S18, S24). Done in: task 15, task 16
+- The status after a real submit or review (S14, S15, S20, S23, S28). Done in: task 16, task 17
 
 ## Task 08: cli-groups-and-template
 
@@ -546,7 +546,7 @@ the built-in template as it is embedded.
 ### Steps
 
 1. Write the tests listed under Done when. Run them, and see them fail.
-2. `internal/cli/cli.go`: groups in `Run`; `topUsage` lists all seven
+2. `internal/cli/cli.go`: groups in `Run`; `topUsage` lists all eight
    commands; `sliceflow spec` and `sliceflow template` alone print it.
 3. `internal/template/template.go`: `Raw`.
 4. `internal/cli/template.go`: `template show`, with
@@ -567,20 +567,21 @@ the built-in template as it is embedded.
 - `func Raw() []byte`: creates, in `internal/template`. The embedded
   spec template, unchanged.
 - `topUsage`: changes. Lines for `spec validate [<name>] [--strict]`,
-  `spec submit [<name>]`, `slice title <name> <title>`, and
-  `template show <template>`. Tasks 09, 12, and 15 register those
+  `spec submit [<name>]`, `spec review [<name>]`,
+  `slice title <name> <title>`, and `template show <template>`. Tasks
+  09, 12, and 16 register those
   commands with `register`.
 
 ### Done when
 
-- `TestTemplateShow`: S30's command prints exactly `template.Raw()` on
-  stdout, starting with S30's lines, exit code 0, in a folder that is
+- `TestTemplateShow`: S34's command prints exactly `template.Raw()` on
+  stdout, starting with S34's lines, exit code 0, in a folder that is
   not a git repo.
   Proves: R35
-  Scenario: S30
-- `TestTemplateShowUnknown`: S31's command prints S31's error, exit 1.
+  Scenario: S34
+- `TestTemplateShowUnknown`: S35's command prints S35's error, exit 1.
   Proves: R35
-  Scenario: S31
+  Scenario: S35
 - `TestGroupsAlone`: `sliceflow spec` and `sliceflow template` print the
   usage on stdout, exit 0; `sliceflow template show` prints
   `Error: missing template name. Run sliceflow --help.`, exit 2;
@@ -590,7 +591,7 @@ the built-in template as it is embedded.
 
 ### Out of scope
 
-- The other new commands. Done in: task 09, task 12, task 15
+- The other new commands. Done in: task 09, task 12, task 16
 
 ## Task 09: validate-command
 
@@ -670,9 +671,9 @@ two that write. Its brief is about 2,300 words, over the usual 1,500, because S6
 - `TestValidateNoSpec`: S13 prints S13's error, exit 1.
   Proves: R19
   Scenario: S13
-- `TestValidateJSON`: S32 prints S32's error, exit 2.
+- `TestValidateJSON`: S36 prints S36's error, exit 2.
   Proves: R36
-  Scenario: S32
+  Scenario: S36
 - `TestValidateMerged`: `sliceflow spec validate login-google` on `main`,
   after `login-google` was merged with `git merge --no-ff` and its branch
   deleted, prints
@@ -687,7 +688,7 @@ two that write. Its brief is about 2,300 words, over the usual 1,500, because S6
 
 ### Out of scope
 
-- Submitting. Done in: task 14, task 15
+- Submitting and reviewing. Done in: task 14, task 15, task 16
 
 ## Task 10: lock
 
@@ -816,7 +817,7 @@ hardest part is the undo, and Ctrl-C during the commit. Its brief is about 2,700
   `Prepare` returned is gone, nothing is staged, and the error is
   `could not save the event: git commit failed (exit code 1). Nothing was changed.`
   Proves: R10
-- `TestSaveTail`: with `Tail` `The steps before it were saved; spec.md is submitted.`,
+- `TestSaveTail`: with `Tail` `The steps before it were saved; spec.md is in_review.`,
   the error ends with it.
   Proves: R10
 - `TestSaveCancelled`: a cancelled `ctx` during the commit undoes as
@@ -874,19 +875,19 @@ says.
 
 ### Done when
 
-- `TestTitleSet`: S26 prints S26's line, makes S26's commit and log
-  line, and `slice list` then shows S26's row.
+- `TestTitleSet`: S30 prints S30's line, makes S30's commit and log
+  line, and `slice list` then shows S30's row.
   Proves: R32, R34
-  Scenario: S26
-- `TestTitleSame`: S27 prints S27's error, exit 1, no commit.
+  Scenario: S30
+- `TestTitleSame`: S31 prints S31's error, exit 1, no commit.
   Proves: R33
-  Scenario: S27
-- `TestTitleEmpty`: S28 prints S28's error, exit 1.
+  Scenario: S31
+- `TestTitleEmpty`: S32 prints S32's error, exit 1.
   Proves: R33
-  Scenario: S28
-- `TestTitleMissing`: S29 prints S29's error, exit 2.
+  Scenario: S32
+- `TestTitleMissing`: S33 prints S33's error, exit 2.
   Proves: R36
-  Scenario: S29
+  Scenario: S33
 - `TestTitleUnknownState`: a slice whose log has no good `slice.created`
   gives R32's error, exit 1.
   Proves: R32
@@ -957,25 +958,23 @@ the result from a review file.
 ## Task 14: submit-core
 
 ```yaml
-covers: [R12, R19, R20, R21, R22, R23, R24, R25, R27, R28]
-depends_on: ["05", "09", "11", "13"]
+covers: [R12, R19, R20, R21, R22, R23]
+depends_on: ["05", "09", "11"]
 touches: [internal/slice/submit.go, internal/slice/submit_test.go]
-follows: ["Flow 3: Submit, refused", "Flow 4: Submit, accepted, and the review", "Flow 5: Submit again from submitted", Core API, Saving an event, Interrupts, Tests, Testing]
+follows: ["Flow 3: Submit, refused", "Flow 4: Submit, accepted", Core API, Saving an event, Interrupts, Tests, Testing]
 risk: core
 ```
 
 ### Goal
 
-`slice.Submit` runs Flows 3, 4, and 5: the state check, the strict
-check, `spec.submitted`, and the review with its two events, reporting
-each step as it happens. The hardest parts are the three separate
-saves, each under its own lock, and finding the submit's commit when it
-goes on from `submitted`. Its brief is about 3,000 words, over the usual 1,500, because Flows 3 to 5 and their scenarios hold the exact steps; splitting it would put one flow into several tasks.
+`slice.Submit` runs Flows 3 and 4: the state check, the strict check,
+and `spec.submitted`, all in one `Prepare` under the lock. It ends at
+`submitted`; it never starts the review.
 
 ### Steps
 
 1. Write the tests listed under Done when. Run them, and see them fail.
-2. `internal/slice/submit.go`: `Step`, `Submission`, `Submit`.
+2. `internal/slice/submit.go`: `Submission`, `Submit`.
 3. Run the tests until they pass.
 
 ### Files
@@ -984,41 +983,30 @@ goes on from `submitted`. Its brief is about 3,000 words, over the usual 1,500, 
 
 ### Interfaces
 
-- `type Step struct{ Kind string; Problems []spec.Problem; Refused *state.Counts; Before string; Round int; Reviewer, File, Result string }`:
-  creates. `Kind` is `problems`, `refused`, `submitted`, `started`, or
-  `finished`. `Before` is the spec's state before a refused submit, for
-  R22's last sentence. Task 15 prints each kind.
-- `type Submission struct{ Refused bool }`: creates.
-- `func Submit(ctx context.Context, r Repo, name string, step func(Step)) (Submission, error)`:
+- `type Submission struct{ Problems []spec.Problem; Refused *state.Counts; Before string }`:
+  creates. `Refused` is nil when accepted. `Before` is the spec's state
+  before a refused submit, for R22's last sentence. Task 16 prints it.
+- `func Submit(ctx context.Context, r Repo, name string) (Submission, error)`:
   creates. `name` `""` means the current branch's slice (R12), with
-  `spec submit` in R32's second line. Each of its three saves does its
-  checks in `Prepare`. Tasks 15 and 16 call it.
-- `var reviewer = review.Placeholder()`: creates. The one reviewer of
-  this slice. (lead's call)
-- `openSlice`, `saveEvent`, `specChanged`, `spec.Parse`, `spec.Check`,
-  `review.FrontMatter`, `review.ReadResult`: uses.
+  `spec submit` in R32's second line. Task 16 calls it.
+- `openSlice`, `saveEvent`, `specChanged`, `spec.Parse`, `spec.Check`:
+  uses.
 
 ### Done when
 
-- `TestSubmitRefused`: S14's spec gives the steps `problems` and
-  `refused` (0 errors, 1 warning, before `draft`), one commit
+- `TestSubmitRefused`: S14's spec gives `Refused` 0 errors and 1
+  warning, `Before` `draft`, and one commit
   `login-google: spec submit refused` holding `spec.md` and the log.
   Proves: R21, R22
-- `TestSubmitAccepted`: a finished spec gives `submitted`, `started`
-  (round 1, `placeholder`, `reviews/spec-1.md`), and `finished`
-  (`passed`), three commits as S15, and `review.started`'s `commit` is
-  the first of them.
-  Proves: R21, R23, R25, R27, R28
-- `TestSubmitStates`: `review_passed` unchanged gives S16's error;
-  `in_review` gives S19's; no `slice.created` gives R20's third error;
-  `review_passed` with an edited `spec.md` is accepted with round 2.
+- `TestSubmitAccepted`: a finished spec gives `Refused` nil, one commit
+  `login-google: spec submitted` holding `spec.md` and the log, and the
+  state `submitted`; no review file exists.
+  Proves: R21, R23
+- `TestSubmitStates`: `submitted` gives S16's error; `review_passed`
+  unchanged gives S27's; `in_review` gives R20's `in_review` error; no
+  `slice.created` gives R20's third error; `review_passed` with an
+  edited `spec.md` is accepted.
   Proves: R20
-- `TestSubmitReviewFileExists`: S22's file gives R24's error, no commit.
-  Proves: R24
-- `TestSubmitGoOn`: a log ending with an accepted `spec.submitted`,
-  then a `slice.titled`, goes on with `started` and `finished` only;
-  `commit` is the commit that added that `spec.submitted`.
-  Proves: R20, R25
 - `TestSubmitNoName`: on `main` with no name, the error's second line is
   `Give a name: sliceflow spec submit <name>`; in the worktree with no
   name, the worktree's slice is submitted.
@@ -1026,48 +1014,115 @@ goes on from `submitted`. Its brief is about 3,000 words, over the usual 1,500, 
 - `TestSubmitNoSpec`: with `spec.md` deleted, R19's error, no event, no
   commit.
   Proves: R19
-- `TestSubmitMovedFirst`: when another save moves the state between the
-  steps, the next step returns R6's error, with
-  `The steps before it were saved.`
-  Proves: R20
 
 ### Out of scope
 
-- Printing, and the exit codes. Done in: task 15
+- The review. Done in: task 15
+- Printing, and the exit codes. Done in: task 16
 
-## Task 15: submit-command
+## Task 15: review-core
 
 ```yaml
-covers: [R20, R21, R22, R23, R25, R26, R27, R28, R29, R30, R37]
-depends_on: ["07", "12", "14"]
-touches: [internal/cli/submit.go, internal/e2e/submit_command_test.go]
-follows: ["Flow 3: Submit, refused", "Flow 4: Submit, accepted, and the review", "Flow 5: Submit again from submitted", CLI, Interrupts, Tests, Testing]
+covers: [R12, R24, R25, R27, R28]
+depends_on: ["09", "11", "13"]
+touches: [internal/slice/review.go, internal/slice/review_test.go]
+follows: ["Flow 5: Review the spec", Core API, Saving an event, Interrupts, Tests, Testing]
+risk: core
+```
+
+### Goal
+
+`slice.ReviewSpec` runs Flow 5: the state check, `review.started`, the
+reviewer with no lock held, and `review.finished`, reporting each step
+as it happens. The hardest parts are the two saves, each under its own
+lock, and finding the commit of the last accepted `spec.submitted`.
+
+### Steps
+
+1. Write the tests listed under Done when. Run them, and see them fail.
+2. `internal/slice/review.go`: `Step`, `ReviewSpec`.
+3. Run the tests until they pass.
+
+### Files
+
+- `internal/slice/review.go`, `internal/slice/review_test.go`: new.
+
+### Interfaces
+
+- `type Step struct{ Kind string; Round int; Reviewer, File, Result string }`:
+  creates. `Kind` is `started` or `finished`. Task 16 prints each kind.
+- `func ReviewSpec(ctx context.Context, r Repo, name string, step func(Step)) error`:
+  creates. `name` `""` means the current branch's slice (R12), with
+  `spec review` in R32's second line. Task 16 calls it.
+- `var reviewer = review.Placeholder()`: creates. The one reviewer of
+  this slice. (lead's call)
+- `openSlice`, `saveEvent`, `review.FrontMatter`, `review.ReadResult`:
+  uses.
+
+### Done when
+
+- `TestReviewPasses`: on a submitted spec, `step` gets `started`
+  (round 1, `placeholder`, `reviews/spec-1.md`) and `finished`
+  (`passed`); two commits as S20; `review.started`'s `commit` is the
+  commit that added the accepted `spec.submitted`, also when a
+  `slice.titled` came after it.
+  Proves: R25, R27, R28
+- `TestReviewStates`: `draft` gives S21's error; `in_review` gives S25's;
+  `review_passed` gives S26's; no `slice.created` gives R20's third
+  error; none saves an event.
+  Proves: R24
+- `TestReviewFileExists`: S22's file gives S22's error, no commit.
+  Proves: R24
+- `TestReviewRound2`: after review 1 passed and a new accepted submit,
+  the review is round 2, with `reviews/spec-2.md`.
+  Proves: R25
+- `TestReviewNoName`: on `main` with no name, the error's second line is
+  `Give a name: sliceflow spec review <name>`.
+  Proves: R12
+- `TestReviewMovedFirst`: when another save moves the state between
+  `review.started` and `review.finished`, the second save returns R6's
+  error, with `The steps before it were saved.`
+  Proves: R24
+
+### Out of scope
+
+- Printing, and the exit codes. Done in: task 16
+
+## Task 16: submit-review-commands
+
+```yaml
+covers: [R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37]
+depends_on: ["07", "12", "14", "15"]
+touches: [internal/cli/submit.go, internal/cli/review.go, internal/e2e/submit_review_commands_test.go]
+follows: ["Flow 3: Submit, refused", "Flow 4: Submit, accepted", "Flow 5: Review the spec", CLI, Interrupts, Tests, Testing]
 risk: normal
 ```
 
 ### Goal
 
-`sliceflow spec submit [<name>]` prints each step as it happens, with
-R22's and R28's lines, on stdout, and exits as the spec says. Its e2e
-tests cover the normal submit cases, S14 to S19. Its brief is about
-3,000 words, over the usual 1,500, because S14 to S19 hold the exact
-output of each step.
+`sliceflow spec submit [<name>]` and `sliceflow spec review [<name>]`
+print what the spec says, on stdout, and exit as the spec says. Its e2e
+tests cover the normal cases of Stories 3 and 4. Its brief is about
+3,000 words, over the usual 1,500, because these scenarios hold the
+exact output of each step.
 
 ### Steps
 
 1. Write the tests listed under Done when. Run them, and see them fail.
-2. `internal/cli/submit.go`: the command, with the signal `ctx` as
-   `slice create` has; `printProblems` for the problems step.
-3. Run the tests until they pass.
+2. `internal/cli/submit.go`: `spec submit`; `printProblems` for the
+   problems.
+3. `internal/cli/review.go`: `spec review`, printing each `Step` as it
+   comes; both with the signal `ctx` as `slice create` has.
+4. Run the tests until they pass.
 
 ### Files
 
-- `internal/cli/submit.go`: new.
-- `internal/e2e/submit_command_test.go`: new.
+- `internal/cli/submit.go`, `internal/cli/review.go`: new.
+- `internal/e2e/submit_review_commands_test.go`: new.
 
 ### Interfaces
 
-- `Submit`, `Step`, `Submission`, `printProblems`: uses.
+- `Submit`, `Submission`, `ReviewSpec`, `Step`, `printProblems`: uses.
 
 ### Done when
 
@@ -1075,47 +1130,60 @@ output of each step.
   status lines.
   Proves: R20, R21, R22, R29, R37
   Scenario: S14
-- `TestSubmitAcceptedCmd`: S15's output, exit 0, three commits, three
-  log lines, and status lines; `reviews/spec-1.md` is R25's front matter
-  and then R26's text.
-  Proves: R21, R23, R25, R26, R27, R28, R29
+- `TestSubmitAcceptedCmd`: S15's output, exit 0, one commit, the log
+  line, and the status lines.
+  Proves: R21, R23, R29
   Scenario: S15
-- `TestSubmitUnchanged`: S16's error, exit 1, no commit.
+- `TestSubmitTwice`: S16's error, exit 1, no commit.
   Proves: R20
   Scenario: S16
-- `TestSubmitChangedStatus`: S17's status lines.
-  Proves: R29, R30
-  Scenario: S17
-- `TestSubmitRound2`: S18's lines.
-  Proves: R20, R25, R30
-  Scenario: S18
-- `TestSubmitInReview`: S19's error, exit 1.
+- `TestReviewCmd`: S20's output, exit 0, two commits, two log lines, and
+  the status lines; `reviews/spec-1.md` is R25's front matter and then
+  R26's text.
+  Proves: R24, R25, R26, R27, R28, R29, R37
+  Scenario: S20
+- `TestReviewDraft`: S21's error, exit 1.
+  Proves: R24
+  Scenario: S21
+- `TestReviewInReview`: S25's error, exit 1.
+  Proves: R24
+  Scenario: S25
+- `TestReviewNothing`: S26's error, exit 1.
+  Proves: R24
+  Scenario: S26
+- `TestSubmitUnchanged`: S27's error, exit 1, no commit.
   Proves: R20
-  Scenario: S19
+  Scenario: S27
+- `TestSubmitChangedStatus`: S28's status lines.
+  Proves: R29, R30
+  Scenario: S28
+- `TestReviewRound2Cmd`: S29's lines and status.
+  Proves: R20, R25, R30
+  Scenario: S29
 
 ### Out of scope
 
-- The failure cases, S20 to S25. Done in: task 16
+- The failure cases. Done in: task 17
 - A real reviewer. Done in: not in this slice
 
-## Task 16: submit-failures
+## Task 17: submit-review-failures
 
 ```yaml
-covers: [R6, R7, R8, R9, R10, R20, R24, R29]
-depends_on: ["15"]
-touches: [internal/e2e/submit_failures_test.go, internal/e2e/no_network_check_test.go]
-follows: ["Flow 5: Submit again from submitted", Undo after a failed commit, Leftovers after a crash, Interrupts, No network, Tests, Testing]
+covers: [R6, R7, R8, R9, R10, R24, R25, R29]
+depends_on: ["16"]
+touches: [internal/e2e/submit_review_failures_test.go, internal/e2e/no_network_check_test.go]
+follows: ["Flow 5: Review the spec", Undo after a failed commit, Leftovers after a crash, Interrupts, No network, Tests, Testing]
 risk: normal
 ```
 
 ### Goal
 
-The e2e tests for the ways a submit can fail or stop: the lock, a
-refused commit, a leftover review file, the lead's staged files, a stop
-halfway and going on, and Ctrl-C. 0001's no-network test runs the new
-commands too. This task adds tests only. Its brief is about 3,000
-words, over the usual 1,500, because S20 to S25 and the write path's
-rules hold the exact failure output.
+The e2e tests for the ways a submit or a review can fail or stop: the
+lock, a refused commit, a leftover review file, the lead's staged files,
+a review that failed to start and is run again, and Ctrl-C. 0001's
+no-network test runs the new commands too. This task adds tests only.
+Its brief is about 3,000 words, over the usual 1,500, because these
+scenarios and the write path's rules hold the exact failure output.
 
 ### Steps
 
@@ -1127,40 +1195,40 @@ rules hold the exact failure output.
 
 ### Files
 
-- `internal/e2e/submit_failures_test.go`: new.
+- `internal/e2e/submit_review_failures_test.go`: new.
 - `internal/e2e/no_network_check_test.go`: changed. The new commands.
 
 ### Done when
 
-- `TestSubmitBusy`: S20's error after 10 s, exit 1, no commit.
+- `TestSubmitBusy`: S17's error after 10 s, exit 1, no commit.
   Proves: R6, R7
-  Scenario: S20
-- `TestSubmitHookFails`: S21's error, exit 1, log as committed, no
+  Scenario: S17
+- `TestSubmitHookFails`: S18's error, exit 1, log as committed, no
   commit.
   Proves: R9, R10
-  Scenario: S21
-- `TestSubmitFileExists`: S22's error, exit 1.
-  Proves: R24
-  Scenario: S22
-- `TestSubmitOwnFiles`: S23: `src/app.go` is in no new commit, and still
+  Scenario: S18
+- `TestSubmitOwnFiles`: S19: `src/app.go` is in no new commit, and still
   staged.
   Proves: R8
-  Scenario: S23
-- `TestSubmitStopsHalfway`: S24's output with a `commit-msg` hook, exit
+  Scenario: S19
+- `TestReviewFileExistsCmd`: S22's error, exit 1, no commit.
+  Proves: R24
+  Scenario: S22
+- `TestReviewCommitRefused`: S23's error with a `commit-msg` hook, exit
   1, and its status lines.
   Proves: R10, R29
+  Scenario: S23
+- `TestReviewAgain`: S24's output, exit 0, two new commits.
+  Proves: R24, R25
   Scenario: S24
-- `TestSubmitGoesOn`: S25's output, exit 0, two new commits.
-  Proves: R20
-  Scenario: S25
 - `TestSubmitInterrupted`: with a `pre-commit` hook that sleeps 30 s,
-  `os.Interrupt` during the first commit gives R10's error with the
-  reason `interrupted`, the log as committed, and no lock file left.
-  Skipped on Windows, as in 0001.
+  `os.Interrupt` during the commit of `spec submit` gives R10's error
+  with the reason `interrupted`, the log as committed, and no lock file
+  left. Skipped on Windows, as in 0001.
   Proves: R10, R6
 - `TestNoNetworkNewCommands`: with `GIT_TRACE` set, `spec validate`,
-  `spec submit`, `slice title`, and `template show` run no `fetch`,
-  `pull`, or `push` (the project rule No network).
+  `spec submit`, `spec review`, `slice title`, and `template show` run no
+  `fetch`, `pull`, or `push` (the project rule No network).
   Proves: R40 of 0001-slice-and-events
 
 ### Out of scope

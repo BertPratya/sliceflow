@@ -91,57 +91,56 @@ Covers: R12, R13, R14, R15, R16, R17, R18, R19, R37
 Covers: R19, R20, R21, R22
 
 1. Steps 1 and 2 of Flow 2, with `spec submit` in R32's line. Then
-   `slice` takes the lock, and replays.
-2. The state decides (R20): `draft`, or `review_passed` and changed after
-   its review (Flow 1, step 3), go on; `submitted` goes to Flow 5; any
-   other state gives R20's error, with no event.
-3. `slice` reads `spec.md` from disk (R19), and checks it as
-   `spec validate --strict` would.
+   `slice` takes the lock, and replays (Saving an event).
+2. In the prepare step, the state decides (R20): `draft`, or
+   `review_passed` and changed after its review (Flow 1, step 3), go on;
+   any other state gives R20's error, with no event.
+3. Still in the prepare step, `slice` reads `spec.md` from disk (R19),
+   and checks it as `spec validate --strict` would.
 4. With an error or a warning, it saves `spec.submitted` with `refused`
-   (Saving an event: the files are `spec.md` and the log; the message is
+   (the files are `spec.md` and the log; the message is
    `<name>: spec submit refused`), and frees the lock.
-5. `step` gets the problems first, then the result. The CLI prints the
+5. `Submit` returns the problems and the result. The CLI prints the
    problem lines, then R22's line, whose last sentence depends on the
    state before (R22), on stdout, and exits with 1.
 
-### Flow 4: Submit, accepted, and the review
+### Flow 4: Submit, accepted
 
-Covers: R23, R24, R25, R26, R27, R28
+Covers: R21, R23
 
 1. Flow 3, steps 1 to 3, find no error and no warning.
-2. If `reviews/spec-<next round>.md` exists in the slice folder on disk,
-   R24's error; no event.
-3. `slice` saves `spec.submitted` with `accepted` (files: `spec.md` and
-   the log; message `<name>: spec submitted`), frees the lock, and calls
-   `step`: the CLI prints `Submitted spec.md.` (R23).
-4. It takes the lock again, replays, and checks that `review.started` is
-   allowed; when another command moved the state first, R6's error. It
-   writes the review file with only R25's front matter, saves
+2. `slice` saves `spec.submitted` with `accepted` (files: `spec.md` and
+   the log; message `<name>: spec submitted`), and frees the lock.
+3. The CLI prints the problem lines (notes only), `Submitted spec.md.`,
+   and `Next: sliceflow spec review` (R23), and exits with 0. No review
+   starts.
+
+### Flow 5: Review the spec
+
+Covers: R24, R25, R26, R27, R28
+
+1. Steps 1 and 2 of Flow 2, with `spec review` in R32's line. Then
+   `slice` takes the lock, and replays.
+2. In the prepare step: a state other than `submitted` gives R24's
+   error; a review file of the next round on disk gives R24's other
+   error. No event.
+3. It writes the review file with only R25's front matter, saves
    `review.started` (files: the review file and the log; message
-   `<name>: review <n> started`), frees the lock, and calls `step` (R25).
-   `commit` is the commit step 3 made.
-5. With no lock held, it calls the reviewer. The placeholder writes R26's
-   text after the front matter.
-6. It reads the result from the file (Interfaces → Review files).
-7. It takes the lock again, replays, checks that `review.finished` is
-   allowed, saves it (files: the review file and the log; R27's
-   message), frees the lock, and calls `step`. The CLI prints
-   `Review <n> passed.` and `Next: write the plan.` (R28), and exits
-   with 0.
-
-### Flow 5: Submit again from submitted
-
-Covers: R20, R24, R25
-
-1. Flow 3, step 2, finds `spec.md` `submitted`: `slice` skips the check
-   and `spec.submitted`.
-2. Flow 4 goes on from step 2 (R24), then step 4. `Submitted spec.md.` is
-   not printed.
-3. `commit` in `review.started` is the commit that added the last
-   accepted `spec.submitted`. `slice` finds it by reading the log of each
-   commit that changed it, newest first (`git log --format=%H -- <log>`),
-   and takes the oldest one whose log still holds that event's `seq`.
+   `<name>: review <n> started`), frees the lock, and calls `step`
+   (R25). `commit` is the commit that added the last accepted
+   `spec.submitted`: `slice` finds it by reading the log of each commit
+   that changed it, newest first (`git log --format=%H -- <log>`), and
+   takes the oldest one whose log still holds that event's `seq`.
    (lead's call)
+4. With no lock held, it calls the reviewer. The placeholder writes R26's
+   text after the front matter.
+5. It reads the result from the file (Interfaces → Review files).
+6. It takes the lock again, replays, and in the prepare step checks that
+   `spec.md` is still `in_review` with this round; when another command
+   moved the state first, R6's error. It saves `review.finished` (files:
+   the review file and the log; R27's message), frees the lock, and
+   calls `step`. The CLI prints `Review <n> passed.` and
+   `Next: write the plan.` (R28), and exits with 0.
 
 ### Flow 6: Set a title
 
@@ -258,7 +257,8 @@ committed log:
 
 Covers: R6, R10
 
-`spec submit` and `slice title` catch Ctrl-C and `SIGTERM` as
+`spec submit`, `spec review`, and `slice title` catch Ctrl-C and
+`SIGTERM` as
 `slice create` does in 0001 (its plan, Interrupts): the signal cancels
 the `ctx`, a running git command is stopped, and the undo runs with
 `context.WithoutCancel(ctx)`. R10's reason is then `interrupted`. The
@@ -325,7 +325,8 @@ keeps holding: 0001's no-network test runs the new commands too.
 Changed. The spec describes it fully; the code follows the spec's words.
 
 - `sliceflow spec validate [<name>] [--strict]`: R11 to R19, R37.
-- `sliceflow spec submit [<name>]`: R6 to R12, R19 to R28, R37.
+- `sliceflow spec submit [<name>]`: R6 to R12, R19 to R23, R37.
+- `sliceflow spec review [<name>]`: R6 to R12, R24 to R28, R37.
 - `sliceflow slice title <name> <title>`: R11, R32 to R34.
 - `sliceflow template show <template>`: R35.
 - `sliceflow slice status [<name>] [--json]`: gains `Spec:` and `Next:`,
@@ -360,14 +361,15 @@ the same functions (SD13 of 0001-slice-and-events).
 
 ```go
 func Validate(ctx context.Context, r Repo, name string, strict bool) (Validation, error)
-func Submit(ctx context.Context, r Repo, name string, step func(Step)) (Submission, error)
+func Submit(ctx context.Context, r Repo, name string) (Submission, error)
+func ReviewSpec(ctx context.Context, r Repo, name string, step func(Step)) error
 func SetTitle(ctx context.Context, r Repo, name, title string) error
 // Status and List: SliceStatus gains the spec's state and the next step.
 ```
 
-- `Submit` calls `step` once for each step done, as it happens (e.g.
-  "Submitted spec.md."), so a long review shows its start at once. The
-  core never prints, as in 0001. (lead's call)
+- `ReviewSpec` calls `step` once for each step done, as it happens
+  (e.g. "Review 1 started"), so a long review shows its start at once.
+  The core never prints, as in 0001. (lead's call)
 - Every failure the spec names is an `*Error` with the spec's words, as
   in 0001.
 
@@ -456,8 +458,8 @@ How the tests make things fail:
 
 - A failed commit comes from a test git hook that exits with 1: a
   `pre-commit` hook, or a `commit-msg` hook that refuses only messages
-  with `review` (S24). Git for Windows runs `#!/bin/sh` hooks too.
-- The busy test (S20) makes the lock file itself, and waits the full
+  with `review` (S23). Git for Windows runs `#!/bin/sh` hooks too.
+- The busy test (S17) makes the lock file itself, and waits the full
   10 s: one slow test, which checks exactly what the user sees. (lead's
   call)
 - Ctrl-C: as in 0001, the e2e test (task 16) skips on Windows, and a
@@ -471,7 +473,7 @@ How the tests make things fail:
 - **TD1.** sliceflow commits with `git commit --only -- <its files>`.
   Why: git then commits those files as they are on disk, and leaves
     what is staged for other files staged and out of the commit (R8,
-    S23).
+    S19).
   Not chosen: a separate index file (`GIT_INDEX_FILE`), because it is
     more code for the same result.
 - **TD2.** The lock is tried again every 100 ms, for up to 10 s.

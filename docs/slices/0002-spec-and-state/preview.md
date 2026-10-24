@@ -62,22 +62,32 @@ Covers: S14, S15
    Expect: `login-google: spec submit refused`.
 3. Write `None.` under `## Open questions` again, and run
    `sliceflow spec submit`.
-   Expect: the 3 notes, then `Submitted spec.md.`,
-   `Review 1 started: reviews/spec-1.md (reviewer: placeholder)`,
+   Expect: the 3 notes, then `Submitted spec.md.` and
+   `Next: sliceflow spec review`; the exit code is 0.
+4. Run `sliceflow slice status`.
+   Expect: `Spec:     submitted (review 1 not started)` and
+   `Next:     sliceflow spec review`.
+
+### P4. Review the submitted spec
+
+Covers: S20
+
+1. After P3, run `sliceflow spec review`.
+   Expect: `Review 1 started: reviews/spec-1.md (reviewer: placeholder)`,
    `Review 1 passed.`, and `Next: write the plan.`; the exit code is 0.
-4. Run `git log --oneline -3`.
+2. Run `git log --oneline -3`.
    Expect: `review 1 passed`, `review 1 started`, and `spec submitted`,
    newest first.
-5. Open `docs/slices/login-google/reviews/spec-1.md`.
+3. Open `docs/slices/login-google/reviews/spec-1.md`.
    Expect: the front matter of R25, and the line
    `No review was done: placeholder reviewer.`
-6. Run `sliceflow slice status`.
+4. Run `sliceflow slice status`.
    Expect: `Spec:     review_passed (review 1, placeholder)` and
    `Next:     write the plan`.
 
-### P4. Set a new title
+### P5. Set a new title
 
-Covers: S26
+Covers: S30
 
 1. Run `sliceflow slice title login-google "Sign in with Google"`.
    Expect: `Title of login-google is now "Sign in with Google".`
@@ -87,9 +97,9 @@ Covers: S26
 3. Run `sliceflow slice list` in the test repo.
    Expect: the row of login-google with the title `Sign in with Google`.
 
-### P5. Read the spec template's rules
+### P6. Read the spec template's rules
 
-Covers: S30
+Covers: S34
 
 1. Run `sliceflow template show spec`.
    Expect: the whole spec template with its rule comments, starting with

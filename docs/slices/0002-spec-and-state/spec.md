@@ -9,8 +9,9 @@ ideas: []
 
 ## Summary
 
-A lead checks a slice's spec with `sliceflow spec validate`, and hands it
-in with `sliceflow spec submit`, which saves the step and runs a review.
+A lead checks a slice's spec with `sliceflow spec validate`, hands it in
+with `sliceflow spec submit`, and has it reviewed, as a separate step,
+with `sliceflow spec review`.
 sliceflow works out each slice's state by replaying its event log, so
 `slice status` shows where the spec stands and what to do next.
 
@@ -143,7 +144,7 @@ The lead checks the spec's form as often as it likes, while writing it.
 
 ### Story 3: Submit the spec
 
-The lead hands in a finished spec, and it is reviewed at once.
+The lead hands in a finished spec. The review is a separate step.
 
 - **S14.** **Given** the spec of S7, which still lists Q1 and Q2,
   **When** I run `sliceflow spec submit`,
@@ -173,39 +174,130 @@ The lead hands in a finished spec, and it is reviewed at once.
   $ sliceflow spec submit
   spec.md:44: note: no scenario shows R8
   Submitted spec.md.
+  Next: sliceflow spec review
+  ```
+  and the exit code is 0,
+  and the branch has one new commit, `login-google: spec submitted`,
+  commit `3f2a1c9`, holding `spec.md` and the log, with the new line:
+  ```
+  {"version":1,"seq":3,"event":"spec.submitted","at":"2026-10-24T10:00:00Z","data":{"result":"accepted","errors":0,"warnings":0}}
+  ```
+  and `slice status` then shows:
+  ```
+  Spec:     submitted (review 1 not started)
+  Next:     sliceflow spec review
+  ```
+  Shows: R8, R21, R23, R29
+- **S16.** **Given** the submitted spec of S15,
+  **When** I run `sliceflow spec submit` again,
+  **Then** sliceflow prints on stderr
+  `Error: spec.md is submitted; review it with: sliceflow spec review. Nothing was changed.`
+  and the exit code is 1, and no commit was made.
+  Shows: R20
+- **S17.** **Given** the lock file `.sliceflow/locks/login-google.lock`
+  holds pid 4312 and the time 10:02 UTC, and stays there,
+  **When** I run `sliceflow spec submit`,
+  **Then** sliceflow waits 10 seconds, prints on stderr
+  `Error: slice login-google is busy: another sliceflow command holds .sliceflow/locks/login-google.lock (pid 4312, since 10:02 UTC). If no sliceflow command is running, delete that file.`
+  and the exit code is 1, and no commit was made.
+  Shows: R6, R7
+- **S18.** **Given** a git pre-commit hook that only runs `exit 1`,
+  **When** I run `sliceflow spec submit` on a finished spec,
+  **Then** sliceflow prints on stderr
+  `Error: could not save the event: git commit failed (exit code 1). Nothing was changed.`
+  and the exit code is 1, and the log on disk is as it was committed,
+  and no commit was made.
+  Shows: R9, R10
+- **S19.** **Given** the lead has a staged change to `src/app.go` in the
+  worktree,
+  **When** I run `sliceflow spec submit`,
+  **Then** none of sliceflow's commits holds `src/app.go`, and the change
+  is still staged afterwards.
+  Shows: R8
+
+### Story 4: Review the spec, and change it after the review
+
+The lead, or the human, runs the review of a submitted spec as its own
+step, and hands in a spec again after changing it.
+
+- **S20.** **Given** the submitted spec of S15,
+  **When** I run `sliceflow spec review`,
+  **Then** sliceflow prints:
+  ```
+  $ sliceflow spec review
   Review 1 started: reviews/spec-1.md (reviewer: placeholder)
   Review 1 passed.
   Next: write the plan.
   ```
   and the exit code is 0,
-  and the branch has three new commits, one per event:
-  1. `login-google: spec submitted`, commit `3f2a1c9`, holding `spec.md`
-     and the log,
-  2. `login-google: review 1 started`, holding the new file
+  and the branch has two new commits, one per event:
+  1. `login-google: review 1 started`, holding the new file
      `reviews/spec-1.md` with only its front matter, and the log,
-  3. `login-google: review 1 passed`, holding the filled
+  2. `login-google: review 1 passed`, holding the filled
      `reviews/spec-1.md`, and the log,
 
-  and the log has three new lines:
+  and the log has two new lines:
   ```
-  {"version":1,"seq":3,"event":"spec.submitted","at":"2026-10-24T10:00:00Z","data":{"result":"accepted","errors":0,"warnings":0}}
-  {"version":1,"seq":4,"event":"review.started","at":"2026-10-24T10:00:01Z","data":{"doc":"spec.md","round":1,"reviewer":"placeholder","file":"reviews/spec-1.md","commit":"3f2a1c9e5b7d4a6f8c0e2b4d6f8a0c2e4b6d8f0a"}}
-  {"version":1,"seq":5,"event":"review.finished","at":"2026-10-24T10:00:01Z","data":{"doc":"spec.md","round":1,"result":"passed"}}
+  {"version":1,"seq":4,"event":"review.started","at":"2026-10-24T10:05:00Z","data":{"doc":"spec.md","round":1,"reviewer":"placeholder","file":"reviews/spec-1.md","commit":"3f2a1c9e5b7d4a6f8c0e2b4d6f8a0c2e4b6d8f0a"}}
+  {"version":1,"seq":5,"event":"review.finished","at":"2026-10-24T10:05:00Z","data":{"doc":"spec.md","round":1,"result":"passed"}}
   ```
   and `slice status` then shows:
   ```
   Spec:     review_passed (review 1, placeholder)
   Next:     write the plan
   ```
-  Shows: R8, R21, R23, R25, R26, R27, R28, R29
-- **S16.** **Given** review 1 of S15 passed, and `spec.md` has not
+  Shows: R8, R24, R25, R26, R27, R28, R29
+- **S21.** **Given** `spec.md` is a `draft`, as in S14,
+  **When** I run `sliceflow spec review`,
+  **Then** sliceflow prints on stderr
+  `Error: spec.md is a draft; submit it first: sliceflow spec submit. Nothing was changed.`
+  and the exit code is 1, and no commit was made.
+  Shows: R24
+- **S22.** **Given** the submitted spec of S15, and the file
+  `reviews/spec-1.md` is already in the slice folder,
+  **When** I run `sliceflow spec review`,
+  **Then** sliceflow prints on stderr
+  `Error: docs/slices/login-google/reviews/spec-1.md already exists, but review 1 has not started. Move it away, then review again. Nothing was changed.`
+  and the exit code is 1, and no commit was made.
+  Shows: R24
+- **S23.** **Given** the submitted spec of S15, and a git commit-msg hook
+  that refuses every commit whose message has `review`,
+  **When** I run `sliceflow spec review`,
+  **Then** sliceflow prints on stderr
+  `Error: could not save the event: git commit failed (exit code 1). Nothing was changed.`
+  and the exit code is 1, and `slice status` then still shows:
+  ```
+  Spec:     submitted (review 1 not started)
+  Next:     sliceflow spec review
+  ```
+  Shows: R10, R29
+- **S24.** **Given** the slice of S23, with that hook removed,
+  **When** I run `sliceflow spec review`,
+  **Then** sliceflow prints the lines of S20, the exit code is 0, and
+  the branch has two new commits, `login-google: review 1 started` and
+  `login-google: review 1 passed`.
+  Shows: R24, R25
+- **S25.** **Given** the log of `login-google` ends with a
+  `review.started`, so `spec.md` is `in_review`,
+  **When** I run `sliceflow spec review`,
+  **Then** sliceflow prints on stderr
+  `Error: spec.md is in_review: review 1 has started, and has not finished. Nothing was changed.`
+  and the exit code is 1.
+  Shows: R24
+- **S26.** **Given** review 1 of S20 passed,
+  **When** I run `sliceflow spec review`,
+  **Then** sliceflow prints on stderr
+  `Error: spec.md passed review 1; there is nothing to review. Nothing was changed.`
+  and the exit code is 1.
+  Shows: R24
+- **S27.** **Given** review 1 of S20 passed, and `spec.md` has not
   changed since,
   **When** I run `sliceflow spec submit`,
   **Then** sliceflow prints on stderr
   `Error: spec.md has not changed since review 1, which passed. Nothing was changed.`
   and the exit code is 1, and no commit was made.
   Shows: R20
-- **S17.** **Given** review 1 of S15 passed, and then the lead changed
+- **S28.** **Given** review 1 of S20 passed, and then the lead changed
   R7 in `spec.md`,
   **When** I run `sliceflow slice status`,
   **Then** the last two lines are:
@@ -214,77 +306,20 @@ The lead hands in a finished spec, and it is reviewed at once.
   Next:     sliceflow spec submit
   ```
   Shows: R29, R30
-- **S18.** **Given** the changed spec of S17,
-  **When** I run `sliceflow spec submit`,
-  **Then** sliceflow prints `Submitted spec.md.`,
-  `Review 2 started: reviews/spec-2.md (reviewer: placeholder)`,
+- **S29.** **Given** the changed spec of S28 was submitted again with
+  `sliceflow spec submit`, which printed `Submitted spec.md.` and
+  `Next: sliceflow spec review`,
+  **When** I run `sliceflow spec review`,
+  **Then** sliceflow prints `Review 2 started: reviews/spec-2.md (reviewer: placeholder)`,
   `Review 2 passed.`, and `Next: write the plan.`,
   and `slice status` then shows `Spec:     review_passed (review 2, placeholder)`.
   Shows: R20, R25, R30
-- **S19.** **Given** the log of `login-google` ends with a
-  `review.started`, so `spec.md` is `in_review`,
-  **When** I run `sliceflow spec submit`,
-  **Then** sliceflow prints on stderr
-  `Error: spec.md is in_review: review 1 has started, and has not finished. Nothing was changed.`
-  and the exit code is 1.
-  Shows: R20
-- **S20.** **Given** the lock file `.sliceflow/locks/login-google.lock`
-  holds pid 4312 and the time 10:02 UTC, and stays there,
-  **When** I run `sliceflow spec submit`,
-  **Then** sliceflow waits 10 seconds, prints on stderr
-  `Error: slice login-google is busy: another sliceflow command holds .sliceflow/locks/login-google.lock (pid 4312, since 10:02 UTC). If no sliceflow command is running, delete that file.`
-  and the exit code is 1, and no commit was made.
-  Shows: R6, R7
-- **S21.** **Given** a git pre-commit hook that only runs `exit 1`,
-  **When** I run `sliceflow spec submit` on a finished spec,
-  **Then** sliceflow prints on stderr
-  `Error: could not save the event: git commit failed (exit code 1). Nothing was changed.`
-  and the exit code is 1, and the log on disk is as it was committed,
-  and no commit was made.
-  Shows: R9, R10
-- **S22.** **Given** the file `reviews/spec-1.md` is in the slice
-  folder, but no review started,
-  **When** I run `sliceflow spec submit` on a finished spec,
-  **Then** sliceflow prints on stderr
-  `Error: docs/slices/login-google/reviews/spec-1.md already exists, but review 1 has not started. Move it away, then submit again. Nothing was changed.`
-  and the exit code is 1, and no commit was made.
-  Shows: R24
-- **S23.** **Given** the lead has a staged change to `src/app.go` in the
-  worktree,
-  **When** I run `sliceflow spec submit`,
-  **Then** none of sliceflow's commits holds `src/app.go`, and the change
-  is still staged afterwards.
-  Shows: R8
-- **S24.** **Given** a git commit-msg hook that refuses every commit
-  whose message has `review`,
-  **When** I run `sliceflow spec submit` on a finished spec,
-  **Then** sliceflow prints `Submitted spec.md.`, then prints on stderr
-  `Error: could not save the event: git commit failed (exit code 1). The steps before it were saved; spec.md is submitted.`
-  and the exit code is 1, and `slice status` then shows:
-  ```
-  Spec:     submitted (review 1 not started)
-  Next:     sliceflow spec submit, to start review 1
-  ```
-  Shows: R10, R29
-- **S25.** **Given** the slice of S24, with that hook removed,
-  **When** I run `sliceflow spec submit`,
-  **Then** sliceflow does not check or submit `spec.md` again, and
-  prints:
-  ```
-  $ sliceflow spec submit
-  Review 1 started: reviews/spec-1.md (reviewer: placeholder)
-  Review 1 passed.
-  Next: write the plan.
-  ```
-  and the exit code is 0, and the branch has two new commits,
-  `login-google: review 1 started` and `login-google: review 1 passed`.
-  Shows: R20
 
-### Story 4: Set the title
+### Story 5: Set the title
 
 A user gives a slice a new title, at any time.
 
-- **S26.** **Given** the slice of S1,
+- **S30.** **Given** the slice of S1,
   **When** I run `sliceflow slice title login-google "Sign in with Google"`,
   **Then** sliceflow prints
   `Title of login-google is now "Sign in with Google".`
@@ -299,28 +334,28 @@ A user gives a slice a new title, at any time.
   login-google  Sign in with Google  planning  2026-10-24 07:42
   ```
   Shows: R32, R34
-- **S27.** **Given** the title of S26,
+- **S31.** **Given** the title of S30,
   **When** I run `sliceflow slice title login-google "Sign in with Google"`,
   **Then** sliceflow prints on stderr
   `Error: the title of login-google is already "Sign in with Google". Nothing was changed.`
   and the exit code is 1.
   Shows: R33
-- **S28.** **When** I run `sliceflow slice title login-google ""`,
+- **S32.** **When** I run `sliceflow slice title login-google ""`,
   **Then** sliceflow prints on stderr
   `Error: the title must not be empty. Nothing was changed.`
   and the exit code is 1.
   Shows: R33
-- **S29.** **When** I run `sliceflow slice title login-google`,
+- **S33.** **When** I run `sliceflow slice title login-google`,
   **Then** sliceflow prints on stderr
   `Error: missing title. Run sliceflow --help.`
   and the exit code is 2.
   Shows: R36
 
-### Story 5: Read the spec's rules
+### Story 6: Read the spec's rules
 
 The lead reads the template's rules, which a filled spec no longer holds.
 
-- **S30.** **When** I run `sliceflow template show spec`,
+- **S34.** **When** I run `sliceflow template show spec`,
   **Then** sliceflow prints the built-in spec template with all its rule
   comments, starting with:
   ```
@@ -333,12 +368,12 @@ The lead reads the template's rules, which a filled spec no longer holds.
   ```
   and the exit code is 0.
   Shows: R35
-- **S31.** **When** I run `sliceflow template show plan`,
+- **S35.** **When** I run `sliceflow template show plan`,
   **Then** sliceflow prints on stderr
   `Error: unknown template "plan". Known templates: spec.`
   and the exit code is 1.
   Shows: R35
-- **S32.** **When** I run `sliceflow spec validate --json`,
+- **S36.** **When** I run `sliceflow spec validate --json`,
   **Then** sliceflow prints on stderr
   `Error: unknown flag --json. Run sliceflow --help.`
   and the exit code is 2.
@@ -462,7 +497,8 @@ The lead reads the template's rules, which a filled spec no longer holds.
   exit code is 1.
   Check: e2e
 - **R11.** If no worktree has the branch `slice/<name>` checked out, then
-  `spec validate`, `spec submit`, and `slice title` shall print the two
+  `spec validate`, `spec submit`, `spec review`, and `slice title` shall
+  print the two
   lines
   `Error: slice <name> has no worktree: no worktree has the branch slice/<name> checked out. Nothing was changed.`
   and `Make one: git worktree add <root>/.sliceflow/worktrees/<name> slice/<name>`,
@@ -471,17 +507,19 @@ The lead reads the template's rules, which a filled spec no longer holds.
   with code 1. When the slice has no branch `slice/<name>`
   because it is merged (a folder on the base branch only), they shall
   instead print
-  `Error: slice <name> is merged into <base branch>, so it has no worktree. Nothing was changed.` These three commands check in this order, and
+  `Error: slice <name> is merged into <base branch>, so it has no worktree. Nothing was changed.` These four commands check in this order, and
   stop at the first that fails: R12 and R13 of 0001-slice-and-events (a
   git repo, with commits), R14 of 0001-slice-and-events (the name), R33
   of 0001-slice-and-events (the slice exists), this requirement, then,
-  for `spec submit` and `slice title` only, the lock (R6), then the
+  for `spec submit`, `spec review`, and `slice title` only, the lock
+  (R6), then the
   command's own checks. `spec validate` takes no lock.
   Check: e2e
 
 ### Which slice
 
-- **R12.** When `spec validate` or `spec submit` runs with no name,
+- **R12.** When `spec validate`, `spec submit`, or `spec review` runs with
+  no name,
   sliceflow shall use the slice of the current branch, as R31 and R32 of
   0001-slice-and-events say. In R32's second line, the command is the one
   that ran, e.g. `Give a name: sliceflow spec validate <name>`.
@@ -576,11 +614,11 @@ The lead reads the template's rules, which a filled spec no longer holds.
 ### Submitting the spec
 
 - **R20.** When the user runs `sliceflow spec submit [<name>]`, sliceflow
-  shall go on only when `spec.md` is `draft`, `submitted`, or
-  `review_passed` and changed after its review (R30). When it is
-  `submitted`, sliceflow skips R21 and R22, and only starts the review,
-  as R24 to R28 say. Otherwise it shall save no event, print one of
-  these, and exit with code 1:
+  shall go on only when `spec.md` is `draft`, or `review_passed` and
+  changed after its review (R30). Otherwise it shall save no event,
+  print one of these, and exit with code 1:
+  - `submitted`:
+    `Error: spec.md is submitted; review it with: sliceflow spec review. Nothing was changed.`
   - `review_passed`, not changed:
     `Error: spec.md has not changed since review <n>, which passed. Nothing was changed.`
   - `in_review`:
@@ -606,19 +644,29 @@ The lead reads the template's rules, which a filled spec no longer holds.
   `It keeps the result of review <n>.`
   Check: e2e
 - **R23.** When the submit is accepted, sliceflow shall print
-  `Submitted spec.md.`, and start the review at once, as R25 to R28 say.
+  `Submitted spec.md.` and `Next: sliceflow spec review`, and exit with
+  code 0. It does not start the review.
   Check: e2e
-- **R24.** If the review file of the next round already exists in the
-  slice folder, then sliceflow shall save no event, print
-  `Error: docs/slices/<name>/reviews/spec-<n>.md already exists, but review <n> has not started. Move it away, then submit again. Nothing was changed.`
-  and exit with code 1. It checks this before it saves an accepted
-  `spec.submitted`, or, when `spec.md` is `submitted`, before it saves
-  `review.started`.
-  Check: e2e
-
 ### The review
 
-- **R25.** sliceflow shall save `review.started`, with `doc` `spec.md`,
+- **R24.** When the user runs `sliceflow spec review [<name>]`, sliceflow
+  shall go on only when `spec.md` is `submitted`. Otherwise it shall save
+  no event, print one of these, and exit with code 1:
+  - `draft`:
+    `Error: spec.md is a draft; submit it first: sliceflow spec submit. Nothing was changed.`
+  - `in_review`:
+    `Error: spec.md is in_review: review <n> has started, and has not finished. Nothing was changed.`
+  - `review_passed`:
+    `Error: spec.md passed review <n>; there is nothing to review. Nothing was changed.`
+  - no good `slice.created`: R20's error for that case.
+
+  If the review file of the next round already exists in the slice
+  folder, it shall instead print
+  `Error: docs/slices/<name>/reviews/spec-<n>.md already exists, but review <n> has not started. Move it away, then review again. Nothing was changed.`
+  sliceflow checks R11 first, then takes the lock (R6), then these.
+  Check: e2e
+
+- **R25.** sliceflow shall then save `review.started`, with `doc` `spec.md`,
   `round` (1 more than the highest round of a `review.started` for
   `spec.md` that the replay allowed by R2, else 1), `reviewer`, `file` (`reviews/spec-<round>.md`), and `commit` (the
   full id of the commit of the last accepted `spec.submitted`). The commit holds the new file
@@ -695,7 +743,7 @@ The lead reads the template's rules, which a filled spec no longer holds.
   | `draft`, no review yet | `draft` | `write spec.md, then: sliceflow spec submit` |
   | `draft`, after review `<n>` found changes | `draft (review <n> found changes: reviews/spec-<n>.md)` | `fix spec.md, then: sliceflow spec submit` |
   | `draft`, after review `<n>` needs the human | `draft (review <n> needs the human: reviews/spec-<n>.md)` | `settle reviews/spec-<n>.md with the human, then: sliceflow spec submit` |
-  | `submitted` | `submitted (review <n> not started)` | `sliceflow spec submit, to start review <n>` |
+  | `submitted` | `submitted (review <n> not started)` | `sliceflow spec review` |
   | `in_review` | `in_review (review <n>, <reviewer>: reviews/spec-<n>.md)` | `wait for review <n>` |
   | `review_passed` | `review_passed (review <n>, <reviewer>)` | `write the plan` |
   | `review_passed`, changed after its review | `passed review <n>, but spec.md was changed after it` | `sliceflow spec submit` |
@@ -770,13 +818,15 @@ The lead reads the template's rules, which a filled spec no longer holds.
 - **R36.** For wrong use, as R38 of 0001-slice-and-events says, sliceflow
   shall also know `missing title` (`slice title` with one argument) and
   `missing template name` (`template show` with none). `spec validate`,
-  `spec submit`, `slice title`, and `template show` have no `--json`.
+  `spec submit`, `spec review`, `slice title`, and `template show` have
+  no `--json`.
   `sliceflow spec` alone and `sliceflow template` alone print their usage
   on stdout, and exit with code 0.
   Check: e2e
-- **R37.** `spec validate` and `spec submit` shall print their problem
-  lines, the summary line, the `Submit refused:` line, and the lines of
-  steps already done, e.g. `Submitted spec.md.`, on stdout, also
+- **R37.** `spec validate`, `spec submit`, and `spec review` shall print
+  their problem lines, the summary line, the `Submit refused:` line, and
+  the lines of steps already done, e.g. `Review 1 started: ...`, on
+  stdout, also
   when they exit with code 1. This is the one exception to R38 of
   0001-slice-and-events, which prints nothing on stdout when a command
   fails. Every `Error:` line goes on stderr.
@@ -788,7 +838,9 @@ The lead reads the template's rules, which a filled spec no longer holds.
 - A number reused for something new after approval. Goes to: a later slice (0003)
 - A real reviewer, and what `spec submit` prints when a review does not pass. Goes to: a later slice (0004)
 - A limit on review rounds. Goes to: a later slice (0004)
-- Going on after a submit that stopped while `spec.md` is `in_review`. Goes to: a later slice (0007)
+- Going on after a review that stopped while `spec.md` is `in_review`. Goes to: a later slice (0007)
+- A general `sliceflow run` for the next step, and steps that start by themselves. Goes to: the backlog
+- Waking the lead when a review ends. Goes to: a later slice (0004)
 - Who caused an event (a `by` field). Goes to: a later slice (0004)
 - Turning the spec review off, and the `review.skipped` event. Goes to: a later slice (0012)
 - The spec as JSON, and `--json` for `spec validate`, `spec submit`, `slice title`, and `template show`. Goes to: a later slice (0015)
@@ -861,11 +913,12 @@ The lead reads the template's rules, which a filled spec no longer holds.
     in a state that 0004 has to change again.
   Cost: a spec can show `review_passed` with no real review.
   Rule: R26
-- **SD8.** The review always runs after an accepted submit.
+- **SD8.** A submitted spec always needs a review to pass; nothing skips
+  it.
   Why: a switch needs a setting, which comes with 0012.
   Not chosen: a switch now, because there is no real reviewer to turn
     off yet.
-  Rule: R23
+  Rule: R24
 - **SD9.** "Changed after its review" is worked out when it is shown, by
   comparing `spec.md` with the reviewed commit. It is no state, and has
   no event.
@@ -888,25 +941,28 @@ The lead reads the template's rules, which a filled spec no longer holds.
   Not chosen: a way to remove the title, because the name already shows
     when no title was set.
   Rule: R32, R33
-- **SD12.** `spec validate` and `spec submit` take the slice's name, or
+- **SD12.** `spec validate`, `spec submit`, and `spec review` take the
+  slice's name, or
   use the current branch's slice. `slice title` always takes the name.
   Why: `slice title` with one argument could be either the name or the
     title.
   Not chosen: an optional name for `slice title`, because the meaning of
     its one argument would depend on the branch.
   Rule: R12, R36
-- **SD13.** A submit that stopped after `spec.submitted` goes on when
-  `spec submit` runs again: it starts the review, and does not hand the
-  spec in again.
-  Why: no review started, so no reviewer can be running, and starting
-    one now is safe.
-  Not chosen: leaving it stuck until the retry slice (0007), because a
-    refused commit is the most likely stop. Also going on from
-    `in_review`, because from 0004 on a reviewer may still be running
-    then, and a second one would start.
-  Cost: a slice that stopped at `in_review` stays there until 0007.
-  Rule: R20
-- **SD14.** `spec validate` and `spec submit` print the spec's problems
+- **SD13.** The review is its own command, `sliceflow spec review`, not
+  part of `spec submit`. Submit ends at `submitted`.
+  Why: a real review takes minutes. Submit ends at once, and the review
+    is its own step of the pipeline, which the lead, the human, or later
+    the server can start. Its name says exactly what it does. A review
+    that failed to start is simply run again.
+  Not chosen: the review inside `spec submit`, because it would hold the
+    submit for minutes; and a general `sliceflow run` that runs whatever
+    comes next, because its scope grows with every slice (backlog, with
+    steps that start by themselves).
+  Cost: the lead runs two commands.
+  Rule: R23, R24
+- **SD14.** `spec validate`, `spec submit`, and `spec review` print the
+  spec's problems and steps
   on stdout, also when they exit with code 1.
   Why: a list of problems is the command's answer, not a broken
     command, as in linters like ESLint. A pipe, e.g. to `grep`, sees it.
