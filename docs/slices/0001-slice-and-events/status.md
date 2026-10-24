@@ -2,17 +2,17 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 05:01 UTC
+- Updated: 2026-10-24 05:03 UTC
 
 ## Needs human
 
-- spec.md: the human chooses to pass the spec now, or one more short check of the last fix.
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
+| spec.md | in_review | 3 | - | - |
 
 ## Tasks
 
@@ -68,6 +68,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 05:03 · lead (claude) · change review 2 started (reviews/change-2.md)
+- 2026-10-24 05:03 · human · "2": one more short check of the last fix
 - 2026-10-24 05:01 · lead (claude) · spec-3/F1 finished: R37's warnings items written as in R30
 - 2026-10-24 05:01 · doc reviewer · change review 1 handed in: F2, F3 verified; F1 reopened (R37's top-level warnings)
 - 2026-10-24 05:00 · lead (claude) · spec fixed for spec-3 F1-F3; change review of only these fixes started (reviews/change-1.md)
