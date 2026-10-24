@@ -42,6 +42,14 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 | 0010 | stacking and cancel | design a slice ahead, on top of another; cancel and reopen | 2.6, 2.7 |
 | 0011 | Claude Code | a second agent tool; proves the adapter shape | 1.9 |
 | 0012 | configurable steps | pick and order the built-in steps | 1.10 |
+| 0013 | local server and dashboard | `sliceflow serve`: see every slice live in the browser, on 127.0.0.1 with a token | 1.7 |
+| 0014 | web actions | stop, continue, and retry from the browser; start agents | 1.7, 2.4 |
+| 0015 | stable output | errors as JSON with codes; the event log and `--json` documented and versioned | 1.13b |
+| 0016 | user hooks | your own hooks before and after events, with a trust check before a repo's hooks run | - |
+| 0017 | team view | teammates' slices from remote branches, and whose slice it is | - |
+| 0018 | Spec Kit import | turn a Spec Kit feature into a slice once; the human fills each task's `touches` | 1.13c |
+| 0019 | Spec Kit files | read Spec Kit files directly | 1.13c |
+| 0020 | configurable templates | a project changes the template text and the reading rules | 1.13c |
 
 - **0009 is the first release.** After it, `sliceflow` runs the whole workflow,
   and this repo switches from the skills to `sliceflow` itself.
@@ -51,6 +59,13 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
   0002's planning starts.
 - **Codex first:** 0004 builds the Codex adapter; Claude Code comes in
   0011.
+- **After 0012** (decided, the human, 2026-10-24): the slices are
+  numbered so the whole order is visible, but their numbers, order, and
+  contents may still change when we get there. The web app comes first
+  (0013, 0014): it calls the core directly, so it does not wait for
+  stable output (0015).
+- **0018 to 0020** were decided by the human on 2026-10-23, then as
+  "after 0012" items.
 
 ## Where the backlog items go (decided, the human, 2026-10-24)
 
@@ -62,10 +77,10 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 | You retry a failed or stopped step | 0007 |
 | Clean up a slice half made by a crash | 0007 |
 | Cancel a slice | 0010 |
-| User hooks before and after events | after 0012 |
-| Errors as JSON, with codes | after 0012: output other programs can rely on |
-| A local server and browser app; stop, continue, and retry buttons | after 0012: the web dashboard |
-| Teammates' slices in `slice list` | after the first release, with real use |
+| User hooks before and after events | 0016 |
+| Errors as JSON, with codes | 0015 |
+| A local server and browser app; stop, continue, and retry buttons | 0013, 0014 |
+| Teammates' slices in `slice list` | 0017 |
 | A `status.md` written from the log | decided after the dashboard |
 
 ## Time (the lead's estimate, 2026-10-23)
@@ -96,21 +111,12 @@ code. At 35 hours a week:
   Windows) and 0007 (processes and restarts on three systems). If the
   0004 experiment goes badly, add a week.
 
-## After 0012 (the lead's proposal)
+## Between and after the slices
 
-In this order:
-
-1. **Use it for real, and make it easy to try.** Run real slices with
-   `sliceflow` on this repo and one other project, and fix what hurts. Then a
-   README, a short demo, and a write-up with real numbers: time, tokens,
-   how often the lead was needed.
-2. **Spec Kit import** (decided, the human, 2026-10-23): turn a Spec Kit
-   feature into a slice once; the human fills each task's `touches`.
-3. **Read Spec Kit files directly** (decided, the human, 2026-10-23).
-4. **Configurable templates** (decided, the human, 2026-10-23): a project
-   changes the template text and the reading rules (`sliceflow-design.md`
-   1.13c).
-5. **Output other programs can rely on:** the event log and
-   `sliceflow status --json`, documented and versioned.
-6. **From the backlog, when needed:** pull requests instead of a local
-   merge, a cost limit, the web dashboard.
+- **Use it for real, and make it easy to try.** After the first release,
+  and again after 0012, run real slices with `sliceflow` on this repo
+  and one other project, and fix what hurts. Then a README, a short
+  demo, and a write-up with real numbers: time, tokens, how often the
+  lead was needed. This is an activity, not a slice.
+- **From the backlog, when needed:** pull requests instead of a local
+  merge, a cost limit.
