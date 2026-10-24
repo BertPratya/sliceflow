@@ -3,11 +3,11 @@
 - Phase: implementing (blocked)
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:35 UTC
+- Updated: 2026-10-24 17:44 UTC
 
 ## Needs human
 
-- Task 04 is blocked (small decision): to fix task-04-1/F1, the worker added a field `Preamble Section` to `spec.Doc`, in `internal/spec/doc.go`. That file is outside task 04's touches, and the field is not in task 03's Interfaces in tasks.md. Keep the field, or fix F1 without it?
+- Task 04 is blocked (small decision, answered: keep `Doc.Preamble`): change review 1 of tasks.md runs; then the R002 tag.
 
 ## Documents
 
@@ -16,7 +16,7 @@
 | spec.md | approved | 3 | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
 | plan.md | approved | 5 | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
 | preview.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
-| tasks.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
+| tasks.md | in_review | with plan.md | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
 
 ## Tasks
 
@@ -133,6 +133,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:44 · lead (claude) · change review 1 started: tasks.md, task 04 (touches, Files, Doc.Preamble)
+- 2026-10-24 17:44 · lead (claude) · tasks.md changed: task 04 changes Doc with Preamble, and touches internal/spec/doc.go
+- 2026-10-24 17:44 · human · task 04's question, option 1, keep Doc.Preamble: "your recommentation"
 - 2026-10-24 17:35 · lead (claude) · task 04 blocked: the F1 fix adds Doc.Preamble in doc.go, outside touches and task 03's Interfaces; question to the human (small). The checks pass; the code is not committed
 - 2026-10-24 17:35 · worker (claude sonnet) · task 04 round 2 handed in: F1-F3 fixed, F4 wontfix
 - 2026-10-24 17:27 · lead (claude) · task 04 worker round 2 started, with review task-04-1
