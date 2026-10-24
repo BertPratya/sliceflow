@@ -2,7 +2,7 @@
 
 - Phase: implementing (blocked)
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 09:39 UTC
+- Updated: 2026-10-24 09:41 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@
 
 ## Tasks
 
-8 of 13 done · 1 blocked · 1 in_review · 3 todo
+8 of 13 done · 1 blocked · 1 doing · 3 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -33,14 +33,14 @@
 | 07 | create-command | normal | done | 0 | 2 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
 | 08 | create-checks | core | done | 0 | 2 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
 | 09 | create-undo | core | blocked | 0 | 2 | 08 | R8, R18 |
-| 10 | status-core | core | in_review | 0 | 1 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
+| 10 | status-core | core | doing | 0 | 1 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
 | 13 | no-network-check | normal | todo | 0 | 0 | 09, 12 | R40 |
 
 ## Findings
 
-Open: 3 · Waiting for verify: 0 · Closed: 74
+Open: 4 · Waiting for verify: 0 · Closed: 74
 
 ### Doc reviews
 
@@ -109,6 +109,7 @@ Open: 3 · Waiting for verify: 0 · Closed: 74
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-10-1/F1 | high | 10 | The base goes to git as a bare name, not refs/heads/<base> | open |
 | task-09-2/Q1 | needs human | 09 | Clean up after every failed worktree add, not only after a signal? | open |
 | task-09-2/F1 | high | 09 | A failed post-checkout hook leaves the worktree; the message does not name it | open |
 | task-09-2/F2 | low | 09 | The reason for a failed worktree add is git's progress line | open |
@@ -157,6 +158,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 09:41 · lead (claude) · task 10 worker round 2 started: F1
+- 2026-10-24 09:41 · code reviewer (claude opus) · task-10-1 submitted: changes; 1 high (a tag named main hides R23 and R24)
 - 2026-10-24 09:39 · lead (claude) · task 10 code review started, round 1
 - 2026-10-24 09:39 · lead (claude) · task 10 committed (2979d45); checks pass
 - 2026-10-24 09:37 · lead (claude) · task 10 started: worker round 1 (task 09 blocked; the human allowed tasks 10 and 11 meanwhile)
