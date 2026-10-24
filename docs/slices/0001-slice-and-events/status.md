@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 10:07 UTC
+- Updated: 2026-10-24 10:10 UTC
 
 ## Needs human
 
@@ -19,7 +19,7 @@ None.
 
 ## Tasks
 
-12 of 13 done · 1 in_review
+12 of 13 done · 1 doing
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -35,11 +35,11 @@ None.
 | 10 | status-core | core | done | 0 | 2 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
 | 11 | status-command | normal | done | 0 | 1 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | done | 0 | 2 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
-| 13 | no-network-check | normal | in_review | 0 | 1 | 09, 12 | R40 |
+| 13 | no-network-check | normal | doing | 0 | 1 | 09, 12 | R40 |
 
 ## Findings
 
-Open: 0 · Waiting for verify: 0 · Closed: 82
+Open: 2 · Waiting for verify: 0 · Closed: 82
 
 ### Doc reviews
 
@@ -109,6 +109,8 @@ Open: 0 · Waiting for verify: 0 · Closed: 82
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-13-1/F1 | medium | 13 | The empty-trace check can never fire | open |
+| task-13-1/F2 | low | 13 | A connection without fetch, e.g. ls-remote, passes | open |
 | task-12-1/F1 | high | 12 | In a subfolder, slice list does not see merged slices | verified |
 | task-11-1/F1 | low | 11 | R30's object is built inline; task 12 would copy it | verified |
 | task-10-1/F1 | high | 10 | The base goes to git as a bare name, not refs/heads/<base> | verified |
@@ -153,6 +155,7 @@ None.
 - 09: task-09-1/F3 is wontfix: `slice.Interrupted` stays. Why: only the CLI uses it; the integration review is told.
 - 12: `internal/cli/status.go` is added to task 12's touches (task-11-1/F1), so R30's object can move into one helper that `slice status` and `slice list` share. Why: R37 says each slice in `slice list --json` has R30's form; a copy could drift.
 - 09 (found by the lead after task 09 was done): `removeWorktree` in `internal/slice/undo.go` runs `git worktree prune` when `git worktree remove --force` fails and the folder is gone. `prune` clears every stale worktree entry in the repo, not only this run's, which breaks Undo on failure ("never removes a thing that is not on the list"). It only runs when this run's worktree was locked during `create`, so the risk is low. Passed to the integration review, with the fix `git worktree remove --force --force <wt>` for this run's entry only. Why: no task left may change `undo.go`, and a new fix task would change tasks.md.
+- 13: task-13-1/F2: `TestNoNetwork` also forbids `ls-remote`, `upload-pack`, `receive-pack`, `fetch-pack`, `send-pack`, and `remote` with a subcommand that connects (`show`, `update`, `prune`, `set-head`); plain `git remote` stays allowed. Why: R40 says no network connection, and these connect without fetch; plain `git remote` only reads the config (check.go uses it).
 
 ## Preview
 
@@ -162,6 +165,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 10:10 · lead (claude) · task 13 worker round 2 started: F1, F2
+- 2026-10-24 10:10 · code reviewer (claude opus) · task-13-1 submitted: changes; 1 medium (the empty-trace check cannot fire), 1 low
 - 2026-10-24 10:07 · lead (claude) · task 13 code review started, round 1
 - 2026-10-24 10:07 · lead (claude) · task 13 committed (7d41700); checks pass
 - 2026-10-24 10:06 · lead (claude) · task 13 started: worker round 1
