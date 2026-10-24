@@ -50,7 +50,7 @@ a spec to fill in, and an event log.
   ```
   {"version":1,"seq":1,"event":"slice.created","at":"2026-10-24T07:42:00Z","data":{"from":{"branch":"main","commit":"9dd7ebf4c2a1e8d3b5f6a7c8d9e0f1a2b3c4d5e6"}}}
   ```
-  Shows: R1, R3, R4, R5, R6, R7, R8, R9, R18, R19
+  Shows: R1, R3, R4, R5, R6, R7, R8, R9, R18, R19, R36
 - **S2.** **Given** `git config sliceflow.base develop`,
   **When** I run
   `sliceflow slice create login-google --title "Login with Google" --json`,
@@ -60,7 +60,7 @@ a spec to fill in, and an event log.
   {"slice":"login-google","branch":"slice/login-google","from":{"branch":"develop","commit":"<full commit id>"},"worktree":"<full path>/.sliceflow/worktrees/login-google","spec":"docs/slices/login-google/spec.md"}
   ```
   and the event's `data` holds `"title":"Login with Google"`.
-  Shows: R3, R10, R19
+  Shows: R3, R10, R19, R36
 - **S3.** **Given** `git config sliceflow.base develop`,
   **When** I run `sliceflow slice create hotfix-ui --from main`,
   **Then** the slice starts from `main`, because `--from` wins.
@@ -410,6 +410,10 @@ stderr, changes nothing, and exits with code 1.
   `git fetch`, `git pull`, or `git push`, and reads only what git already
   has.
   Check: e2e
+- **R36.** sliceflow shall print every path with `/` between its parts,
+  on every system, also in `--json`. On Windows a full path looks like
+  `C:/Users/me/project/.sliceflow/worktrees/spec-submit`.
+  Check: unit, e2e
 
 ## Out of scope
 
@@ -532,5 +536,4 @@ stderr, changes nothing, and exits with code 1.
 
 ## Open questions
 
-- **Q4.** On Windows, paths in the output: with `/` as on the other
-  systems, or with `\`?
+None.
