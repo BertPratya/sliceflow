@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 18:41 UTC
+- Updated: 2026-10-24 18:55 UTC
 
 ## Needs human
 
@@ -133,6 +133,7 @@ None.
 - Task 04, task-04-1/F1: task 04's touches widened to `internal/spec/parse.go` and `parse_test.go` (tasks.md changed). Why: the fix is in the reader, which drops the lines above the first `##` heading; it is the same package, and no later task touches those files. Later, by the human's answer, `Doc` also gets `Preamble`, and `doc.go` joined the touches (R002).
 - Task 04, task-04-2/F1 (low): fixed in round 3, not left. Why: users would see a wrong extra error (`shows R9, which does not exist`), and the fix is one line.
 - Task 05, task-05-1/Q1: an empty Open questions section gets both of R16's warnings, "is empty" and "is not None.". Why: that is R16 as written, so no document changes; only the other answer (one warning) would change the spec. The human may overrule it.
+- Task 06: touches widened to `internal/e2e/status_command_test.go` and `internal/e2e/slice_list_test.go` (tasks.md changed). Their tests (`TestStatusBadLines`, `TestListBadLine`, from 0001) now expect R4's third warning, `.events.jsonl line 3: slice.created is not allowed when spec.md is draft; skipped`. Why: replay now skips the second `slice.created`, as R2 and R4 say; task 06 changes what these tests check. The test logs stay as 0001 wrote them.
 
 ## Preview
 
@@ -142,6 +143,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 18:55 · lead (claude) · task 06's touches widened to two 0001 e2e test files; the worker goes on
+- 2026-10-24 18:55 · worker (claude sonnet) · task 06 round 1 blocked: two 0001 e2e tests now get R4's warning for a second slice.created
 - 2026-10-24 18:41 · lead (claude) · task 06 started: worker round 1
 - 2026-10-24 18:41 · lead (claude) · task 05 done
 - 2026-10-24 18:41 · code-reviewer (claude opus) · task review 2 of task 05 handed in: F1, Q1 verified; no new findings

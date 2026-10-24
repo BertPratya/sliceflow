@@ -388,7 +388,8 @@ the notes for R11, R40, and R43.
 ```yaml
 covers: [R1, R3, R29, R30, R34]
 depends_on: ["02"]
-touches: [internal/slice/status.go, internal/slice/list.go, internal/slice/worktree.go, internal/slice/next.go, internal/slice/status_test.go, internal/slice/list_test.go, internal/slice/worktree_test.go, internal/slice/next_test.go, internal/eventlog/parse.go, internal/eventlog/parse_test.go]
+touches: [internal/slice/status.go, internal/slice/list.go, internal/slice/worktree.go, internal/slice/next.go, internal/slice/status_test.go, internal/slice/list_test.go, internal/slice/worktree_test.go, internal/slice/next_test.go, internal/eventlog/parse.go, internal/eventlog/parse_test.go,
+  internal/e2e/status_command_test.go, internal/e2e/slice_list_test.go]
 follows: ["Flow 1: Replay a slice, and show its status", Core API, Git arguments, Cross-platform paths, Tests, Testing]
 risk: core
 ```
@@ -422,6 +423,10 @@ part is R29's refused mark, which depends on both the state and R30. Its brief i
 - `internal/slice/status_test.go`, `internal/slice/list_test.go`:
   changed. `internal/slice/worktree_test.go`, `internal/slice/next_test.go`:
   new.
+- `internal/e2e/status_command_test.go`, `internal/e2e/slice_list_test.go`:
+  changed. `TestStatusBadLines` and `TestListBadLine` expect R4's
+  warning for the second `slice.created` at line 3, after the two parse
+  warnings (lead's call).
 
 ### Interfaces
 
