@@ -2,7 +2,7 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 05:03 UTC
+- Updated: 2026-10-24 05:04 UTC
 
 ## Needs human
 
@@ -12,7 +12,7 @@ None.
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | in_review | 3 | - | - |
+| spec.md | review_passed | 3 | - | - |
 
 ## Tasks
 
@@ -20,13 +20,13 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 1 · Closed: 20
+Open: 0 · Waiting for verify: 0 · Closed: 21
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| spec-3/F1 | medium | Warning items: drop Warning: and <name>: , the R23 item | fixed (waiting for verify) |
+| spec-3/F1 | medium | Warning items: drop Warning: and <name>: , the R23 item | verified |
 | spec-3/F2 | low | R37: with no slices, only slices is [] | verified |
 | spec-3/F3 | low | R26: a bad at, by the form of R19 | verified |
 | spec-2/F1 | medium | R9 vs S1 and R10: what the spec path is relative to | verified |
@@ -68,6 +68,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 05:04 · lead (claude) · spec.md review_passed
+- 2026-10-24 05:04 · doc reviewer · change review 2 handed in: spec-3/F1 verified; no findings
 - 2026-10-24 05:03 · lead (claude) · change review 2 started (reviews/change-2.md)
 - 2026-10-24 05:03 · human · "2": one more short check of the last fix
 - 2026-10-24 05:01 · lead (claude) · spec-3/F1 finished: R37's warnings items written as in R30
