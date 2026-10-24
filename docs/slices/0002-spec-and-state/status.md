@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:47 UTC
+- Updated: 2026-10-24 17:49 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-11 of 17 done · 1 in_review · 5 todo
+11 of 17 done · 1 doing · 5 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -35,7 +35,7 @@ None.
 | 09 | validate-command | core | done | 0 | 2 | 05, 06, 08 | R11, R12, R13, R14, R18, R19, R36, R37 |
 | 10 | lock | core | done | 0 | 2 | - | R6, R7 |
 | 11 | save-event | core | done | 0 | 3 | 01, 02, 06, 10 | R2, R6, R8, R9, R10 |
-| 12 | title-command | normal | in_review | 0 | 1 | 08, 09, 11 | R32, R33, R34, R36 |
+| 12 | title-command | normal | doing | 0 | 1 | 08, 09, 11 | R32, R33, R34, R36 |
 | 13 | reviewer | core | todo | 0 | 0 | - | R25, R26, R27 |
 | 14 | submit-core | core | todo | 0 | 0 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
 | 15 | review-core | core | todo | 0 | 0 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 4 · Closed: 79
+Open: 2 · Waiting for verify: 4 · Closed: 79
 
 ### Doc reviews
 
@@ -105,6 +105,8 @@ Open: 0 · Waiting for verify: 4 · Closed: 79
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-12-1/F1 | low | 12 | Ctrl-C during the first checks prints git's error, not R10's interrupted | open |
+| task-12-1/F2 | low | 12 | No test for an untitled slice given its own name as the title | open |
 | task-11-2/F1 | medium | 11 | With no Ctrl-C, the undo can still remove another git's live index.lock | verified |
 | task-11-1/Q1 | question | 11 | R10's message when the undo cannot put something back | open (the lead decided: `Could not put back: <list>.` replaces the last sentence, as 0001's R18; verified) |
 | task-11-1/F1 | high | 11 | Ctrl-C after the commit was made is treated as a failure | verified |
@@ -157,6 +159,7 @@ None.
 - Task 10, task-10-2/F1 (low): wontfix. A lasting permission error on the lock folder shows after the lock wait (10 s), as itself. Why: it is a rare setup problem, the error is still true, and a Windows-only retry would leave that path untested on Linux and macOS.
 - Task 11, task-11-1/Q1: when the undo cannot put something back, `Could not put back: <list>.` replaces R10's last sentence. Why: R10 says the message follows 0001's R18, and R18 does the same with `Could not remove: <list>.`; no document changes, and the message no longer says "Nothing was changed." when something was not put back. The human may overrule it.
 - Task 11, task-11-1/F2: the undo removes git's `index.lock` only when `git reset` fails because that lock exists, and the lock's time is inside the stopped `git commit`'s window: from just before it started (less a 2 s margin for coarse file times) to the moment it returned (so it is the dead git's). Why: it keeps the undo working after Ctrl-C without touching another git's live lock; it stays inside task 11's touches. Stopping git gently in `internal/git` (the reviewer's other idea) changes every git command, so it went to the backlog, with F3.
+- Task 12, task-12-1/F1 and F2 (low): both fixed, not left. Why: R10 says a Ctrl-C before the commit gives `interrupted`, and the same early checks come in tasks 14 and 16 (their briefs will say so); F2 is one test case for the lead's reading of R33.
 
 ## Preview
 
@@ -166,6 +169,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:49 · lead (claude) · task 12 worker round 2 started, to fix both lows
+- 2026-10-24 17:49 · code-reviewer (claude opus) · task review 1 of task 12 handed in: 2 low
 - 2026-10-24 17:47 · lead (claude) · task review 1 of task 12 started
 - 2026-10-24 17:47 · lead (claude) · task 12 committed (c6081ab); the checks pass
 - 2026-10-24 17:47 · worker (claude sonnet) · task 12 round 1 handed in
