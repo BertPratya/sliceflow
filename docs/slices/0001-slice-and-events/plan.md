@@ -97,7 +97,15 @@ Covers: R18
    `interrupted` when a signal arrived, whatever git printed. Otherwise
    it is the first line of git's stderr that is not empty, or
    `git <command> failed (exit code <n>)`; the other lines follow,
-   each indented by 2 spaces (R18).
+   each indented by 2 spaces (R18). Each step names its own git
+   command for this, e.g. `commit` or `worktree add`, so the worktree
+   path and the commit id never become part of `<command>`. (lead's
+   call)
+4. For a step that is not git, such as writing a file, the reason is
+   Go's error text, with any path in it written with `/` (R41): for a
+   `*fs.PathError`, its `Op`, then `filepath.ToSlash(Path)`, then its
+   `Err`, e.g. `open C:/Users/me/project/.sliceflow/worktrees/x/docs/slices/x/spec.md: Access is denied.`
+   (lead's call)
 
 ### Flow 4: Status of one slice
 

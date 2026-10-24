@@ -439,8 +439,10 @@ front matter filled for a new slice.
 ### Done when
 
 - `TestSpecFrontMatter`: `Spec("spec-submit", <2026-10-24 23:30 in UTC-5>)`
-  starts with `---\nslice: spec-submit\ncreated: 2026-10-25\nideas: []\n`,
-  and the front matter has exactly one line starting with `ideas:`.
+  starts with exactly
+  `---\nslice: spec-submit\ncreated: 2026-10-25\nideas: []\n---\n`,
+  so no other front matter line, such as the template's example idea
+  line, is left in.
   Proves: R7
 - `TestSpecNoPlaceholdersInFrontMatter`: the front matter has no line
   starting with `title:`, and no `{{slice}}`, `{{title}}`, or
@@ -724,9 +726,11 @@ what this run did not make. Its brief is about 1,950 words, over the usual 1,500
    note whether `.sliceflow/worktrees/` exists before step 6; check
    `ctx` between steps; on an error, run the undo and return R18's
    `*Error`. The reason is `interrupted` when `ctx.Err()` is set;
-   else the first line of `git.Error.Stderr` that is not empty, or
-   `git <command> failed (exit code <n>)`, with the other lines after
-   it.
+   else, for a git step, the first line of `git.Error.Stderr` that is
+   not empty, or `git <command> failed (exit code <n>)` with the
+   command name the step passes (e.g. `commit`, `worktree add`), with
+   the other lines after it; else, for a step that is not git, the
+   error text with paths written with `/`, as Flow 3, step 4 says.
 4. In `internal/cli/create.go`: make the `ctx` with
    `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)` first,
    before `FindRepo`. When `FindRepo` returns because the `ctx` is done,
@@ -781,6 +785,13 @@ what this run did not make. Its brief is about 1,950 words, over the usual 1,500
   Proves: R18
 - `TestUndoCouldNotRemove` (unit): when the worktree folder cannot be
   removed, the error ends with `Could not remove: <the folder>.`
+  Proves: R18
+- `TestReasonFileError` (unit): the reason for a `*fs.PathError` with
+  `Op` `open`, `Path` `C:\a\b\spec.md`, and `Err` `Access is denied.`
+  is `open C:/a/b/spec.md: Access is denied.`
+  Proves: R18
+- `TestReasonGitCommand` (unit): a failed `worktree add` with an empty
+  stderr and exit code 128 gives `git worktree add failed (exit code 128)`.
   Proves: R18
 
 ### Out of scope

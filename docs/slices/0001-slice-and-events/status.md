@@ -1,21 +1,21 @@
 # Status: 0001-slice-and-events
 
-- Phase: planning (blocked: the plan review did not pass in 3 rounds)
+- Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 07:23 UTC
+- Updated: 2026-10-24 07:27 UTC
 
 ## Needs human
 
-- The plan review did not pass in 3 rounds (plan-3: 1 medium, 2 low). The human decides how to go on.
+None.
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
-| spec.md | draft | 3 | - | - |
-| plan.md | draft | 3 | - | - |
-| preview.md | draft | with plan.md | - | - |
-| tasks.md | draft | with plan.md | - | - |
+| spec.md | in_review | 3 | - | - |
+| plan.md | in_review | 3 | - | - |
+| preview.md | in_review | with plan.md | - | - |
+| tasks.md | in_review | with plan.md | - | - |
 
 ## Tasks
 
@@ -39,16 +39,16 @@
 
 ## Findings
 
-Open: 3 · Waiting for verify: 0 · Closed: 42
+Open: 0 · Waiting for verify: 3 · Closed: 42
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-3/F1 | medium | R18's system error reason: not in Flow 3 or task 09, path with \ on Windows | open |
-| plan-3/F2 | low | Task 09: how to get <command> from git.Error.Args | open |
+| plan-3/F1 | medium | R18's system error reason: not in Flow 3 or task 09, path with \ on Windows | fixed |
+| plan-3/F2 | low | Task 09: how to get <command> from git.Error.Args | fixed |
 | plan-2/F1 | medium | Task 08's folder check misses Cross-platform paths | verified |
-| plan-2/F2 | low | TestSpecFrontMatter passes with the ideas: example left in | reopened |
+| plan-2/F2 | low | TestSpecFrontMatter passes with the ideas: example left in | fixed |
 | plan-2/F3 | low | Ctrl-C during FindRepo prints context canceled | verified |
 | plan-2/F4 | low | R18: <command> for worktree add; a step that is not git | verified |
 | plan-2/F5 | low | R38's short list leaves out the new wrong uses | verified |
@@ -111,6 +111,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 07:27 · lead (claude) · plan-3 fixed (F1, F2, plan-2/F2); change review started (reviews/change-3.md), it checks only these fixes
+- 2026-10-24 07:27 · human · after the round limit: fix the three, then a change review of only the fixes (option 1); block removed
 - 2026-10-24 07:23 · lead (claude) · round limit reached; slice marked planning (blocked); asking the human
 - 2026-10-24 07:23 · doc reviewer (claude opus) · plan-3: 6 of 7 verified, plan-2/F2 reopened; new: 1 medium, 1 low; nothing for the human to decide
 - 2026-10-24 07:21 · lead (claude) · plan review round 3 started (reviews/plan-3.md), the last round of the limit
