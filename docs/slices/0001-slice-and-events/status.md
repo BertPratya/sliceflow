@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:42 UTC
+- Updated: 2026-10-24 08:45 UTC
 
 ## Needs human
 
@@ -19,13 +19,13 @@ None.
 
 ## Tasks
 
-4 of 13 done · 1 in_review · 8 todo
+4 of 13 done · 1 doing · 8 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | git-runner | core | done | 0 | 2 | - | R40 |
 | 02 | event-log | core | done | 0 | 2 | 01 | R19, R25, R26, R27 |
-| 03 | cli-skeleton | core | in_review | 0 | 1 | 01, 04 | R28, R38, R39 |
+| 03 | cli-skeleton | core | doing | 0 | 1 | 01, 04 | R28, R38, R39 |
 | 04 | repo-and-names | core | done | 0 | 1 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | done | 0 | 1 | 01 | R7 |
 | 06 | create-core | core | todo | 0 | 0 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 0 · Closed: 53
+Open: 2 · Waiting for verify: 0 · Closed: 53
 
 ### Doc reviews
 
@@ -99,6 +99,9 @@ Open: 0 · Waiting for verify: 0 · Closed: 53
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-03-1/F1 | high | 03 | Any flag after slice prints the help and exits 0 | open |
+| task-03-1/F3 | low | 03 | A bad bool value gives a text that is not one of R38's | open |
+| task-03-1/F2 | low | 03 | fail indents later lines; S15's lines have no indent | deferred: task 11 |
 | task-04-1/F1 | low | 04 | FindRepo calls every rev-parse failure "not inside a git repository" | wontfix: why: git gives exit 128 for both, and sliceflow does not read git's error text (Git arguments); the worker's ASSUMED names it |
 | task-02-1/Q1 | needs human | 02 | R27 does not say which seq the first good line must have | verified: the human chose option 1 (expect 1); R002 |
 | task-02-1/F1 | low | 02 | A seq too big for an int gets a wrong value reason R26 does not list | verified |
@@ -115,6 +118,8 @@ None.
 - 01 to 02: the gofmt check runs on the folders that exist, as `.githooks/pre-commit` does. Why: `cmd/` comes with task 03; until then `gofmt -l cmd internal` fails with "stat cmd", which is not a format error.
 - 02: task-02-1/F1, a seq too big for an int, gets `field "seq" has the wrong type`, not `has a wrong value`. Why: R26's wrong values name only at, commit, branch, and title; the plan already calls a seq that is not a usable whole number the wrong type.
 - 02: the worker adds a TestParseBadLines row for a line of only `\r` (`blank line`). Why: Reading a line says so, and the review showed no test catches it.
+- 03: task-03-1/F3, a bad value for a bool flag, e.g. `--json=yes`, is wrong use: `Error: unknown flag --json=yes. Run sliceflow --help.`, exit 2. Why: R38 allows only its five texts for wrong use, and this is the closest.
+- 03: task-03-1/F2 goes into task 11's brief: S15's lines must not go through `fail` as one indented message. Why: `fail` indents later lines, as R18 needs for task 09.
 
 ## Preview
 
@@ -124,6 +129,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:45 · lead (claude) · task 03 worker round 2 started: F1 and F3; F2 deferred to task 11
+- 2026-10-24 08:45 · code reviewer (claude opus) · task-03-1 submitted: changes; 1 high (slice --colour exits 0), 2 low
 - 2026-10-24 08:42 · lead (claude) · task 03 code review started, round 1
 - 2026-10-24 08:42 · lead (claude) · task 03 committed (b887065); full checks pass (gofmt on cmd and internal again)
 - 2026-10-24 08:42 · lead (claude) · found and fixed more damage from task 01 attempt 1: the stray git init had set core.bare = true in .git/config, which broke the main checkout and go build's VCS stamping; set back to false; main checkout clean on main at db185d4
