@@ -201,7 +201,33 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
      data model doc for full details.
      None? Write: None. -->
 
-{{The stored data that changes, and how old data is moved over.}}
+Committed, on the slice branch:
+
+- **The event log** `docs/slices/<name>/.events.jsonl` gets four new
+  events: `slice.titled`, `spec.submitted`, `review.started`, and
+  `review.finished`, with the `data` fields of R5, in the order of the
+  spec's examples. `version` stays 1: the line form did not change. A
+  0001 log holds only `slice.created`, which keeps its meaning, so no old
+  log is changed. An older sliceflow skips the new events with the
+  warning `unknown event` (R26 of 0001-slice-and-events).
+- **The review files** `docs/slices/<name>/reviews/spec-<round>.md`, in
+  the form of R25 and R26.
+
+Local, in the main checkout, never committed:
+
+- **The lock file** `.sliceflow/locks/<name>.lock`: one JSON line with
+  `pid` (a whole number) and `since` (the time in UTC, as the events'
+  `at`), e.g. `{"pid":4312,"since":"2026-10-24T10:02:00Z"}`. It exists
+  only while one event is saved. `.sliceflow/` ignores itself through its
+  `.gitignore` (R6 of 0001-slice-and-events); when that file is missing,
+  taking the lock writes it first. (lead's call)
+
+Local, in the slice's worktree, for a moment only:
+
+- **The temporary log** `docs/slices/<name>/.events.jsonl.tmp`: the whole
+  new log, renamed over `.events.jsonl` once written (R9). A file left by
+  a crash is removed at the next write. (lead's call)
+
 
 ## Testing
 

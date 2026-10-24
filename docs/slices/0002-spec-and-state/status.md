@@ -72,6 +72,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 15:50 · lead (claude) · human: lock file is one JSON line (pid, since); a leftover lock is removed by hand until 0007 (roadmap); reads take no lock. Data written
 - 2026-10-24 15:20 · lead (claude) · human: complex; package layout option 1 (three new packages: state, spec, review); Approach written
 - 2026-10-24 15:00 · lead (claude) · plan started: plan.md and preview.md copied; preview's fixed checks P1-P5
 - 2026-10-24 14:55 · lead (claude) · spec.md review_passed
