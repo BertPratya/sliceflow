@@ -10,7 +10,7 @@ slice: 0001-slice-and-events
 covers: [R40]
 depends_on: []
 touches: [go.mod, internal/git/, internal/testrepo/]
-follows: [TD1, TD3, TD8, Git arguments, No network, Interrupts, Tests, Testing]
+follows: [TD1, TD3, TD8, Git arguments, No network, Tests, Testing]
 risk: core
 ```
 
@@ -31,7 +31,8 @@ config, for every package's tests.
    `exec.LookPath`, run it with `exec.CommandContext`, the given folder
    as its working directory, `GIT_TERMINAL_PROMPT=0` and
    `GIT_NO_LAZY_FETCH=1` added to the environment, and
-   `cmd.WaitDelay` of 2 seconds (Interrupts). When `ctx` is done,
+   `cmd.WaitDelay` of 2 seconds, so a hook that outlives a stopped git
+   cannot hold `Run` open. When `ctx` is done,
    return `ctx.Err()`, not a `*git.Error`.
 4. Add `Error`: the arguments, the exit code, and git's stderr with
    spaces trimmed at both ends. Its `Error()` is that stderr text.
@@ -119,7 +120,7 @@ The event log format exists as a package with no file or git access.
 It writes one `slice.created` line, and reads a whole log into events
 and warnings in R26's and R27's exact words. The hardest part is the
 reader: every bad line is skipped with the right reason, including a
-field that appears twice.
+field that appears twice. Its brief is about 2,100 words, over the usual 1,500, because it carries every warning text of R26 and R27, which the worker must copy exactly.
 
 ### Steps
 
@@ -128,9 +129,10 @@ field that appears twice.
    `NewCreated`, with the fields declared in R19's order (TD4).
 3. Add `Encode`: one line of JSON, ending in `\n`.
 4. In `internal/eventlog/parse.go`, add `Parse` as Reading a line says:
-   split on `\n`, find a name that appears twice with
-   `json.Decoder.Token`, then read the line into a map and check each
-   field (TD5), in the order of R26's reasons.
+   split on `\n`; for each line, check `blank line` and
+   `not valid JSON`, then find a name that appears twice with
+   `json.Decoder.Token`, then read the line into a map and check the
+   other reasons in R26's order (TD5), as Reading a line says.
 5. Add `Phase`.
 6. Run the tests until they pass.
 
@@ -225,7 +227,7 @@ risk: core
 `sliceflow` runs, shows help, and stops wrong use with exit code 2 and
 R38's words. Commands register themselves from their own files, so
 tasks 07, 11, and 12 each add a file and never edit `cli.go`. The e2e
-helpers exist. The hardest part is the flag helper of TD2.
+helpers exist. The hardest part is the flag helper of TD2. Its brief is about 1,900 words, over the usual 1,500, because R38 brings the wrong-use scenarios, whose texts the CLI must print exactly.
 
 ### Steps
 
@@ -326,7 +328,7 @@ risk: core
 
 The shared base of the core exists: finding the repo and the main
 checkout, the error and warning types, the name rule, and picking the
-base branch. Every command uses these.
+base branch. Every command uses these. Its brief is about 2,150 words, over the usual 1,500, because R3 and R21 bring the create and list scenarios that show the base branch; the task needs only their base-branch part.
 
 ### Steps
 
@@ -437,7 +439,8 @@ front matter filled for a new slice.
 ### Done when
 
 - `TestSpecFrontMatter`: `Spec("spec-submit", <2026-10-24 23:30 in UTC-5>)`
-  starts with `---\nslice: spec-submit\ncreated: 2026-10-25\nideas: []\n`.
+  starts with `---\nslice: spec-submit\ncreated: 2026-10-25\nideas: []\n`,
+  and the front matter has exactly one line starting with `ideas:`.
   Proves: R7
 - `TestSpecNoPlaceholdersInFrontMatter`: the front matter has no line
   starting with `title:`, and no `{{slice}}`, `{{title}}`, or
@@ -468,7 +471,7 @@ risk: core
 `slice.Create` makes the branch, the worktree, the two files, and the
 commit, from a `Repo` the CLI found. The checks before creating come in
 task 08, the undo in task 09; this task leaves a clear place for the
-checks.
+checks. Its brief is about 2,000 words, over the usual 1,500, because Flow 1 and the create scenarios hold the exact files, commit, and log line.
 
 ### Steps
 
@@ -542,7 +545,7 @@ risk: normal
 ### Goal
 
 `sliceflow slice create <name>` works from the terminal, and prints
-R9's lines or R10's JSON, with paths relative to the main checkout.
+R9's lines or R10's JSON, with paths relative to the main checkout. Its brief is about 1,850 words, over the usual 1,500, because the create scenarios hold the exact output the command prints.
 
 ### Steps
 
@@ -606,11 +609,11 @@ R9's lines or R10's JSON, with paths relative to the main checkout.
 ## Task 08: create-checks
 
 ```yaml
-covers: [R2, R11, R12, R13, R14, R15, R16, R17, R38, R42]
+covers: [R2, R11, R12, R13, R14, R15, R16, R17, R42]
 depends_on: ["07"]
 touches: [internal/slice/create.go, internal/slice/check.go,
   internal/slice/check_test.go, internal/e2e/create_checks_test.go]
-follows: ["Flow 2: A check fails before creating", Git arguments, Tests, Testing]
+follows: ["Flow 2: A check fails before creating", Git arguments, Cross-platform paths, Tests, Testing]
 risk: core
 ```
 
@@ -649,7 +652,7 @@ Each e2e test also checks that stdout is empty, the exit code is 1,
 and no branch, worktree, or `.sliceflow/` was made.
 
 - `TestCreateBadName`: S5: `slice create "My Slice"` prints S5's error.
-  Proves: R2, R14, R38
+  Proves: R2, R14
   Scenario: S5
 - `TestCreateReservedName`: S6: `slice create con`.
   Proves: R14
@@ -696,7 +699,7 @@ and no branch, worktree, or `.sliceflow/` was made.
 ## Task 09: create-undo
 
 ```yaml
-covers: [R8, R18, R38]
+covers: [R8, R18]
 depends_on: ["08"]
 touches: [internal/slice/create.go, internal/slice/undo.go,
   internal/slice/undo_test.go, internal/cli/create.go,
@@ -710,7 +713,7 @@ risk: core
 When a step of `create` fails, or Ctrl-C or `SIGTERM` arrives,
 sliceflow removes what it made in this run, newest first, and prints
 R18's error with the right reason. The hardest part is to never remove
-what this run did not make.
+what this run did not make. Its brief is about 1,950 words, over the usual 1,500, because the undo and interrupt rules must all be followed together.
 
 ### Steps
 
@@ -725,7 +728,9 @@ what this run did not make.
    `git <command> failed (exit code <n>)`, with the other lines after
    it.
 4. In `internal/cli/create.go`: make the `ctx` with
-   `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)`.
+   `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)` first,
+   before `FindRepo`. When `FindRepo` returns because the `ctx` is done,
+   print R18's error with `interrupted`, not `context canceled`.
 5. Run the tests until they pass.
 
 ### Files
@@ -749,7 +754,7 @@ what this run did not make.
   `Error: could not create slice spec-submit: git commit failed (exit code 1). Everything sliceflow made was removed.`,
   stdout is empty, exit code 1; no branch `slice/spec-submit`, no
   worktree in `git worktree list --porcelain`, no `.sliceflow/`.
-  Proves: R8, R18, R38
+  Proves: R8, R18
   Scenario: S12
 - `TestCreateHookOutput` (e2e): a `pre-commit` hook that prints
   `lint: 2 errors` and `a.go:1: bad` on stderr and exits with 1:
@@ -796,7 +801,7 @@ risk: core
 
 The core reads a slice's log from git and works out its status, with
 its warnings. `Status` uses it for one slice; task 12's `List` uses the
-same reading for every slice.
+same reading for every slice. Its brief is about 1,800 words, over the usual 1,500, because R26 and the status scenarios hold the exact warnings and values.
 
 ### Steps
 
@@ -858,7 +863,7 @@ same reading for every slice.
 ## Task 11: status-command
 
 ```yaml
-covers: [R22, R26, R28, R29, R30, R31, R32, R33, R38, R42]
+covers: [R22, R26, R28, R29, R30, R31, R32, R33, R42]
 depends_on: ["03", "07", "10"]
 touches: [internal/cli/status.go, internal/e2e/status_command_test.go]
 follows: [CLI, Tests, Testing]
@@ -868,7 +873,7 @@ risk: normal
 ### Goal
 
 `sliceflow slice status [<name>]` prints R29's lines or R30's JSON, and
-the warnings on stderr.
+the warnings on stderr. Its brief is about 1,750 words, over the usual 1,500, because the status scenarios hold the exact output the command prints.
 
 ### Steps
 
@@ -903,7 +908,7 @@ changed log is committed on the slice branch.
   Scenario: S14
 - `TestStatusNotOnSlice`: S15's three lines, exit code 1; on a
   detached HEAD, `on no branch`.
-  Proves: R32, R38
+  Proves: R32
   Scenario: S15
 - `TestStatusJSON`: S16.
   Proves: R30
@@ -942,7 +947,7 @@ risk: normal
 
 `sliceflow slice list` shows the slices in progress, oldest first, or
 all of them with `--all`, or R37's JSON, with ` !` for a slice with
-warnings, and leaves out branches whose name breaks R2.
+warnings, and leaves out branches whose name breaks R2. Its brief is about 2,350 words, over the usual 1,500, because the list scenarios hold the exact table, JSON, and warnings, and the core and the command share them.
 
 ### Steps
 

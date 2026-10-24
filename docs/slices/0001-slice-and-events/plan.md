@@ -248,7 +248,8 @@ failure, and prints R18's error with the reason `interrupted`.
   is cancelled, `git.Run` returns `ctx.Err()`, never a "not found"
   answer, so `RefExists` cannot report a missing branch by mistake.
   `create` then prints R18's error with `interrupted`; nothing was made
-  yet, so there is nothing to remove.
+  yet, so there is nothing to remove. The CLI makes the signal `ctx`
+  before it calls `FindRepo`, so a Ctrl-C there gives the same error.
 `status` and `list` change nothing, so they keep Go's default: they
 stop at once. (lead's call)
 
@@ -378,9 +379,11 @@ e.g. `data.from.branch`.
   `has the wrong type`. (lead's call)
 - The whole log is read from git in one piece, so a line has no length
   limit. (lead's call)
-- A line with more than one fault gets one warning: the checks run in
-  the order of R26's list of reasons, and the first fault found is the
-  warning, e.g. a line with an unknown field and no `at` gives
+- A line with more than one fault gets one warning, the first fault
+  found, in this order: `blank line`, `not valid JSON`, a field that
+  `appears twice`, then the other reasons in the order of R26's list.
+  E.g. `{"version":2,"seq":1,"seq":1,...}` gives `field "seq" appears
+  twice`, and a line with an unknown field and no `at` gives
   `unknown field "<f>"`. (lead's call)
 
 ## Testing

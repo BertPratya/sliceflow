@@ -365,8 +365,12 @@ stderr, changes nothing, and exits with code 1.
   If it cannot remove something, the message ends with
   `Could not remove: <list>.` instead of the last sentence.
   `<reason>` is the first line of git's message that is not empty, or
-  `git <command> failed (exit code <n>)` when git printed nothing, e.g.
-  `git commit failed (exit code 1)`. The other lines of git's message,
+  `git <command> failed (exit code <n>)` when git printed nothing, where
+  `<command>` is the git command without its options and values, e.g.
+  `git commit failed (exit code 1)` or
+  `git worktree add failed (exit code 128)`. For a step that is not a
+  git command, such as writing a file, `<reason>` is the system's error
+  message. The other lines of git's message,
   which hold the output of the user's hooks, follow the error line, each
   indented by 2 spaces.
   Ctrl-C, or a stop signal from the system, while sliceflow is creating
@@ -497,7 +501,8 @@ stderr, changes nothing, and exits with code 1.
 ### Every command
 
 - **R38.** sliceflow shall exit with code 0 on success, 1 on an error,
-  and 2 on wrong use (an unknown command or flag, or a missing value).
+  and 2 on wrong use (an unknown command or flag, a missing value, a
+  missing slice name, or too many arguments).
   It shall print errors on stderr, and nothing on stdout when a command
   fails. For wrong use, the error is
   `Error: <what is wrong>. Run sliceflow --help.`, where

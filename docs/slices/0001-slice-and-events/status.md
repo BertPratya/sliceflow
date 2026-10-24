@@ -2,11 +2,11 @@
 
 - Phase: planning
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 07:15 UTC
+- Updated: 2026-10-24 07:20 UTC
 
 ## Needs human
 
-- plan-2 findings to decide: plan-2/F1 and plan-1/F10 (medium)
+None.
 
 ## Documents
 
@@ -30,26 +30,26 @@
 | 05 | spec-template | normal | todo | 0 | 0 | 01 | R7 |
 | 06 | create-core | core | todo | 0 | 0 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | todo | 0 | 0 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
-| 08 | create-checks | core | todo | 0 | 0 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R38, R42 |
-| 09 | create-undo | core | todo | 0 | 0 | 08 | R8, R18, R38 |
+| 08 | create-checks | core | todo | 0 | 0 | 07 | R2, R11, R12, R13, R14, R15, R16, R17, R42 |
+| 09 | create-undo | core | todo | 0 | 0 | 08 | R8, R18 |
 | 10 | status-core | core | todo | 0 | 0 | 02, 04, 06 | R21, R23, R24, R25, R26, R33 |
-| 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R38, R42 |
+| 11 | status-command | normal | todo | 0 | 0 | 03, 07, 10 | R22, R26, R28, R29, R30, R31, R32, R33, R42 |
 | 12 | slice-list | normal | todo | 0 | 0 | 11 | R21, R22, R23, R28, R34, R35, R36, R37, R38, R42, R43 |
 | 13 | no-network-check | normal | todo | 0 | 0 | 09, 12 | R40 |
 
 ## Findings
 
-Open: 7 · Waiting for verify: 0 · Closed: 36
+Open: 0 · Waiting for verify: 7 · Closed: 36
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| plan-2/F1 | medium | Task 08's folder check misses Cross-platform paths | open |
-| plan-2/F2 | low | TestSpecFrontMatter passes with the ideas: example left in | open |
-| plan-2/F3 | low | Ctrl-C during FindRepo prints context canceled | open |
-| plan-2/F4 | low | R18: <command> for worktree add; a step that is not git | open |
-| plan-2/F5 | low | R38's short list leaves out the new wrong uses | open |
+| plan-2/F1 | medium | Task 08's folder check misses Cross-platform paths | fixed |
+| plan-2/F2 | low | TestSpecFrontMatter passes with the ideas: example left in | fixed |
+| plan-2/F3 | low | Ctrl-C during FindRepo prints context canceled | fixed |
+| plan-2/F4 | low | R18: <command> for worktree add; a step that is not git | fixed |
+| plan-2/F5 | low | R38's short list leaves out the new wrong uses | fixed |
 | plan-1/F1 | medium | Status and List are each a type and a function | verified |
 | plan-1/F2 | medium | Tasks 02 and 05 need go.mod from task 01 | verified |
 | plan-1/F3 | medium | Interrupts: undo ctx, WaitDelay, the reason, Ctrl-C during checks | verified |
@@ -59,12 +59,12 @@ Open: 7 · Waiting for verify: 0 · Closed: 36
 | plan-1/F7 | medium | TestSpecNoTitle: wrong placeholder, impossible body | verified |
 | plan-1/F8 | medium | Cross-platform paths misses tasks 08-10; Tests rule reaches no task | verified |
 | plan-1/F9 | medium | R42 proved only for create | verified |
-| plan-1/F10 | medium | Briefs of tasks 06, 07, 09 over 1,500 words | reopened |
+| plan-1/F10 | medium | Briefs of tasks 06, 07, 09 over 1,500 words | fixed |
 | plan-1/F11 | low | TD3 both followed and Plan only | verified |
 | plan-1/F12 | low | follows names flows and Data subsections | verified |
 | plan-1/F13 | low | Some Proves: lines name a requirement not proved | verified |
 | plan-1/F14 | low | e2e/ outside the gofmt check | verified |
-| plan-1/F15 | low | R26: which reason wins with two faults | reopened |
+| plan-1/F15 | low | R26: which reason wins with two faults | fixed |
 | plan-1/F16 | low | Flow 1: Create finds the repo, but gets a Repo | verified |
 | plan-1/F17 | low | git makes .sliceflow/worktrees/, undo list misses it | verified |
 | spec-3/F1 | medium | Warning items: drop Warning: and <name>: , the R23 item | verified |
@@ -109,6 +109,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 07:20 · lead (claude) · plan-2 fixed: task 08 follows Cross-platform paths; R38 only in tasks 03, 07, 12; size reasons in long briefs; lows F2-F5 and plan-1/F15
+- 2026-10-24 07:20 · human · plan-2 fixes: yes
 - 2026-10-24 07:15 · doc reviewer (claude opus) · plan-2: 15 of plan-1 verified, F10 and F15 reopened; new: 1 medium, 4 low; nothing for the human to decide; documents back to draft
 - 2026-10-24 07:11 · lead (claude) · plan review round 2 started (reviews/plan-2.md)
 - 2026-10-24 07:11 · lead (claude) · plan-1 fixed: spec R18 reason, R38 wrong use, key concept; plan F1-F17; tasks now 13 (create and status split), e2e in internal/e2e/
