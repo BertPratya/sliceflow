@@ -165,6 +165,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 10:25 · lead (claude) · integration review started, round 1
+- 2026-10-24 10:25 · lead (claude) · updated from main (28e9abb: docs/backlog.md, docs/design/roadmap.md only); full checks pass
 - 2026-10-24 10:25 · lead (claude) · integration started: every task is done; the human said "yes do it."
 - 2026-10-24 10:14 · lead (claude) · task 13 done; every task is done
 - 2026-10-24 10:14 · code reviewer (claude opus) · task-13-2 submitted: pass; F1 and F2 verified; no new findings
