@@ -250,7 +250,8 @@ blocks, `inline code`, and comments (R18).
 ```yaml
 covers: [R15, R18]
 depends_on: ["03"]
-touches: [internal/spec/check.go, internal/spec/errors.go, internal/spec/errors_test.go, internal/spec/testdata/]
+touches: [internal/spec/check.go, internal/spec/errors.go, internal/spec/errors_test.go, internal/spec/testdata/,
+  internal/spec/parse.go, internal/spec/parse_test.go]
 follows: [Spec reader, Tests, Testing]
 risk: core
 ```
@@ -280,6 +281,9 @@ spec; both give 0 errors.
 - `internal/spec/errors_test.go`: new.
 - `internal/spec/testdata/fresh.md`, `internal/spec/testdata/0001-spec.md`:
   new.
+- `internal/spec/parse.go`, `internal/spec/parse_test.go`: changed, for
+  review task-04-1/F1 only: the lines above the first `##` heading are
+  read too.
 
 ### Interfaces
 

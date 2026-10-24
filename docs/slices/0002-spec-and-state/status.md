@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-24 17:19 UTC
+- Updated: 2026-10-24 17:27 UTC
 
 ## Needs human
 
@@ -20,14 +20,14 @@ None.
 
 ## Tasks
 
-3 of 17 done · 1 in_review · 13 todo
+3 of 17 done · 1 doing · 13 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | eventlog-events | core | done | 0 | 2 | - | R5 |
 | 02 | state-machine | core | done | 0 | 2 | 01 | R1, R2, R3, R4 |
 | 03 | spec-reader | core | done | 0 | 3 | - | R18 |
-| 04 | spec-errors | core | in_review | 0 | 1 | 03 | R15, R18 |
+| 04 | spec-errors | core | doing | 0 | 1 | 03 | R15, R18 |
 | 05 | spec-warnings | core | todo | 0 | 0 | 04 | R16, R17, R18 |
 | 06 | status-core | core | todo | 0 | 0 | 02 | R1, R3, R29, R30, R34 |
 | 07 | status-spec | normal | todo | 0 | 0 | 06 | R4, R29, R31 |
@@ -44,7 +44,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 4 · Closed: 51
+Open: 4 · Waiting for verify: 4 · Closed: 51
 
 ### Doc reviews
 
@@ -101,6 +101,10 @@ Open: 0 · Waiting for verify: 4 · Closed: 51
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-04-1/F1 | medium | 04 | A marker above the first ## heading is never checked | open |
+| task-04-1/F2 | low | 04 | Quotes in a value show with backslashes | open |
+| task-04-1/F3 | low | 04 | Inline code is lost in the not-a-marker text | open |
+| task-04-1/F4 | low | 04 | An empty Check:, Shows:, or Rule: line gives no error | open |
 | task-02-1/F1 | low | 02 | No test checks the review's reviewer, file, commit, or the created title | verified |
 | task-03-2/F1 | medium | 03 | A lone backtick in one item hides the next item | verified |
 | task-03-1/F1 | high | 03 | An ideas list item with no space before - is dropped | verified |
@@ -119,6 +123,7 @@ None.
 
 - Task 03, task-03-1/F3: a front matter with no closing `---` gives `HasFront` false, so task 04 reports R15's `no front matter` error. Why: R15 asks for front matter between two `---` lines, and `Doc` keeps the fields of tasks.md (no new field).
 - Task 02, task-02-1/F1 (low): fixed in a worker round, not left. Why: tasks 06, 11, and 15 rely on the review's reviewer, file, and commit, and on the title from `slice.created`; no other task's tests check them in `state`.
+- Task 04, task-04-1/F1: task 04's touches widened to `internal/spec/parse.go` and `parse_test.go` (tasks.md changed). Why: the fix is in the reader, which drops the lines above the first `##` heading; it is the same package, no interface changes, and no later task touches those files.
 
 ## Preview
 
@@ -128,6 +133,9 @@ None.
 
 Newest first.
 
+- 2026-10-24 17:27 · lead (claude) · task 04 worker round 2 started, with review task-04-1
+- 2026-10-24 17:27 · lead (claude) · task 04's touches widened to internal/spec/parse.go and parse_test.go, for task-04-1/F1
+- 2026-10-24 17:27 · code-reviewer (claude opus) · task review 1 of task 04 handed in: 1 medium, 3 low
 - 2026-10-24 17:19 · lead (claude) · task review 1 of task 04 started
 - 2026-10-24 17:19 · lead (claude) · task 04 committed (c25ef94); the checks pass
 - 2026-10-24 17:19 · worker (claude sonnet) · task 04 round 1 handed in
