@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:15 UTC
+- Updated: 2026-10-24 08:17 UTC
 
 ## Needs human
 
@@ -39,7 +39,7 @@ None.
 
 ## Findings
 
-Open: 0 · Waiting for verify: 0 · Closed: 48
+Open: 2 · Waiting for verify: 0 · Closed: 48
 
 ### Doc reviews
 
@@ -96,7 +96,10 @@ Open: 0 · Waiting for verify: 0 · Closed: 48
 
 ### Task reviews
 
-None.
+| ID | Level | Task | Title | Status |
+|---|---|---|---|---|
+| task-01-1/F1 | low | 01 | Show reports a bad ref or a non-repo folder as a missing file | open |
+| task-01-1/F2 | low | 01 | The no-network test can pass against a broken Run | open |
 
 ### Integration review
 
@@ -115,6 +118,8 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:17 · lead (claude) · task 01: fix F2 in a worker round; F1 to be wontfix with a doc comment (callers check the ref and repo first)
+- 2026-10-24 08:17 · code reviewer (claude opus) · task-01-1 submitted: pass; 2 low; leaving git.Run's environment as is is fine for this slice
 - 2026-10-24 08:15 · lead (claude) · task 01 code review started, round 1
 - 2026-10-24 08:15 · lead (claude) · task 01 committed (ab4fce5) after worker round 2; checks pass, also through the pre-commit hook
 - 2026-10-24 08:13 · lead (claude) · task 01 attempt 1 failed in the pre-commit hook: git's hook variables (GIT_DIR, GIT_INDEX_FILE) leaked into the tests, which then made 7 commits on the slice branch and set alias.env-check in .git/config; both undone (branch back to d8f86fd, never pushed); worker round 2 next
