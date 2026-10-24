@@ -2,7 +2,7 @@
 
 - Phase: implementing
 - Branch: slice/0001-slice-and-events
-- Updated: 2026-10-24 08:34 UTC
+- Updated: 2026-10-24 08:35 UTC
 
 ## Needs human
 
@@ -19,14 +19,14 @@ None.
 
 ## Tasks
 
-2 of 13 done · 11 todo
+2 of 13 done · 1 doing · 10 todo
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
 | 01 | git-runner | core | done | 0 | 2 | - | R40 |
 | 02 | event-log | core | done | 0 | 2 | 01 | R19, R25, R26, R27 |
 | 03 | cli-skeleton | core | todo | 0 | 0 | 01, 04 | R28, R38, R39 |
-| 04 | repo-and-names | core | todo | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
+| 04 | repo-and-names | core | doing | 0 | 0 | 01 | R2, R3, R12, R13, R14, R21, R22 |
 | 05 | spec-template | normal | todo | 0 | 0 | 01 | R7 |
 | 06 | create-core | core | todo | 0 | 0 | 02, 04, 05 | R1, R4, R5, R6, R7, R8, R19, R20 |
 | 07 | create-command | normal | todo | 0 | 0 | 03, 06 | R1, R3, R5, R9, R10, R38, R39, R41 |
@@ -123,6 +123,7 @@ None.
 
 Newest first.
 
+- 2026-10-24 08:35 · lead (claude) · task 04 started: worker round 1
 - 2026-10-24 08:34 · lead (claude) · task 02 done
 - 2026-10-24 08:34 · code reviewer (claude opus) · task-02-2 submitted: pass; Q1 and F1 verified; no new findings
 - 2026-10-24 08:33 · lead (claude) · task 02 code review started, round 2
