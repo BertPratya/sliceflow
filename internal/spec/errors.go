@@ -181,7 +181,7 @@ func splitList(v string) []string {
 func itemErrors(d Doc) []Problem {
 	var ps []Problem
 	reqs := map[string]Item{} // the requirements of this spec
-	for _, s := range d.Sections {
+	for _, s := range append([]Section{d.Preamble}, d.Sections...) {
 		for _, it := range s.Items {
 			if it.ID != "" && idLetters(it.ID) == "R" {
 				if _, ok := reqs[it.ID]; !ok {

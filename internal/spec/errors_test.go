@@ -336,3 +336,17 @@ func TestErrorBadMarkerKeepsInlineCode(t *testing.T) {
 		t.Fatalf("got %v\nwant %v", got, want)
 	}
 }
+
+// task-04-2/F1: a requirement above the first "##" heading counts for Shows:.
+func TestErrorShowsRequirementBeforeFirstSection(t *testing.T) {
+	text := strings.Replace(goodSpec, "# Spec\n", "# Spec\n\n- **R9.** x\n", 1)
+	text = strings.Replace(text, "Shows: R1", "Shows: R9", 1)
+	got := errorsOf(text, "demo")
+	want := []Problem{
+		{lineOf(text, "- **R9.**", 0), "error", `R9 is outside "## Requirements"`},
+		{lineOf(text, "- **R9.**", 0), "error", `R9 has no Check: line`},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v\nwant %v", got, want)
+	}
+}
