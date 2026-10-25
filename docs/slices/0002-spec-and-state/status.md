@@ -196,6 +196,9 @@ None.
 
 Newest first.
 
+- 2026-10-25 03:48 · lead (claude) · integration review 2 started
+- 2026-10-25 03:48 · lead (claude) · updated from main (backlog only); the checks pass
+
 - 2026-10-25 03:48 · lead (claude) · task 18 done; back to integration
 - 2026-10-25 03:48 · code-reviewer (claude opus) · task review 2 of task 18 handed in: F1 verified; no new findings
 
