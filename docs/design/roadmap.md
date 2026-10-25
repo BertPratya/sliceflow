@@ -36,7 +36,7 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 | 0004 | agents | `sliceflow` starts agents itself: the Codex adapter, the permission layers, settings per role; first use: the spec check and the plan review; who caused each event (`by`); each session sliceflow starts is bound to its slice by its session ID, and commands on other slices are refused | 1.9, 1.12c |
 | 0005 | the run | `sliceflow run` builds an approved plan by itself, one task at a time: worktree, worker, checks, task review, fix rounds, merge; `sliceflow stop`, and `sliceflow run` continues where it stopped | 2.4 |
 | 0006 | parallel tasks | independent tasks run at the same time: worker limit, `touches` overlap, merge queue, conflicts | 2.4 |
-| 0007 | reliability | a run survives a killed `sliceflow`, a lost network, a stuck agent: heartbeats, time limits, retries, checking the log against reality on restart; `sliceflow retry` for a failed or stopped step; cleaning up a slice half made by a crash | 1.7, 2.4 |
+| 0007 | reliability | a run survives a killed `sliceflow`, a lost network, a stuck agent: heartbeats, time limits, retries, checking the log against reality on restart; `sliceflow retry` for a failed or stopped step; cleaning up a slice half made by a crash; taking over a lock left by a crashed `sliceflow`, after checking that its process is gone | 1.7, 2.4 |
 | 0008 | cases and the lead | each stop goes to the right level: the chat lead, the fallback lead, or the human | 1.6, 1.12c |
 | 0009 | finish | the full path to `main`: integration review, preview, result approval, update from `main`, merge, backlog | 2.5 |
 | 0010 | stacking and cancel | design a slice ahead, on top of another; cancel and reopen | 2.6, 2.7 |
@@ -78,6 +78,7 @@ slice is in `sliceflow-design.md` (the Design column names its sections).
 | You stop a run, and continue it | 0005 |
 | You retry a failed or stopped step | 0007 |
 | Clean up a slice half made by a crash | 0007 |
+| Remove a lock left by a crash | 0007 |
 | Cancel a slice | 0010 |
 | User hooks before and after events | 0016 |
 | Errors as JSON, with codes | 0015 |
