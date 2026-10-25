@@ -1122,7 +1122,7 @@ covers: [R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37]
 depends_on: ["07", "12", "14", "15"]
 touches: [internal/cli/submit.go, internal/cli/review.go, internal/e2e/submit_review_commands_test.go, internal/slice/submit.go, internal/slice/submit_test.go]
 follows: ["Flow 3: Submit, refused", "Flow 4: Submit, accepted", "Flow 5: Review the spec", CLI, Interrupts, Tests, Testing]
-risk: normal
+risk: core
 ```
 
 ### Goal
@@ -1138,9 +1138,11 @@ exact output of each step.
 1. Write the tests listed under Done when. Run them, and see them fail.
 2. `internal/cli/submit.go`: `spec submit`; `printProblems` for the
    problems.
-3. `internal/cli/review.go`: `spec review`, printing each `Step` as it
+3. `internal/slice/submit.go`: `Submit` sets `Submission.BeforeRound`
+   in its `Prepare` (review task-16-1/F1).
+4. `internal/cli/review.go`: `spec review`, printing each `Step` as it
    comes; both with the signal `ctx` as `slice create` has.
-4. Run the tests until they pass.
+5. Run the tests until they pass.
 
 ### Files
 
@@ -1189,8 +1191,8 @@ exact output of each step.
   `spec.md` with an open question gives exactly
   `Submit refused: spec.md is not finished (0 errors, 1 warning). It keeps the result of review 1.`
   as the last line of stdout, exit 1, empty stderr. In
-  `internal/slice/submit_test.go`, the refused submit from
-  `review_passed` also checks `BeforeRound` 1.
+  `internal/slice/submit_test.go`, `TestSubmitStates`'s case for a
+  refused submit from `review_passed` also checks `BeforeRound` 1.
   Proves: R22
 - `TestSubmitUnchanged`: S27's error, exit 1, no commit.
   Proves: R20
