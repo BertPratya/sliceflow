@@ -3,18 +3,18 @@
 - Phase: preview
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-25 09:10 UTC
+- Updated: 2026-10-25 09:12 UTC
 
 ## Needs human
 
-- plan-5/F3, reopened by integration-1 (small decision): `plan.md` Flow 8 step 3 lists `spec validate`, `spec submit`, and `slice title`, and leaves out `spec review`. Fix that line (R004), or leave it.
+- The result is waiting for approval
 
 ## Documents
 
 | Doc | Status | Round | Revision | Approved |
 |---|---|---|---|---|
 | spec.md | approved | 3 | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
-| plan.md | approved | 5 | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
+| plan.md | approved | 5 | R004 | 2026-10-25 · human · sliceflow/0002-spec-and-state/planning/R004 |
 | preview.md | approved | with plan.md | R001 | 2026-10-24 · human · sliceflow/0002-spec-and-state/planning/R001 |
 | tasks.md | approved | with plan.md | R003 | 2026-10-25 · human · sliceflow/0002-spec-and-state/planning/R003 |
 
@@ -45,7 +45,7 @@
 
 ## Findings
 
-Open: 1 · Waiting for verify: 0 · Closed: 102
+Open: 0 · Waiting for verify: 0 · Closed: 103
 
 ### Doc reviews
 
@@ -60,7 +60,7 @@ Open: 1 · Waiting for verify: 0 · Closed: 102
 | change-1/F4 | low | Lead's decision on task-04-1/F1 is out of date | verified (fixed) |
 | plan-5/F1 | medium | A failed review.finished commit has no brief and no test | verified (task review task-15-1) |
 | plan-5/F2 | low | Three leftover lines in spec.md | verified (fixed) |
-| plan-5/F3 | low | plan.md leaves out spec review; wrong task for Ctrl-C | open (reopened by integration-1: Flow 8 step 3 still leaves out spec review; needs the human) |
+| plan-5/F3 | low | plan.md leaves out spec review; wrong task for Ctrl-C | verified (fixed: plan.md R004; change review 3) |
 | plan-5/F4 | low | Stale task numbers; R20's error index | verified (fixed) |
 | plan-4/F1 | low | R31: next for a merged slice | verified (fixed) |
 | plan-4/F2 | low | R29: refused mark on a merged slice | verified (fixed) |
@@ -200,6 +200,10 @@ Open: 1 · Waiting for verify: 0 · Closed: 102
 ## Log
 
 Newest first.
+
+- 2026-10-25 09:12 · lead (claude) · the result is waiting for approval
+- 2026-10-25 09:12 · lead (claude) · plan.md R004: Flow 8 step 3 names spec review (tag planning/R004); change review 3: no findings
+- 2026-10-25 09:12 · human · plan-5/F3 answered: "1. Fix the line (Recommended)"
 
 - 2026-10-25 09:10 · human · ran preview P2 and P3 again: both match; every preview check passes
 
