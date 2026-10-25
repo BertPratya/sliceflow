@@ -1309,7 +1309,7 @@ had staged is lost, while the message says `Nothing was changed.`
 1. Write the tests listed under Done when. Run them, and see them fail.
 2. `internal/slice/save.go`: before the `git add` of the event's files,
    save their index entries (`git ls-files -s -- <files>`). In the undo,
-   put back each saved entry (`git update-index --index-info`), and reset
+   put back each saved entry (`git update-index --cacheinfo`), and reset
    only the files that had no entry.
 3. Run the tests until they pass.
 
