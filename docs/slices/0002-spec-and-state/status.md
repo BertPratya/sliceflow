@@ -1,13 +1,13 @@
 # Status: 0002-spec-and-state
 
-- Phase: integration
+- Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-25 03:26 UTC
+- Updated: 2026-10-25 03:34 UTC
 
 ## Needs human
 
-None.
+- plan-5/F3, reopened by integration-1 (small decision): `plan.md` Flow 8 step 3 lists `spec validate`, `spec submit`, and `slice title`, and leaves out `spec review`. Fix that line (R004), or leave it.
 
 ## Documents
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-17 of 17 done
+17 of 18 done · 1 doing
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -41,26 +41,27 @@ None.
 | 15 | review-core | core | done | 0 | 3 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | core | done | 0 | 2 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
 | 17 | submit-review-failures | normal | done | 0 | 2 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
+| 18 | undo-keeps-staged | core | doing | 0 | 0 | 17 | R8, R10 |
 
 ## Findings
 
-Open: 0 · Waiting for verify: 10 · Closed: 89
+Open: 2 · Waiting for verify: 0 · Closed: 99
 
 ### Doc reviews
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| change-2/F1 | low | Task 16 changes a shared interface but is still normal risk | fixed |
-| change-2/F2 | low | The BeforeRound unit check names no test | fixed |
-| change-2/F3 | low | Task 16's Steps do not mention internal/slice/submit.go | fixed |
-| change-1/F1 | medium | Task 04 Files says F1 only; parse.go also has the F3 fix | fixed |
-| change-1/F2 | low | Task 04 Done when names no test for a marker above the first heading | fixed |
-| change-1/F3 | low | Doc not written the way task 03 writes it | fixed |
-| change-1/F4 | low | Lead's decision on task-04-1/F1 is out of date | fixed |
+| change-2/F1 | low | Task 16 changes a shared interface but is still normal risk | verified (fixed) |
+| change-2/F2 | low | The BeforeRound unit check names no test | verified (fixed) |
+| change-2/F3 | low | Task 16's Steps do not mention internal/slice/submit.go | verified (fixed) |
+| change-1/F1 | medium | Task 04 Files says F1 only; parse.go also has the F3 fix | verified (fixed) |
+| change-1/F2 | low | Task 04 Done when names no test for a marker above the first heading | verified (fixed) |
+| change-1/F3 | low | Doc not written the way task 03 writes it | verified (fixed) |
+| change-1/F4 | low | Lead's decision on task-04-1/F1 is out of date | verified (fixed) |
 | plan-5/F1 | medium | A failed review.finished commit has no brief and no test | verified (task review task-15-1) |
-| plan-5/F2 | low | Three leftover lines in spec.md | fixed |
-| plan-5/F3 | low | plan.md leaves out spec review; wrong task for Ctrl-C | fixed |
-| plan-5/F4 | low | Stale task numbers; R20's error index | fixed |
+| plan-5/F2 | low | Three leftover lines in spec.md | verified (fixed) |
+| plan-5/F3 | low | plan.md leaves out spec review; wrong task for Ctrl-C | open (reopened by integration-1: Flow 8 step 3 still leaves out spec review; needs the human) |
+| plan-5/F4 | low | Stale task numbers; R20's error index | verified (fixed) |
 | plan-4/F1 | low | R31: next for a merged slice | verified (fixed) |
 | plan-4/F2 | low | R29: refused mark on a merged slice | verified (fixed) |
 | plan-4/F3 | low | Task 09: how openSlice finds a merged slice | verified (fixed) |
@@ -157,7 +158,10 @@ Open: 0 · Waiting for verify: 10 · Closed: 89
 
 ### Integration review
 
-None.
+| ID | Level | Title | Status |
+|---|---|---|---|
+| integration-1/F1 | medium | A failed save drops a staged spec.md, and says Nothing was changed | open (fix task 18) |
+| integration-1/F2 | low | plural, R20's error, and the problem count are written more than once | deferred: backlog (main f95910a) |
 
 ## Lead's decisions
 
@@ -177,6 +181,9 @@ None.
 
 - Task 17, task-17-1/F1 (low): fixed in a worker round, not left. Why: a busy command must never delete a lock it did not take (R6, R7); the check is one line, in task 17's own test file.
 
+- Integration, integration-1/F1: fix task 18 restores the index entries the save staged, not the last commit. Why: R10 says the undo never changes `spec.md`, and R8 keeps other staged changes; a new task, so done tasks stay as reviewed.
+- Integration, integration-1/F2 (low): deferred to the backlog. Why: nothing users see changes, and the repeats are small.
+
 ## Preview
 
 None.
@@ -184,6 +191,9 @@ None.
 ## Log
 
 Newest first.
+
+- 2026-10-25 03:34 · lead (claude) · fix task 18 started: worker round 1; plan-5/F3 asked of the human (small)
+- 2026-10-25 03:34 · code-reviewer (claude opus) · integration review 1 handed in: 1 medium, 1 low; doc fixes verified, plan-5/F3 reopened
 
 - 2026-10-25 03:26 · lead (claude) · integration review 1 started
 - 2026-10-25 03:26 · lead (claude) · updated from main (backlog and roadmap only); the checks pass

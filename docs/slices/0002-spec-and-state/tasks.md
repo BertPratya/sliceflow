@@ -1285,3 +1285,58 @@ scenarios and the write path's rules hold the exact failure output.
 ### Out of scope
 
 - A real reviewer. Done in: not in this slice
+
+## Task 18: undo-keeps-staged
+
+```yaml
+covers: [R8, R10]
+depends_on: ["17"]
+touches: [internal/slice/save.go, internal/slice/save_test.go, internal/e2e/submit_review_failures_test.go]
+follows: [Saving an event, Undo after a failed commit, Interrupts, Git arguments, Tests, Testing]
+risk: core
+```
+
+### Goal
+
+A fix task, for integration review integration-1/F1. When the commit of
+an event fails, or is stopped by Ctrl-C, the undo puts back what the
+index held for the event's files before `saveEvent` staged them. Today
+it resets them to the last commit, so a version of `spec.md` the user
+had staged is lost, while the message says `Nothing was changed.`
+
+### Steps
+
+1. Write the tests listed under Done when. Run them, and see them fail.
+2. `internal/slice/save.go`: before the `git add` of the event's files,
+   save their index entries (`git ls-files -s -- <files>`). In the undo,
+   put back each saved entry (`git update-index --index-info`), and reset
+   only the files that had no entry.
+3. Run the tests until they pass.
+
+### Files
+
+- `internal/slice/save.go`, `internal/slice/save_test.go`: changed.
+- `internal/e2e/submit_review_failures_test.go`: changed. One new test.
+
+### Interfaces
+
+- `saveEvent`: changes inside only; its signature and `saveOp` stay.
+
+### Done when
+
+- `TestSaveUndoKeepsStaged`: with `spec.md` staged with one text and
+  changed on disk to another, a commit refused by a `pre-commit` hook
+  leaves the staged text (`git show :<path>`) and the text on disk as
+  they were; the log is as committed; a file the event created is gone.
+  Proves: R8, R10
+- `TestSaveUndoKeepsStaged` also runs with a cancelled `ctx` during the
+  commit, with the same result.
+  Proves: R10
+- `TestSubmitStagedSpecKept`: S18's setup with `spec.md` staged and then
+  changed on disk: `spec submit` gives S18's error, exit 1, and
+  `git diff --cached` shows the staged change as before.
+  Proves: R8, R10
+
+### Out of scope
+
+- Stopping git gently on Ctrl-C. Done in: the backlog
