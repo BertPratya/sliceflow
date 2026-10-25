@@ -161,3 +161,42 @@ func TestNoNetwork(t *testing.T) {
 		}
 	}
 }
+
+// R40 of 0001: the commands of 0002 run no fetch, pull, or push either.
+func TestNoNetworkNewCommands(t *testing.T) {
+	dir := draftSlice(t, s15Text())
+	testrepo.Git(t, dir, "remote", "add", "origin", filepath.Join(t.TempDir(), "no-such-remote"))
+
+	trace := filepath.Join(t.TempDir(), "trace.txt")
+	t.Setenv("GIT_TRACE", trace)
+
+	for _, args := range [][]string{
+		{"spec", "validate"},
+		{"spec", "submit"},
+		{"spec", "review"},
+		{"slice", "title", specName, "Sign in"},
+		{"template", "show", "spec"},
+	} {
+		stdout, stderr, code := run(t, wtOf(dir), args...)
+		if code != 0 {
+			t.Fatalf("%v: exit %d\nstdout: %s\nstderr: %s", args, code, stdout, stderr)
+		}
+	}
+
+	b, err := os.ReadFile(trace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	for _, line := range strings.Split(string(b), "\n") {
+		sub, rest := gitCommand(line)
+		seen[sub] = true
+		if forbiddenGitCommand(sub, rest) {
+			t.Errorf("forbidden git command in trace: %s", line)
+		}
+	}
+	// Only the binary ran after GIT_TRACE was set, so its commits must show.
+	if !seen["commit"] {
+		t.Errorf("the trace has no git commit line from the binary; GIT_TRACE does not work?\n%s", b)
+	}
+}
