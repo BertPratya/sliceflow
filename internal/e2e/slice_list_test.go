@@ -102,7 +102,8 @@ func TestListBadLine(t *testing.T) {
 		"spec-submit   spec-submit        planning !  2026-10-24 07:42\n" +
 		"login-google  Login with Google  planning    2026-10-24 08:10\n"
 	wantErr := "Warning: spec-submit: .events.jsonl line 2: not valid JSON; skipped\n" +
-		"Warning: spec-submit: .events.jsonl line 3: seq 4, expected 2\n"
+		"Warning: spec-submit: .events.jsonl line 3: seq 4, expected 2\n" +
+		"Warning: spec-submit: .events.jsonl line 3: slice.created is not allowed when spec.md is draft; skipped\n"
 	if code != 0 || out != want || errOut != wantErr {
 		t.Fatalf("code %d\nstdout %q\nwant   %q\nstderr %q\nwant   %q", code, out, want, errOut, wantErr)
 	}
@@ -112,8 +113,8 @@ func TestListJSON(t *testing.T) {
 	dir, commit := s20Repo(t)
 	out, errOut, code := run(t, dir, "slice", "list", "--json")
 	want := `{"slices":[` +
-		`{"slice":"spec-submit","phase":"planning","from":{"branch":"main","commit":"` + commit + `"},"created":"2026-10-24T07:42:00Z","warnings":[]},` +
-		`{"slice":"login-google","title":"Login with Google","phase":"planning","from":{"branch":"main","commit":"` + commit + `"},"created":"2026-10-24T08:10:00Z","warnings":[]}` +
+		`{"slice":"spec-submit","phase":"planning","from":{"branch":"main","commit":"` + commit + `"},"created":"2026-10-24T07:42:00Z","docs":[{"doc":"spec.md","status":"draft"}],"next":"write spec.md, then: sliceflow spec submit","warnings":[]},` +
+		`{"slice":"login-google","title":"Login with Google","phase":"planning","from":{"branch":"main","commit":"` + commit + `"},"created":"2026-10-24T08:10:00Z","docs":[{"doc":"spec.md","status":"draft"}],"next":"write spec.md, then: sliceflow spec submit","warnings":[]}` +
 		`],"warnings":[]}` + "\n"
 	if code != 0 || errOut != "" || out != want {
 		t.Fatalf("code %d\nstdout %q\nwant   %q\nstderr %q", code, out, want, errOut)

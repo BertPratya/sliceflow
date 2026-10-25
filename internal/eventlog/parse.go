@@ -31,6 +31,7 @@ func Parse(log []byte) ([]Event, []string) {
 	for i, line := range lines {
 		n := i + 1
 		ev, reason := parseLine(line)
+		ev.Line = n
 		if reason != "" {
 			warnings = append(warnings, fmt.Sprintf(".events.jsonl line %d: %s; skipped", n, reason))
 			continue
@@ -42,17 +43,6 @@ func Parse(log []byte) ([]Event, []string) {
 		events = append(events, ev)
 	}
 	return events, warnings
-}
-
-// Phase returns "planning" when there is a good slice.created event,
-// else "unknown".
-func Phase(events []Event) string {
-	for _, e := range events {
-		if e.Event == "slice.created" {
-			return "planning"
-		}
-	}
-	return "unknown"
 }
 
 // findDuplicate walks the tokens and returns the path of the first name
@@ -165,8 +155,11 @@ func parseLine(line string) (Event, string) {
 		return Event{}, "unknown version " + string(raw)
 	}
 	if raw, ok := top["event"]; ok {
-		if s, ok := asString(raw); ok && s != "slice.created" {
+		if s, ok := asString(raw); ok && s != "slice.created" && newEvents[s] == nil {
 			return Event{}, fmt.Sprintf("unknown event %q", s)
+		}
+		if s, ok := asString(raw); ok && newEvents[s] != nil {
+			return parseNew(top, newEvents[s])
 		}
 	}
 
@@ -271,4 +264,160 @@ func parseLine(line string) (Event, string) {
 		At:      at,
 		Data:    Created{From: From{Branch: branch, Commit: commit}, Title: title},
 	}, ""
+}
+
+const (
+	kString = iota
+	kWhole
+)
+
+// dataField is one field of the data of a new event.
+type dataField struct {
+	name string
+	kind int
+	ok   func(s string, n int) bool // checks the value
+}
+
+func nonEmpty(s string, _ int) bool { return s != "" }
+func atLeast0(_ string, n int) bool { return n >= 0 }
+func atLeast1(_ string, n int) bool { return n >= 1 }
+func oneOf(vals ...string) func(string, int) bool {
+	return func(s string, _ int) bool {
+		for _, v := range vals {
+			if s == v {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+// newSpec says how to read one new event.
+type newSpec struct {
+	fields []dataField
+	build  func(vals map[string]any) any
+}
+
+var newEvents = map[string]*newSpec{
+	"slice.titled": {
+		fields: []dataField{{"title", kString, nonEmpty}},
+		build:  func(v map[string]any) any { return Titled{Title: v["title"].(string)} },
+	},
+	"spec.submitted": {
+		fields: []dataField{
+			{"result", kString, oneOf("accepted", "refused")},
+			{"errors", kWhole, atLeast0},
+			{"warnings", kWhole, atLeast0},
+		},
+		build: func(v map[string]any) any {
+			return Submitted{Result: v["result"].(string), Errors: v["errors"].(int), Warnings: v["warnings"].(int)}
+		},
+	},
+	"review.started": {
+		fields: []dataField{
+			{"doc", kString, oneOf("spec.md")},
+			{"round", kWhole, atLeast1},
+			{"reviewer", kString, nonEmpty},
+			{"file", kString, nonEmpty},
+			{"commit", kString, func(s string, _ int) bool { return commitRe.MatchString(s) }},
+		},
+		build: func(v map[string]any) any {
+			return ReviewStarted{Doc: v["doc"].(string), Round: v["round"].(int), Reviewer: v["reviewer"].(string),
+				File: v["file"].(string), Commit: v["commit"].(string)}
+		},
+	},
+	"review.finished": {
+		fields: []dataField{
+			{"doc", kString, oneOf("spec.md")},
+			{"round", kWhole, atLeast1},
+			{"result", kString, oneOf("passed", "changes", "needs_human")},
+		},
+		build: func(v map[string]any) any {
+			return ReviewFinished{Doc: v["doc"].(string), Round: v["round"].(int), Result: v["result"].(string)}
+		},
+	},
+}
+
+// parseNew checks a line of a new event, in the order of R26 of
+// 0001-slice-and-events: unknown, missing, wrong type, wrong value.
+func parseNew(top map[string]json.RawMessage, spec *newSpec) (Event, string) {
+	if r := unknownIn(top, []string{"version", "seq", "event", "at", "data"}, ""); r != "" {
+		return Event{}, r
+	}
+	data, dataOK := asObject(top["data"])
+	if dataOK {
+		names := make([]string, len(spec.fields))
+		for i, f := range spec.fields {
+			names[i] = f.name
+		}
+		if r := unknownIn(data, names, "data."); r != "" {
+			return Event{}, r
+		}
+	}
+	for _, f := range []string{"version", "seq", "event", "at", "data"} {
+		if _, ok := top[f]; !ok {
+			return Event{}, fmt.Sprintf("missing field %q", f)
+		}
+	}
+	if dataOK {
+		for _, f := range spec.fields {
+			if _, ok := data[f.name]; !ok {
+				return Event{}, fmt.Sprintf("missing field %q", "data."+f.name)
+			}
+		}
+	}
+	wrong := func(f string) (Event, string) {
+		return Event{}, fmt.Sprintf("field %q has the wrong type", f)
+	}
+	if !isWhole(top["version"]) {
+		return wrong("version")
+	}
+	seq, err := strconv.Atoi(string(top["seq"]))
+	if !isWhole(top["seq"]) || err != nil {
+		return wrong("seq")
+	}
+	name, ok := asString(top["event"])
+	if !ok {
+		return wrong("event")
+	}
+	at, ok := asString(top["at"])
+	if !ok {
+		return wrong("at")
+	}
+	if !dataOK {
+		return wrong("data")
+	}
+	strs := map[string]string{}
+	nums := map[string]int{}
+	vals := map[string]any{}
+	for _, f := range spec.fields {
+		raw := data[f.name]
+		if f.kind == kString {
+			s, ok := asString(raw)
+			if !ok {
+				return wrong("data." + f.name)
+			}
+			strs[f.name] = s
+			vals[f.name] = s
+		} else {
+			n, err := strconv.Atoi(string(raw))
+			if !isWhole(raw) || err != nil {
+				return wrong("data." + f.name)
+			}
+			nums[f.name] = n
+			vals[f.name] = n
+		}
+	}
+	bad := func(f string) (Event, string) {
+		return Event{}, fmt.Sprintf("field %q has a wrong value", f)
+	}
+	if t, err := time.Parse(TimeLayout, at); err != nil || t.Format(TimeLayout) != at {
+		return bad("at")
+	}
+	for _, f := range spec.fields {
+		if !f.ok(strs[f.name], nums[f.name]) {
+			return bad("data." + f.name)
+		}
+	}
+	return Event{Version: 1, Seq: seq, Event: name, At: at, Data: spec.build(vals)}, ""
 }

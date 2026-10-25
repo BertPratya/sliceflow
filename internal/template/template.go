@@ -23,3 +23,7 @@ func Spec(name string, created time.Time) []byte {
 	front := "---\nslice: " + name + "\ncreated: " + created.UTC().Format("2006-01-02") + "\nideas: []\n---\n"
 	return []byte(front + body)
 }
+
+// Raw returns the spec template as it is embedded: its own front matter and
+// every rule comment, unchanged.
+func Raw() []byte { return []byte(specTemplate) }

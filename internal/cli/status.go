@@ -81,6 +81,8 @@ func runStatus(ctx context.Context, args []string, stdout, stderr io.Writer) int
 	fmt.Fprintf(stdout, "Phase:    %s\n", st.Phase)
 	fmt.Fprintf(stdout, "From:     %s\n", from)
 	fmt.Fprintf(stdout, "Created:  %s\n", created)
+	fmt.Fprintf(stdout, "Spec:     %s\n", st.SpecText)
+	fmt.Fprintf(stdout, "Next:     %s\n", st.Next)
 	printWarnings(stderr, st.Warnings)
 	return 0
 }
@@ -117,7 +119,48 @@ type sliceJSON struct {
 	Phase    string    `json:"phase"`
 	From     *fromJSON `json:"from,omitempty"`
 	Created  string    `json:"created,omitempty"`
+	Docs     []docJSON `json:"docs"`
+	Next     string    `json:"next,omitempty"`
 	Warnings []string  `json:"warnings"`
+}
+
+// docJSON is one item of "docs" (R31).
+type docJSON struct {
+	Doc                string      `json:"doc"`
+	Status             string      `json:"status"`
+	Review             *reviewJSON `json:"review,omitempty"`
+	SubmitRefused      *countsJSON `json:"submit_refused,omitempty"`
+	ChangedAfterReview bool        `json:"changed_after_review,omitempty"`
+}
+
+type reviewJSON struct {
+	Round    int    `json:"round"`
+	Reviewer string `json:"reviewer"`
+	File     string `json:"file"`
+	Result   string `json:"result,omitempty"`
+}
+
+type countsJSON struct {
+	Errors   int `json:"errors"`
+	Warnings int `json:"warnings"`
+}
+
+// docsJSON builds "docs": empty before a good slice.created.
+func docsJSON(st slice.SliceStatus) []docJSON {
+	d := st.State.Spec
+	if d.Status == "" {
+		return []docJSON{}
+	}
+	doc := docJSON{Doc: "spec.md", Status: d.Status, ChangedAfterReview: st.ChangedAfterReview}
+	if r := d.Review; r != nil {
+		doc.Review = &reviewJSON{Round: r.Round, Reviewer: r.Reviewer, File: r.File, Result: r.Result}
+	}
+	// The refused mark shows as R29 says: not merged, and a draft or a
+	// spec changed after its review.
+	if c := d.Refused; c != nil && !st.Merged && (d.Status == "draft" || st.ChangedAfterReview) {
+		doc.SubmitRefused = &countsJSON{Errors: c.Errors, Warnings: c.Warnings}
+	}
+	return []docJSON{doc}
 }
 
 // warningTexts returns the text of each warning; never nil, so JSON gets [].
@@ -136,6 +179,10 @@ func newSliceJSON(st slice.SliceStatus) sliceJSON {
 	}
 	if !st.Created.IsZero() {
 		obj.Created = st.Created.UTC().Format("2006-01-02T15:04:05Z")
+	}
+	obj.Docs = docsJSON(st)
+	if st.Next != "-" {
+		obj.Next = st.Next
 	}
 	return obj
 }

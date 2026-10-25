@@ -37,11 +37,17 @@ func createdAt(t *testing.T, dir, name string) time.Time {
 }
 
 func statusLines(slice, title, phase, from, created string) string {
+	return statusLinesSpec(slice, title, phase, from, created, "draft", "write spec.md, then: sliceflow spec submit")
+}
+
+func statusLinesSpec(slice, title, phase, from, created, spec, next string) string {
 	return "Slice:    " + slice + "\n" +
 		"Title:    " + title + "\n" +
 		"Phase:    " + phase + "\n" +
 		"From:     " + from + "\n" +
-		"Created:  " + created + "\n"
+		"Created:  " + created + "\n" +
+		"Spec:     " + spec + "\n" +
+		"Next:     " + next + "\n"
 }
 
 func TestStatusSpecSubmit(t *testing.T) {
@@ -106,7 +112,8 @@ func TestStatusJSON(t *testing.T) {
 	out, errOut, code := run(t, dir, "slice", "status", "login-google", "--json")
 	want := `{"slice":"login-google","title":"Login with Google","phase":"planning",` +
 		`"from":{"branch":"develop","commit":"` + commit + `"},` +
-		`"created":"` + at.Format("2006-01-02T15:04:05Z") + `","warnings":[]}` + "\n"
+		`"created":"` + at.Format("2006-01-02T15:04:05Z") + `",` +
+		`"docs":[{"doc":"spec.md","status":"draft"}],"next":"write spec.md, then: sliceflow spec submit","warnings":[]}` + "\n"
 	if code != 0 || errOut != "" || out != want {
 		t.Fatalf("code %d\nstdout %q\nwant   %q\nstderr %q", code, out, want, errOut)
 	}
@@ -117,7 +124,7 @@ func TestStatusJSONWarnings(t *testing.T) {
 	testrepo.Git(t, dir, "branch", "slice/old-idea")
 	testrepo.Git(t, dir, "config", "sliceflow.base", "develop")
 	out, errOut, code := run(t, dir, "slice", "status", "old-idea", "--json")
-	want := `{"slice":"old-idea","phase":"unknown","warnings":[` +
+	want := `{"slice":"old-idea","phase":"unknown","docs":[],"warnings":[` +
 		`"base branch develop does not exist (from git config sliceflow.base); merged slices are not shown",` +
 		`".events.jsonl not found"]}` + "\n"
 	wantErr := "Warning: base branch develop does not exist (from git config sliceflow.base); merged slices are not shown\n" +
@@ -152,7 +159,8 @@ func TestStatusBadLines(t *testing.T) {
 	out, errOut, code := run(t, dir, "slice", "status", "spec-submit")
 	want := statusLines("spec-submit", "spec-submit", "planning", "main @ "+commit[:7], at.Format("2006-01-02 15:04")+" UTC")
 	wantErr := "Warning: spec-submit: .events.jsonl line 2: not valid JSON; skipped\n" +
-		"Warning: spec-submit: .events.jsonl line 3: seq 4, expected 2\n"
+		"Warning: spec-submit: .events.jsonl line 3: seq 4, expected 2\n" +
+		"Warning: spec-submit: .events.jsonl line 3: slice.created is not allowed when spec.md is draft; skipped\n"
 	if code != 0 || out != want || errOut != wantErr {
 		t.Fatalf("code %d\nstdout %q\nwant   %q\nstderr %q\nwant   %q", code, out, want, errOut, wantErr)
 	}
@@ -164,9 +172,10 @@ func TestStatusBadLines(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &got); err != nil {
 		t.Fatalf("json: %v: %q", err, out)
 	}
-	if code != 0 || errOut != wantErr || len(got.Warnings) != 2 ||
+	if code != 0 || errOut != wantErr || len(got.Warnings) != 3 ||
 		got.Warnings[0] != ".events.jsonl line 2: not valid JSON; skipped" ||
-		got.Warnings[1] != ".events.jsonl line 3: seq 4, expected 2" {
+		got.Warnings[1] != ".events.jsonl line 3: seq 4, expected 2" ||
+		got.Warnings[2] != ".events.jsonl line 3: slice.created is not allowed when spec.md is draft; skipped" {
 		t.Fatalf("code %d json %q stderr %q", code, out, errOut)
 	}
 }
@@ -175,7 +184,7 @@ func TestStatusNoLog(t *testing.T) {
 	dir := testrepo.New(t)
 	testrepo.Git(t, dir, "branch", "slice/old-idea")
 	out, errOut, code := run(t, dir, "slice", "status", "old-idea")
-	want := statusLines("old-idea", "old-idea", "unknown", "-", "-")
+	want := statusLinesSpec("old-idea", "old-idea", "unknown", "-", "-", "-", "-")
 	if code != 0 || out != want || errOut != "Warning: old-idea: .events.jsonl not found\n" {
 		t.Fatalf("code %d\nstdout %q\nwant   %q\nstderr %q", code, out, want, errOut)
 	}

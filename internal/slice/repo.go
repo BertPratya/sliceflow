@@ -15,6 +15,8 @@ import (
 type Repo struct {
 	Dir, Root string
 	Now       func() time.Time
+	// LockWait is how long takeLock tries again. 0 means 10 s.
+	LockWait time.Duration
 }
 
 // FindRepo checks that dir is inside a git repo with at least one commit,
