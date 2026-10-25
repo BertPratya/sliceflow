@@ -245,6 +245,21 @@ func changeR7(t *testing.T, dir string) {
 	writeSpec(t, dir, specName, strings.Replace(s15Text(), "- **R7.** Other thing.", "- **R7.** Other thing, changed.", 1))
 }
 
+func TestSubmitRefusedReviewed(t *testing.T) {
+	dir := reviewedSlice(t)
+	text := strings.Replace(s15Text(), "- **R7.** Other thing.", "- **R7.** Other thing, changed.", 1)
+	text = strings.Replace(text, "## Open questions\n\nNone.\n", "## Open questions\n\n- **Q1.** a?\n", 1)
+	if text == s15Text() {
+		t.Fatal("no edit made")
+	}
+	writeSpec(t, dir, specName, text)
+	out, errOut, code := run(t, wtOf(dir), "spec", "submit")
+	last := "Submit refused: spec.md is not finished (0 errors, 1 warning). It keeps the result of review 1.\n"
+	if code != 1 || !strings.HasSuffix(out, last) || errOut != "" {
+		t.Fatalf("code %d stdout %q stderr %q", code, out, errOut)
+	}
+}
+
 func TestSubmitChangedStatus(t *testing.T) {
 	dir := reviewedSlice(t)
 	changeR7(t, dir)

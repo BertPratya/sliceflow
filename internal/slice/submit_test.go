@@ -245,7 +245,7 @@ func TestSubmitStates(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if sub.Refused == nil || sub.Before != "review_passed" {
+		if sub.Refused == nil || sub.Before != "review_passed" || sub.BeforeRound != 1 {
 			t.Errorf("got %+v", sub)
 		}
 	})

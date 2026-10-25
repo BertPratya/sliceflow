@@ -14,11 +14,13 @@ import (
 // Submission is the result of Submit. Problems are the lines to print
 // (without the summary line). Refused is nil when the submit was accepted.
 // Before is the spec's state before a refused submit, for R22's last
-// sentence.
+// sentence. BeforeRound is the round of the kept review when Before is
+// review_passed (read under the lock), else 0.
 type Submission struct {
-	Problems []spec.Problem
-	Refused  *state.Counts
-	Before   string
+	Problems    []spec.Problem
+	Refused     *state.Counts
+	Before      string
+	BeforeRound int
 }
 
 // Submit runs Flows 3 and 4: with the lock held, it checks the state (R20),
@@ -88,6 +90,9 @@ func Submit(ctx context.Context, r Repo, name string) (Submission, error) {
 				}
 			}
 			sub = Submission{Problems: problems, Before: st.Spec.Status}
+			if st.Spec.Status == "review_passed" {
+				sub.BeforeRound = round
+			}
 			result, msg := "accepted", name+": spec submitted"
 			if c.Errors > 0 || c.Warnings > 0 {
 				result, msg = "refused", name+": spec submit refused"

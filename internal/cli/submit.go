@@ -68,12 +68,7 @@ func runSubmit(ctx context.Context, args []string, stdout, stderr io.Writer) int
 	}
 	last := "It stays a draft."
 	if sub.Before == "review_passed" {
-		// A refused submit keeps the review, so the status still has its round.
-		st, err := slice.Status(context.WithoutCancel(ctx), r, name)
-		if err != nil {
-			return statusFail(stderr, err)
-		}
-		last = fmt.Sprintf("It keeps the result of review %d.", st.State.Spec.Review.Round)
+		last = fmt.Sprintf("It keeps the result of review %d.", sub.BeforeRound)
 	}
 	fmt.Fprintf(stdout, "Submit refused: spec.md is not finished (%s, %s). %s\n",
 		plural(sub.Refused.Errors, "error"), plural(sub.Refused.Warnings, "warning"), last)
