@@ -1120,7 +1120,7 @@ lock, and finding the commit of the last accepted `spec.submitted`.
 ```yaml
 covers: [R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37]
 depends_on: ["07", "12", "14", "15"]
-touches: [internal/cli/submit.go, internal/cli/review.go, internal/e2e/submit_review_commands_test.go]
+touches: [internal/cli/submit.go, internal/cli/review.go, internal/e2e/submit_review_commands_test.go, internal/slice/submit.go, internal/slice/submit_test.go]
 follows: ["Flow 3: Submit, refused", "Flow 4: Submit, accepted", "Flow 5: Review the spec", CLI, Interrupts, Tests, Testing]
 risk: normal
 ```
@@ -1146,10 +1146,17 @@ exact output of each step.
 
 - `internal/cli/submit.go`, `internal/cli/review.go`: new.
 - `internal/e2e/submit_review_commands_test.go`: new.
+- `internal/slice/submit.go`, `internal/slice/submit_test.go`: changed,
+  for review task-16-1/F1 only: `Submission` gets `BeforeRound`.
 
 ### Interfaces
 
-- `Submit`, `Submission`, `ReviewSpec`, `Step`, `printProblems`: uses.
+- `type Submission struct{ Problems []spec.Problem; Refused *state.Counts; Before string; BeforeRound int }`:
+  changes, for review task-16-1/F1. `BeforeRound` is the round of the
+  kept review when `Before` is `review_passed`, read in `Submit`'s
+  `Prepare` under the lock; 0 otherwise. `spec submit` prints it in
+  R22's last sentence, with no second read of the status.
+- `Submit`, `ReviewSpec`, `Step`, `printProblems`: uses.
 
 ### Done when
 
@@ -1178,6 +1185,13 @@ exact output of each step.
 - `TestReviewNothing`: S26's error, exit 1.
   Proves: R24
   Scenario: S26
+- `TestSubmitRefusedReviewed`: after review 1 passed, a changed
+  `spec.md` with an open question gives exactly
+  `Submit refused: spec.md is not finished (0 errors, 1 warning). It keeps the result of review 1.`
+  as the last line of stdout, exit 1, empty stderr. In
+  `internal/slice/submit_test.go`, the refused submit from
+  `review_passed` also checks `BeforeRound` 1.
+  Proves: R22
 - `TestSubmitUnchanged`: S27's error, exit 1, no commit.
   Proves: R20
   Scenario: S27
