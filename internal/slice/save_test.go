@@ -521,3 +521,57 @@ func TestStaleIndexLock(t *testing.T) {
 		})
 	}
 }
+
+func TestSaveUndoKeepsStaged(t *testing.T) {
+	for _, cancelled := range []bool{false, true} {
+		name := "hook"
+		if cancelled {
+			name = "cancel"
+		}
+		t.Run(name, func(t *testing.T) {
+			r, wt := saveSlice(t)
+			r.LockWait = 5 * time.Second
+			committed := readFile(t, saveLogPath(wt))
+			before := commitCount(t, wt)
+			specRel := "docs/slices/" + saveName + "/spec.md"
+			specFile := filepath.Join(wt, filepath.FromSlash(specRel))
+			if err := os.WriteFile(specFile, []byte("staged text\n"), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			testrepo.Git(t, wt, "add", specRel)
+			if err := os.WriteFile(specFile, []byte("disk text\n"), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			ctx := context.Background()
+			if cancelled {
+				writeSaveHook(t, r, "pre-commit", "sleep 3")
+				c, cancel := context.WithCancel(ctx)
+				defer cancel()
+				time.AfterFunc(700*time.Millisecond, cancel)
+				ctx = c
+			} else {
+				writeSaveHook(t, r, "pre-commit", "exit 1")
+			}
+			op := saveWithFile("U")
+			op.Keep = []string{"spec.md"}
+			if _, _, err := saveEvent(ctx, r, saveName, wt, op); err == nil {
+				t.Fatal("want an error")
+			}
+			if got := gitOut(t, wt, "show", ":"+specRel); got != "staged text" && got != "staged text\n" {
+				t.Errorf("staged = %q", got)
+			}
+			if got := readFile(t, specFile); got != "disk text\n" {
+				t.Errorf("disk = %q", got)
+			}
+			if readFile(t, saveLogPath(wt)) != committed || commitCount(t, wt) != before {
+				t.Error("not undone")
+			}
+			if _, err := os.Stat(filepath.Join(wt, "docs", "slices", saveName, "reviews", "spec-1.md")); err == nil {
+				t.Error("review file still there")
+			}
+			if staged := strings.TrimSpace(gitOut(t, wt, "diff", "--cached", "--name-only")); staged != specRel {
+				t.Errorf("staged files = %q", staged)
+			}
+		})
+	}
+}

@@ -122,6 +122,7 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 	kept := map[string][]byte{}    // files on disk but not in the commit: their old bytes
 	var started, stopped time.Time // just before git commit ran, and when it returned
 	gitFiles := []string{logRel}
+	entries := map[string]string{} // path -> "mode,object,path" the index held before
 	undo := func() []string {
 		uctx := context.WithoutCancel(ctx)
 		var failed []string
@@ -156,19 +157,36 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 				failed = append(failed, gp)
 			}
 		}
-		args := append([]string{"reset", "-q", "--"}, gitFiles...)
-		if _, err := git.Run(uctx, worktree, args...); err != nil {
-			// A stopped git commit may leave its index.lock. Remove it only
-			// when the commit was stopped (ctx cancelled), reset failed
-			// because that lock exists, and the lock is not newer than the
-			// moment the commit returned: then it is the dead git's, not
-			// another command's.
-			if staleIndexLock(ctx, worktree, err, started, stopped) {
+		// Put the index back: each entry it held before, and reset the
+		// files that had none.
+		var noEntry []string
+		var cache []string
+		for _, f := range gitFiles {
+			if e, ok := entries[f]; ok {
+				cache = append(cache, "--cacheinfo", e)
+			} else {
+				noEntry = append(noEntry, f)
+			}
+		}
+		// A stopped git commit may leave its index.lock. Remove it only
+		// when the commit was stopped (ctx cancelled), the command failed
+		// because that lock exists, and the lock is not newer than the
+		// moment the commit returned: then it is the dead git's, not
+		// another command's.
+		idx := func(args []string) {
+			_, err := git.Run(uctx, worktree, args...)
+			if err != nil && staleIndexLock(ctx, worktree, err, started, stopped) {
 				_, err = git.Run(uctx, worktree, args...)
 			}
-			if err != nil {
+			if err != nil && !contains(failed, "index") {
 				failed = append(failed, "index")
 			}
+		}
+		if len(noEntry) > 0 {
+			idx(append([]string{"reset", "-q", "--"}, noEntry...))
+		}
+		if len(cache) > 0 {
+			idx(append([]string{"update-index"}, cache...))
 		}
 		return failed
 	}
@@ -229,6 +247,19 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 		gitFiles = append(gitFiles, path.Join(folder, k))
 	}
 
+	// Save what the index holds for these files, to put it back on failure.
+	ls, err := git.Run(ctx, worktree, append([]string{"ls-files", "-s", "-z", "--"}, gitFiles...)...)
+	if err != nil {
+		return fail(err, "ls-files")
+	}
+	for _, rec := range strings.Split(ls, "\x00") {
+		meta, p, ok := strings.Cut(rec, "\t")
+		f := strings.Fields(meta)
+		if !ok || len(f) != 3 || f[2] != "0" {
+			continue
+		}
+		entries[p] = f[0] + "," + f[1] + "," + p
+	}
 	if _, err := git.Run(ctx, worktree, append([]string{"add", "-f", "--"}, gitFiles...)...); err != nil {
 		return fail(err, "add")
 	}
@@ -299,4 +330,13 @@ func failSave(ctx context.Context, err error, gitCmd, tail string, failed []stri
 		tail = "Could not put back: " + strings.Join(failed, ", ") + "."
 	}
 	return saveError(reason, tail, extra)
+}
+
+func contains(l []string, s string) bool {
+	for _, x := range l {
+		if x == s {
+			return true
+		}
+	}
+	return false
 }

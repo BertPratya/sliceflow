@@ -243,3 +243,30 @@ func TestSubmitInterrupted(t *testing.T) {
 		t.Fatal("lock file left")
 	}
 }
+
+func TestSubmitStagedSpecKept(t *testing.T) {
+	dir := draftSlice(t, s15Text())
+	wt := wtOf(dir)
+	rel := "docs/slices/" + specName + "/spec.md"
+	testrepo.Git(t, wt, "add", rel)
+	disk := filepath.Join(wt, filepath.FromSlash(rel))
+	if err := os.WriteFile(disk, []byte(s15Text()+"\nchanged on disk\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cachedBefore := testrepo.Git(t, wt, "diff", "--cached")
+	if cachedBefore == "" {
+		t.Fatal("nothing staged")
+	}
+	writeUndoHook(t, dir, "pre-commit", "exit 1")
+	before := headOf(t, dir)
+	_, errOut, code := run(t, wt, "spec", "submit")
+	if code != 1 || errOut != refusedCommit {
+		t.Fatalf("code %d stderr %q", code, errOut)
+	}
+	if headOf(t, dir) != before {
+		t.Fatal("a commit was made")
+	}
+	if got := testrepo.Git(t, wt, "diff", "--cached"); got != cachedBefore {
+		t.Fatalf("staged change differs:\n%q\nwas\n%q", got, cachedBefore)
+	}
+}
