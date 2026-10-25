@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-25 03:00 UTC
+- Updated: 2026-10-25 03:03 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-16 of 17 done · 1 in review
+16 of 17 done · 1 doing
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -40,11 +40,11 @@ None.
 | 14 | submit-core | core | done | 0 | 2 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
 | 15 | review-core | core | done | 0 | 3 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | core | done | 0 | 2 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
-| 17 | submit-review-failures | normal | in_review | 0 | 1 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
+| 17 | submit-review-failures | normal | doing | 0 | 1 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
 
 ## Findings
 
-Open: 0 · Waiting for verify: 3 · Closed: 95
+Open: 1 · Waiting for verify: 3 · Closed: 95
 
 ### Doc reviews
 
@@ -108,6 +108,7 @@ Open: 0 · Waiting for verify: 3 · Closed: 95
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
+| task-17-1/F1 | low | 17 | TestSubmitBusy does not check the other command's lock file is still there | open |
 | task-16-1/F1 | medium | 16 | R22's review number is read again in the CLI, after the save and outside the lock | fixed (the human chose a new field, BeforeRound; tasks.md R003; verified) |
 | task-16-1/F2 | medium | 16 | No test for a refused submit from review_passed | verified |
 | task-16-1/F3 | low | 16 | spec review's output when a review does not pass | deferred: backlog (for 0004) |
@@ -174,6 +175,8 @@ None.
 - Task 11, task-11-1/F2: the undo removes git's `index.lock` only when `git reset` fails because that lock exists, and the lock's time is inside the stopped `git commit`'s window: from just before it started (less a 2 s margin for coarse file times) to the moment it returned (so it is the dead git's). Why: it keeps the undo working after Ctrl-C without touching another git's live lock; it stays inside task 11's touches. Stopping git gently in `internal/git` (the reviewer's other idea) changes every git command, so it went to the backlog, with F3.
 - Task 12, task-12-1/F1 and F2 (low): both fixed, not left. Why: R10 says a Ctrl-C before the commit gives `interrupted`, and the same early checks come in tasks 14 and 16 (their briefs will say so); F2 is one test case for the lead's reading of R33.
 
+- Task 17, task-17-1/F1 (low): fixed in a worker round, not left. Why: a busy command must never delete a lock it did not take (R6, R7); the check is one line, in task 17's own test file.
+
 ## Preview
 
 None.
@@ -181,6 +184,9 @@ None.
 ## Log
 
 Newest first.
+
+- 2026-10-25 03:03 · lead (claude) · task 17 worker round 2 started, with review task-17-1 (F1)
+- 2026-10-25 03:03 · code-reviewer (claude opus) · task review 1 of task 17 handed in: 1 low
 
 - 2026-10-25 03:00 · lead (claude) · task review 1 of task 17 started
 - 2026-10-25 03:00 · lead (claude) · task 17 committed (2236606); the checks pass
