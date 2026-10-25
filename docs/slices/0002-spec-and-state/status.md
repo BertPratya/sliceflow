@@ -1,9 +1,9 @@
 # Status: 0002-spec-and-state
 
-- Phase: implementing
+- Phase: integration
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-25 03:07 UTC
+- Updated: 2026-10-25 03:26 UTC
 
 ## Needs human
 
@@ -184,6 +184,10 @@ None.
 ## Log
 
 Newest first.
+
+- 2026-10-25 03:26 · lead (claude) · integration review 1 started
+- 2026-10-25 03:26 · lead (claude) · updated from main (backlog and roadmap only); the checks pass
+- 2026-10-25 03:26 · human · "yes": start the finish step
 
 - 2026-10-25 03:07 · lead (claude) · every task done; the human is told what was built and the lead's decisions
 - 2026-10-25 03:07 · lead (claude) · task 17 done
