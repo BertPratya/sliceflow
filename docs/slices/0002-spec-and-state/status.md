@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-25 03:34 UTC
+- Updated: 2026-10-25 03:37 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@
 
 ## Tasks
 
-17 of 18 done · 1 doing
+17 of 18 done · 1 in review
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -41,7 +41,7 @@
 | 15 | review-core | core | done | 0 | 3 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | core | done | 0 | 2 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
 | 17 | submit-review-failures | normal | done | 0 | 2 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
-| 18 | undo-keeps-staged | core | doing | 0 | 0 | 17 | R8, R10 |
+| 18 | undo-keeps-staged | core | in_review | 0 | 1 | 17 | R8, R10 |
 
 ## Findings
 
@@ -191,6 +191,10 @@ None.
 ## Log
 
 Newest first.
+
+- 2026-10-25 03:37 · lead (claude) · task review 1 of task 18 started
+- 2026-10-25 03:37 · lead (claude) · task 18 committed (7aea506); the checks pass
+- 2026-10-25 03:37 · worker (claude sonnet) · task 18 round 1 handed in
 
 - 2026-10-25 03:34 · lead (claude) · fix task 18 started: worker round 1; plan-5/F3 asked of the human (small)
 - 2026-10-25 03:34 · code-reviewer (claude opus) · integration review 1 handed in: 1 medium, 1 low; doc fixes verified, plan-5/F3 reopened
