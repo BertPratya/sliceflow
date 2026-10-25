@@ -1,9 +1,9 @@
 # Status: 0002-spec-and-state
 
-- Phase: integration
+- Phase: preview
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-25 03:48 UTC
+- Updated: 2026-10-25 03:52 UTC
 
 ## Needs human
 
@@ -45,7 +45,7 @@
 
 ## Findings
 
-Open: 1 · Waiting for verify: 1 · Closed: 101
+Open: 1 · Waiting for verify: 0 · Closed: 102
 
 ### Doc reviews
 
@@ -162,7 +162,7 @@ Open: 1 · Waiting for verify: 1 · Closed: 101
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| integration-1/F1 | medium | A failed save drops a staged spec.md, and says Nothing was changed | fixed (fix task 18) |
+| integration-1/F1 | medium | A failed save drops a staged spec.md, and says Nothing was changed | verified (fixed by task 18) |
 | integration-1/F2 | low | plural, R20's error, and the problem count are written more than once | deferred: backlog (main f95910a) |
 
 ## Lead's decisions
@@ -190,11 +190,19 @@ Open: 1 · Waiting for verify: 1 · Closed: 101
 
 ## Preview
 
-None.
+- P1. See where a new spec stands: not tried
+- P2. Check a spec with problems: not tried
+- P3. Submit a spec, refused and then accepted: not tried
+- P4. Review the submitted spec: not tried
+- P5. Set a new title: not tried
+- P6. Read the spec template's rules: not tried
 
 ## Log
 
 Newest first.
+
+- 2026-10-25 03:52 · lead (claude) · preview: the checks handed to the human
+- 2026-10-25 03:52 · code-reviewer (claude opus) · integration review 2 handed in: integration-1/F1 verified; no findings
 
 - 2026-10-25 03:48 · lead (claude) · integration review 2 started
 - 2026-10-25 03:48 · lead (claude) · updated from main (backlog only); the checks pass
