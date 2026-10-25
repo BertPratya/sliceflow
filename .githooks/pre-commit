@@ -1,0 +1,25 @@
+#!/bin/sh
+# Formats the staged Go files with gofmt before a commit, and stages them again.
+# A file that also has unstaged changes is not touched: the commit stops,
+# because staging it again would add those changes too.
+# Turn on once per clone: git config core.hooksPath .githooks
+
+files=$(git diff --cached --name-only --diff-filter=ACM -- '*.go')
+[ -n "$files" ] || exit 0
+
+unformatted=$(echo "$files" | while IFS= read -r f; do gofmt -l "$f"; done)
+[ -n "$unformatted" ] || exit 0
+
+partial=$(echo "$unformatted" | while IFS= read -r f; do
+  git diff --quiet -- "$f" || echo "$f"
+done)
+if [ -n "$partial" ]; then
+  echo "pre-commit: these files need formatting, but also have unstaged changes." >&2
+  echo "Run gofmt -w on them, git add them, then commit again:" >&2
+  echo "$partial" >&2
+  exit 1
+fi
+
+echo "$unformatted" | while IFS= read -r f; do
+  gofmt -w "$f" && git add -- "$f" && echo "pre-commit: formatted $f" >&2
+done
