@@ -3,11 +3,10 @@
 - Phase: preview
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-25 09:07 UTC
+- Updated: 2026-10-25 09:10 UTC
 
 ## Needs human
 
-- Preview P2 and P3: to run again, with corrected commands.
 - plan-5/F3, reopened by integration-1 (small decision): `plan.md` Flow 8 step 3 lists `spec validate`, `spec submit`, and `slice title`, and leaves out `spec review`. Fix that line (R004), or leave it.
 
 ## Documents
@@ -192,8 +191,8 @@ Open: 1 · Waiting for verify: 0 · Closed: 102
 ## Preview
 
 - P1. See where a new spec stands: pass
-- P2. Check a spec with problems: not tried (the lead's sed command missed the open question; to run again in a fresh repo)
-- P3. Submit a spec, refused and then accepted: not tried (the refused step did not run, for the same reason; to run again)
+- P2. Check a spec with problems: pass
+- P3. Submit a spec, refused and then accepted: pass
 - P4. Review the submitted spec: pass
 - P5. Set a new title: pass
 - P6. Read the spec template's rules: pass
@@ -201,6 +200,8 @@ Open: 1 · Waiting for verify: 0 · Closed: 102
 ## Log
 
 Newest first.
+
+- 2026-10-25 09:10 · human · ran preview P2 and P3 again: both match; every preview check passes
 
 - 2026-10-25 09:07 · lead (claude) · preview: P1, P4, P5, P6 pass; P2 and P3 to run again (the lead's sed command was wrong), commands corrected and dry-run
 - 2026-10-25 09:07 · human · ran the preview: "I thinks this is okay now, it work"
