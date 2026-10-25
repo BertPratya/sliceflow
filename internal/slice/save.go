@@ -123,6 +123,7 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 	var started, stopped time.Time // just before git commit ran, and when it returned
 	gitFiles := []string{logRel}
 	entries := map[string]string{} // path -> "mode,object,path" the index held before
+	addRan := false                // set just before git add: before it, the index is untouched
 	undo := func() []string {
 		uctx := context.WithoutCancel(ctx)
 		var failed []string
@@ -162,6 +163,9 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 		var noEntry []string
 		var cache []string
 		for _, f := range gitFiles {
+			if !addRan {
+				break
+			}
 			if e, ok := entries[f]; ok {
 				cache = append(cache, "--cacheinfo", e)
 			} else {
@@ -260,6 +264,7 @@ func saveEvent(ctx context.Context, r Repo, name, worktree string, op saveOp) (s
 		}
 		entries[p] = f[0] + "," + f[1] + "," + p
 	}
+	addRan = true
 	if _, err := git.Run(ctx, worktree, append([]string{"add", "-f", "--"}, gitFiles...)...); err != nil {
 		return fail(err, "add")
 	}

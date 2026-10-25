@@ -575,3 +575,45 @@ func TestSaveUndoKeepsStaged(t *testing.T) {
 		})
 	}
 }
+
+// A stop before git add ran: the index was never touched, so the undo
+// leaves a staged spec.md alone.
+func TestSaveUndoKeepsStagedBeforeAdd(t *testing.T) {
+	r, wt := saveSlice(t)
+	committed := readFile(t, saveLogPath(wt))
+	before := commitCount(t, wt)
+	specRel := "docs/slices/" + saveName + "/spec.md"
+	specFile := filepath.Join(wt, filepath.FromSlash(specRel))
+	if err := os.WriteFile(specFile, []byte("staged text\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	testrepo.Git(t, wt, "add", specRel)
+	if err := os.WriteFile(specFile, []byte("disk text\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	op := titleOp("U")
+	op.Keep = []string{"spec.md"}
+	inner := op.Prepare
+	op.Prepare = func(st state.State) (prepared, error) {
+		cancel()
+		return inner(st)
+	}
+	_, _, err := saveEvent(ctx, r, saveName, wt, op)
+	if err == nil {
+		t.Fatal("want an error")
+	}
+	if want := "could not save the event: interrupted. Nothing was changed."; err.Error() != want {
+		t.Errorf("err = %q, want %q", err.Error(), want)
+	}
+	if got := gitOut(t, wt, "show", ":"+specRel); got != "staged text" && got != "staged text\n" {
+		t.Errorf("staged = %q", got)
+	}
+	if got := readFile(t, specFile); got != "disk text\n" {
+		t.Errorf("disk = %q", got)
+	}
+	if readFile(t, saveLogPath(wt)) != committed || commitCount(t, wt) != before {
+		t.Error("not undone")
+	}
+}
