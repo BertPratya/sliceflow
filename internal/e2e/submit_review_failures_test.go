@@ -63,7 +63,8 @@ func TestSubmitBusy(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(lockFile(dir)), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(lockFile(dir), []byte(`{"pid":4312,"since":"2026-10-24T10:02:00Z"}`+"\n"), 0o644); err != nil {
+	lockText := `{"pid":4312,"since":"2026-10-24T10:02:00Z"}` + "\n"
+	if err := os.WriteFile(lockFile(dir), []byte(lockText), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	before := headOf(t, dir)
@@ -75,6 +76,9 @@ func TestSubmitBusy(t *testing.T) {
 	}
 	if d := time.Since(start); d < 9*time.Second {
 		t.Fatalf("waited only %v", d)
+	}
+	if got, err := os.ReadFile(lockFile(dir)); err != nil || string(got) != lockText {
+		t.Fatalf("lock file changed: %q, %v", got, err)
 	}
 	if headOf(t, dir) != before {
 		t.Fatal("a commit was made")
