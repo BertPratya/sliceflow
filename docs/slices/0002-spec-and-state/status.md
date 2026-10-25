@@ -1,9 +1,9 @@
 # Status: 0002-spec-and-state
 
-- Phase: implementing
+- Phase: integration
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-25 03:45 UTC
+- Updated: 2026-10-25 03:48 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@
 
 ## Tasks
 
-17 of 18 done · 1 in review
+18 of 18 done
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -41,11 +41,11 @@
 | 15 | review-core | core | done | 0 | 3 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | core | done | 0 | 2 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
 | 17 | submit-review-failures | normal | done | 0 | 2 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
-| 18 | undo-keeps-staged | core | in_review | 0 | 2 | 17 | R8, R10 |
+| 18 | undo-keeps-staged | core | done | 0 | 2 | 17 | R8, R10 |
 
 ## Findings
 
-Open: 2 · Waiting for verify: 1 · Closed: 100
+Open: 1 · Waiting for verify: 1 · Closed: 101
 
 ### Doc reviews
 
@@ -109,7 +109,7 @@ Open: 2 · Waiting for verify: 1 · Closed: 100
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-18-1/F1 | medium | 18 | Ctrl-C before git add still drops a staged spec.md | fixed |
+| task-18-1/F1 | medium | 18 | Ctrl-C before git add still drops a staged spec.md | verified |
 | task-18-1/F2 | low | 18 | A failed save during a merge conflict loses the conflict state | deferred: backlog (main a7f51a1) |
 | task-17-1/F1 | low | 17 | TestSubmitBusy does not check the other command's lock file is still there | verified |
 | task-16-1/F1 | medium | 16 | R22's review number is read again in the CLI, after the save and outside the lock | verified (fixed: the human chose a new field, BeforeRound; tasks.md R003) |
@@ -162,7 +162,7 @@ Open: 2 · Waiting for verify: 1 · Closed: 100
 
 | ID | Level | Title | Status |
 |---|---|---|---|
-| integration-1/F1 | medium | A failed save drops a staged spec.md, and says Nothing was changed | open (fix task 18) |
+| integration-1/F1 | medium | A failed save drops a staged spec.md, and says Nothing was changed | fixed (fix task 18) |
 | integration-1/F2 | low | plural, R20's error, and the problem count are written more than once | deferred: backlog (main f95910a) |
 
 ## Lead's decisions
@@ -195,6 +195,9 @@ None.
 ## Log
 
 Newest first.
+
+- 2026-10-25 03:48 · lead (claude) · task 18 done; back to integration
+- 2026-10-25 03:48 · code-reviewer (claude opus) · task review 2 of task 18 handed in: F1 verified; no new findings
 
 - 2026-10-25 03:45 · lead (claude) · task review 2 of task 18 started
 - 2026-10-25 03:45 · lead (claude) · task 18 round 2 committed (715ebe3); the checks pass
