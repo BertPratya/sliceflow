@@ -1,6 +1,6 @@
 # Status: 0002-spec-and-state
 
-- Phase: preview
+- Phase: done
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
 - Updated: 2026-10-25 09:40 UTC
@@ -200,6 +200,8 @@ Open: 0 · Waiting for verify: 0 · Closed: 103
 ## Log
 
 Newest first.
+
+- 2026-10-25 09:40 · lead (claude) · done: merging into main
 
 - 2026-10-25 09:40 · human · result approved: "1. approve and push" ("merge it and push to remote repo now"); backlog rows for review at work, risk flags, and a second-vendor reviewer: "no"
 
