@@ -173,9 +173,9 @@ Covers: R11, R36
 2. Wrong use exits with 2, as R38 of 0001-slice-and-events says, with
    the new texts `missing title` and `missing template name`. The new
    commands have no `--json`, so it is `unknown flag --json`.
-3. For `spec validate`, `spec submit`, and `slice title`, the first
-   checks run in R11's order, then the lock (submit, review, and title only),
-   then the command's own checks.
+3. For `spec validate`, `spec submit`, `spec review`, and `slice title`,
+   the first checks run in R11's order, then the lock (submit, review,
+   and title only), then the command's own checks.
 
 ### Shared rules
 
