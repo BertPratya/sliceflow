@@ -3,7 +3,7 @@
 - Phase: implementing
 - Branch: slice/0002-spec-and-state
 - After: 0001-slice-and-events
-- Updated: 2026-10-25 03:03 UTC
+- Updated: 2026-10-25 03:05 UTC
 
 ## Needs human
 
@@ -20,7 +20,7 @@ None.
 
 ## Tasks
 
-16 of 17 done · 1 doing
+16 of 17 done · 1 in review
 
 | # | Name | Risk | Status | Attempt | Round | Depends on | Covers |
 |---|---|---|---|---|---|---|---|
@@ -40,11 +40,11 @@ None.
 | 14 | submit-core | core | done | 0 | 2 | 05, 09, 11 | R12, R19, R20, R21, R22, R23 |
 | 15 | review-core | core | done | 0 | 3 | 09, 11, 13 | R10, R12, R24, R25, R27, R28 |
 | 16 | submit-review-commands | core | done | 0 | 2 | 07, 12, 14, 15 | R20, R21, R22, R23, R24, R25, R26, R27, R28, R29, R30, R37 |
-| 17 | submit-review-failures | normal | doing | 0 | 1 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
+| 17 | submit-review-failures | normal | in_review | 0 | 2 | 16 | R6, R7, R8, R9, R10, R24, R25, R29, R37 |
 
 ## Findings
 
-Open: 1 · Waiting for verify: 3 · Closed: 95
+Open: 0 · Waiting for verify: 4 · Closed: 95
 
 ### Doc reviews
 
@@ -108,7 +108,7 @@ Open: 1 · Waiting for verify: 3 · Closed: 95
 
 | ID | Level | Task | Title | Status |
 |---|---|---|---|---|
-| task-17-1/F1 | low | 17 | TestSubmitBusy does not check the other command's lock file is still there | open |
+| task-17-1/F1 | low | 17 | TestSubmitBusy does not check the other command's lock file is still there | fixed |
 | task-16-1/F1 | medium | 16 | R22's review number is read again in the CLI, after the save and outside the lock | fixed (the human chose a new field, BeforeRound; tasks.md R003; verified) |
 | task-16-1/F2 | medium | 16 | No test for a refused submit from review_passed | verified |
 | task-16-1/F3 | low | 16 | spec review's output when a review does not pass | deferred: backlog (for 0004) |
@@ -184,6 +184,10 @@ None.
 ## Log
 
 Newest first.
+
+- 2026-10-25 03:05 · lead (claude) · task review 2 of task 17 started
+- 2026-10-25 03:05 · lead (claude) · task 17 round 2 committed (a10ec7e); the checks pass
+- 2026-10-25 03:05 · worker (claude sonnet) · task 17 round 2 handed in: F1 fixed
 
 - 2026-10-25 03:03 · lead (claude) · task 17 worker round 2 started, with review task-17-1 (F1)
 - 2026-10-25 03:03 · code-reviewer (claude opus) · task review 1 of task 17 handed in: 1 low
