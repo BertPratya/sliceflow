@@ -45,6 +45,39 @@ func HasCommits(dir string) (bool, error) {
 	return false, gitError(args, err)
 }
 
+// Config returns the value of the git setting key, as git config --get
+// prints it. ok is false when the setting is not set.
+func Config(dir, key string) (value string, ok bool, err error) {
+	// git config --get exits with 1 when the key is not set.
+	args := []string{"config", "--get", key}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+			return "", false, nil
+		}
+		return "", false, gitError(args, err)
+	}
+	return strings.TrimSpace(string(out)), true, nil
+}
+
+// BranchExists reports whether the repository that dir is in has a local
+// branch with this name. A branch of a remote, like origin/main, does not
+// count.
+func BranchExists(dir, branch string) (bool, error) {
+	args := []string{"rev-parse", "--verify", "--quiet", "refs/heads/" + branch}
+	_, err := command(dir, args...).Output()
+	if err == nil {
+		return true, nil
+	}
+
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+		return false, nil
+	}
+	return false, gitError(args, err)
+}
+
 // command prepares git with args, to run in dir. LC_ALL=C makes git print
 // its messages in English, so sliceflow can read them on every computer.
 func command(dir string, args ...string) *exec.Cmd {
@@ -71,7 +104,7 @@ func gitError(args []string, err error) error {
 
 // firstLine returns the first line of s that is not empty.
 func firstLine(s string) string {
-	for _, line := range strings.Split(s, "\n") {
+	for line := range strings.SplitSeq(s, "\n") {
 		if line = strings.TrimSpace(line); line != "" {
 			return line
 		}

@@ -5,11 +5,12 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/BertPratya/sliceflow/internal/gittest"
 )
 
 func TestRootFromSubfolder(t *testing.T) {
-	repo := t.TempDir()
-	runGit(t, repo, "init")
+	repo := gittest.Init(t)
 
 	sub := filepath.Join(repo, "sub")
 	if err := os.Mkdir(sub, 0o755); err != nil {
@@ -27,35 +28,50 @@ func TestRootFromSubfolder(t *testing.T) {
 }
 
 func TestHasCommits(t *testing.T) {
-	repo := t.TempDir()
-	runGit(t, repo, "init", "-b", "main")
+	repo := gittest.Init(t)
 
 	if got, err := HasCommits(repo); err != nil || got {
 		t.Fatalf("HasCommits(new repo) = %v, %v, want false, nil", got, err)
 	}
 
-	emptyCommit(t, repo)
+	gittest.Commit(t, repo, "first")
 
 	if got, err := HasCommits(repo); err != nil || !got {
 		t.Errorf("HasCommits(repo with a commit) = %v, %v, want true, nil", got, err)
 	}
 }
 
-// emptyCommit makes a commit with no files in the repo at dir. It sets its
-// own name and email, and turns off signing, so it works on any computer.
-func emptyCommit(t *testing.T, dir string) {
-	t.Helper()
-	runGit(t, dir,
-		"-c", "user.name=sliceflow test", "-c", "user.email=test@example.com",
-		"-c", "commit.gpgsign=false",
-		"commit", "--allow-empty", "-m", "first")
+func TestConfig(t *testing.T) {
+	repo := gittest.NewRepo(t)
+
+	if value, ok, err := Config(repo, "sliceflow.base"); err != nil || ok {
+		t.Fatalf("Config(not set) = %q, %v, %v, want \"\", false, nil", value, ok, err)
+	}
+
+	gittest.Run(t, repo, "config", "sliceflow.base", "develop")
+
+	if value, ok, err := Config(repo, "sliceflow.base"); err != nil || !ok || value != "develop" {
+		t.Errorf("Config(set) = %q, %v, %v, want \"develop\", true, nil", value, ok, err)
+	}
 }
 
-// runGit runs git with args in dir, and stops the test if git fails.
-func runGit(t *testing.T, dir string, args ...string) {
-	t.Helper()
-	if out, err := command(dir, args...).CombinedOutput(); err != nil {
-		t.Fatalf("git %v: %v\n%s", args, err, out)
+func TestBranchExists(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	gittest.Run(t, repo, "branch", "develop")
+
+	tests := []struct {
+		branch string
+		want   bool
+	}{
+		{"main", true},
+		{"develop", true},
+		{"nope", false},
+	}
+	for _, tt := range tests {
+		got, err := BranchExists(repo, tt.branch)
+		if err != nil || got != tt.want {
+			t.Errorf("BranchExists(%q) = %v, %v, want %v, nil", tt.branch, got, err, tt.want)
+		}
 	}
 }
 
