@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/BertPratya/sliceflow/internal/gittest"
@@ -116,4 +117,114 @@ func TestHasCommitsNotRepo(t *testing.T) {
 	}
 
 	t.Logf("error: %v", err)
+}
+
+func TestCommandErrorText(t *testing.T) {
+	base := errors.New("exit status 1")
+	tests := []struct {
+		name string
+		err  *CommandError
+		want string
+	}{
+		{"first line", &CommandError{Command: "commit", ExitCode: 1, Lines: []string{"first", "second"}, Err: base}, "first"},
+		{"no lines", &CommandError{Command: "commit", ExitCode: 128, Err: base}, "git commit failed (exit code 128)"},
+		{"cannot start", &CommandError{Command: "commit", ExitCode: -1, Err: base}, "run git: exit status 1"},
+	}
+	for _, tt := range tests {
+		if got := tt.err.Error(); got != tt.want {
+			t.Errorf("%s: Error() = %q, want %q", tt.name, got, tt.want)
+		}
+		if !errors.Is(tt.err, base) {
+			t.Errorf("%s: errors.Is does not find the underlying error", tt.name)
+		}
+	}
+}
+
+func TestGitErrorKeepsLines(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	_, err := PathExists(repo, "no-such-branch", "x")
+
+	var ce *CommandError
+	if !errors.As(err, &ce) {
+		t.Fatalf("error = %v, want a *CommandError", err)
+	}
+	if ce.Command != "ls-tree" || ce.ExitCode == 0 || len(ce.Lines) == 0 {
+		t.Errorf("CommandError = %+v, want ls-tree, a non-zero code, and lines", ce)
+	}
+}
+
+func TestMainRoot(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	want := realPath(t, repo)
+
+	got, err := MainRoot(repo)
+	if err != nil || got != want {
+		t.Fatalf("MainRoot(repo) = %q, %v, want %q, nil", got, err, want)
+	}
+
+	// From inside a linked worktree, MainRoot still gives the main checkout.
+	wt := filepath.Join(t.TempDir(), "wt")
+	gittest.Run(t, repo, "worktree", "add", "-b", "other", wt)
+	got, err = MainRoot(wt)
+	if err != nil || got != want {
+		t.Errorf("MainRoot(worktree) = %q, %v, want %q, nil", got, err, want)
+	}
+}
+
+func TestRemoteBranches(t *testing.T) {
+	repo := gittest.NewRepo(t)
+
+	got, err := RemoteBranches(repo, "slice/x")
+	if err != nil || len(got) != 0 {
+		t.Fatalf("RemoteBranches(no remotes) = %v, %v, want none, nil", got, err)
+	}
+
+	// Make remote-tracking branches by hand, as a fetch would.
+	head := gittest.Run(t, repo, "rev-parse", "HEAD")
+	gittest.Run(t, repo, "remote", "add", "origin", "https://example.com/o.git")
+	gittest.Run(t, repo, "remote", "add", "a/b", "https://example.com/ab.git")
+	for _, ref := range []string{
+		"refs/remotes/origin/slice/x",
+		"refs/remotes/a/b/slice/x",
+		"refs/remotes/origin/feature/slice/x",
+		"refs/remotes/origin/slice/y",
+		"refs/remotes/origin/other",
+	} {
+		gittest.Run(t, repo, "update-ref", ref, head)
+	}
+
+	got, err = RemoteBranches(repo, "slice/x")
+	want := []string{"a/b/slice/x", "origin/slice/x"}
+	if err != nil || !slices.Equal(got, want) {
+		t.Errorf("RemoteBranches = %v, %v, want %v, nil", got, err, want)
+	}
+}
+
+func TestPathExists(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	if err := os.MkdirAll(filepath.Join(repo, "docs", "slices", "a"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(repo, "docs", "slices", "a", "spec.md"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	gittest.Run(t, repo, "add", ".")
+	gittest.Run(t, repo, "commit", "-m", "add a")
+	gittest.Run(t, repo, "branch", "old", "HEAD~1")
+
+	tests := []struct {
+		rev, path string
+		want      bool
+	}{
+		{"main", "docs/slices/a", true},
+		{"main", "docs/slices/a/spec.md", true},
+		{"main", "docs/slices/b", false},
+		{"old", "docs/slices/a", false},
+	}
+	for _, tt := range tests {
+		got, err := PathExists(repo, tt.rev, tt.path)
+		if err != nil || got != tt.want {
+			t.Errorf("PathExists(%q, %q) = %v, %v, want %v, nil", tt.rev, tt.path, got, err, tt.want)
+		}
+	}
 }

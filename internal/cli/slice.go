@@ -1,6 +1,11 @@
 package cli
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+
+	"github.com/BertPratya/sliceflow/internal/slice"
+)
 
 // sliceCreateUsage is the help text of "sliceflow slice create".
 const sliceCreateUsage = `Create a new slice: a branch, a worktree, a spec to fill in, and an event log.
@@ -19,7 +24,7 @@ Flags:
 var sliceCreateFlags = flagSpec{values: []string{"from", "title"}, bools: []string{"json"}}
 
 // runSliceCreate runs "sliceflow slice create". args are the words after
-// "create". For now it only checks the words; the work comes later.
+// "create". It checks the words, then asks the slice package to create the slice.
 func runSliceCreate(e *env, args []string) int {
 	f, positional, err := parseFlags(args, sliceCreateFlags)
 	if f.help {
@@ -36,7 +41,24 @@ func runSliceCreate(e *env, args []string) int {
 		return wrongUse(e, "too many arguments")
 	}
 
-	// TODO(chunk 2): run the checks.
-	fmt.Fprintln(e.stderr, "Error: slice create is not built yet.")
-	return exitError
+	dir, err := e.workDir()
+	if err != nil {
+		fmt.Fprintf(e.stderr, "Error: %v\n", err)
+		return exitError
+	}
+
+	_, err = slice.Create(slice.CreateOptions{
+		Dir:   dir,
+		Name:  positional[0],
+		From:  f.values["from"],
+		Title: f.values["title"],
+		Now:   time.Now(),
+	})
+	if err != nil {
+		fmt.Fprintf(e.stderr, "Error: %v\n", err)
+		return exitError
+	}
+
+	// TODO(chunk 4): print the result.
+	return exitOK
 }

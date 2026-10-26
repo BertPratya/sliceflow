@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -78,6 +80,71 @@ func BranchExists(dir, branch string) (bool, error) {
 	return false, gitError(args, err)
 }
 
+// MainRoot returns the top folder of the main checkout of the repository
+// that dir is in (PD6). Inside a linked worktree, Root gives the worktree;
+// MainRoot still gives the main checkout. The path has / between the parts.
+func MainRoot(dir string) (string, error) {
+	args := []string{"rev-parse", "--path-format=absolute", "--git-common-dir"}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		return "", gitError(args, err)
+	}
+	// A repo made with --separate-git-dir, or a submodule, is not handled (PD6).
+	// The common git folder is <main checkout>/.git, so its parent is the
+	// main checkout.
+	gitDir := filepath.FromSlash(strings.TrimSpace(string(out)))
+	return filepath.ToSlash(filepath.Dir(gitDir)), nil
+}
+
+// RemoteBranches returns the remote-tracking branches named exactly
+// <remote>/<branch>, as git last saw them, sorted. For branch "slice/x" it
+// may return ["origin/slice/x"]. A branch like origin/feature/slice/x does
+// not count. It never talks to the remote.
+func RemoteBranches(dir, branch string) ([]string, error) {
+	args := []string{"remote"}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		return nil, gitError(args, err)
+	}
+
+	var found []string
+	// A remote name can have a "/" in it, so ask git about each remote and
+	// check the exact reference, instead of cutting names apart.
+	for remote := range strings.SplitSeq(string(out), "\n") {
+		remote = strings.TrimSpace(remote)
+		if remote == "" {
+			continue
+		}
+		// With --verify --quiet, git exits with 0 when the reference exists,
+		// and with 1, printing nothing, when it does not.
+		args := []string{"show-ref", "--verify", "--quiet", "refs/remotes/" + remote + "/" + branch}
+		_, err := command(dir, args...).Output()
+		if err == nil {
+			found = append(found, remote+"/"+branch)
+			continue
+		}
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+			continue
+		}
+		return nil, gitError(args, err)
+	}
+	slices.Sort(found)
+	return found, nil
+}
+
+// PathExists reports whether path is on the commit rev, e.g. a branch name.
+// It works for files and for folders. A file at the path counts too; this
+// is fine because the caller checks the name first.
+func PathExists(dir, rev, path string) (bool, error) {
+	args := []string{"ls-tree", "--name-only", rev, "--", path}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		return false, gitError(args, err)
+	}
+	return strings.TrimSpace(string(out)) != "", nil
+}
+
 // command prepares git with args, to run in dir. LC_ALL=C makes git print
 // its messages in English, so sliceflow can read them on every computer.
 func command(dir string, args ...string) *exec.Cmd {
@@ -87,27 +154,46 @@ func command(dir string, args ...string) *exec.Cmd {
 	return cmd
 }
 
-// gitError turns an error from running git with args into the reason of
-// R18: the first line of git's message that is not empty, or
-// "git <command> failed (exit code <n>)" when git printed nothing.
-func gitError(args []string, err error) error {
-	var exitErr *exec.ExitError
-	if !errors.As(err, &exitErr) {
-		// git could not run at all, e.g. it is not installed.
-		return fmt.Errorf("run git: %w", err)
-	}
-	if line := firstLine(string(exitErr.Stderr)); line != "" {
-		return errors.New(line)
-	}
-	return fmt.Errorf("git %s failed (exit code %d)", args[0], exitErr.ExitCode())
+// CommandError is the error of a git command that failed (PD4). It keeps
+// all of git's message lines, so a caller can read more than the first.
+type CommandError struct {
+	Command  string   // the git command, e.g. "commit"
+	ExitCode int      // git's exit code, or -1 when git could not start
+	Lines    []string // the lines git printed on stderr, not empty, trimmed
+	Err      error    // the underlying error
 }
 
-// firstLine returns the first line of s that is not empty.
-func firstLine(s string) string {
-	for line := range strings.SplitSeq(s, "\n") {
-		if line = strings.TrimSpace(line); line != "" {
-			return line
+// Error returns the first line git printed, or "git <command> failed (exit
+// code <n>)" when it printed nothing, or "run git: ..." when git could not
+// start.
+func (e *CommandError) Error() string {
+	if e.ExitCode == -1 {
+		return fmt.Sprintf("run git: %v", e.Err)
+	}
+	if len(e.Lines) > 0 {
+		return e.Lines[0]
+	}
+	return fmt.Sprintf("git %s failed (exit code %d)", e.Command, e.ExitCode)
+}
+
+// Unwrap returns the underlying error.
+func (e *CommandError) Unwrap() error {
+	return e.Err
+}
+
+// gitError turns an error from running git with args into a *CommandError.
+func gitError(args []string, err error) error {
+	ce := &CommandError{Command: args[0], ExitCode: -1, Err: err}
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) {
+		// git ran and failed. If not, git could not run at all, e.g. it is
+		// not installed, and the exit code stays -1.
+		ce.ExitCode = exitErr.ExitCode()
+		for line := range strings.SplitSeq(string(exitErr.Stderr), "\n") {
+			if line = strings.TrimSpace(line); line != "" {
+				ce.Lines = append(ce.Lines, line)
+			}
 		}
 	}
-	return ""
+	return ce
 }
