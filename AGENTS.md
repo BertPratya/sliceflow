@@ -16,11 +16,18 @@ asks, at any level.
 
 ## Levels
 
-**Current level: 2**
+**Current level: 3, for the rest of slice 0001; then 2 again**
 
 The human moves up a level when they pass its "ready when" tests. The human
 decides when; you may suggest it, and you change the line above only when the
 human says so. There are no deadlines.
+
+The human chose level 3 for the rest of 0001 on 2026-10-27, before passing
+the level 3 tests: 0001 is mostly basics the human knows from Python. The
+human's learning time goes to the hard slices instead (0004-0007, 0013):
+before each, the human writes a small prototype of what is new, e.g.
+streaming a program's output, `context` timeouts, goroutines, or a web
+server with Server-Sent Events. Those slices are built on level 2.
 
 | Level | Who writes the code in `cmd/` and `internal/` |
 |---|---|
@@ -74,6 +81,26 @@ Work on one requirement at a time, in this order:
    correct what is wrong. The step is done when the answers are right.
 7. **Commit:** the human commits.
 
+## Fast mode (level 3)
+
+You are the lead. The plan in `docs/plans/` splits the slice into chunks:
+one commit each, about 200-400 lines.
+
+1. **Build:** a worker agent with a fresh context builds one chunk from a
+   short brief: the chunk's section of the plan, the exact requirements
+   and scenarios it covers, and the files it touches.
+2. **Review:** a reviewer agent with a fresh context checks the chunk
+   against the spec and the plan. It never changes code. The worker, or
+   you, fix what it finds.
+3. **Check:** you run `gofmt`, `go vet ./...`, and `go test ./...`, and
+   read the diff yourself.
+4. **Commit:** you commit the chunk, and never push. The message body says
+   what is new, which parts follow a known pattern, the commands to try,
+   and every `Assumed:` choice the spec did not settle.
+5. **The human reviews** each commit afterwards, in order. Fixes are new
+   commits. Then a walkthrough session follows the code the way it runs,
+   with questions at each stop.
+
 ## The hint ladder (the human's piece and solo requirements)
 
 When the human is stuck, climb one rung at a time. Go to the next rung only
@@ -113,7 +140,8 @@ When the human asks you to write their piece, offer the next rung first.
 ## Git
 
 - Work directly on `main`. No worktrees.
-- The human commits. Leave your changes uncommitted, for the human to read.
+- On level 2, the human commits: leave your changes uncommitted, for the
+  human to read. On level 3, you commit each chunk, as in fast mode.
 - Commit messages: `<area>: <what happened>`, e.g. `slice: create a slice folder`.
 - Push only when the human says "push".
 - Never force-push. Never use a bare `git stash`.
@@ -124,6 +152,7 @@ When the human asks you to write their piece, offer the next rung first.
 
 - `docs/specs/`: the specs. Build from these.
 - `docs/design/`: the design and the roadmap.
+- `docs/plans/`: how each slice is built, split into chunks.
 - `docs/backlog.md`: ideas and open items for later.
 - `templates/default/`: the templates sliceflow uses for slice documents.
 - `notes/`: the human's own learning notes.
