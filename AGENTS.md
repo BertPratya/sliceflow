@@ -104,9 +104,12 @@ one commit each, about 200-400 lines.
 4. **Commit:** you commit the chunk, and never push. The message body says
    what is new, which parts follow a known pattern, the commands to try,
    and every `Assumed:` choice the spec did not settle.
-5. **The human reviews** each commit afterwards, in order. Fixes are new
-   commits. Then a walkthrough session follows the code the way it runs,
-   with questions at each stop.
+5. **The human reviews** the current code, not each commit's diff, in a
+   walkthrough session: it follows the code the way it runs, one stop at a
+   time, with 2-3 questions at each stop. The human reads in their editor,
+   not the terminal, so give clickable `file:line` links. The core parts
+   are read closely; code that follows a known pattern is skimmed. Fixes
+   are new commits.
 
 ## The hint ladder (the human's piece and solo requirements)
 
