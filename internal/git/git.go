@@ -174,6 +174,34 @@ func AddWorktree(dir, path, branch string) error {
 	return nil
 }
 
+// RemoveWorktree removes the worktree at path, with its files and staged
+// changes (--force). path may have / between the parts.
+func RemoveWorktree(dir, path string) error {
+	args := []string{"worktree", "remove", "--force", filepath.FromSlash(path)}
+	if _, err := command(dir, args...).Output(); err != nil {
+		return gitError(args, err)
+	}
+	return nil
+}
+
+// PruneWorktrees makes git forget worktrees whose folder is gone.
+func PruneWorktrees(dir string) error {
+	args := []string{"worktree", "prune"}
+	if _, err := command(dir, args...).Output(); err != nil {
+		return gitError(args, err)
+	}
+	return nil
+}
+
+// DeleteBranch deletes the local branch, even if it is not merged.
+func DeleteBranch(dir, branch string) error {
+	args := []string{"branch", "-D", branch}
+	if _, err := command(dir, args...).Output(); err != nil {
+		return gitError(args, err)
+	}
+	return nil
+}
+
 // Add stages the files at paths. It uses --force, so a .gitignore of the
 // user cannot keep them out.
 func Add(dir string, paths ...string) error {
@@ -206,7 +234,7 @@ func command(dir string, args ...string) *exec.Cmd {
 // CommandError is the error of a git command that failed (PD4). It keeps
 // all of git's message lines, so a caller can read more than the first.
 type CommandError struct {
-	Command  string   // the git command, e.g. "commit"
+	Command  string   // the git command without options, e.g. "commit" or "worktree add"
 	ExitCode int      // git's exit code, or -1 when git could not start
 	Lines    []string // the lines git printed on stderr, not empty, trimmed
 	Err      error    // the underlying error
@@ -232,7 +260,7 @@ func (e *CommandError) Unwrap() error {
 
 // gitError turns an error from running git with args into a *CommandError.
 func gitError(args []string, err error) error {
-	ce := &CommandError{Command: args[0], ExitCode: -1, Err: err}
+	ce := &CommandError{Command: commandName(args), ExitCode: -1, Err: err}
 	var exitErr *exec.ExitError
 	if errors.As(err, &exitErr) {
 		// git ran and failed. If not, git could not run at all, e.g. it is
@@ -245,4 +273,13 @@ func gitError(args []string, err error) error {
 		}
 	}
 	return ce
+}
+
+// commandName returns the git command of args without options and values:
+// the first word, and the second too when the first is "worktree".
+func commandName(args []string) string {
+	if args[0] == "worktree" && len(args) > 1 {
+		return args[0] + " " + args[1]
+	}
+	return args[0]
 }

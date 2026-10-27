@@ -1,6 +1,8 @@
 package slice
 
 import (
+	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,7 +17,7 @@ const notChanged = ". Nothing was changed."
 // createErr runs Create and returns the text of its error.
 func createErr(t *testing.T, dir, name, from string) string {
 	t.Helper()
-	_, err := Create(CreateOptions{Dir: dir, Name: name, From: from})
+	_, err := Create(context.Background(), CreateOptions{Dir: dir, Name: name, From: from})
 	if err == nil {
 		t.Fatal("Create error = nil, want an error")
 	}
@@ -119,7 +121,7 @@ func TestCreateChecksPass(t *testing.T) {
 	repo := gittest.NewRepo(t)
 
 	// When every check passes, the slice is created.
-	got, err := Create(CreateOptions{Dir: repo, Name: "x", Now: time.Date(2026, 10, 24, 7, 42, 0, 0, time.UTC)})
+	got, err := Create(context.Background(), CreateOptions{Dir: repo, Name: "x", Now: time.Date(2026, 10, 24, 7, 42, 0, 0, time.UTC)})
 	if err != nil {
 		t.Fatalf("Create error = %v, want nil", err)
 	}
@@ -202,7 +204,7 @@ func TestCreateTimeIsUTC(t *testing.T) {
 	repo := gittest.NewRepo(t)
 	now := time.Date(2026, 10, 24, 23, 30, 0, 0, time.FixedZone("UTC-5", -5*3600))
 
-	if _, err := Create(CreateOptions{Dir: repo, Name: "x", Now: now}); err != nil {
+	if _, err := Create(context.Background(), CreateOptions{Dir: repo, Name: "x", Now: now}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -213,5 +215,153 @@ func TestCreateTimeIsUTC(t *testing.T) {
 	event := gittest.Run(t, repo, "show", "slice/x:docs/slices/x/.events.jsonl")
 	if !strings.Contains(event, `"at":"2026-10-25T04:30:00Z"`) {
 		t.Errorf("event = %s, want at 2026-10-25T04:30:00Z", event)
+	}
+}
+
+// writeHook writes a pre-commit hook into the repo.
+func writeHook(t *testing.T, repo, body string) {
+	t.Helper()
+	path := filepath.Join(repo, ".git", "hooks", "pre-commit")
+	if err := os.WriteFile(path, []byte("#!/bin/sh\n"+body+"\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCreateFailed(t *testing.T) {
+	tests := []struct {
+		name       string
+		reason     string
+		notRemoved []string
+		details    []string
+		want       string
+	}{
+		{"removed", "git commit failed (exit code 1)", nil, nil,
+			"could not create slice x: git commit failed (exit code 1). Everything sliceflow made was removed."},
+		{"not removed", "boom", []string{"branch slice/x", "folder .sliceflow"}, nil,
+			"could not create slice x: boom. Could not remove: branch slice/x, folder .sliceflow."},
+		{"details", "first", nil, []string{"second", "third"},
+			"could not create slice x: first. Everything sliceflow made was removed.\n  second\n  third"},
+		{"not removed and details", "first", []string{"worktree w"}, []string{"second"},
+			"could not create slice x: first. Could not remove: worktree w.\n  second"},
+	}
+	for _, tt := range tests {
+		got := createFailed("x", tt.reason, tt.notRemoved, tt.details).Error()
+		if got != tt.want {
+			t.Errorf("%s: got %q, want %q", tt.name, got, tt.want)
+		}
+	}
+}
+
+// TestCreateCommitFailsUndoesAll: a hook that refuses the commit leaves
+// nothing behind, not even the new .sliceflow folder.
+func TestCreateCommitFailsUndoesAll(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	writeHook(t, repo, "exit 1")
+
+	want := "could not create slice x: git commit failed (exit code 1). Everything sliceflow made was removed."
+	if got := createErr(t, repo, "x", ""); got != want {
+		t.Errorf("error = %q, want %q", got, want)
+	}
+	if out := gittest.Run(t, repo, "branch", "--list", "slice/x"); out != "" {
+		t.Errorf("branch left: %q", out)
+	}
+	if out := gittest.Run(t, repo, "worktree", "list", "--porcelain"); strings.Count(out, "worktree ") != 1 {
+		t.Errorf("worktrees left: %q", out)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".sliceflow")); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf(".sliceflow left: %v", err)
+	}
+}
+
+// TestCreateLaterFailureKeepsOlderSlice: the second create fails, and the
+// first slice, .sliceflow, and .gitignore stay.
+func TestCreateLaterFailureKeepsOlderSlice(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	if _, err := Create(context.Background(), CreateOptions{Dir: repo, Name: "a", Now: time.Now()}); err != nil {
+		t.Fatal(err)
+	}
+	writeHook(t, repo, "exit 1")
+
+	createErr(t, repo, "b", "")
+	for _, p := range []string{".sliceflow", ".sliceflow/.gitignore", ".sliceflow/worktrees/a"} {
+		if _, err := os.Stat(filepath.Join(repo, filepath.FromSlash(p))); err != nil {
+			t.Errorf("%s should stay: %v", p, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".sliceflow", "worktrees", "b")); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("worktree b left: %v", err)
+	}
+	if out := gittest.Run(t, repo, "branch", "--list", "slice/b"); out != "" {
+		t.Errorf("branch b left: %q", out)
+	}
+}
+
+// TestCreateCancelledContext: I call Create with a context that is already
+// cancelled. The checks still run first (a bad name gives its normal
+// error); a good name gives "interrupted" and nothing is made.
+func TestCreateCancelledContext(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := Create(ctx, CreateOptions{Dir: repo, Name: "My Slice"})
+	if err == nil || !strings.HasSuffix(err.Error(), notChanged) {
+		t.Errorf("bad name: error = %v, want the check error", err)
+	}
+
+	_, err = Create(ctx, CreateOptions{Dir: repo, Name: "x", Now: time.Now()})
+	want := "could not create slice x: interrupted. Everything sliceflow made was removed."
+	if err == nil || err.Error() != want {
+		t.Errorf("error = %v, want %q", err, want)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".sliceflow")); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf(".sliceflow made: %v", err)
+	}
+	if out := gittest.Run(t, repo, "branch", "--list", "slice/x"); out != "" {
+		t.Errorf("branch made: %q", out)
+	}
+}
+
+// TestCreatePostCheckoutHookFails: git worktree add fails but leaves the
+// worktree. The undo must still remove it, and the branch.
+func TestCreatePostCheckoutHookFails(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	path := filepath.Join(repo, ".git", "hooks", "post-checkout")
+	if err := os.WriteFile(path, []byte("#!/bin/sh\nexit 1\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	got := createErr(t, repo, "x", "")
+	if !strings.HasSuffix(got, "Everything sliceflow made was removed.") {
+		t.Errorf("error = %q, want it to end with the removed sentence", got)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".sliceflow", "worktrees", "x")); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("worktree folder left: %v", err)
+	}
+	if out := gittest.Run(t, repo, "branch", "--list", "slice/x"); out != "" {
+		t.Errorf("branch left: %q", out)
+	}
+	if out := gittest.Run(t, repo, "worktree", "list", "--porcelain"); strings.Count(out, "worktree ") != 1 {
+		t.Errorf("worktrees left: %q", out)
+	}
+}
+
+// TestCreateCouldNotRemove: the hook puts a file in the new .sliceflow
+// folder, so removing that folder fails and the message names it.
+func TestCreateCouldNotRemove(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	extra := filepath.ToSlash(filepath.Join(repo, ".sliceflow", "extra"))
+	writeHook(t, repo, "touch '"+extra+"'\nexit 1")
+
+	want := "could not create slice x: git commit failed (exit code 1). Could not remove: folder .sliceflow."
+	if got := createErr(t, repo, "x", ""); got != want {
+		t.Errorf("error = %q, want %q", got, want)
+	}
+	// The rest was removed.
+	if out := gittest.Run(t, repo, "branch", "--list", "slice/x"); out != "" {
+		t.Errorf("branch left: %q", out)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".sliceflow", "worktrees")); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("worktrees folder left: %v", err)
 	}
 }

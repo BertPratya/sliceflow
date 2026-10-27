@@ -1,8 +1,12 @@
 package cli
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/BertPratya/sliceflow/internal/slice"
@@ -48,7 +52,11 @@ func runSliceCreate(e *env, args []string) int {
 		return exitError
 	}
 
-	res, err := slice.Create(slice.CreateOptions{
+	// Ctrl-C or a stop signal cancels ctx; Create then undoes its work (R18).
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	res, err := slice.Create(ctx, slice.CreateOptions{
 		Dir:   dir,
 		Name:  positional[0],
 		From:  f.values["from"],

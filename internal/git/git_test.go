@@ -153,6 +153,59 @@ func TestGitErrorKeepsLines(t *testing.T) {
 	}
 }
 
+func TestCommandName(t *testing.T) {
+	tests := []struct {
+		args []string
+		want string
+	}{
+		{[]string{"commit", "-m", "x"}, "commit"},
+		{[]string{"branch", "-D", "x"}, "branch"},
+		{[]string{"worktree", "add", "p", "b"}, "worktree add"},
+		{[]string{"worktree", "remove", "--force", "p"}, "worktree remove"},
+	}
+	for _, tt := range tests {
+		if got := commandName(tt.args); got != tt.want {
+			t.Errorf("commandName(%v) = %q, want %q", tt.args, got, tt.want)
+		}
+	}
+}
+
+func TestRemoveWorktreeAndDeleteBranch(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	path := filepath.ToSlash(filepath.Join(t.TempDir(), "wt"))
+	gittest.Run(t, repo, "branch", "slice/x")
+	if err := AddWorktree(repo, path, "slice/x"); err != nil {
+		t.Fatal(err)
+	}
+	// An untracked file does not stop --force.
+	if err := os.WriteFile(filepath.Join(path, "junk"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := RemoveWorktree(repo, path); err != nil {
+		t.Fatalf("RemoveWorktree: %v", err)
+	}
+	if _, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("worktree folder still there: %v", err)
+	}
+	if err := DeleteBranch(repo, "slice/x"); err != nil {
+		t.Fatalf("DeleteBranch: %v", err)
+	}
+	if ok, _ := BranchExists(repo, "slice/x"); ok {
+		t.Error("branch still exists")
+	}
+
+	var ce *CommandError
+	err := DeleteBranch(repo, "slice/x")
+	if !errors.As(err, &ce) || ce.Command != "branch" {
+		t.Errorf("DeleteBranch of a missing branch: error = %v, want a branch *CommandError", err)
+	}
+	err = RemoveWorktree(repo, path)
+	if !errors.As(err, &ce) || ce.Command != "worktree remove" {
+		t.Errorf("RemoveWorktree of a missing worktree: error = %v, want a worktree remove *CommandError", err)
+	}
+}
+
 func TestMainRoot(t *testing.T) {
 	repo := gittest.NewRepo(t)
 	want := realPath(t, repo)
