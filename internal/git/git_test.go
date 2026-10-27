@@ -228,3 +228,65 @@ func TestPathExists(t *testing.T) {
 		}
 	}
 }
+
+func TestCreateBranchAndWorktree(t *testing.T) {
+	repo := gittest.NewRepo(t)
+
+	id, err := CommitID(repo, "main")
+	if err != nil || len(id) != 40 {
+		t.Fatalf("CommitID(main) = %q, %v, want 40 characters, nil", id, err)
+	}
+	if _, err := CommitID(repo, "nope"); err == nil {
+		t.Error("CommitID(nope) error = nil, want an error")
+	}
+
+	if err := CreateBranch(repo, "slice/x", id); err != nil {
+		t.Fatal(err)
+	}
+	if got := gittest.Run(t, repo, "rev-parse", "slice/x"); got != id {
+		t.Errorf("slice/x is at %q, want %q", got, id)
+	}
+	if err := CreateBranch(repo, "slice/x", id); err == nil {
+		t.Error("CreateBranch twice: error = nil, want an error")
+	}
+
+	wt := filepath.ToSlash(filepath.Join(t.TempDir(), "wt"))
+	if err := AddWorktree(repo, wt, "slice/x"); err != nil {
+		t.Fatal(err)
+	}
+	if got := gittest.Run(t, wt, "branch", "--show-current"); got != "slice/x" {
+		t.Errorf("worktree branch = %q, want slice/x", got)
+	}
+}
+
+func TestAddAndCommit(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	before := gittest.Run(t, repo, "rev-parse", "HEAD")
+
+	// A user's .gitignore must not keep the file out.
+	if err := os.WriteFile(filepath.Join(repo, ".gitignore"), []byte("*.log\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(repo, "a.log"), []byte("x\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := Add(repo, "a.log"); err != nil {
+		t.Fatal(err)
+	}
+	if err := Commit(repo, "x: add a.log"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := gittest.Run(t, repo, "show", "--name-only", "--format=%s", "HEAD"); got != "x: add a.log\n\na.log" {
+		t.Errorf("last commit = %q", got)
+	}
+	if got := gittest.Run(t, repo, "rev-parse", "HEAD~1"); got != before {
+		t.Errorf("parent = %q, want %q", got, before)
+	}
+
+	// Nothing staged: git refuses, and we get a *CommandError.
+	var ce *CommandError
+	if err := Commit(repo, "empty"); !errors.As(err, &ce) {
+		t.Errorf("Commit with nothing staged: error = %v, want a *CommandError", err)
+	}
+}

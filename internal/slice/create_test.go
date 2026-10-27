@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/BertPratya/sliceflow/internal/gittest"
 )
@@ -117,10 +118,22 @@ func TestCreateOldWorktreeFolder(t *testing.T) {
 func TestCreateChecksPass(t *testing.T) {
 	repo := gittest.NewRepo(t)
 
-	// For now, all checks passing ends in "not built yet" (chunk 4).
-	want := "creating a slice is not built yet"
-	if got := createErr(t, repo, "x", ""); got != want {
-		t.Errorf("error = %q, want %q", got, want)
+	// When every check passes, the slice is created.
+	got, err := Create(CreateOptions{Dir: repo, Name: "x", Now: time.Date(2026, 10, 24, 7, 42, 0, 0, time.UTC)})
+	if err != nil {
+		t.Fatalf("Create error = %v, want nil", err)
+	}
+	if got.Name != "x" || got.Branch != "slice/x" || got.From.Branch != "main" || len(got.From.Commit) != 40 {
+		t.Errorf("Result = %+v", got)
+	}
+	if got.WorktreeRel != ".sliceflow/worktrees/x" || got.Spec != "docs/slices/x/spec.md" {
+		t.Errorf("Result paths = %q, %q", got.WorktreeRel, got.Spec)
+	}
+	if !strings.HasSuffix(got.Worktree, "/.sliceflow/worktrees/x") || strings.Contains(got.Worktree, `\`) {
+		t.Errorf("Worktree = %q", got.Worktree)
+	}
+	if out := gittest.Run(t, repo, "log", "-1", "--format=%s", "slice/x"); out != "x: slice created" {
+		t.Errorf("last commit on slice/x = %q", out)
 	}
 }
 
@@ -180,5 +193,25 @@ func TestCreateOrderPairs(t *testing.T) {
 				t.Errorf("error = %q, want it to start with %q", got, tt.want)
 			}
 		})
+	}
+}
+
+// TestCreateTimeIsUTC: 23:30 at UTC-5 is already the next day in UTC, for
+// the spec's date and for the event's time.
+func TestCreateTimeIsUTC(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	now := time.Date(2026, 10, 24, 23, 30, 0, 0, time.FixedZone("UTC-5", -5*3600))
+
+	if _, err := Create(CreateOptions{Dir: repo, Name: "x", Now: now}); err != nil {
+		t.Fatal(err)
+	}
+
+	spec := gittest.Run(t, repo, "show", "slice/x:docs/slices/x/spec.md")
+	if !strings.HasPrefix(spec, "---\nslice: x\ncreated: 2026-10-25\n") {
+		t.Errorf("spec starts with %q", spec[:60])
+	}
+	event := gittest.Run(t, repo, "show", "slice/x:docs/slices/x/.events.jsonl")
+	if !strings.Contains(event, `"at":"2026-10-25T04:30:00Z"`) {
+		t.Errorf("event = %s, want at 2026-10-25T04:30:00Z", event)
 	}
 }

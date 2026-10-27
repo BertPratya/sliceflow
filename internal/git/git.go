@@ -145,6 +145,55 @@ func PathExists(dir, rev, path string) (bool, error) {
 	return strings.TrimSpace(string(out)) != "", nil
 }
 
+// CommitID returns the full id of the commit that rev names, e.g. a branch.
+func CommitID(dir, rev string) (string, error) {
+	args := []string{"rev-parse", "--verify", rev + "^{commit}"}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		return "", gitError(args, err)
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
+// CreateBranch makes the branch at the commit. The branch tracks nothing.
+func CreateBranch(dir, branch, commit string) error {
+	args := []string{"branch", "--no-track", branch, commit}
+	if _, err := command(dir, args...).Output(); err != nil {
+		return gitError(args, err)
+	}
+	return nil
+}
+
+// AddWorktree checks out the existing branch in a new worktree at path.
+// path may have / between the parts; git gets it in the form of the system.
+func AddWorktree(dir, path, branch string) error {
+	args := []string{"worktree", "add", filepath.FromSlash(path), branch}
+	if _, err := command(dir, args...).Output(); err != nil {
+		return gitError(args, err)
+	}
+	return nil
+}
+
+// Add stages the files at paths. It uses --force, so a .gitignore of the
+// user cannot keep them out.
+func Add(dir string, paths ...string) error {
+	args := append([]string{"add", "--force", "--"}, paths...)
+	if _, err := command(dir, args...).Output(); err != nil {
+		return gitError(args, err)
+	}
+	return nil
+}
+
+// Commit makes a normal commit of the staged files. It leaves the author,
+// the hooks, and the signing to the user's git settings.
+func Commit(dir, msg string) error {
+	args := []string{"commit", "-m", msg}
+	if _, err := command(dir, args...).Output(); err != nil {
+		return gitError(args, err)
+	}
+	return nil
+}
+
 // command prepares git with args, to run in dir. LC_ALL=C makes git print
 // its messages in English, so sliceflow can read them on every computer.
 func command(dir string, args ...string) *exec.Cmd {
