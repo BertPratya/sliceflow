@@ -366,15 +366,16 @@ stderr, changes nothing, and exits with code 1.
   If it cannot remove something, the message ends with
   `Could not remove: <list>.` instead of the last sentence.
   `<reason>` is the first line of git's message that starts with `fatal:`
-  or `error:`, else its first line that is not empty, or
-  `git <command> failed (exit code <n>)` when git printed nothing, where
+  or `error:`. When there is none, `<reason>` is
+  `git <command> failed (exit code <n>)`, where
   `<command>` is the git command without its options and values, e.g.
   `git commit failed (exit code 1)` or
-  `git worktree add failed (exit code 128)`. For a step that is not a
-  git command, such as writing a file, `<reason>` is the system's error
-  message. The other lines of git's message,
-  which hold the output of the user's hooks, follow the error line, each
-  indented by 2 spaces.
+  `git worktree add failed (exit code 128)`. When git cannot start at
+  all, `<reason>` is `run git: <the system's error message>`. For a step
+  that is not a git command, such as writing a file, `<reason>` is the
+  system's error message. Every other line of git's message that is not empty, which
+  holds git's progress and the output of the user's hooks, follows the
+  error line, each indented by 2 spaces.
   Ctrl-C, or a stop signal from the system, while sliceflow is creating
   counts as a failed step, with the reason `interrupted`.
   Check: e2e

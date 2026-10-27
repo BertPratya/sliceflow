@@ -45,8 +45,11 @@ func (c *creation) check(err error) error {
 	if c.ctx.Err() == nil {
 		reason = err.Error()
 		var ce *git.CommandError
-		if errors.As(err, &ce) && len(ce.Lines) > 1 {
-			details = ce.Lines[1:]
+		if errors.As(err, &ce) {
+			// Reason and details both come from git's error, so they always
+			// match, even if the error was wrapped on the way.
+			reason = ce.Error()
+			details = ce.OtherLines()
 		}
 	}
 	return createFailed(c.name, reason, c.rollback(), details)

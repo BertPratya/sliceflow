@@ -331,9 +331,13 @@ func TestCreatePostCheckoutHookFails(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// git prints only progress, so the reason names the command (R18), and
+	// the progress line follows.
 	got := createErr(t, repo, "x", "")
-	if !strings.HasSuffix(got, "Everything sliceflow made was removed.") {
-		t.Errorf("error = %q, want it to end with the removed sentence", got)
+	want := "could not create slice x: git worktree add failed (exit code 1). Everything sliceflow made was removed.\n" +
+		"  Preparing worktree (checking out 'slice/x')"
+	if got != want {
+		t.Errorf("error = %q, want %q", got, want)
 	}
 	if _, err := os.Stat(filepath.Join(repo, ".sliceflow", "worktrees", "x")); !errors.Is(err, os.ErrNotExist) {
 		t.Errorf("worktree folder left: %v", err)

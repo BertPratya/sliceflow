@@ -275,17 +275,41 @@ type CommandError struct {
 	Err      error    // the underlying error
 }
 
-// Error returns the first line git printed, or "git <command> failed (exit
-// code <n>)" when it printed nothing, or "run git: ..." when git could not
-// start.
+// Error returns the first line git printed that starts with "fatal:" or
+// "error:", else "git <command> failed (exit code <n>)" (R18), or
+// "run git: ..." when git could not start.
 func (e *CommandError) Error() string {
 	if e.ExitCode == -1 {
 		return fmt.Sprintf("run git: %v", e.Err)
 	}
-	if len(e.Lines) > 0 {
-		return e.Lines[0]
+	if i := e.reasonLine(); i >= 0 {
+		return e.Lines[i]
 	}
 	return fmt.Sprintf("git %s failed (exit code %d)", e.Command, e.ExitCode)
+}
+
+// OtherLines returns git's lines without the one that Error returns, in
+// git's order. They hold git's progress and the output of the user's
+// hooks (R18).
+func (e *CommandError) OtherLines() []string {
+	i := e.reasonLine()
+	if i < 0 {
+		return slices.Clone(e.Lines)
+	}
+	return append(slices.Clone(e.Lines[:i]), e.Lines[i+1:]...)
+}
+
+// reasonLine returns the index of the first line that starts with "fatal:"
+// or "error:": git's own words for what went wrong (R18). It returns -1
+// when there is none, e.g. when git printed only progress and a hook's
+// output. Then Error names the command and its exit code instead.
+func (e *CommandError) reasonLine() int {
+	for i, line := range e.Lines {
+		if strings.HasPrefix(line, "fatal:") || strings.HasPrefix(line, "error:") {
+			return i
+		}
+	}
+	return -1
 }
 
 // Unwrap returns the underlying error.

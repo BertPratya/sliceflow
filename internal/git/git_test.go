@@ -120,6 +120,25 @@ func TestHasCommitsNotRepo(t *testing.T) {
 	t.Logf("error: %v", err)
 }
 
+func TestCommandErrorOtherLines(t *testing.T) {
+	tests := []struct {
+		name  string
+		lines []string
+		want  []string
+	}{
+		{"no lines", nil, nil},
+		{"no fatal or error line: all lines", []string{"Preparing", "hook says no"}, []string{"Preparing", "hook says no"}},
+		{"fatal line left out", []string{"Preparing", "fatal: x", "after"}, []string{"Preparing", "after"}},
+		{"only the first such line left out", []string{"error: one", "fatal: two"}, []string{"fatal: two"}},
+	}
+	for _, tt := range tests {
+		e := &CommandError{Command: "commit", ExitCode: 1, Lines: tt.lines}
+		if got := e.OtherLines(); !slices.Equal(got, tt.want) {
+			t.Errorf("%s: OtherLines() = %q, want %q", tt.name, got, tt.want)
+		}
+	}
+}
+
 func TestCommandErrorText(t *testing.T) {
 	base := errors.New("exit status 1")
 	tests := []struct {
@@ -127,7 +146,9 @@ func TestCommandErrorText(t *testing.T) {
 		err  *CommandError
 		want string
 	}{
-		{"first line", &CommandError{Command: "commit", ExitCode: 1, Lines: []string{"first", "second"}, Err: base}, "first"},
+		{"no fatal or error line", &CommandError{Command: "commit", ExitCode: 1, Lines: []string{"first", "second"}, Err: base}, "git commit failed (exit code 1)"},
+		{"fatal after progress", &CommandError{Command: "worktree add", ExitCode: 128, Lines: []string{"Preparing worktree (checking out 'b')", "fatal: 'wt' already exists"}, Err: base}, "fatal: 'wt' already exists"},
+		{"first of two", &CommandError{Command: "commit", ExitCode: 1, Lines: []string{"hint: x", "error: one", "fatal: two"}, Err: base}, "error: one"},
 		{"no lines", &CommandError{Command: "commit", ExitCode: 128, Err: base}, "git commit failed (exit code 128)"},
 		{"cannot start", &CommandError{Command: "commit", ExitCode: -1, Err: base}, "run git: exit status 1"},
 	}

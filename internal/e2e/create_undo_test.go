@@ -58,7 +58,9 @@ func TestCreateFailureShowsHookOutput(t *testing.T) {
 	writeHook(t, repo, "echo first >&2; echo second >&2; exit 1")
 
 	r := run(t, repo, "slice", "create", "x")
-	want := "Error: could not create slice x: first. Everything sliceflow made was removed.\n  second\n"
+	// The hook's lines have no "fatal:" or "error:", so the reason names the
+	// failed command, and both lines follow (R18).
+	want := "Error: could not create slice x: git commit failed (exit code 1). Everything sliceflow made was removed.\n  first\n  second\n"
 	if r.code != 1 || r.stdout != "" || r.stderr != want {
 		t.Fatalf("code = %d, stdout = %q, stderr = %q, want 1, \"\", %q", r.code, r.stdout, r.stderr, want)
 	}
