@@ -16,7 +16,7 @@ asks, at any level.
 
 ## Levels
 
-**Current level: 3, for the rest of slice 0001; then 2 again**
+**Current level: 3, for slices 0001-0003; then 2 from slice 0004 on**
 
 The human moves up a level when they pass its "ready when" tests. The human
 decides when; you may suggest it, and you change the line above only when the
@@ -24,10 +24,15 @@ human says so. There are no deadlines.
 
 The human chose level 3 for the rest of 0001 on 2026-10-27, before passing
 the level 3 tests: 0001 is mostly basics the human knows from Python. The
-human's learning time goes to the hard slices instead (0004-0007, 0013):
-before each, the human writes a small prototype of what is new, e.g.
-streaming a program's output, `context` timeouts, goroutines, or a web
-server with Server-Sent Events. Those slices are built on level 2.
+same day, the human kept level 3 for 0002 and 0003 too. The human's learning
+time goes to the slices from 0004 on, and most of all to the hard ones
+(0004-0007, 0013): before each hard slice, the human writes a small
+prototype of what is new, e.g. streaming a program's output, `context`
+timeouts, goroutines, or a web server with Server-Sent Events. From 0004 on,
+slices are built on level 2, with bigger pieces for the human.
+
+On level 3, the walkthrough after each slice is not optional: it is how the
+human learns the code they did not write.
 
 | Level | Who writes the code in `cmd/` and `internal/` |
 |---|---|
@@ -39,9 +44,11 @@ server with Server-Sent Events. Those slices are built on level 2.
 At every level, the human checks code before it is merged.
 
 The human chose level 2 on 2026-10-26, before passing the level 2 tests,
-because level 1 was too slow. Those tests stay as goals: every week or two,
-offer one small requirement as a **solo requirement**, built with level 1
-rules.
+because level 1 was too slow. Those tests stay as goals. At every level,
+every week or two, offer one small requirement as a **solo requirement**,
+built with level 1 rules: the human writes the code and the test with no AI.
+This is also the human's practice for job interviews, where live coding is
+often done with AI turned off.
 
 **Ready for level 2 when the human can:**
 - build one small requirement (code and test) alone, with no AI;
