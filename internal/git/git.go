@@ -318,3 +318,48 @@ func commandName(args []string) string {
 	}
 	return args[0]
 }
+
+// Branches returns the full names of the local branches that start with
+// prefix, e.g. "slice/" gives "slice/a" and "slice/team/login". They are
+// sorted. Branches of remotes do not count.
+func Branches(dir, prefix string) ([]string, error) {
+	args := []string{"for-each-ref", "--format=%(refname)", "refs/heads/" + prefix}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		return nil, gitError(args, err)
+	}
+
+	var names []string
+	for line := range strings.SplitSeq(string(out), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		names = append(names, strings.TrimPrefix(line, "refs/heads/"))
+	}
+	slices.Sort(names)
+	return names, nil
+}
+
+// ListDirs returns the names of the folders directly inside path on the
+// commit rev, e.g. a branch. Only the last part of each path is returned.
+// It returns an empty list when path is not on rev.
+func ListDirs(dir, rev, path string) ([]string, error) {
+	// -z ends each name with a zero byte, so git does not quote odd names.
+	// -d lists folders only. The / at the end of path asks for what is
+	// inside the folder, not the folder itself.
+	args := []string{"ls-tree", "-d", "-z", "--name-only", rev, "--", path + "/"}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		return nil, gitError(args, err)
+	}
+
+	var names []string
+	for full := range strings.SplitSeq(string(out), "\x00") {
+		if full == "" {
+			continue
+		}
+		names = append(names, full[strings.LastIndex(full, "/")+1:])
+	}
+	return names, nil
+}

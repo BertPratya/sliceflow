@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/BertPratya/sliceflow/internal/gittest"
@@ -397,5 +398,78 @@ func TestCurrentBranchAmbiguousName(t *testing.T) {
 	got, err := CurrentBranch(repo)
 	if err != nil || got != "heads/main" {
 		t.Fatalf("CurrentBranch = %q, %v, want heads/main, nil", got, err)
+	}
+}
+
+func TestBranches(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	for _, b := range []string{"slice/b", "slice/a", "slice/team/login", "other"} {
+		gittest.Run(t, repo, "branch", b)
+	}
+
+	got, err := Branches(repo, "slice/")
+	want := []string{"slice/a", "slice/b", "slice/team/login"}
+	if err != nil || !slices.Equal(got, want) {
+		t.Errorf("Branches(slice/) = %v, %v, want %v, nil", got, err, want)
+	}
+
+	got, err = Branches(repo, "nothing/")
+	if err != nil || len(got) != 0 {
+		t.Errorf("Branches(nothing/) = %v, %v, want empty, nil", got, err)
+	}
+}
+
+func TestListDirs(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	for _, p := range []string{"docs/slices/b/x.md", "docs/slices/a/y.md", "docs/slices/file.md"} {
+		full := filepath.Join(repo, filepath.FromSlash(p))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	gittest.Run(t, repo, "add", "-A")
+	gittest.Run(t, repo, "commit", "-m", "slices")
+
+	got, err := ListDirs(repo, "refs/heads/main", "docs/slices")
+	want := []string{"a", "b"}
+	if err != nil || !slices.Equal(got, want) {
+		t.Errorf("ListDirs = %v, %v, want %v, nil", got, err, want)
+	}
+
+	got, err = ListDirs(repo, "refs/heads/main", "docs/none")
+	if err != nil || len(got) != 0 {
+		t.Errorf("ListDirs(missing path) = %v, %v, want empty, nil", got, err)
+	}
+}
+
+// TestNoNetworkCommands guards R40. It reads every non-test .go file under
+// internal/ and fails if one has the text of a git command that talks to
+// another computer, written as a string literal. It is a simple check on
+// the text, not a proof, but it catches a command added by mistake.
+func TestNoNetworkCommands(t *testing.T) {
+	banned := []string{`"fetch"`, `"pull"`, `"push"`, `"clone"`, `"ls-remote"`}
+	err := filepath.WalkDir("..", func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		for _, word := range banned {
+			if strings.Contains(string(content), word) {
+				t.Errorf("%s has %s: sliceflow must not use the network (R40)", path, word)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
 	}
 }

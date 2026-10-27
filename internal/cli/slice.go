@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
@@ -239,20 +240,161 @@ type statusJSON struct {
 	Warnings []string     `json:"warnings"`
 }
 
-// printStatusJSON prints the status as one line of JSON (R30). The list of
-// warnings has the repo warnings first, and is [] when there are none.
-func printStatusJSON(e *env, info slice.Info) int {
+// toStatusJSON builds the R30 object for a slice. Its warnings are the
+// repoWarnings first, then its own; the list is [] when there are none.
+func toStatusJSON(info slice.Info, repoWarnings []string) statusJSON {
 	out := statusJSON{
 		Slice:    info.Name,
 		Title:    info.Title,
 		Phase:    info.Phase,
-		Warnings: append(append([]string{}, info.RepoWarnings...), info.Warnings...),
+		Warnings: append(append([]string{}, repoWarnings...), info.Warnings...),
 	}
 	if info.From != nil {
 		out.From = &createdFrom{Branch: info.From.Branch, Commit: info.From.Commit}
 	}
 	if !info.Created.IsZero() {
 		out.Created = info.Created.UTC().Format("2006-01-02T15:04:05Z")
+	}
+	return out
+}
+
+// printStatusJSON prints the status as one line of JSON (R30). The list of
+// warnings has the repo warnings first, and is [] when there are none.
+func printStatusJSON(e *env, info slice.Info) int {
+	out := toStatusJSON(info, info.RepoWarnings)
+
+	enc := json.NewEncoder(e.stdout)
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(out); err != nil {
+		fmt.Fprintf(e.stderr, "Error: %v\n", err)
+		return exitError
+	}
+	return exitOK
+}
+
+// sliceListUsage is the help text of "sliceflow slice list".
+const sliceListUsage = `List the slices in progress.
+
+Usage:
+  sliceflow slice list [flags]
+
+Flags:
+  --all          Also list the merged slices
+  --json         Print the result as JSON
+  -h, --help     Show this help
+`
+
+// sliceListFlags is the flags that "slice list" accepts.
+var sliceListFlags = flagSpec{bools: []string{"all", "json"}}
+
+// runSliceList runs "sliceflow slice list". args are the words after
+// "list". Warnings go to stderr (R28), also with --json.
+func runSliceList(e *env, args []string) int {
+	f, positional, err := parseFlags(args, sliceListFlags)
+	if f.help {
+		fmt.Fprint(e.stdout, sliceListUsage)
+		return exitOK
+	}
+	if err != nil {
+		return wrongUse(e, err.Error())
+	}
+	if len(positional) > 0 {
+		return wrongUse(e, "too many arguments")
+	}
+
+	dir, err := e.workDir()
+	if err != nil {
+		fmt.Fprintf(e.stderr, "Error: %v\n", err)
+		return exitError
+	}
+
+	all := f.bools["all"]
+	listing, err := slice.List(dir, all)
+	if err != nil {
+		fmt.Fprintf(e.stderr, "Error: %v\n", err)
+		return exitError
+	}
+
+	// Repo warnings first, then the warnings of each slice in row order.
+	for _, w := range listing.Warnings {
+		fmt.Fprintf(e.stderr, "Warning: %s\n", w)
+	}
+	for _, info := range listing.Slices {
+		for _, w := range info.Warnings {
+			fmt.Fprintf(e.stderr, "Warning: %s: %s\n", info.Name, w)
+		}
+	}
+
+	if f.bools["json"] {
+		return printListJSON(e, listing)
+	}
+	printList(e, listing.Slices, all)
+	return exitOK
+}
+
+// printList prints the table of R34, or the line for no rows (R34, R35).
+// Each column is as wide as its widest value, header included.
+func printList(e *env, infos []slice.Info, all bool) {
+	if len(infos) == 0 {
+		if all {
+			fmt.Fprintln(e.stdout, "No slices.")
+		} else {
+			fmt.Fprintln(e.stdout, "No slices in progress.")
+		}
+		return
+	}
+
+	rows := [][]string{{"NAME", "TITLE", "PHASE", "CREATED (UTC)"}}
+	for _, info := range infos {
+		title := info.Title
+		if title == "" {
+			title = info.Name
+		}
+		phase := safeText(info.Phase)
+		if len(info.Warnings) > 0 {
+			phase += " !"
+		}
+		created := "-"
+		if !info.Created.IsZero() {
+			created = info.Created.UTC().Format("2006-01-02 15:04")
+		}
+		rows = append(rows, []string{safeText(info.Name), safeText(title), phase, created})
+	}
+
+	// widths[i] is the width of column i. It counts runes, so wide
+	// characters (CJK, emoji) can misalign. This is accepted.
+	widths := make([]int, 4)
+	for _, row := range rows {
+		for i, cell := range row {
+			widths[i] = max(widths[i], utf8.RuneCountInString(cell))
+		}
+	}
+	for _, row := range rows {
+		var line strings.Builder
+		for i, cell := range row {
+			line.WriteString(cell)
+			// The last column gets no spaces after it.
+			if i < len(row)-1 {
+				line.WriteString(strings.Repeat(" ", widths[i]-utf8.RuneCountInString(cell)+2))
+			}
+		}
+		fmt.Fprintln(e.stdout, line.String())
+	}
+}
+
+// listJSON is the object that "slice list --json" prints (R37).
+type listJSON struct {
+	Slices   []statusJSON `json:"slices"`
+	Warnings []string     `json:"warnings"`
+}
+
+// printListJSON prints the listing as one line of JSON (R37). Each slice
+// holds only its own warnings; the repo warnings are at the top. Empty
+// lists are [].
+func printListJSON(e *env, l slice.Listing) int {
+	out := listJSON{Slices: []statusJSON{}, Warnings: append([]string{}, l.Warnings...)}
+	for _, info := range l.Slices {
+		out.Slices = append(out.Slices, toStatusJSON(info, nil))
 	}
 
 	enc := json.NewEncoder(e.stdout)

@@ -62,5 +62,6 @@ var sliceCommands = group{
 	commands: []command{
 		{name: "create", args: "<name>", about: "Create a new slice", usage: sliceCreateUsage, run: runSliceCreate},
 		{name: "status", args: "[name]", about: "Show where a slice stands", usage: sliceStatusUsage, run: runSliceStatus},
+		{name: "list", about: "List the slices in progress", usage: sliceListUsage, run: runSliceList},
 	},
 }
