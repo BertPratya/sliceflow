@@ -282,7 +282,7 @@ A user learns how to use a command, and sees what was wrong.
   Check: unit
 - **R3.** When creating a slice, sliceflow shall use as the base branch
   the value of `--from`, else the value of `git config sliceflow.base`,
-  else `main`.
+  else `main`. An empty `git config sliceflow.base` counts as not set.
   Check: e2e
 - **R4.** When every check passes, sliceflow shall create the branch
   `slice/<name>` at the newest commit of the base branch.
@@ -301,7 +301,8 @@ A user learns how to use a command, and sees what was wrong.
   The built-in template is this repo's spec template without the
   `title:` line and its rules about the title. Its front matter is
   filled with `slice`, `created` (today's date in UTC, as `YYYY-MM-DD`),
-  and `ideas: []`.
+  and `ideas: []`. sliceflow adds both files also when a `.gitignore`
+  rule of the repo matches them.
   Check: e2e
 - **R8.** sliceflow shall commit those two files on the slice branch as
   one commit, with the message `<name>: slice created`. It is a normal
@@ -364,7 +365,8 @@ stderr, changes nothing, and exits with code 1.
   `Error: could not create slice <name>: <reason>. Everything sliceflow made was removed.`
   If it cannot remove something, the message ends with
   `Could not remove: <list>.` instead of the last sentence.
-  `<reason>` is the first line of git's message that is not empty, or
+  `<reason>` is the first line of git's message that starts with `fatal:`
+  or `error:`, else its first line that is not empty, or
   `git <command> failed (exit code <n>)` when git printed nothing, where
   `<command>` is the git command without its options and values, e.g.
   `git commit failed (exit code 1)` or
@@ -395,6 +397,7 @@ stderr, changes nothing, and exits with code 1.
 
 - **R21.** For `slice status` and `slice list`, sliceflow shall use as
   the base branch the value of `git config sliceflow.base`, else `main`.
+  An empty value counts as not set.
   Check: e2e
 - **R22.** If `slice status` or `slice list` runs outside a git repo, or
   in a repo with no commits, then sliceflow shall print the error of R12
@@ -408,7 +411,8 @@ stderr, changes nothing, and exits with code 1.
 - **R24.** sliceflow shall read a slice's log from the newest commit of
   the local branch `slice/<name>` when that branch exists, else from the
   newest commit of the base branch. It shall never read the log from files
-  that are not committed.
+  that are not committed. When the branch exists but has no log, the base
+  branch is not read.
   Check: e2e
 - **R25.** sliceflow shall give a slice the phase `planning` when its log
   has a good `slice.created` event, and `unknown` otherwise.
@@ -474,7 +478,8 @@ stderr, changes nothing, and exits with code 1.
   `NAME`, `TITLE`, `PHASE`, and `CREATED (UTC)`, oldest first. Columns
   are separated by 2 spaces, and each is as wide as its widest value.
   Slices with the same created time are in name order, a to z. Slices
-  with no created time come last, by name. With no rows, it shall print
+  with no created time come last, by name, and show `-` as their created
+  time. With no rows, it shall print
   `No slices in progress.` instead.
   Check: e2e
 - **R35.** sliceflow shall leave merged slices out of the list, except
@@ -509,7 +514,9 @@ stderr, changes nothing, and exits with code 1.
   `Error: <what is wrong>. Run sliceflow --help.`, where
   `<what is wrong>` is one of `unknown command "<command>"`,
   `unknown flag <flag>`, `flag needs a value: <flag>`,
-  `missing slice name`, or `too many arguments`. `sliceflow` alone and
+  `missing slice name`, or `too many arguments`. A flag that takes a value,
+  followed by a word that starts with `-`, has a missing value; such a
+  value is written `--name=value`. `sliceflow` alone and
   `sliceflow slice` alone are not wrong use: they print the usage on
   stdout, and exit with code 0.
   Check: e2e
