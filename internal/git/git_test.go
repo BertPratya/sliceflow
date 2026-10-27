@@ -343,3 +343,59 @@ func TestAddAndCommit(t *testing.T) {
 		t.Errorf("Commit with nothing staged: error = %v, want a *CommandError", err)
 	}
 }
+
+func TestCurrentBranch(t *testing.T) {
+	repo := gittest.NewRepo(t)
+
+	got, err := CurrentBranch(repo)
+	if err != nil || got != "main" {
+		t.Fatalf("CurrentBranch = %q, %v, want main, nil", got, err)
+	}
+
+	gittest.Run(t, repo, "checkout", "--detach")
+	got, err = CurrentBranch(repo)
+	if err != nil || got != "" {
+		t.Fatalf("CurrentBranch(detached) = %q, %v, want empty, nil", got, err)
+	}
+}
+
+func TestShowFile(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	file := filepath.Join(repo, "a.txt")
+	if err := os.WriteFile(file, []byte("one\n\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	gittest.Run(t, repo, "add", "a.txt")
+	gittest.Run(t, repo, "commit", "-m", "add a")
+
+	// The bytes come back as committed, with the new lines at the end.
+	got, found, err := ShowFile(repo, "main", "a.txt")
+	if err != nil || !found || string(got) != "one\n\n" {
+		t.Fatalf("ShowFile = %q, %v, %v, want %q, true, nil", got, found, err, "one\n\n")
+	}
+
+	// An edit that is not committed is not read.
+	if err := os.WriteFile(file, []byte("changed\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, _, _ = ShowFile(repo, "main", "a.txt")
+	if string(got) != "one\n\n" {
+		t.Errorf("ShowFile after an edit = %q, want the committed content", got)
+	}
+
+	got, found, err = ShowFile(repo, "main", "missing.txt")
+	if err != nil || found || got != nil {
+		t.Errorf("ShowFile(missing) = %q, %v, %v, want nil, false, nil", got, found, err)
+	}
+}
+
+func TestCurrentBranchAmbiguousName(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	gittest.Run(t, repo, "branch", "heads/main")
+	gittest.Run(t, repo, "checkout", "heads/main")
+
+	got, err := CurrentBranch(repo)
+	if err != nil || got != "heads/main" {
+		t.Fatalf("CurrentBranch = %q, %v, want heads/main, nil", got, err)
+	}
+}

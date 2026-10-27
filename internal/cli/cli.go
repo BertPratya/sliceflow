@@ -61,5 +61,6 @@ var sliceCommands = group{
 	about: "Work with slices: one piece of work, with its own branch and event log.",
 	commands: []command{
 		{name: "create", args: "<name>", about: "Create a new slice", usage: sliceCreateUsage, run: runSliceCreate},
+		{name: "status", args: "[name]", about: "Show where a slice stands", usage: sliceStatusUsage, run: runSliceStatus},
 	},
 }

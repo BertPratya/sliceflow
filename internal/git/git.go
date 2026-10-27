@@ -145,6 +145,41 @@ func PathExists(dir, rev, path string) (bool, error) {
 	return strings.TrimSpace(string(out)) != "", nil
 }
 
+// CurrentBranch returns the name of the branch that is checked out in dir.
+// It returns "" when HEAD is detached (not on any branch).
+func CurrentBranch(dir string) (string, error) {
+	// With -q, git exits with 1, printing nothing, for a detached HEAD.
+	// Without --short, git prints the full name (refs/heads/main). --short
+	// could print an ambiguous name like heads/main.
+	args := []string{"symbolic-ref", "-q", "HEAD"}
+	out, err := command(dir, args...).Output()
+	if err == nil {
+		return strings.TrimPrefix(strings.TrimSpace(string(out)), "refs/heads/"), nil
+	}
+
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+		return "", nil
+	}
+	return "", gitError(args, err)
+}
+
+// ShowFile returns the content of the file at path on the commit rev, e.g.
+// a branch, as it was committed. The bytes are not changed. found is false
+// when path is not on rev. Files that are not committed are never read.
+func ShowFile(dir, rev, path string) (content []byte, found bool, err error) {
+	exists, err := PathExists(dir, rev, path)
+	if err != nil || !exists {
+		return nil, false, err
+	}
+	args := []string{"cat-file", "blob", rev + ":" + path}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		return nil, false, gitError(args, err)
+	}
+	return out, true, nil
+}
+
 // CommitID returns the full id of the commit that rev names, e.g. a branch.
 func CommitID(dir, rev string) (string, error) {
 	args := []string{"rev-parse", "--verify", rev + "^{commit}"}

@@ -13,15 +13,10 @@ import (
 func baseBranch(root, from string) (string, error) {
 	branch, source := from, "from --from"
 	if branch == "" {
-		value, ok, err := git.Config(root, "sliceflow.base")
+		var err error
+		branch, source, err = readBase(root)
 		if err != nil {
 			return "", err
-		}
-		// An empty value counts as not set.
-		if ok && value != "" {
-			branch, source = value, "from git config sliceflow.base"
-		} else {
-			branch, source = "main", "the default"
 		}
 	}
 
