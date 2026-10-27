@@ -1,7 +1,6 @@
 package slice
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -25,30 +24,15 @@ type Listing struct {
 // when all is true. It returns an error that ends with "Nothing was
 // changed." outside a repo or in a repo with no commits (R22).
 func List(dir string, all bool) (Listing, error) {
-	root, err := git.Root(dir)
-	if err != nil {
-		return Listing{}, unchanged(err)
-	}
-	hasCommits, err := git.HasCommits(root)
-	if err != nil {
-		return Listing{}, unchanged(err)
-	}
-	if !hasCommits {
-		return Listing{}, unchanged(errors.New("the repository has no commits yet. Make a first commit, then try again"))
-	}
-
-	base, source, err := readBase(root)
+	root, err := openRepo(dir)
 	if err != nil {
 		return Listing{}, err
 	}
-	baseExists, err := git.BranchExists(root, base)
+	base, baseExists, repoWarnings, err := loadBase(root)
 	if err != nil {
 		return Listing{}, err
 	}
-	var result Listing
-	if !baseExists {
-		result.Warnings = append(result.Warnings, MissingBaseWarning(base, source))
-	}
+	result := Listing{Warnings: repoWarnings}
 
 	// hasBranch holds the names of the valid slice branches.
 	hasBranch := map[string]bool{}

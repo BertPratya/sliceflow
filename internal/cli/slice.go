@@ -173,17 +173,13 @@ func runSliceStatus(e *env, args []string) int {
 
 	info, err := slice.Status(dir, name)
 	// Repo warnings come first, also when the command fails.
-	for _, w := range info.RepoWarnings {
-		fmt.Fprintf(e.stderr, "Warning: %s\n", w)
-	}
+	printWarnings(e, info.RepoWarnings, "", nil)
 	if err != nil {
 		fmt.Fprintf(e.stderr, "Error: %v\n", err)
 		return exitError
 	}
 
-	for _, w := range info.Warnings {
-		fmt.Fprintf(e.stderr, "Warning: %s: %s\n", info.Name, w)
-	}
+	printWarnings(e, nil, info.Name, info.Warnings)
 
 	if f.bools["json"] {
 		return printStatusJSON(e, info)
@@ -316,13 +312,9 @@ func runSliceList(e *env, args []string) int {
 	}
 
 	// Repo warnings first, then the warnings of each slice in row order.
-	for _, w := range listing.Warnings {
-		fmt.Fprintf(e.stderr, "Warning: %s\n", w)
-	}
+	printWarnings(e, listing.Warnings, "", nil)
 	for _, info := range listing.Slices {
-		for _, w := range info.Warnings {
-			fmt.Fprintf(e.stderr, "Warning: %s: %s\n", info.Name, w)
-		}
+		printWarnings(e, nil, info.Name, info.Warnings)
 	}
 
 	if f.bools["json"] {
@@ -404,4 +396,16 @@ func printListJSON(e *env, l slice.Listing) int {
 		return exitError
 	}
 	return exitOK
+}
+
+// printWarnings prints warnings on stderr (R28). Each repo warning prints
+// as "Warning: <warning>", then each warning of the slice name prints as
+// "Warning: <name>: <warning>".
+func printWarnings(e *env, repoWarnings []string, name string, warnings []string) {
+	for _, w := range repoWarnings {
+		fmt.Fprintf(e.stderr, "Warning: %s\n", w)
+	}
+	for _, w := range warnings {
+		fmt.Fprintf(e.stderr, "Warning: %s: %s\n", name, w)
+	}
 }

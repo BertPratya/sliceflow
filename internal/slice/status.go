@@ -64,29 +64,13 @@ type Info struct {
 // current branch slice/<name> (R31). It returns an error that ends with
 // "Nothing was changed." outside a repo or in a repo with no commits (R22).
 func Status(dir, name string) (Info, error) {
-	root, err := git.Root(dir)
-	if err != nil {
-		return Info{}, unchanged(err)
-	}
-	hasCommits, err := git.HasCommits(root)
-	if err != nil {
-		return Info{}, unchanged(err)
-	}
-	if !hasCommits {
-		return Info{}, unchanged(errors.New("the repository has no commits yet. Make a first commit, then try again"))
-	}
-
-	base, source, err := readBase(root)
+	root, err := openRepo(dir)
 	if err != nil {
 		return Info{}, err
 	}
-	baseExists, err := git.BranchExists(root, base)
+	base, baseExists, repoWarnings, err := loadBase(root)
 	if err != nil {
 		return Info{}, err
-	}
-	var repoWarnings []string
-	if !baseExists {
-		repoWarnings = append(repoWarnings, MissingBaseWarning(base, source))
 	}
 
 	if name == "" {
@@ -113,6 +97,24 @@ func Status(dir, name string) (Info, error) {
 	}
 	info.RepoWarnings = repoWarnings
 	return info, nil
+}
+
+// loadBase reads the base branch (R21) and checks that it exists. When it
+// does not, repoWarnings holds the R23 warning. Status and list both start
+// with it.
+func loadBase(root string) (base string, exists bool, repoWarnings []string, err error) {
+	base, source, err := readBase(root)
+	if err != nil {
+		return "", false, nil, err
+	}
+	exists, err = git.BranchExists(root, base)
+	if err != nil {
+		return "", false, nil, err
+	}
+	if !exists {
+		repoWarnings = append(repoWarnings, MissingBaseWarning(base, source))
+	}
+	return base, exists, repoWarnings, nil
 }
 
 // readBase returns the base branch for status and list (R21): the value of
