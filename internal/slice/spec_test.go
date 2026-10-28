@@ -17,7 +17,7 @@ func TestSpecFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	front := "---\nslice: spec-submit\ncreated: 2026-10-25\nideas: []\n---\n"
+	front := "---\nslice: spec-submit\ncreated: 2026-10-25\n---\n"
 	if !strings.HasPrefix(got, front) {
 		t.Errorf("front matter is wrong, the spec starts with:\n%s", got[:min(len(got), 200)])
 	}
@@ -51,7 +51,6 @@ func TestSpecFileBrokenTemplate(t *testing.T) {
 		"remove the title line":            "title: {{title}}\n",
 		"remove the title rule":            "The title of the slice lives only",
 		"change the list of filled fields": "slice, title, and date",
-		"set ideas to an empty list":       "  - {{an idea file",
 		"{{slice}}":                        "{{slice}}",
 		"{{date}}":                         "{{date}}",
 	}

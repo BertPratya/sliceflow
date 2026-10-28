@@ -300,8 +300,9 @@ A user learns how to use a command, and sees what was wrong.
   `docs/slices/<name>/.events.jsonl`, with one `slice.created` event.
   The built-in template is this repo's spec template without the
   `title:` line and its rules about the title. Its front matter is
-  filled with `slice`, `created` (today's date in UTC, as `YYYY-MM-DD`),
-  and `ideas: []`. sliceflow adds both files also when a `.gitignore`
+  filled with `slice` and `created` (today's date in UTC, as
+  `YYYY-MM-DD`). (Changed 2026-10-28: the `ideas:` list was removed with
+  the idea template; it was filled with `ideas: []`.) sliceflow adds both files also when a `.gitignore`
   rule of the repo matches them.
   Check: e2e
 - **R8.** sliceflow shall commit those two files on the slice branch as

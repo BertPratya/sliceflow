@@ -112,7 +112,7 @@ func TestS1(t *testing.T) {
 	now := time.Now().UTC()
 	okFront := false
 	for _, day := range []time.Time{now, now.AddDate(0, 0, -1)} {
-		front := "---\nslice: spec-submit\ncreated: " + day.Format("2006-01-02") + "\nideas: []\n---"
+		front := "---\nslice: spec-submit\ncreated: " + day.Format("2006-01-02") + "\n---"
 		okFront = okFront || strings.HasPrefix(spec, front)
 	}
 	if !okFront {

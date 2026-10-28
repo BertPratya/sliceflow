@@ -33,18 +33,12 @@ var specEdits = []specEdit{
 		find: regexp.MustCompile(`slice, title, and date`),
 		with: "slice and date",
 	},
-	{
-		name: "set ideas to an empty list",
-		find: regexp.MustCompile(`ideas:\n  - \{\{an idea file[^\n]*\}\}\n`),
-		with: "ideas: []\n",
-	},
 }
 
 // specFile makes the spec of a new slice from the template text tmpl (R7).
-// It drops the title, sets ideas to an empty list, and fills slice and
-// created (the date of created, in UTC). Every edit must match exactly once;
-// if not, the error names the edit, so a changed template is noticed. The
-// result has \n line endings only.
+// It drops the title, and fills slice and created (the date of created, in
+// UTC). Every edit must match exactly once; if not, the error names the edit,
+// so a changed template is noticed. The result has \n line endings only.
 func specFile(tmpl, name string, created time.Time) (string, error) {
 	text := strings.ReplaceAll(tmpl, "\r\n", "\n")
 

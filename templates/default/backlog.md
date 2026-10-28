@@ -7,23 +7,25 @@
      comes up, so every slice can see it.
 
      One row per item, at the end of the table:
-     - Item: the item, one sentence.
-     - Status: open, or closed.
+     - Item: what it is, then the background someone needs to pick it
+       up months later: why it matters, the options, and the slice it
+       may go with. A short paragraph at most.
      - From: where it came from:
        - a slice file and its number, e.g.
          docs/slices/due-dates/spec.md Q4
-       - a review finding: the review file and the finding, e.g.
-         docs/slices/due-dates/reviews/task-04-1.md F3
+       - a review finding: the review and the finding, e.g.
+         slice due-dates, review task-04-1, F3
        - a short label for an item added by hand, e.g. setup, design talk
      - Added: the date, YYYY-MM-DD.
-     - Closed by: - while open. When closed: the slice that built it,
-       e.g. slice sort-by-due, or dropped: why.
+     - Closed by: - while the item is open. When it is closed: the slice
+       that built it, e.g. slice sort-by-due, or dropped: why. This
+       column alone says whether an item is open.
 
      Never delete a row: a closed item stays, so the record is kept.
 
      A new backlog.md holds the heading # Backlog and the table's header
      row only. -->
 
-| Item | Status | From | Added | Closed by |
-|---|---|---|---|---|
-| {{The item.}} | {{open or closed}} | {{source}} | {{YYYY-MM-DD}} | {{-, slice <name>, or dropped: why}} |
+| Item | From | Added | Closed by |
+|---|---|---|---|
+| {{The item, and its background.}} | {{source}} | {{YYYY-MM-DD}} | {{-, slice <name>, or dropped: why}} |

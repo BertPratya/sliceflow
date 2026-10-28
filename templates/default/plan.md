@@ -11,7 +11,7 @@ touches:
      change, the flows, the interfaces, the data, the tests, and the
      decisions. The tasks go in tasks.md, written after this plan is
      designed and its Open questions say None. The human approves the
-     spec, plan, tasks, and preview together, in one approval.
+     spec, plan, and tasks together, in one approval.
 
      The plan never adds scope. Anything not in the spec needs a spec
      change first. If the spec leaves out something the user sees (an
@@ -24,8 +24,8 @@ touches:
 
      sliceflow reads this file. Keep every marker exactly as shown: the
      headings, the numbers (**TD1.**, **Q1.**), the labeled lines
-     (Success criteria:, Covers:, Project rule:, Why:, Not chosen:, Cost:,
-     Replaces:, Plan only:), and the front matter. Don't rename or reorder
+     (Project rule:, Why:, Not chosen:, Cost:,
+     Replaces:, Plan only:, Expect:), and the front matter. Don't rename or reorder
      them. A labeled line may go on over more lines:
      indent the extra lines 2 spaces more than the label.
 
@@ -37,8 +37,6 @@ touches:
        Flows and Interfaces, which have their own ### rules.
      - Repeat a block as often as needed: flows, rules, decisions.
      - A required section with nothing to say gets one line: None.
-     - Two sections are optional: Risks and rollout, and Parked. Delete
-       them when they don't apply.
      - When you are done, delete every comment and check that no {{ is
        left. A plan with a comment or a {{ left in it is not finished.
        Every placeholder of this template counts, even inside code. A {{
@@ -68,14 +66,6 @@ touches:
      Each one needs the human's approval, so name it and say why it is
      needed. None? Write: New dependencies: None.
 
-     Then, only if the spec has success criteria: a Success criteria:
-     line, and under it one bullet per criterion. Each bullet starts with
-     the criterion's number and a colon, then the flows, decisions, or
-     shared rules that reach it, then a period and one or two sentences
-     on how. sliceflow checks that every criterion has a bullet and that the
-     names exist; the reasoning is checked in the plan review.
-     No success criteria in the spec? Leave the line out.
-
      Example:
      The due date is a new optional field on a task. Sorting and the
      overdue mark happen when the list is printed.
@@ -85,11 +75,7 @@ touches:
      | Task store | internal/store/ | changed |
      | List command | cmd/todo/ | changed |
 
-     New dependencies: None.
-
-     Success criteria:
-     - SC1: Flow 2, TD3. The run loop never calls the lead when a task
-       passes, and sliceflow writes the merge messages itself. -->
+     New dependencies: None. -->
 
 {{The whole idea in a few sentences.}}
 
@@ -99,38 +85,31 @@ touches:
 
 New dependencies: {{None, or each one with why it is needed}}
 
-Success criteria:
-- {{SC1}}: {{Flow 2, TD3}}. {{How they reach it. Delete this line and the one above if the spec has no success criteria.}}
-
 ## Flows
 
 <!-- One ### Flow subsection per main path, including the important
-     failure paths. Each one starts with a Covers: line, then lists the
-     steps. Add a Mermaid diagram for complex flows.
+     failure paths. Every plan has at least one flow. Each one lists the
+     steps in order. Add a Mermaid diagram for complex flows.
 
      Rules that apply across several flows (expiry, retries, locking,
-     security) go under ### Shared rules, one #### subsection each, also
-     with a Covers: line. Give each rule a short heading that no other
-     shared rule or interface uses: tasks name it in follows.
+     security) go under ### Shared rules, one #### subsection each. Give
+     each rule a short heading that no other shared rule or interface
+     uses: tasks name it in follows.
 
      Shared rules also list each project rule this slice must handle
      (from AGENTS.md or the project's rules), and how the slice handles
      it. Such a rule has a Project rule: line quoting where it comes
-     from, and Covers: names the requirements it touches, or none. List
-     every project rule that applies: a missing one is a plan review
-     finding.
+     from. List every project rule that applies: a missing one is a
+     plan review finding.
      Tasks name these rules in follows like any other, so they reach the
      worker.
 
      - Number the flows Flow 1, Flow 2, ...
-     - Covers: names spec requirements, e.g. Covers: R1, R5
-     - Every requirement in the spec is covered by at least one flow or
-       shared rule.
+     - Which task builds which requirement is said in tasks.md, in each
+       task's covers, not here.
 
      Example:
      ### Flow 1: Add a task with a due date
-
-     Covers: R1, R4
 
      1. The add command reads --due and checks the date.
      2. A bad date stops the command before anything is saved.
@@ -140,7 +119,6 @@ Success criteria:
 
      #### Cross-platform paths
 
-     Covers: none
      Project rule: AGENTS.md, paths must work on Windows, macOS, and
        Linux.
      Paths are built with filepath.Join, never with "/". The tests run
@@ -148,15 +126,12 @@ Success criteria:
 
 ### Flow 1: {{name}}
 
-Covers: {{R1, R2}}
-
 1. {{step}}
 
 ### Shared rules
 
 #### {{rule name}}
 
-Covers: {{R5, or none}}
 Project rule: {{where it comes from, for a project rule; otherwise delete this line}}
 
 {{the rule}}
@@ -199,18 +174,56 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
      test tools, fakes, and test data are used, and where the test files
      live. Each task puts its e2e tests in its own file, so say the
      folder and the file name form, e.g. e2e/<task_name>_test.go (the
-     task's name with - written as _, as Go file names usually are). manual
-     checks are not listed here: they go in preview.md.
+     task's name with - written as _, as Go file names usually are).
+
+     Then ### Trying it by hand: what the human needs at the preview.
+     sliceflow builds the preview checklist itself, from the spec: the
+     first scenario of each story, with its exact command and output,
+     and each requirement with Check: manual. This part adds only what
+     the spec cannot say, under two fixed #### headings:
+     - Setup: numbered steps the human does once before trying, e.g.
+       build the program, make a test repo. A step that gives a result
+       has an Expect: line. Nothing needed? Write: None.
+     - Manual checks: for each requirement with Check: manual, its
+       number, then numbered steps, each one thing the human does, with
+       an Expect: line. No manual requirement in the spec? Write: None.
 
      Example:
      | Check | How |
      |---|---|
      | unit | Go tests; a fake clock for "today" |
-     | e2e | build the binary, run it in a temporary folder; one file per task: e2e/<task_name>_test.go | -->
+     | e2e | build the binary, run it in a temporary folder; one file per task: e2e/<task_name>_test.go |
+
+     ### Trying it by hand
+
+     #### Setup
+
+     1. Run `go build -o todo ./cmd/todo`.
+     2. Run `./todo add "first"`.
+        Expect: "Added task 1."
+
+     #### Manual checks
+
+     - **R12.**
+       1. Run `./todo list` in a terminal with colors.
+          Expect: overdue tasks are shown in red. -->
 
 | Check | How |
 |---|---|
 | {{unit, api, or e2e}} | {{test tools, fakes, test data}} |
+
+### Trying it by hand
+
+#### Setup
+
+1. {{A setup step.}}
+   Expect: {{what the human should see, or delete this line}}
+
+#### Manual checks
+
+- **{{R12}}.**
+  1. {{A step the human does.}}
+     Expect: {{what they should see}}
 
 ## Decisions
 
@@ -218,8 +231,9 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
 
      - Each one has the choice, Why:, and Not chosen: (the main other
        option, and why not).
-     - Optional: a Cost: line for the downside we accept with this
-       choice. Leave it out when there is no real downside.
+     - Each one has a Cost: line: the downside we accept with this
+       choice. With truly no downside, write Cost: None. A reviewer
+       questions a None that looks wrong.
      - To replace a decision from an earlier slice, add Replaces: with
        that slice's name and the decision's number, e.g. checkout/TD2.
        Otherwise remove the whole Replaces: line.
@@ -241,43 +255,28 @@ Project rule: {{where it comes from, for a project rule; otherwise delete this l
 - **TD1.** {{The choice.}}
   Why: {{the reason}}
   Not chosen: {{the main other option, and why not}}
-  Cost: {{optional: the downside we accept, or delete this line}}
+  Cost: {{the downside we accept, or None}}
   Plan only: {{why no task's code depends on it, or delete this line}}
   Replaces: {{an earlier decision, e.g. checkout/TD2}}
 
 ## Risks and rollout
 
-<!-- Optional. Delete this section if not needed.
-     What could go wrong, and how it is reduced. Migration order, feature
-     flags, compatibility with older versions. -->
-
-{{A risk, and how it is reduced.}}
-
-## Parked
-
-<!-- Optional. Delete this section if not needed.
-     Ideas found while planning that belong to a later slice. Only new
-     ideas: don't repeat an item the spec's Out of scope already sends
-     to the backlog.
-
-     Each idea is also added to docs/backlog.md on main at once,
-     as plan-slice says. So:
-     - One - bullet per idea. Start each idea with what it is.
-     - Lines indented under a bullet belong to that idea.
-     - No sub-bullets, headings, or code blocks.
+<!-- What could go wrong, and how it is reduced: migration order,
+     feature flags, compatibility with older versions. Always present.
+     With truly no risk, write: None. A reviewer questions a None that
+     looks wrong.
 
      Example:
-     - Show overdue tasks in red.
-     - Let `todo due` take a number of days, e.g. `todo due 2 +3`.
-       Saves typing the full date. -->
+     - Event logs written by older versions must still be read. The
+       reader skips unknown fields, and a test reads an old log file. -->
 
-- {{An idea for later.}}
+{{A risk, and how it is reduced, or None.}}
 
 ## Open questions
 
 <!-- Questions for the human, numbered Q1, Q2, ... An answered question
      is written into the plan and removed from here. A deferred question
-     that does not block the build moves to Parked and the backlog.
+     that does not block the build moves to docs/backlog.md.
      The tasks are written only when this section says None. -->
 
 - **Q1.** {{A question for the human.}}

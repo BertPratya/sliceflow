@@ -2,8 +2,6 @@
 slice: {{slice}}
 title: {{title}}
 created: {{date}}
-ideas:
-  - {{an idea file this slice builds on, e.g. docs/ideas/2026-10-23-due-dates.md; none: ideas: []}}
 ---
 
 <!-- HOW TO FILL THIS TEMPLATE
@@ -17,18 +15,15 @@ ideas:
      one idea per sentence.
 
      sliceflow reads this file. Keep every marker exactly as shown: the
-     headings, the numbers (**R1.**, **S1.**, **SD1.**, **SC1.**, **Q1.**), and the
-     labeled lines (Check:, Shows:, Measured:, Why:, Not chosen:, Cost:, Rule:,
-     Noticed:,
-     Replaces:, Goes to:). Don't rename or reorder them. A labeled line
+     headings, the numbers (**R1.**, **S1.**, **SD1.**, **Q1.**), and the
+     labeled lines (Check:, Shows:, Why:, Not chosen:, Cost:, Rule:,
+     Replaces:). Don't rename or reorder them. A labeled line
      may go on over more lines: indent the extra lines 2 spaces more than
-     the label. Goes to: is the exception: it ends a one-line item.
+     the label.
 
      - Replace every {{...}} with real text. The text inside says what
        goes there. sliceflow fills slice, title, and date itself. If they
        still show {{...}}, fill them yourself.
-     - ideas: the idea files from docs/ideas/ this slice builds on.
-       Start the Summary and Why from them. None: ideas: []
      - The title of the slice lives only in this front matter. Don't
        repeat it in a heading or in other files.
      - Each section has a comment like this one with its rules. Follow it.
@@ -36,8 +31,6 @@ ideas:
      - Repeat a block as often as needed: stories, scenarios,
        requirements, decisions.
      - A required section with nothing to say gets one line: None.
-     - Two sections are optional: Success criteria and Key concepts.
-       Delete them when they don't apply.
      - When you are done, delete every comment and check that no {{ is
        left. A spec with a comment or a {{ left in it is not finished.
        Every placeholder of this template counts, even inside code. A {{
@@ -50,50 +43,19 @@ ideas:
 
 ## Summary
 
-<!-- One or two sentences. What the feature lets someone do, not how. -->
+<!-- Two or three sentences: what the feature lets someone do, not how,
+     and why it is needed. The why helps a worker guess right when a
+     requirement leaves something open. -->
 
-{{One or two sentences: what this feature lets someone do.}}
-
-## Why
-
-<!-- The problem it solves, who has the problem, and why it matters now. -->
-
-{{The problem it solves, who it is for, and why now.}}
-
-## Success criteria
-
-<!-- Optional. Most small slices have none. When in doubt, delete this
-     section.
-
-     Use it only when the slice has a goal for the whole result that no
-     single requirement covers.
-     - A requirement checks one part. One test of one behavior proves it.
-     - A success criterion checks the whole result. You use the slice
-       from start to end, and maybe count or compare something: time,
-       tokens, steps. All requirements can pass while it fails.
-     If it repeats a requirement, it is not a success criterion.
-
-     - Number them SC1, SC2, ... One to three is enough.
-     - Each one is measurable. "Easy to use" is not. "One command, no
-       manual steps" is.
-     - Each one says nothing about how it is built.
-     - Each one has a Measured: line. The human checks them at the
-       preview.
-
-     Example:
-     - **SC1.** A plan with 5 tasks runs to the end with no action from
-       the lead, when no task fails.
-       Measured: preview, on a test repo. -->
-
-- **SC1.** {{A measurable result of the whole slice.}}
-  Measured: {{how and when it is checked}}
+{{Two or three sentences: what this feature lets someone do, and why.}}
 
 ## User stories
 
 <!-- What the user does. This is the first thing a reviewer reads.
 
-     - A story is one thing the user wants to do: a short title, and one
-       sentence saying who wants to do what.
+     - Every scenario sits under a story, even when there is only one
+       story. A story is one thing the user wants to do. It always has
+       both: a short title, and one sentence saying who wants to do what.
      - Under it, a list of scenarios, one per case. The success cases
        come first, then each important failure.
      - Number scenarios S1, S2, ... across the whole spec, not per story.
@@ -122,18 +84,19 @@ ideas:
 
      A developer starts work on a new feature with one command.
 
-     - **S1.** **When** I run `sliceflow slice new checkout`,
+     - **S1.** **When** I run `sliceflow slice create checkout`,
        **Then** sliceflow creates the slice and says where to write the spec:
        ```
-       $ sliceflow slice new checkout
+       $ sliceflow slice create checkout
        Created slice checkout.
-       Next: write the spec in docs/slices/checkout/spec.md
+       Next: write the spec in .sliceflow/worktrees/checkout/docs/slices/checkout/spec.md
        ```
        Shows: R1, R2
      - **S2.** **Given** a slice named `checkout` already exists,
-       **When** I run `sliceflow slice new checkout`,
+       **When** I run `sliceflow slice create checkout`,
        **Then** sliceflow changes nothing and prints
-       "Error: slice checkout already exists. Nothing was changed."
+       "Error: slice checkout already exists: branch slice/checkout.
+       Nothing was changed."
        Shows: R3 -->
 
 ### Story 1: {{short title}}
@@ -151,16 +114,6 @@ ideas:
   **Then** {{what the user sees}}.
   Shows: {{R3}}
 
-## Key concepts
-
-<!-- Optional. Use it when the slice brings in terms that need one fixed
-     meaning, e.g. "overdue". Otherwise delete this section.
-
-     The important states, terms, and objects, so everyone uses the same
-     words. One line each. -->
-
-- **{{term}}:** {{what it means}}
-
 ## Requirements
 
 <!-- The full rules, including the ones a user never sees.
@@ -170,19 +123,25 @@ ideas:
        top to bottom in this section, and update every link to match:
        the Shows: lines and the decisions' Rule: lines. You may renumber only before the spec is first approved.
      - Group them under small headings, e.g. ### Starting, ### Errors.
-     - Write each one in one of these forms (EARS):
-       - When <trigger>, the <system> shall <response>.
-       - If <bad situation>, then the <system> shall <response>.
-       - While <state>, the <system> shall <response>.
-       - Where <feature or setting is on>, the <system> shall
-         <response>.
-       - The <system> shall <response>.
+     - Write each one in one of these forms (EARS, without "shall"),
+       in the present tense:
+       - When <trigger>, <system> <response>.
+       - If <bad situation>, <system> <response>.
+       - While <state>, <system> <response>.
+       - Where <feature or setting is on>, <system> <response>.
+       - <system> <response>.
        Two keywords may be combined when a rule needs both, e.g.
-       While <state>, when <trigger>, the <system> shall <response>.
-       For <system>, use the product's name, e.g. sliceflow.
+       While <state>, when <trigger>, <system> <response>.
+       For <system>, use the product's name, e.g. sliceflow. Write
+       "sliceflow prints", not "sliceflow shall print" or "sliceflow
+       must print". For something it must not do, write "never", e.g.
+       "sliceflow never sends data over the network."
      - Name exact values: the message printed, the limit, the exit
        code. A worker sees this text, so "say so" is not enough.
      - One behavior per requirement.
+     - A term that needs one fixed meaning is defined in the requirement
+       where it first appears, e.g. "A task is overdue when its due date
+       is before today."
      - Each one has a Check: line saying how it is tested. More than one
        is allowed, e.g. Check: unit, e2e.
        - unit: tests one piece of code on its own.
@@ -201,41 +160,33 @@ ideas:
      Example:
      ### Errors
 
-     - **R3.** If a slice with that name already exists, then sliceflow shall
-       change nothing and print "Error: slice <name> already exists.
-       Nothing was changed."
+     - **R3.** If a slice with that name already exists, sliceflow changes
+       nothing and prints "Error: slice <name> already exists:
+       branch slice/<name>. Nothing was changed."
        Check: e2e
 
      ### Settings
 
-     - **R9.** Where task review is turned off, sliceflow shall merge a task
+     - **R9.** Where task review is turned off, sliceflow merges a task
        without starting a reviewer.
        Check: e2e -->
 
 ### {{group name}}
 
-- **R1.** {{When <trigger>, the <system> shall <response>.}}
+- **R1.** {{When <trigger>, <system> <response>.}}
   Check: {{unit, api, e2e, or manual}}
 
 ## Out of scope
 
-<!-- What this slice does not do, so nobody builds it by mistake.
-     For each item, say where it goes:
-     - a later slice (name it if you know it)
-     - the backlog
-     - not planned: we decided not to do it
-
-     One - bullet per item, on one line: the item, then Goes to: at the
-     end of the line. No sub-bullets, headings, or code blocks.
-
-     An item that goes to the backlog is also added to
-     docs/backlog.md on main at once, as plan-slice says.
+<!-- What this slice does not do, even if it looks related, so nobody
+     builds it by mistake. One - bullet per item, one line each. No
+     sub-bullets, headings, or code blocks.
 
      Example:
-     - Reminders and notifications. Goes to: the backlog
-     - Repeating tasks. Goes to: a later slice (recurring-tasks) -->
+     - Reminders and notifications.
+     - Repeating tasks. -->
 
-- {{What this slice does not do.}} Goes to: {{a later slice, the backlog, or not planned}}
+- {{What this slice does not do.}}
 
 ## Decisions
 
@@ -244,8 +195,9 @@ ideas:
      - Number them SD1, SD2, ...
      - Each one has the choice, Why:, and Not chosen: (the main other
        option, and why not).
-     - Optional: a Cost: line for the downside we accept with this
-       choice. Leave it out when there is no real downside.
+     - Each one has a Cost: line: the downside we accept with this
+       choice. With truly no downside, write Cost: None. A reviewer
+       questions a None that looks wrong.
      - Each one has a Rule: line. A worker sees requirements, not
        decisions. So a decision that changes what the feature does is
        also written as a requirement, and Rule: names it, e.g. Rule: R11.
@@ -268,31 +220,9 @@ ideas:
 - **SD1.** {{The choice.}}
   Why: {{the reason}}
   Not chosen: {{the main other option, and why not}}
-  Cost: {{optional: the downside we accept, or delete this line}}
+  Cost: {{the downside we accept, or None}}
   Rule: {{the requirement that states it, e.g. R11, or none}}
   Replaces: {{an earlier decision, e.g. device-pairing/SD3}}
-
-## Assumptions
-
-<!-- Things we believe are true but did not verify. If one turns out
-     wrong, the spec may need to change.
-
-     An assumption is a fact about the world: the environment, other
-     systems, the users. A choice about what the feature does is never
-     an assumption. It is a requirement, a decision, or an Open question
-     for the human.
-
-     Optional: add a Noticed: line saying how we would notice if it is
-     wrong.
-
-     Example:
-     - Users run todo in one time zone.
-       Noticed: a user across time zones sees overdue marks a day off.
-     Not an assumption (a choice; ask it as a question instead):
-     - Dates before today are refused when adding a task. -->
-
-- {{A fact we believe is true but did not verify.}}
-  Noticed: {{optional: how we would notice if it is wrong, or delete this line}}
 
 ## Open questions
 

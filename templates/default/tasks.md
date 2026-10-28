@@ -6,7 +6,7 @@ slice: {{slice}}
 
      tasks.md holds every task of the slice: one section per task. Write
      it after plan.md is designed and its Open questions say None. The
-     human approves it with the spec, plan, and preview, in one approval.
+     human approves it with the spec and plan, in one approval.
 
      Each task is built by one worker: an agent with a fresh context.
      The lead gives each worker a brief, built from the links in this
@@ -14,7 +14,6 @@ slice: {{slice}}
      - its own task's section
      - the exact text of the requirements in covers
      - the spec's scenarios whose Shows: names one of those requirements
-     - the spec's Key concepts
      - the exact text of the plan items in follows
      The worker may also open the full spec and plan if something is
      unclear. So don't copy any of these here; name them, e.g. R5, TD2.
@@ -24,7 +23,7 @@ slice: {{slice}}
      YAML block, the labeled lines (Proves:, Scenario:, Done in:), and
      the words creates, changes, and uses in Interfaces. Don't rename or
      reorder them. A task's section runs from its ## Task heading to
-     the next one. In Files, Interfaces, and Done when, put the path,
+     the next one. In Interfaces and Done when, put the path,
      name, or test name in `backticks`, then a colon. A labeled line may
      go on over more lines: indent the extra lines 2 spaces more than the
      label.
@@ -48,7 +47,7 @@ slice: {{slice}}
        a part of it, e.g. the rule in one task and the command in
        another. Each task proves its own part.
      - A requirement with Check: manual is in a task's covers too: the
-       task builds it, and preview.md proves it.
+       task builds it, and the human checks it at the preview.
      - Every scenario in the spec (S1, S2, ...) that is not removed
        becomes at least one e2e
        test in some task's Done when, with the scenario's exact values
@@ -72,17 +71,16 @@ slice: {{slice}}
        reuse an id: a removed task leaves its number unused, and a new
        task goes at the end with the next free number. The order of work
        comes from depends_on, not from the order in this file.
-     - Before approval, to add, remove, or rename tasks, edit this file
-       and the Tasks table in status.md.
+     - Before approval, to add, remove, or rename tasks, edit this file.
 
      Filling the template:
      - Replace every {{...}} with real text. The lead fills slice when
        it copies this template.
      - Copy the whole ## Task block once per task.
      - Each part has a comment like this one with its rules. Follow it.
-     - Three parts of a task are optional: Interfaces, Copy the style of, and
-       Rules. Delete them when they don't apply. The other parts are
-       required; one with nothing to say gets one line: None.
+     - Interfaces is there only when this task shares a name with
+       another task (see its comment). The other parts are required;
+       one with nothing to say gets one line: None.
      - When you are done, delete every comment and check that nothing of
        this template is left: no comment, and no {{...}} placeholder,
        even inside code. A {{ or a comment marker that you write yourself
@@ -145,8 +143,25 @@ risk: {{core, normal, or low}}
 ### Steps
 
 <!-- The approach, in the order the worker should do it. One step per
-     line, each naming the file, function, or type it changes. The worker
-     still writes the code; the steps say what to build, not every line.
+     line, each naming the file, and the function or type, it changes.
+     The worker still writes the code; the steps say what to build, not
+     every line.
+
+     Together, the steps name every file this task creates or changes,
+     test files included. All of them must be inside the task's touches.
+     Each task puts its e2e tests in its own file, where the plan's
+     Testing section says e2e tests live, so tasks that run at the same
+     time never share a test file.
+
+     When similar code already exists, the step names the file to copy
+     the style from, so the new code looks like the code around it.
+
+     A rule the worker must follow lives in one place only:
+     - A rule the user can see, e.g. an error message: a requirement in
+       the spec, with its exact values.
+     - A rule several tasks share: a shared rule in the plan. Name it in
+       follows; sliceflow gives the worker its exact text.
+     - A rule for this task only: the step that needs it.
 
      Tests come first: the first step writes the tests listed under Done
      when and runs them to see them fail; the last step runs them until
@@ -154,40 +169,30 @@ risk: {{core, normal, or low}}
      code happens to do.
 
      Example:
-     1. Write the tests listed under Done when. Run them, and see them
-        fail.
+     1. Write the tests listed under Done when: unit tests in
+        internal/task/due_test.go, e2e tests in e2e/add_due_test.go. Run
+        them, and see them fail.
      2. Add a Due field (string, YYYY-MM-DD, empty means none) to Task in
         internal/task/task.go.
      3. Add parseDue() in internal/task/due.go. It accepts only a real
         date in the form YYYY-MM-DD and returns an error otherwise.
-     4. In cmd/todo/add.go, read --due, call parseDue(), and stop before
-        saving when it fails.
+     4. In cmd/todo/add.go, read --due the same way cmd/todo/list.go
+        reads its flags, call parseDue(), and stop before saving when it
+        fails.
      5. Run the tests until they pass. -->
 
-1. {{A step of the approach, naming the file or function.}}
-
-### Files
-
-<!-- Every file this task creates or changes, with what goes in it.
-     All of them must be inside the task's touches. Test files count:
-     list them too. Each task puts its e2e tests in its own file, where
-     the plan's Testing section says e2e tests live, so tasks that run at
-     the same time never share a test file.
-
-     Example:
-     - `internal/task/due.go`: new. parseDue().
-     - `internal/task/due_test.go`: new. Unit tests for parseDue().
-     - `cmd/todo/add.go`: changed. The --due flag.
-     - `e2e/add_due_test.go`: new. The e2e tests for S1 and S2. -->
-
-- `{{path}}`: {{new or changed, and what goes in it}}
+1. {{A step of the approach, naming the file, and the function or type.}}
 
 ### Interfaces
 
-<!-- Optional. The exact names and signatures this task creates that
-     other tasks or other code will use. Other tasks may be built at the
-     same time, so they rely on these names being exactly right. Also
-     list names from earlier tasks that this task must use.
+<!-- Required when this task shares a name with another task of this
+     slice: it creates or changes a name that another task uses, or it
+     uses a name that another task creates or changes. Otherwise delete
+     this part. This is a fact about the tasks, not a choice.
+
+     The exact names and signatures this task shares. Other tasks may be
+     built at the same time, so they rely on these names being exactly
+     right. The plan review checks that no shared name is missing.
 
      Start each one with what this task does with it:
      - creates: a new name.
@@ -202,29 +207,6 @@ risk: {{core, normal, or low}}
      - `task.Task.Due`: creates. Task 02 sorts by it. -->
 
 - `{{name or signature}}`: {{creates, changes, or uses; what it does; who else uses it}}
-
-### Copy the style of
-
-<!-- Optional. Existing code to copy the style from, so the new code
-     looks like the code around it. (Not the same as follows: in the
-     YAML block, which names plan items.)
-
-     Example:
-     - Read flags the same way as cmd/todo/list.go does. -->
-
-- {{Existing code to copy, and what to copy from it.}}
-
-### Rules
-
-<!-- Optional. Rules that apply to this task and exist nowhere else.
-     A rule already in the plan goes in follows instead: sliceflow gives the
-     worker its exact text. Don't copy it here.
-
-     Example:
-     - Errors start with "Error: " and end with "Nothing was changed."
-       when nothing was saved. -->
-
-- {{A rule that applies to this task.}}
 
 ### Done when
 
@@ -248,7 +230,8 @@ risk: {{core, normal, or low}}
 
      Every requirement this task covers is in at least one Proves: line.
      The only exception: a requirement whose Check: is manual and
-     nothing else. preview.md proves that one. With Check: e2e, manual,
+     nothing else. The human checks that one at the preview, with the
+     steps in the plan's Testing section. With Check: e2e, manual,
      the e2e part still needs a test here.
 
      sliceflow also runs all project checks before the task is handed in, so
@@ -257,7 +240,7 @@ risk: {{core, normal, or low}}
      tool reports test names, that it ran and passed.
 
      Existing tests must keep passing. Change an existing test only when
-     this task changes what it tests, and list its file under Files.
+     this task changes what it tests, and name its file in Steps.
 
      Example:
      - `TestParseDueRejectsBadDate`: "25/10/2026" and "2026-02-30"
