@@ -81,15 +81,6 @@ func Parse(content []byte) Log {
 	return l
 }
 
-// Phase returns the phase of a slice (R25): "planning" when the log has a
-// good slice.created event, "unknown" otherwise.
-func Phase(l Log) string {
-	if _, _, ok := l.Created(); ok {
-		return "planning"
-	}
-	return "unknown"
-}
-
 // Created returns the first good slice.created event and its data. ok is
 // false when there is none. Assumed: if there are more, the first counts.
 func (l Log) Created() (e Event, data SliceCreated, ok bool) {

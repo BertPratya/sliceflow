@@ -167,22 +167,16 @@ func TestParseReadsBackLine(t *testing.T) {
 	if e.Version != 1 || e.Seq != 1 || e.Event != EventSliceCreated || !e.At.Equal(at) || string(e.Data) != string(data) {
 		t.Errorf("event = %+v", e)
 	}
-	if got := Phase(l); got != "planning" {
-		t.Errorf("Phase = %q, want planning", got)
-	}
 	ce, cd, ok := l.Created()
 	if !ok || ce.Seq != 1 || cd != want {
 		t.Errorf("Created = %+v, %+v, %v", ce, cd, ok)
 	}
 }
 
-// TestPhaseUnknown checks that a log without a good slice.created is unknown.
-func TestPhaseUnknown(t *testing.T) {
+// TestCreatedMissing checks that a log without a good slice.created has none.
+func TestCreatedMissing(t *testing.T) {
 	for _, content := range []string{"", "{bad\n"} {
 		l := Parse([]byte(content))
-		if got := Phase(l); got != "unknown" {
-			t.Errorf("Phase(%q) = %q, want unknown", content, got)
-		}
 		if _, _, ok := l.Created(); ok {
 			t.Errorf("Created(%q) ok = true", content)
 		}

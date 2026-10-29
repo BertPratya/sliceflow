@@ -8,6 +8,7 @@ import (
 
 	"github.com/BertPratya/sliceflow/internal/eventlog"
 	"github.com/BertPratya/sliceflow/internal/git"
+	"github.com/BertPratya/sliceflow/internal/state"
 )
 
 // ErrNoSlice means no slice has the given name (R33). Use errors.Is to tell
@@ -43,7 +44,8 @@ func MissingBaseWarning(base, source string) string {
 type Info struct {
 	Name  string
 	Title string // the saved title, or "" when there is none
-	Phase string // "planning" or "unknown" (R25)
+	Phase string // e.g. "planning", or "unknown" (0002 R23)
+	State string // e.g. "spec_draft"; empty when Phase is "unknown"
 	// From is the slice's base branch and commit. It is nil when the log
 	// does not have them.
 	From *eventlog.Ref
@@ -182,7 +184,8 @@ func ReadLog(root, rev, name string) (Info, error) {
 
 	log := eventlog.Parse(content)
 	info.Warnings = log.Warnings
-	info.Phase = eventlog.Phase(log)
+	place := state.Replay(log.Events)
+	info.Phase, info.State = place.Phase, place.State
 	if ev, data, ok := log.Created(); ok {
 		from := data.From
 		info.From = &from
