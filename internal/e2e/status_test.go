@@ -151,8 +151,10 @@ func TestS17(t *testing.T) {
 	gittest.Run(t, worktree, "commit", "-m", "bad log")
 
 	r := run(t, repo, "slice", "status", "spec-submit")
+	// Line 3 is a second slice.created, so 0002's R27 also skips it.
 	want := "Warning: spec-submit: .events.jsonl line 2: not valid JSON; skipped\n" +
-		"Warning: spec-submit: .events.jsonl line 3: seq 4, expected 2\n"
+		"Warning: spec-submit: .events.jsonl line 3: seq 4, expected 2\n" +
+		"Warning: spec-submit: .events.jsonl line 3: slice.created is not allowed in planning (spec_draft); skipped\n"
 	if r.code != 0 || r.stderr != want {
 		t.Errorf("code = %d, stderr = %q, want 0, %q", r.code, r.stderr, want)
 	}
@@ -168,7 +170,7 @@ func TestS17(t *testing.T) {
 	if err := json.Unmarshal([]byte(j.stdout), &got); err != nil {
 		t.Fatal(err)
 	}
-	if len(got.Warnings) != 2 || got.Warnings[0] != ".events.jsonl line 2: not valid JSON; skipped" {
+	if len(got.Warnings) != 3 || got.Warnings[0] != ".events.jsonl line 2: not valid JSON; skipped" {
 		t.Errorf("warnings = %q", got.Warnings)
 	}
 	if j.stderr != want {

@@ -164,7 +164,7 @@ func TestParseReadsBackLine(t *testing.T) {
 		t.Fatalf("events %d, warnings %q", len(l.Events), l.Warnings)
 	}
 	e := l.Events[0]
-	if e.Version != 1 || e.Seq != 1 || e.Event != EventSliceCreated || !e.At.Equal(at) || string(e.Data) != string(data) {
+	if e.Version != 1 || e.Seq != 1 || e.Event != EventSliceCreated || !e.At.Equal(at) || string(e.Data) != string(data) || e.Line != 1 {
 		t.Errorf("event = %+v", e)
 	}
 	ce, cd, ok := l.Created()
@@ -228,4 +228,17 @@ func FuzzParse(f *testing.F) {
 			}
 		}
 	})
+}
+
+// TestParseLine checks that each good event keeps its real line number,
+// counting bad lines too (0002 R27).
+func TestParseLine(t *testing.T) {
+	l := Parse([]byte(goodLine("1") + "\n{bad\n" + goodLine("2") + "\n"))
+	var lines []int
+	for _, e := range l.Events {
+		lines = append(lines, e.Line)
+	}
+	if !reflect.DeepEqual(lines, []int{1, 3}) {
+		t.Errorf("lines = %v, want [1 3]", lines)
+	}
 }

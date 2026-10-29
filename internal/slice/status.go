@@ -184,8 +184,9 @@ func ReadLog(root, rev, name string) (Info, error) {
 
 	log := eventlog.Parse(content)
 	info.Warnings = log.Warnings
-	place := state.Replay(log.Events)
+	place, warnings := state.Replay(log.Events)
 	info.Phase, info.State = place.Phase, place.State
+	info.Warnings = append(info.Warnings, warnings...)
 	if ev, data, ok := log.Created(); ok {
 		from := data.From
 		info.From = &from

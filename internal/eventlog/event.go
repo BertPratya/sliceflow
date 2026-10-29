@@ -27,6 +27,9 @@ type Event struct {
 	Event   string
 	At      time.Time
 	Data    json.RawMessage
+	// Line is the event's line number in the file, set by Parse. Line
+	// never writes it.
+	Line int
 }
 
 // Ref names a place in git: a branch and the full id of a commit on it.

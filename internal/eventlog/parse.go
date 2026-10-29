@@ -76,6 +76,7 @@ func Parse(content []byte) Log {
 				fmt.Sprintf(".events.jsonl line %d: seq %d, expected %d", n, e.Seq, last+1))
 		}
 		last = e.Seq
+		e.Line = n
 		l.Events = append(l.Events, e)
 	}
 	return l

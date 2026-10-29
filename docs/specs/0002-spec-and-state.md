@@ -433,9 +433,11 @@ In the messages, `<id>` is an item's id, e.g. `R3`.
   Check: e2e
 - **R27.** If an event is good, but no move allows it in the slice's
   phase and state at that point, sliceflow skips it and adds the warning
-  `.events.jsonl line <n>: <event> is not allowed in <phase> (<state>); skipped`.
+  `.events.jsonl line <n>: <event> is not allowed in <phase> (<state>); skipped`,
+  or `in <phase>` alone when the slice has no state, e.g. `in unknown`.
   The skipped line still counts as the last good line for 0001's R27, so
-  its `seq` is checked and the next line's `seq` follows it.
+  its `seq` is checked and the next line's `seq` follows it. This adds a
+  third warning to 0001's S17, whose line 3 is a second `slice.created`.
   Check: unit
 
 ### The template

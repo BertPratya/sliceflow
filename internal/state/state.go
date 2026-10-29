@@ -3,6 +3,8 @@
 package state
 
 import (
+	"fmt"
+
 	"github.com/BertPratya/sliceflow/internal/eventlog"
 )
 
@@ -33,24 +35,39 @@ var moves = []move{
 	},
 }
 
-func next(current *Place, event eventlog.Event) {
+// next moves current along the move for event, and reports whether there
+// was one.
+func next(current *Place, event eventlog.Event) bool {
 	for _, m := range moves {
 		if *current == m.from && event.Event == m.event {
 			*current = m.to
-			return
+			return true
 		}
 	}
+	return false
 }
 
 // Replay returns the place a slice ends up in after its events, in file
-// order, following the moves in the table (R23).
-func Replay(events []eventlog.Event) Place {
-
+// order, following the moves in the table (R23). An event with no move is
+// skipped, with a warning (R27).
+func Replay(events []eventlog.Event) (Place, []string) {
 	current := Unknown
-
+	var warnings []string
 	for _, event := range events {
-		next(&current, event)
+		if !next(&current, event) {
+			warnings = append(warnings, fmt.Sprintf(
+				".events.jsonl line %d: %s is not allowed in %s; skipped",
+				event.Line, event.Event, describe(current)))
+		}
 	}
-	return current
+	return current, warnings
+}
 
+// describe writes a place as in R27's warning: "planning (spec_draft)", or
+// "unknown" when there is no state.
+func describe(p Place) string {
+	if p.State == "" {
+		return p.Phase
+	}
+	return p.Phase + " (" + p.State + ")"
 }
