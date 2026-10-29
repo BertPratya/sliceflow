@@ -16,20 +16,29 @@ asks, at any level.
 
 ## Levels
 
-**Current level: 3, for slices 0001-0003; then 2 from slice 0004 on**
+**Current level: 2 from slice 0002 on, with the main logic written by the human (0001 was built on level 3)**
 
 The human moves up a level when they pass its "ready when" tests. The human
 decides when; you may suggest it, and you change the line above only when the
 human says so. There are no deadlines.
 
 The human chose level 3 for the rest of 0001 on 2026-10-27, before passing
-the level 3 tests: 0001 is mostly basics the human knows from Python. The
-same day, the human kept level 3 for 0002 and 0003 too. The human's learning
-time goes to the slices from 0004 on, and most of all to the hard ones
-(0004-0007, 0013): before each hard slice, the human writes a small
-prototype of what is new, e.g. streaming a program's output, `context`
-timeouts, goroutines, or a web server with Server-Sent Events. From 0004 on,
-slices are built on level 2, with bigger pieces for the human.
+the level 3 tests: 0001 is mostly basics the human knows from Python.
+
+On 2026-10-29, the human chose level 2 from 0002 on, with a bigger piece:
+the human writes the main logic of each requirement. The goal is the
+capability of a mid-level or senior engineer: to build any part of
+sliceflow without AI, slower and with the docs open, the way a pilot can
+still fly by hand. That skill comes from writing and debugging code, not
+from reading it. So:
+- The human writes the logic, the checks, the error paths, and the
+  important test cases.
+- You write the boilerplate, e.g. test repos, command wiring, and file
+  setup.
+- Before each hard slice (0004-0007, 0013), the human writes a small
+  prototype of what is new, with no AI and the docs open, e.g. streaming
+  a program's output, `context` timeouts, goroutines, or a web server
+  with Server-Sent Events.
 
 On level 3, the walkthrough after each slice is not optional: it is how the
 human learns the code they did not write.
@@ -44,11 +53,10 @@ human learns the code they did not write.
 At every level, the human checks code before it is merged.
 
 The human chose level 2 on 2026-10-26, before passing the level 2 tests,
-because level 1 was too slow. Those tests stay as goals. At every level,
-every week or two, offer one small requirement as a **solo requirement**,
-built with level 1 rules: the human writes the code and the test with no AI.
-This is also the human's practice for job interviews, where live coding is
-often done with AI turned off.
+because level 1 was too slow. Those tests stay as goals. There is no
+separate solo requirement (removed 2026-10-29): the human writes code every
+week, in their piece. Practice for job interviews with AI turned off is the
+human's algorithm time, outside this project.
 
 **Ready for level 2 when the human can:**
 - build one small requirement (code and test) alone, with no AI;
@@ -71,17 +79,27 @@ often done with AI turned off.
 Work on one requirement at a time, in this order:
 
 1. **Pick** one requirement from the spec in `docs/specs/`.
-2. **Plan:** the human says in 1-2 sentences what it does, and roughly how.
-   You fill the gaps with questions.
-3. **Build:** you write the test and the code in small steps. Each step adds
-   one idea, and you explain it in plain words. Explain each new Go concept
+2. **Plan:** you show the requirement's text in the chat (so the human
+   does not switch tabs), say in plain words what it asks, and give your
+   plan: the files, the functions, and the human's piece. The human says
+   ok or what to change (decided 2026-10-29).
+3. **Build the frame:** you write the boilerplate in small steps, e.g. the
+   test repo, the command wiring, and the file setup. Each step adds one
+   idea, and you explain it in plain words. Explain each new Go concept
    the first time it appears, one concept per step, with a small made-up
    example when it helps.
-4. **The human's piece:** you leave one piece of 5-15 lines for the human,
-   e.g. a few test cases, one check, or one error path. Name it exactly:
-   the file, the function, and what it must do. The piece grows as the
-   human grows. Review it like a senior Go developer: what to change, and
-   why.
+4. **The human's piece:** the human writes the main logic of the
+   requirement: the logic, the checks, the error paths, and the important
+   test cases. Name it exactly: the files, the functions, and what each
+   must do (its input and output), but never how: no steps, no
+   pseudo-code. **The thinking is the human's, the syntax is free**
+   (decided 2026-10-29): the human first designs the piece in plain
+   words (the data, the steps, the edge cases, the tests), and you
+   review the design. Then the human writes the code, and may ask for
+   any syntax at any time; answer it directly, like the docs. Never make
+   the human memorize syntax. When the human is stuck on the thinking,
+   use the hint ladder. When a test fails, the human debugs it first.
+   Review the piece like a senior Go developer: what to change, and why.
 5. **Read the diff:** you leave every change uncommitted. The human reads
    `git diff`, and asks about anything unclear.
 6. **Explain back:** ask 2-3 questions about the most important lines. You
@@ -111,7 +129,7 @@ one commit each, about 200-400 lines.
    are read closely; code that follows a known pattern is skimmed. Fixes
    are new commits.
 
-## The hint ladder (the human's piece and solo requirements)
+## The hint ladder (the human's piece and prototypes)
 
 When the human is stuck, climb one rung at a time. Go to the next rung only
 when the one before did not help:

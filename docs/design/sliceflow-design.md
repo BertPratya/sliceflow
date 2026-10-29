@@ -517,14 +517,15 @@ messages are settled in its slice.
 1. The lead and the human write `spec.md`. Its state is **draft**.
 2. `sliceflow spec validate` checks it like a compiler, one problem per
    line, e.g. `spec.md:42: error: R7 has no Check: line`. Every error
-   carries a hint on how to fix it. Errors block submit; so do warnings
-   such as open questions.
+   carries a hint on how to fix it. Errors block submit. An open question
+   is an error too (the human, 2026-10-29).
 3. `sliceflow spec submit` validates again, then starts the spec review
    (if on), or goes straight to awaiting approval.
 4. The reviewer answers in JSON (1.9). Open points go back to draft; the
    lead answers facts itself and brings decisions to the human.
-5. The human approves (1.6: `via` terminal, browser, or lead), or
-   rejects with a reason.
+5. There is no approval of the spec alone. The human approves the spec,
+   plan, and tasks once, together, at the end of planning (2.3; the
+   human, 2026-10-29).
 
 **What a spec holds** (the human, 2026-10-28). A spec says WHAT, never HOW.
 
@@ -555,7 +556,7 @@ number is never reused, and a removed item stays, marked removed.
 
 **History is in git** (the human, 2026-10-20). Each approval makes one
 annotated git tag on the approved commit, e.g.
-`sliceflow/<name>/spec/R001`; its message holds the approval record (what,
+`sliceflow/<name>/planning/R001`; its message holds the approval record (what,
 the revision, the date, the human's words, `via`). The approval event also
 stores a hash of the approved files' contents, so the approval can be
 checked even if a commit is lost after a squash merge (the human,
@@ -566,8 +567,10 @@ Others read the history with plain git (`git tag -l "sliceflow/<name>/*"`,
 ### 2.3 Write and approve the plan and tasks
 
 It works like the spec: draft, validate, submit, review, awaiting approval,
-approve. **One planning phase, one approval** (the human, 2026-10-21): the
-plan and its tasks are approved together, after the spec. The plan review
+approve. **One planning phase, one approval** (the human, 2026-10-21;
+confirmed 2026-10-29): the spec, the plan, and its tasks are approved
+together, once, with `via` terminal, browser, or lead (1.6), or rejected
+with a reason. The plan review
 always runs.
 
 **What a plan holds** (the human, 2026-10-28). The plan says HOW. It never
@@ -887,6 +890,10 @@ marked.
   first public release after it (the human; `roadmap.md`).
 - The diff by state: the core and `sliceflow diff` in 0005, the browser
   view in 0006, side-by-side and comments in Part B (the human; 1.8).
+- One approval for the spec, plan, and tasks together, in 0003; no
+  spec approval of its own (the human; 2.2, 2.3).
+- `spec validate` checks only the facts later code relies on; writing
+  quality is the spec reviewer's job (the human; 0002 SD2).
 
 ---
 
