@@ -50,9 +50,13 @@ template. `internal/spec` only reads specs.
 ## Assumed (the spec does not settle these)
 
 - **A code fence may be indented.** A line whose text, after leading
-  spaces, starts with three backticks opens or closes a code block. The
-  spec's own code blocks are indented 2 spaces under list items, and S14's
+  spaces, starts with a run of 3 or more backticks, with no backtick in
+  the rest of the line, opens a code block. It closes at a fence line
+  whose run is at least as long, with only spaces after it. The spec's
+  own code blocks are indented 2 spaces under list items, and S14's
   output holds `---`, `<!--`, and `{{slice}}`, which must stay content.
+  A line like `` ```` ``` ```` `` (R10's own text) is inline code, not a
+  fence.
 - **Inline code** is a run of N backticks up to the next run of exactly N
   backticks on the same line. A run with no partner is plain text.
 - **HTML comments.** From a `<!--` to the next `-->` (also across lines),
@@ -108,8 +112,9 @@ Each chunk is one commit. All chunks keep `gofmt`, `go vet ./...` and
 - **Names (inside the package):** `doc` holds `lines`, the front matter
   range, `headings` (`level`, `text`, `line`), and `items`. An item has
   `id` (e.g. `SD3`), `kind` (`R`, `S`, `SD`, `Q`), `num`, `line`,
-  `removed`, `section` (the `##` heading it is under, or `""`), `story`
-  (the number of the `### Story <n>:` it is under, or 0), and `labels`.
+  `removed`, `section` (the `##` heading it is under, or `""`),
+  `storyLine` (the line of the `### Story <n>:` heading it is under, or
+  0), and `labels`.
   A label has `name`, `value` (continuation lines joined with one space,
   trimmed), and `line`. Known labels: `Check`, `Shows`, `Why`,
   `Not chosen`, `Cost`, `Rule`, `Replaces`.
