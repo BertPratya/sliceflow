@@ -97,7 +97,8 @@ Numbered when they are picked. No fixed order.
 | Backlog item | Goes to |
 |---|---|
 | Set or change a slice's title | 0002 |
-| Approvals record `via`; the terminal prompt | 0002, 0003; the browser in 0007 |
+| Approvals record `via`; the terminal prompt | 0003; the browser in 0007 |
+| Windows lock for the event log (`LockFileEx`, `golang.org/x/sys`) | 0008, at the latest |
 | Reviews as JSON events | 0004 |
 | Usage recorded per agent run | 0004; shown in 0006; caps in 0015 |
 | Settings in `sliceflow.yaml` and git config | 0004 |

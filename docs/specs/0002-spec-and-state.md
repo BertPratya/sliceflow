@@ -461,7 +461,9 @@ In the messages, `<id>` is an item's id, e.g. `R3`.
 - **R30.** Where `--json` is given, sliceflow prints, instead of R29's
   line, one JSON object with `slice` and `title`.
   Check: e2e
-- **R31.** If the title is empty, or only spaces, sliceflow prints
+- **R31.** sliceflow saves the title without the white space at both
+  ends, e.g. `"  Login  "` is saved as `Login`. If nothing is left,
+  sliceflow prints
   `Error: the title is empty. Nothing was changed.` and exits with code
   1. Without a slice of that name, or without its worktree, sliceflow
   prints the error of R6 or R7. Both the name and the title must be
@@ -482,8 +484,16 @@ In the messages, `<id>` is an item's id, e.g. `R3`.
   If another sliceflow is adding one, sliceflow waits up to 10 seconds,
   then prints
   `Error: the event log of <name> is busy: another sliceflow is writing to it. Try again. Nothing was changed.`
-  and exits with code 1. A lock left by a sliceflow that stopped, e.g.
-  after a crash, never blocks.
+  and exits with code 1. The lock file is `.events.lock`, beside the log
+  in the worktree. It is never committed, and neither is the temp file
+  of R35, `.events.jsonl.tmp`: before it locks, sliceflow makes sure
+  the repo's `.git/info/exclude` has the lines
+  `docs/slices/*/.events.lock` and `docs/slices/*/.events.jsonl.tmp`,
+  and never changes the repo's `.gitignore`. On Linux and macOS, a lock left by a sliceflow
+  that stopped, e.g. after a crash, never blocks. On Windows, for now
+  (SD9), such a lock blocks until its file is deleted, and the error
+  ends with `If no sliceflow is running, delete <lock file>.`, where
+  `<lock file>` is the lock file's full path.
   Check: unit, e2e
 - **R35.** If a step fails after sliceflow started to write, sliceflow
   puts the log file back as it was, and prints
@@ -577,6 +587,21 @@ In the messages, `<id>` is an item's id, e.g. `R3`.
   it holds nothing that can be read.
   Cost: the text of the half-written line is lost.
   Rule: R33
+
+- **SD9.** On Linux and macOS, the lock is a lock of the operating
+  system. On Windows, for now, it is a lock file, made only when no such
+  file exists (the human, 2026-10-29).
+  Why: the operating system frees its lock when the process ends, also
+  after a crash, and Go has it on Linux and macOS without a dependency.
+  On Windows it needs `golang.org/x/sys`, the first dependency, so it
+  waits.
+  Not chosen: a lock file with the process id on every system, because
+  a process id is used again after its process ends, so a dead lock
+  can look alive.
+  Cost: on Windows, a crash while writing leaves a lock that blocks
+  every later write, until someone deletes the file. The backlog has
+  the fix, before the first release.
+  Rule: R34
 
 ## Open questions
 
