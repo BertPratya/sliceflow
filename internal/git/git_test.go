@@ -366,6 +366,39 @@ func TestAddAndCommit(t *testing.T) {
 	}
 }
 
+func TestCommitPaths(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	write := func(name, text string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(repo, name), []byte(text), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// a.txt is tracked, then changed but not staged.
+	write("a.txt", "one\n")
+	gittest.Run(t, repo, "add", "a.txt")
+	gittest.Run(t, repo, "commit", "-m", "x: add a.txt")
+	write("a.txt", "two\n")
+	// b.txt is staged by the user, and must stay out of our commit.
+	write("b.txt", "user's\n")
+	gittest.Run(t, repo, "add", "b.txt")
+
+	if err := CommitPaths(repo, "x: change a.txt", "a.txt"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := gittest.Run(t, repo, "show", "--name-only", "--format=%s", "HEAD"); got != "x: change a.txt\n\na.txt" {
+		t.Errorf("last commit = %q", got)
+	}
+	if got := gittest.Run(t, repo, "show", "HEAD:a.txt"); got != "two" {
+		t.Errorf("a.txt in the commit = %q, want %q", got, "two")
+	}
+	if got := gittest.Run(t, repo, "diff", "--cached", "--name-only"); got != "b.txt" {
+		t.Errorf("still staged = %q, want %q", got, "b.txt")
+	}
+}
+
 func TestCurrentBranch(t *testing.T) {
 	repo := gittest.NewRepo(t)
 
@@ -463,6 +496,60 @@ func TestListDirs(t *testing.T) {
 	got, err = ListDirs(repo, "refs/heads/main", "docs/none")
 	if err != nil || len(got) != 0 {
 		t.Errorf("ListDirs(missing path) = %v, %v, want empty, nil", got, err)
+	}
+}
+
+// TestWorktreeOf finds the worktree of a branch, and nothing for a branch
+// that is not checked out, or whose worktree folder is gone.
+func TestWorktreeOf(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	gittest.Run(t, repo, "branch", "slice/a")
+	gittest.Run(t, repo, "branch", "slice/b")
+	gittest.Run(t, repo, "branch", "slice/gone")
+	wt := filepath.Join(t.TempDir(), "with space")
+	gittest.Run(t, repo, "worktree", "add", wt, "slice/a")
+	gone := filepath.Join(t.TempDir(), "gone")
+	gittest.Run(t, repo, "worktree", "add", gone, "slice/gone")
+	if err := os.RemoveAll(gone); err != nil {
+		t.Fatal(err)
+	}
+
+	got, ok, err := WorktreeOf(repo, "slice/a")
+	if err != nil || !ok {
+		t.Fatalf("WorktreeOf(slice/a) = %q, %v, %v, want the worktree", got, ok, err)
+	}
+	if want := realPath(t, wt); realPath(t, got) != want {
+		t.Errorf("WorktreeOf(slice/a) = %q, want %q", got, want)
+	}
+
+	mainDir, ok, err := WorktreeOf(repo, "main")
+	if err != nil || !ok || realPath(t, mainDir) != realPath(t, repo) {
+		t.Errorf("WorktreeOf(main) = %q, %v, %v, want the main checkout", mainDir, ok, err)
+	}
+
+	for _, branch := range []string{"slice/b", "slice/gone", "slice/none"} {
+		if got, ok, err := WorktreeOf(repo, branch); err != nil || ok {
+			t.Errorf("WorktreeOf(%s) = %q, %v, %v, want not found", branch, got, ok, err)
+		}
+	}
+}
+
+// TestExcludePath gives the same file from the main checkout and from a
+// worktree.
+func TestExcludePath(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	wt := filepath.Join(t.TempDir(), "wt")
+	gittest.Run(t, repo, "worktree", "add", "-b", "slice/a", wt)
+
+	want := filepath.Join(realPath(t, repo), ".git", "info", "exclude")
+	for _, dir := range []string{repo, wt} {
+		got, err := ExcludePath(dir)
+		if err != nil {
+			t.Fatalf("ExcludePath(%q): %v", dir, err)
+		}
+		if filepath.Clean(filepath.Join(realPath(t, filepath.Dir(got)), filepath.Base(got))) != want {
+			t.Errorf("ExcludePath(%q) = %q, want %q", dir, got, want)
+		}
 	}
 }
 

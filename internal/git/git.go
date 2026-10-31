@@ -257,6 +257,18 @@ func Commit(dir, msg string) error {
 	return nil
 }
 
+// CommitPaths commits only the files at paths, as they are on disk, also
+// when other files are staged. The other staged files stay staged. Like
+// Commit, it leaves the author, the hooks, and the signing to the user's
+// git settings.
+func CommitPaths(dir, msg string, paths ...string) error {
+	args := append([]string{"commit", "-m", msg, "--"}, paths...)
+	if _, err := command(dir, args...).Output(); err != nil {
+		return gitError(args, err)
+	}
+	return nil
+}
+
 // command prepares git with args, to run in dir. LC_ALL=C makes git print
 // its messages in English, so sliceflow can read them on every computer.
 func command(dir string, args ...string) *exec.Cmd {
@@ -386,4 +398,54 @@ func ListDirs(dir, rev, path string) ([]string, error) {
 		names = append(names, full[strings.LastIndex(full, "/")+1:])
 	}
 	return names, nil
+}
+
+// WorktreeOf returns the folder of the worktree where branch, e.g.
+// "slice/a", is checked out. ok is false when no worktree has it. A
+// worktree whose folder is gone (git calls it prunable) does not count.
+func WorktreeOf(dir, branch string) (path string, ok bool, err error) {
+	// -z ends each field with a zero byte, so git does not quote odd
+	// paths. An empty field ends each worktree.
+	args := []string{"worktree", "list", "--porcelain", "-z"}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		return "", false, gitError(args, err)
+	}
+
+	var current string
+	var onBranch, prunable bool
+	for field := range strings.SplitSeq(string(out), "\x00") {
+		switch {
+		case strings.HasPrefix(field, "worktree "):
+			current = strings.TrimPrefix(field, "worktree ")
+		case field == "branch refs/heads/"+branch:
+			onBranch = true
+		case field == "prunable" || strings.HasPrefix(field, "prunable "):
+			prunable = true
+		case field == "":
+			// The end of one worktree.
+			if onBranch && !prunable {
+				return filepath.FromSlash(current), true, nil
+			}
+			current, onBranch, prunable = "", false, false
+		}
+	}
+	return "", false, nil
+}
+
+// ExcludePath returns the path of the repo's info/exclude file. All
+// worktrees of a repo share it. The file may not exist yet.
+func ExcludePath(dir string) (string, error) {
+	args := []string{"rev-parse", "--git-path", "info/exclude"}
+	out, err := command(dir, args...).Output()
+	if err != nil {
+		return "", gitError(args, err)
+	}
+	// git gives a path relative to dir in the main checkout, and a full
+	// path in another worktree.
+	path := filepath.FromSlash(strings.TrimSpace(string(out)))
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(dir, path)
+	}
+	return path, nil
 }
