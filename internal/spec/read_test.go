@@ -547,8 +547,8 @@ func TestReadItems(t *testing.T) {
 		{"S1", "S", 1, 13, 14, false, "User stories", 9, 1},
 		{"S2", "S", 2, 15, 16, true, "User stories", 9, 0},
 		{"S3", "S", 3, 19, 21, false, "User stories", 17, 1},
-		{"R1", "R", 1, 26, 27, false, "Requirements", 0, 1},
-		{"R2", "R", 2, 28, 30, false, "Requirements", 0, 1},
+		{"R1", "R", 1, 26, 27, false, "Requirements", 24, 1},
+		{"R2", "R", 2, 28, 30, false, "Requirements", 24, 1},
 		{"SD1", "SD", 1, 33, 35, false, "Decisions", 0, 1},
 		{"Q12", "Q", 12, 38, 38, false, "Open questions", 0, 0},
 	}
@@ -562,7 +562,8 @@ func TestReadItems(t *testing.T) {
 }
 
 // TestReadStoryAndSection checks each item's section (R13: up to the
-// next ## heading) and the line of the story it is under.
+// next ## heading) and the line of the ### heading it is under, whatever
+// its text.
 func TestReadStoryAndSection(t *testing.T) {
 	content := text(
 		"- **S1.** before any heading", // 1
@@ -571,7 +572,7 @@ func TestReadStoryAndSection(t *testing.T) {
 		"#### Detail",
 		"- **S2.** under a #### inside a story", // 5
 		"### Not a story",
-		"- **S3.** under a ### that is not a story",
+		"- **S3.** under a ### that is not a story: still under it",
 		"### Story 1: A",
 		"- **S4.** under the first Story 1",
 		"### Story 1: B", // 10
@@ -590,7 +591,7 @@ func TestReadStoryAndSection(t *testing.T) {
 	want := []where{
 		{"", 0},
 		{"User stories", 3},
-		{"User stories", 0},
+		{"User stories", 6},
 		{"User stories", 8},
 		{"User stories", 10},
 		{"User stories", 12},

@@ -54,7 +54,7 @@ type item struct {
 	text      string // the item's own text, after the marker, up to its first label, blank line, or code
 	removed   bool   // text is "(removed in R<3 digits>: <why>)"
 	section   string // text of the ## heading above it, or ""
-	storyLine int    // line of the "### Story <n>:" heading it is under, or 0
+	storyLine int    // line of the ### heading it is under, whatever its text, or 0
 	labels    []label
 }
 
@@ -76,8 +76,6 @@ var (
 	labelRe = regexp.MustCompile(`^  (` + strings.Join(knownLabels, "|") + `):`)
 	// removedRe is the text of a removed item.
 	removedRe = regexp.MustCompile(`^\(removed in R[0-9]{3}: \S.*\)$`)
-	// storyRe is the start of a story heading's text, e.g. "Story 2:".
-	storyRe = regexp.MustCompile(`^Story ([0-9]{1,9}):`)
 )
 
 // read reads a spec (R9-R11). Lines are split on \n, and a \r at the end
@@ -274,8 +272,10 @@ func spaces(n int) string {
 // Assumed: a heading is 1 to 6 #s at the start of a line, then a space,
 // a tab, or the end of the line.
 // A section runs from its ## heading to the next ## heading (R13).
-// Assumed: an item's story is reset by a # or ## heading, and by a ###
-// heading that is not "### Story <n>:". A #### heading keeps it.
+// Assumed: an item's storyLine is the line of the ### heading above it,
+// whatever its text, so a story heading with a typo still holds its
+// scenarios (the checks judge the text). A # or ## heading resets it to
+// 0. A #### heading keeps it.
 func readItems(lines []line) ([]heading, []item) {
 	var headings []heading
 	var items []item
@@ -299,10 +299,7 @@ func readItems(lines []line) ([]heading, []item) {
 			case 2:
 				section, storyLine = h.text, 0
 			case 3:
-				storyLine = 0
-				if _, ok := storyNumber(h.text); ok {
-					storyLine = h.line
-				}
+				storyLine = h.line
 			}
 			continue
 		}
@@ -342,17 +339,6 @@ func readHeading(l line) (h heading, ok bool) {
 		return heading{}, false
 	}
 	return heading{level: level, text: strings.TrimSpace(l.clean[level:]), line: l.num}, true
-}
-
-// storyNumber returns n for a heading text "Story <n>: ...". ok is false
-// when the text does not start that way.
-func storyNumber(text string) (n int, ok bool) {
-	m := storyRe.FindStringSubmatch(text)
-	if m == nil {
-		return 0, false
-	}
-	n, _ = strconv.Atoi(m[1]) // at most 9 digits: always fits
-	return n, true
 }
 
 // finishItem reads an item's text, whether it is removed, and its labels,

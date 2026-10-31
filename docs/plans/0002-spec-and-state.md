@@ -78,8 +78,14 @@ template. `internal/spec` only reads specs.
   gives one problem, not a chain.
 - **R13, empty section:** a section is empty when it has no line other
   than blank lines and comment lines.
-- **R13, out of order:** a section is out of order when a section that
-  comes later in the order is above it. Each such section is one problem.
+- **R13, out of order:** a section is out of order when it is not in the
+  longest run of sections that is already in the right order. So one
+  moved section gives one problem, not one for each section it passed.
+- **R16 and R17, no cascades.** An item whose home section is missing
+  gets no R16 problem: the missing section covers it. A scenario under
+  any `###` heading in `User stories` is under a story; a bad heading
+  gets only R17's heading problem. Story numbers are read loosely
+  (`story 2`, no colon) for R15.
 
 ## Chunks
 
@@ -113,8 +119,8 @@ Each chunk is one commit. All chunks keep `gofmt`, `go vet ./...` and
   range, `headings` (`level`, `text`, `line`), and `items`. An item has
   `id` (e.g. `SD3`), `kind` (`R`, `S`, `SD`, `Q`), `num`, `line`,
   `removed`, `section` (the `##` heading it is under, or `""`),
-  `storyLine` (the line of the `### Story <n>:` heading it is under, or
-  0), and `labels`.
+  `storyLine` (the line of the `###` heading it is under, whatever its
+  text, or 0), and `labels`.
   A label has `name`, `value` (continuation lines joined with one space,
   trimmed), and `line`. Known labels: `Check`, `Shows`, `Why`,
   `Not chosen`, `Cost`, `Rule`, `Replaces`.
