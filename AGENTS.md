@@ -16,7 +16,12 @@ asks, at any level.
 
 ## Levels
 
-**Current level: 2 from slice 0002 on, with the main logic written by the human (0001 was built on level 3)**
+**Current level: 2 from slice 0002 on, with the main logic written by the human (0001 was built on level 3; the rest of 0002 from 2026-10-31 too)**
+
+On 2026-10-31, the human chose fast mode (level 3) for the rest of 0002,
+after writing the lock and the event write: what is left is mostly
+plumbing. The human reviews it in a walkthrough, and writes a parser of
+their own in 0004.
 
 The human moves up a level when they pass its "ready when" tests. The human
 decides when; you may suggest it, and you change the line above only when the
