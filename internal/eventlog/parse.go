@@ -97,6 +97,22 @@ func (l Log) Created() (e Event, data SliceCreated, ok bool) {
 	return Event{}, SliceCreated{}, false
 }
 
+// Title returns the title of the newest good slice.titled event. ok is
+// false when there is none (R32).
+func (l Log) Title() (title string, ok bool) {
+	for _, ev := range slices.Backward(l.Events) {
+		if ev.Event != EventSliceTitled {
+			continue
+		}
+		var data SliceTitled
+		if err := json.Unmarshal(ev.Data, &data); err != nil {
+			continue
+		}
+		return data.Title, true
+	}
+	return "", false
+}
+
 // parseLine checks one line. It returns the event, or a reason (the text
 // of R26) when the line is bad.
 func parseLine(text string) (Event, string) {

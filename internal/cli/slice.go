@@ -398,6 +398,81 @@ func printListJSON(e *env, l slice.Listing) int {
 	return exitOK
 }
 
+// sliceTitleUsage is the help text of "sliceflow slice title".
+const sliceTitleUsage = `Set the title of a slice. The title is saved in the slice's event log.
+
+Usage:
+  sliceflow slice title <name> <title> [flags]
+
+Flags:
+  --json         Print the result as JSON
+  -h, --help     Show this help
+`
+
+// sliceTitleFlags is the flags that "slice title" accepts.
+var sliceTitleFlags = flagSpec{bools: []string{"json"}}
+
+// runSliceTitle runs "sliceflow slice title" (0002 R29-R35). args are the
+// words after "title". Warnings go to stderr, also when it fails.
+func runSliceTitle(e *env, args []string) int {
+	f, positional, err := parseFlags(args, sliceTitleFlags)
+	if f.help {
+		fmt.Fprint(e.stdout, sliceTitleUsage)
+		return exitOK
+	}
+	if err != nil {
+		return wrongUse(e, err.Error())
+	}
+	if len(positional) == 0 || positional[0] == "" {
+		return wrongUse(e, "missing slice name")
+	}
+	// A title of "" is given, so it is not wrong use; SetTitle gives R31's
+	// error.
+	if len(positional) == 1 {
+		return wrongUse(e, "missing title")
+	}
+	if len(positional) > 2 {
+		return wrongUse(e, "too many arguments")
+	}
+
+	dir, err := e.workDir()
+	if err != nil {
+		fmt.Fprintf(e.stderr, "Error: %v\n", err)
+		return exitError
+	}
+
+	name := positional[0]
+	res, err := slice.SetTitle(dir, name, positional[1], time.Now())
+	printWarnings(e, nil, name, res.Warnings)
+	if err != nil {
+		fmt.Fprintf(e.stderr, "Error: %v\n", err)
+		return exitError
+	}
+
+	if f.bools["json"] {
+		return printTitleJSON(e, res)
+	}
+	fmt.Fprintf(e.stdout, "Title of %s set: %s\n", res.Name, safeText(res.Title))
+	return exitOK
+}
+
+// titleJSON is the object that "slice title --json" prints (0002 R30).
+type titleJSON struct {
+	Slice string `json:"slice"`
+	Title string `json:"title"`
+}
+
+// printTitleJSON prints the result as one line of JSON (0002 R30).
+func printTitleJSON(e *env, r slice.TitleResult) int {
+	enc := json.NewEncoder(e.stdout)
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(titleJSON{Slice: r.Name, Title: r.Title}); err != nil {
+		fmt.Fprintf(e.stderr, "Error: %v\n", err)
+		return exitError
+	}
+	return exitOK
+}
+
 // printWarnings prints warnings on stderr (R28). Each repo warning prints
 // as "Warning: <warning>", then each warning of the slice name prints as
 // "Warning: <name>: <warning>".

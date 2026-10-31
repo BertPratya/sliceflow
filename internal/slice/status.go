@@ -193,5 +193,9 @@ func ReadLog(root, rev, name string) (Info, error) {
 		info.Title = data.Title
 		info.Created = ev.At
 	}
+	// R32: the newest slice.titled wins over the title of slice.created.
+	if title, ok := log.Title(); ok {
+		info.Title = title
+	}
 	return info, nil
 }

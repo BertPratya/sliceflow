@@ -51,7 +51,7 @@ var rootCommands = group{
 	path:  "sliceflow",
 	about: "sliceflow runs a spec-driven workflow with AI coding agents.",
 	commands: []command{
-		{name: "slice", args: "<command>", about: "Create and inspect slices", run: sliceCommands.route},
+		{name: "slice", args: "<command>", about: "Create, inspect, and title slices", run: sliceCommands.route},
 	},
 }
 
@@ -63,5 +63,6 @@ var sliceCommands = group{
 		{name: "create", args: "<name>", about: "Create a new slice", usage: sliceCreateUsage, run: runSliceCreate},
 		{name: "status", args: "[name]", about: "Show where a slice stands", usage: sliceStatusUsage, run: runSliceStatus},
 		{name: "list", about: "List the slices in progress", usage: sliceListUsage, run: runSliceList},
+		{name: "title", args: "<name> <title>", about: "Set the title of a slice", usage: sliceTitleUsage, run: runSliceTitle},
 	},
 }

@@ -248,3 +248,20 @@ func TestParseLine(t *testing.T) {
 		t.Errorf("lines = %v, want [1 3]", lines)
 	}
 }
+
+// TestLogTitle checks that the newest slice.titled wins (0002 R32).
+func TestLogTitle(t *testing.T) {
+	titledLine := func(seq, title string) string {
+		return `{"version":1,"seq":` + seq + `,"event":"slice.titled","at":"2026-10-24T07:42:00Z","data":{"title":"` + title + `"}}`
+	}
+
+	l := Parse([]byte(goodLine("1") + "\n" + titledLine("2", "Old") + "\n" + titledLine("3", "New") + "\n"))
+	if title, ok := l.Title(); !ok || title != "New" {
+		t.Errorf("Title() = %q, %v, want New, true", title, ok)
+	}
+
+	l = Parse([]byte(goodLine("1") + "\n"))
+	if title, ok := l.Title(); ok {
+		t.Errorf("Title() = %q, true, want none", title)
+	}
+}

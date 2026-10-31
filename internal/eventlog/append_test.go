@@ -198,6 +198,40 @@ func TestAddEventNoLog(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(sliceDir, ".events.jsonl")); !errors.Is(err, os.ErrNotExist) {
 		t.Errorf("AddEvent made a log file")
 	}
+
+	// A missing slice folder is not found too, and nothing is made.
+	gone := filepath.Join(repo, "docs", "slices", "gone")
+	if _, err := AddEvent(gone, titled(), "gone: title set"); !errors.Is(err, ErrNotFound) {
+		t.Errorf("missing folder: got %v, want ErrNotFound", err)
+	}
+	if _, err := os.Stat(gone); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("AddEvent made the slice folder")
+	}
+}
+
+// R34: AddEvent adds the exclude lines once, keeps what was there, and the
+// lock file never shows in git status.
+func TestAddEventExcludes(t *testing.T) {
+	repo, sliceDir := sliceWithLog(t, makeLine(t, titledAt, ""))
+	excludePath := filepath.Join(repo, ".git", "info", "exclude")
+	if err := os.MkdirAll(filepath.Dir(excludePath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, excludePath, "# mine\n*.log") // no \n at the end
+
+	for range 2 {
+		if _, err := AddEvent(sliceDir, titled(), "demo: title set"); err != nil {
+			t.Fatalf("AddEvent: %v", err)
+		}
+	}
+
+	want := "# mine\n*.log\ndocs/slices/*/.events.lock\ndocs/slices/*/.events.jsonl.tmp\n"
+	if got := readFile(t, excludePath); got != want {
+		t.Errorf("exclude:\ngot  %q\nwant %q", got, want)
+	}
+	if got := gittest.Run(t, repo, "status", "--porcelain", "--untracked-files=all"); got != "" {
+		t.Errorf("git status: got %q, want clean", got)
+	}
 }
 
 // R35 / S19: the commit fails, so the log is put back byte for byte, and
@@ -219,8 +253,8 @@ func TestAddEventCommitFails(t *testing.T) {
 	if !errors.As(err, &we) {
 		t.Fatalf("got %v, want a *WriteError", err)
 	}
-	if !we.Restored {
-		t.Errorf("Restored is false, want true")
+	if !we.Restored || we.RestoreErr != nil {
+		t.Errorf("Restored = %v, RestoreErr = %v, want true, nil", we.Restored, we.RestoreErr)
 	}
 	if !strings.Contains(err.Error(), "error: commits are blocked") {
 		t.Errorf("error %q does not hold git's reason", err)

@@ -15,23 +15,38 @@ import (
 // logName is the log's file name inside a slice folder.
 const logName = ".events.jsonl"
 
+// lockName is the lock file's name, beside the log (R34).
+const lockName = ".events.lock"
+
+// LockPath returns the path of the lock file of the slice folder sliceDir.
+func LockPath(sliceDir string) string {
+	return filepath.Join(sliceDir, lockName)
+}
+
 // ErrNotFound means the slice folder has no log. Nothing was changed.
 var ErrNotFound = errors.New(NotFound)
 
 // WriteError means AddEvent failed after it started to change the log.
-// Restored tells whether the log was put back as it was (R35).
 type WriteError struct {
-	Err      error
-	Restored bool
+	Err        error // the step that failed
+	Restored   bool  // whether the log was put back as it was (R35)
+	RestoreErr error // why it was not put back; nil when Restored
 }
 
-func (e *WriteError) Error() string { return e.Err.Error() }
+func (e *WriteError) Error() string {
+	if e.RestoreErr != nil {
+		return e.Err.Error() + "; could not put the log back: " + e.RestoreErr.Error()
+	}
+	return e.Err.Error()
+}
+
 func (e *WriteError) Unwrap() error { return e.Err }
 
 // AddEvent adds e to the end of the log in sliceDir, and commits only the
 // log, with msg (R29). It sets e.Seq itself: 1 more than the seq of the
 // last good line, or 1 when there is none (R33). It holds the log's lock
-// the whole time (R34).
+// the whole time (R34). Before the lock, it adds the lines of R34 to the
+// repo's .git/info/exclude.
 //
 // The warnings have no slice name; the caller adds it. The errors:
 // filelock.ErrBusy and ErrNotFound change nothing; a *WriteError comes
@@ -39,8 +54,15 @@ func (e *WriteError) Unwrap() error { return e.Err }
 func AddEvent(sliceDir string, e Event, msg string) (warnings []string, err error) {
 	logPath := filepath.Join(sliceDir, logName)
 
-	// TODO: the .git/info/exclude lines (R34), before the lock.
-	lock, err := filelock.Lock(filepath.Join(sliceDir, ".events.lock"))
+	// A missing log changes nothing, not even the exclude file. The read
+	// below checks again, under the lock.
+	if _, err := os.Stat(logPath); errors.Is(err, fs.ErrNotExist) {
+		return nil, ErrNotFound
+	}
+	if err := exclude(sliceDir); err != nil {
+		return nil, err
+	}
+	lock, err := filelock.Lock(LockPath(sliceDir))
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +145,7 @@ func writeLog(path string, keep, size int, line []byte) error {
 // *WriteError that tells whether that worked.
 func putBack(path string, original []byte, cause error) error {
 	if err := restore(path, original); err != nil {
-		return &WriteError{Err: errors.Join(cause, err), Restored: false}
+		return &WriteError{Err: cause, RestoreErr: err}
 	}
 	return &WriteError{Err: cause, Restored: true}
 }

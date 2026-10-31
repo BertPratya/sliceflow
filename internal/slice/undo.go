@@ -43,16 +43,31 @@ func (c *creation) check(err error) error {
 	reason := "interrupted"
 	var details []string
 	if c.ctx.Err() == nil {
-		reason = err.Error()
-		var ce *git.CommandError
-		if errors.As(err, &ce) {
-			// Reason and details both come from git's error, so they always
-			// match, even if the error was wrapped on the way.
-			reason = ce.Error()
-			details = ce.OtherLines()
-		}
+		reason, details = failReason(err)
 	}
 	return createFailed(c.name, reason, c.rollback(), details)
+}
+
+// failReason returns the <reason> of R18 for err, and the other lines of
+// git's message. For an error that is not from git, the reason is the
+// error's text, and there are no other lines.
+func failReason(err error) (reason string, details []string) {
+	var ce *git.CommandError
+	if errors.As(err, &ce) {
+		// Reason and details both come from git's error, so they always
+		// match, even if the error was wrapped on the way.
+		return ce.Error(), ce.OtherLines()
+	}
+	return err.Error(), nil
+}
+
+// withDetails adds each detail to msg on its own line, indented by 2
+// spaces (R18), and returns it as an error.
+func withDetails(msg string, details []string) error {
+	for _, d := range details {
+		msg += "\n  " + d
+	}
+	return errors.New(msg)
 }
 
 // rollback runs the undo steps, newest first. It does not use the context,
@@ -85,10 +100,7 @@ func createFailed(name, reason string, notRemoved, details []string) error {
 	} else {
 		msg += " Could not remove: " + strings.Join(notRemoved, ", ") + "."
 	}
-	for _, d := range details {
-		msg += "\n  " + d
-	}
-	return errors.New(msg)
+	return withDetails(msg, details)
 }
 
 // writeGitignore makes the folder .sliceflow in the main checkout, and
