@@ -32,6 +32,19 @@ func TestReplay(t *testing.T) {
 			want:   Place{Phase: "planning", State: "spec_draft"},
 		},
 		{
+			name:   "slice.titled stays in planning, spec_draft (R32)",
+			events: events(eventlog.EventSliceCreated, eventlog.EventSliceTitled, eventlog.EventSliceTitled),
+			want:   Place{Phase: "planning", State: "spec_draft"},
+		},
+		{
+			name:   "slice.titled before slice.created is skipped",
+			events: events(eventlog.EventSliceTitled, eventlog.EventSliceCreated),
+			want:   Place{Phase: "planning", State: "spec_draft"},
+			warnings: []string{
+				".events.jsonl line 1: slice.titled is not allowed in unknown; skipped",
+			},
+		},
+		{
 			name:   "no events stays unknown",
 			events: nil,
 			want:   Unknown,

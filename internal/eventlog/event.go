@@ -12,8 +12,13 @@ import (
 // Version is the version of the event format. Every event carries it.
 const Version = 1
 
-// EventSliceCreated is the name of the first event of a slice.
-const EventSliceCreated = "slice.created"
+// The event names. Parse knows only these (see dataChecks).
+const (
+	// EventSliceCreated is the first event of a slice.
+	EventSliceCreated = "slice.created"
+	// EventSliceTitled sets a slice's title (R29).
+	EventSliceTitled = "slice.titled"
+)
 
 // atLayout is how an event's time is written: UTC, to the second, with a
 // Z at the end.
@@ -43,6 +48,11 @@ type Ref struct {
 type SliceCreated struct {
 	From  Ref    `json:"from"`
 	Title string `json:"title,omitempty"`
+}
+
+// SliceTitled is the data of a slice.titled event (R29).
+type SliceTitled struct {
+	Title string `json:"title"`
 }
 
 // line is the shape of one log line. The field order here is the order in

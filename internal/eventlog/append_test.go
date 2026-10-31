@@ -20,7 +20,7 @@ var titledAt = time.Date(2026, 10, 31, 9, 0, 0, 0, time.UTC)
 func titled() Event {
 	return Event{
 		Version: Version,
-		Event:   "slice.titled",
+		Event:   EventSliceTitled,
 		At:      titledAt,
 		Data:    json.RawMessage(`{"title":"Submit a spec"}`),
 	}

@@ -33,6 +33,12 @@ var moves = []move{
 		from:  Unknown,
 		to:    Place{Phase: "planning", State: "spec_draft"},
 	},
+	{
+		// R32: a title changes no place.
+		event: eventlog.EventSliceTitled,
+		from:  Place{Phase: "planning", State: "spec_draft"},
+		to:    Place{Phase: "planning", State: "spec_draft"},
+	},
 }
 
 // next moves current along the move for event, and reports whether there

@@ -134,7 +134,8 @@ func parseLine(text string) (Event, string) {
 	if !ok {
 		return Event{}, wrongType("event")
 	}
-	if name != EventSliceCreated {
+	checkData, ok := dataChecks[name]
+	if !ok {
 		return Event{}, fmt.Sprintf("unknown event %q", name)
 	}
 
@@ -172,8 +173,8 @@ func parseLine(text string) (Event, string) {
 		return Event{}, wrongValue("at")
 	}
 
-	// data of slice.created
-	if r := checkCreatedData(rawData); r != "" {
+	// the event's own data
+	if r := checkData(rawData); r != "" {
 		return Event{}, r
 	}
 	return Event{
@@ -183,6 +184,14 @@ func parseLine(text string) (Event, string) {
 		At:      at.UTC(),
 		Data:    rawData,
 	}, ""
+}
+
+// dataChecks maps each known event name to the check for its data. A
+// check returns a reason, or "" when the data is good. A new event needs
+// one line here.
+var dataChecks = map[string]func(json.RawMessage) string{
+	EventSliceCreated: checkCreatedData,
+	EventSliceTitled:  checkTitledData,
 }
 
 // checkCreatedData checks the data of a slice.created event (R20). It
@@ -235,6 +244,27 @@ func checkCreatedData(rawData json.RawMessage) string {
 		return wrongValue("data.from.commit")
 	}
 	if hasTitle && title == "" {
+		return wrongValue("data.title")
+	}
+	return ""
+}
+
+// checkTitledData checks the data of a slice.titled event (R29): only
+// title, a string that is not empty.
+func checkTitledData(rawData json.RawMessage) string {
+	data, _ := members(rawData)
+	if r := unknownFields(data, "data.", "title"); r != "" {
+		return r
+	}
+	rawTitle, ok := find(data, "title")
+	if !ok {
+		return missing("data.title")
+	}
+	title, ok := asString(rawTitle)
+	if !ok {
+		return wrongType("data.title")
+	}
+	if title == "" {
 		return wrongValue("data.title")
 	}
 	return ""

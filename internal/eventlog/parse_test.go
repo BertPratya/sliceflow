@@ -75,6 +75,12 @@ func TestParseOneBadLine(t *testing.T) {
 		{"data null", `{"version":1,"seq":1,"event":"slice.created",` + at + `,"data":null}`, `field "data" has the wrong type`},
 		{"title null", mk(head, `{`+from+`,"title":null}`), `field "data.title" has the wrong type`},
 		{"dup written with escape", `{"version":1,"seq":1,"\u0073eq":2}`, `field "seq" appears twice`},
+		// slice.titled (R29)
+		{"titled good", `{"version":1,"seq":1,"event":"slice.titled",` + at + `,"data":{"title":"T"}}`, ""},
+		{"titled title missing", `{"version":1,"seq":1,"event":"slice.titled",` + at + `,"data":{}}`, `missing field "data.title"`},
+		{"titled title number", `{"version":1,"seq":1,"event":"slice.titled",` + at + `,"data":{"title":3}}`, `field "data.title" has the wrong type`},
+		{"titled title empty", `{"version":1,"seq":1,"event":"slice.titled",` + at + `,"data":{"title":""}}`, `field "data.title" has a wrong value`},
+		{"titled unknown data field", `{"version":1,"seq":1,"event":"slice.titled",` + at + `,"data":{"title":"T","from":{}}}`, `unknown field "data.from"`},
 		// one reason only, in our order
 		{"version before event", `{"version":2,"event":"nope"}`, "unknown version 2"},
 		{"dup before version", `{"version":2,"version":1}`, `field "version" appears twice`},
