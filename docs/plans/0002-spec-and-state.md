@@ -143,7 +143,8 @@ Each chunk is one commit. All chunks keep `gofmt`, `go vet ./...` and
 ### Chunk 4: checks R18-R22
 
 - **Covers:** R18, R19, R20, R21, R22.
-- **Files:** `internal/spec/check.go`, `internal/spec/check_test.go`.
+- **Files:** `internal/spec/check.go` (the list of checks), new
+  `internal/spec/check_items.go` and `check_items_test.go`.
 - **Tests:** each message of R18-R22, as in chunk 3. A removed item is
   checked only for its number. The order of problems on one line.
 

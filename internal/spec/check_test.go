@@ -337,7 +337,10 @@ func TestCheckSections(t *testing.T) {
 			[]Problem{{29, "SD1 is in the wrong section", `move it to "## Decisions"`}}},
 		{"question in Summary",
 			[]change{{"so that it gets done.\n", "so that it gets done.\n\n- **Q1.** (removed in R001: answered)\n- **Q2.** Is it done?\n"}},
-			[]Problem{{13, "Q2 is in the wrong section", `move it to "## Open questions"`}}},
+			[]Problem{
+				{13, "Q2 is in the wrong section", `move it to "## Open questions"`},
+				{13, "Q2 is not answered", "write the answer into the spec, and remove Q2. When no question is left, write None"},
+			}},
 		{"removed item is not checked",
 			[]change{{"## Decisions\n\nNone.\n", "## Decisions\n\n- **R2.** (removed in R001: merged into R1)\n"}},
 			nil},
@@ -433,7 +436,7 @@ func TestCheckOrderOnOneLine(t *testing.T) {
 				{22, msgPlace + "{{x}}", hintPlace},
 			}},
 		{"R14, R15, R16 on one item",
-			[]change{{"  Check: e2e\n", "  Check: e2e\n- **SD5.** {{x}}\n"}},
+			[]change{{"  Check: e2e\n", "  Check: e2e\n- **SD5.** {{x}}\n  Why: a\n  Not chosen: b\n  Cost: None\n  Rule: none\n"}},
 			[]Problem{
 				{26, msgPlace + "{{x}}", hintPlace},
 				{26, "SD5 comes first: expected SD1", hintNum},
@@ -488,8 +491,10 @@ func templateText(t *testing.T) string {
 }
 
 // TestCheckTemplate checks the template as a new slice gets it: only the
-// placeholders and comments left from it are problems, sorted by line.
-// The {{real output}} in the code block is content (R10).
+// placeholders and comments left from it are problems, sorted by line,
+// and its open question Q1. A label whose value is a placeholder gives
+// no R18-R21 problem. The {{real output}} in the code block is content
+// (R10).
 func TestCheckTemplate(t *testing.T) {
 	got := Check([]byte(templateText(t)), "demo", checkToday)
 	place := func(line int, p string) Problem { return Problem{line, msgPlace + p, hintPlace} }
@@ -528,6 +533,7 @@ func TestCheckTemplate(t *testing.T) {
 		place(224, "{{an earlier decision, e.g. device-pairi…"),
 		comment(228), // Open questions
 		place(233, "{{A question for the human.}}"),
+		{233, "Q1 is not answered", "write the answer into the spec, and remove Q1. When no question is left, write None"},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got:")

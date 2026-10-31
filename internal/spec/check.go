@@ -35,6 +35,11 @@ var checks = []func(in input) []Problem{
 	checkNumbers,     // R15
 	checkSections,    // R16
 	checkStories,     // R17
+	checkShows,       // R18
+	checkCheckKinds,  // R19
+	checkDecisions,   // R20
+	checkRules,       // R21
+	checkQuestions,   // R22
 }
 
 // Check reads a spec and returns its problems (PD10). name is the slice's
