@@ -46,6 +46,7 @@ type Info struct {
 	Title string // the saved title, or "" when there is none
 	Phase string // e.g. "planning", or "unknown" (0002 R23)
 	State string // e.g. "spec_draft"; empty when Phase is "unknown"
+	Next  string // the next step (0002 R25), or "" when there is none
 	// From is the slice's base branch and commit. It is nil when the log
 	// does not have them.
 	From *eventlog.Ref
@@ -186,6 +187,7 @@ func ReadLog(root, rev, name string) (Info, error) {
 	info.Warnings = log.Warnings
 	place, warnings := state.Replay(log.Events)
 	info.Phase, info.State = place.Phase, place.State
+	info.Next = state.Next(place, name)
 	info.Warnings = append(info.Warnings, warnings...)
 	if ev, data, ok := log.Created(); ok {
 		from := data.From

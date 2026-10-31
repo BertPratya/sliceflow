@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/BertPratya/sliceflow/templates"
 )
 
 // specEdit is one change that specFile makes to the template.
@@ -35,18 +37,35 @@ var specEdits = []specEdit{
 	},
 }
 
-// specFile makes the spec of a new slice from the template text tmpl (R7).
-// It drops the title, and fills slice and created (the date of created, in
-// UTC). Every edit must match exactly once; if not, the error names the edit,
-// so a changed template is noticed. The result has \n line endings only.
-func specFile(tmpl, name string, created time.Time) (string, error) {
-	text := strings.ReplaceAll(tmpl, "\r\n", "\n")
+// SpecTemplate returns the built-in spec template, as "spec template"
+// prints it (0002 R28, PD13): the template with the edits of specEdits,
+// and {{slice}} and {{date}} left as they are. It has \n line endings only.
+func SpecTemplate() (string, error) {
+	return editSpec(templates.Spec)
+}
 
+// editSpec runs the edits of specEdits on the template text tmpl, after it
+// turns \r\n into \n. Every edit must match exactly once; if not, the
+// error names the edit, so a changed template is noticed.
+func editSpec(tmpl string) (string, error) {
+	text := strings.ReplaceAll(tmpl, "\r\n", "\n")
 	for _, e := range specEdits {
 		if n := len(e.find.FindAllStringIndex(text, -1)); n != 1 {
 			return "", fmt.Errorf("spec template: %q matched %d times, want 1", e.name, n)
 		}
 		text = e.find.ReplaceAllLiteralString(text, e.with)
+	}
+	return text, nil
+}
+
+// specFile makes the spec of a new slice from the template text tmpl (R7).
+// It runs the same edits as SpecTemplate, so it drops the title. Then it
+// fills slice and created (the date of created, in UTC). The result has \n
+// line endings only.
+func specFile(tmpl, name string, created time.Time) (string, error) {
+	text, err := editSpec(tmpl)
+	if err != nil {
+		return "", err
 	}
 
 	date := created.UTC().Format("2006-01-02")

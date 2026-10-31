@@ -78,3 +78,24 @@ func TestReplay(t *testing.T) {
 		})
 	}
 }
+
+// TestNext checks the next step for each place (0002 R25).
+func TestNext(t *testing.T) {
+	tests := []struct {
+		name  string
+		place Place
+		want  string
+	}{
+		{"planning, spec_draft", Place{Phase: "planning", State: "spec_draft"}, "write the spec, then check it: sliceflow spec validate spec-submit"},
+		{"unknown", Unknown, ""},
+		{"planning with no state", Place{Phase: "planning"}, ""},
+		{"a place with no move", Place{Phase: "build", State: "coding"}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Next(tt.place, "spec-submit"); got != tt.want {
+				t.Errorf("Next(%+v) = %q, want %q", tt.place, got, tt.want)
+			}
+		})
+	}
+}

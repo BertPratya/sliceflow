@@ -27,7 +27,8 @@ func logPath(worktree, name string) string {
 	return filepath.Join(worktree, "docs", "slices", name, ".events.jsonl")
 }
 
-// TestS13: the plain status of a new slice, from main.
+// TestS13: the plain status of a new slice, from main. It is 0002's S11
+// too: 0002 R24 adds State: and Next:.
 func TestS13(t *testing.T) {
 	repo := gittest.NewRepo(t)
 	short := gittest.Run(t, repo, "rev-parse", "main")[:7]
@@ -40,8 +41,10 @@ func TestS13(t *testing.T) {
 	want := regexp.MustCompile(`^Slice:    spec-submit\n` +
 		`Title:    spec-submit\n` +
 		`Phase:    planning\n` +
+		`State:    spec_draft\n` +
 		`From:     main @ ` + short + `\n` +
-		`Created:  \d{4}-\d\d-\d\d \d\d:\d\d UTC\n$`)
+		`Created:  \d{4}-\d\d-\d\d \d\d:\d\d UTC\n` +
+		`Next:     write the spec, then check it: sliceflow spec validate spec-submit\n$`)
 	if !want.MatchString(r.stdout) {
 		t.Errorf("stdout = %q, does not match %v", r.stdout, want)
 	}
@@ -125,8 +128,9 @@ func TestS16(t *testing.T) {
 	if got.Warnings == nil || len(got.Warnings) != 0 {
 		t.Errorf("warnings = %#v, want []", got.Warnings)
 	}
-	// The key order is part of R30, and warnings is [] in the text.
-	order := regexp.MustCompile(`^\{"slice":.*,"title":.*,"phase":.*,"from":.*,"created":.*,"warnings":\[\]\}\n$`)
+	// The key order is part of R30 and 0002 R26, and warnings is [] in the
+	// text.
+	order := regexp.MustCompile(`^\{"slice":.*,"title":.*,"phase":.*,"state":.*,"next":.*,"from":.*,"created":.*,"warnings":\[\]\}\n$`)
 	if !order.MatchString(r.stdout) {
 		t.Errorf("stdout = %q, fields are not in the order of R30", r.stdout)
 	}
@@ -178,7 +182,8 @@ func TestS17(t *testing.T) {
 	}
 }
 
-// TestS18: a slice branch with no log.
+// TestS18: a slice branch with no log. State: and Next: are "-", and the
+// JSON has no state or next (0002 R24, R26).
 func TestS18(t *testing.T) {
 	repo := gittest.NewRepo(t)
 	gittest.Run(t, repo, "branch", "slice/old-idea")
@@ -187,8 +192,10 @@ func TestS18(t *testing.T) {
 	want := "Slice:    old-idea\n" +
 		"Title:    old-idea\n" +
 		"Phase:    unknown\n" +
+		"State:    -\n" +
 		"From:     -\n" +
-		"Created:  -\n"
+		"Created:  -\n" +
+		"Next:     -\n"
 	if r.code != 0 || r.stdout != want || r.stderr != "Warning: old-idea: .events.jsonl not found\n" {
 		t.Errorf("code = %d, stdout = %q, stderr = %q", r.code, r.stdout, r.stderr)
 	}
@@ -341,5 +348,27 @@ func TestStatusTitleEscapeCodes(t *testing.T) {
 	}
 	if !strings.Contains(r.stdout, "Title:    red\\u001b[31m text\n") {
 		t.Errorf("stdout = %q, want the escape written as \\u001b", r.stdout)
+	}
+}
+
+// TestStatusS12: 0002 S12. The JSON holds state and next after phase
+// (0002 R26).
+func TestStatusS12(t *testing.T) {
+	repo := gittest.NewRepo(t)
+	gittest.Run(t, repo, "branch", "develop")
+	gittest.Run(t, repo, "config", "sliceflow.base", "develop")
+	full := gittest.Run(t, repo, "rev-parse", "develop")
+	createSlice(t, repo, "login-google", "--title", "Login with Google")
+
+	r := run(t, repo, "slice", "status", "login-google", "--json")
+	if r.code != 0 || r.stderr != "" {
+		t.Fatalf("code = %d, stderr = %q, want 0, empty", r.code, r.stderr)
+	}
+	want := regexp.MustCompile(`^\{"slice":"login-google","title":"Login with Google","phase":"planning",` +
+		`"state":"spec_draft","next":"write the spec, then check it: sliceflow spec validate login-google",` +
+		`"from":\{"branch":"develop","commit":"` + full + `"\},` +
+		`"created":"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ","warnings":\[\]\}\n$`)
+	if !want.MatchString(r.stdout) {
+		t.Errorf("stdout = %q, does not match %v", r.stdout, want)
 	}
 }

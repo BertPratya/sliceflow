@@ -188,14 +188,22 @@ func runSliceStatus(e *env, args []string) int {
 	return exitOK
 }
 
-// printStatus prints the lines of R29 (S13). A value the log does not
-// have prints as "-".
+// printStatus prints the lines of R29 (S13), with State: and Next: of
+// 0002 R24 (0002 S11). A value the log does not have prints as "-", so
+// State: and Next: are "-" when the phase is unknown.
 func printStatus(e *env, info slice.Info) {
 	title := info.Title
 	if title == "" {
 		title = info.Name
 	}
 	from, created := "-", "-"
+	state, next := "-", "-"
+	if info.State != "" {
+		state = info.State
+	}
+	if info.Next != "" {
+		next = info.Next
+	}
 	if info.From != nil {
 		from = info.From.Branch + " @ " + shortCommit(info.From.Commit)
 	}
@@ -205,8 +213,10 @@ func printStatus(e *env, info slice.Info) {
 	fmt.Fprintf(e.stdout, "Slice:    %s\n", safeText(info.Name))
 	fmt.Fprintf(e.stdout, "Title:    %s\n", safeText(title))
 	fmt.Fprintf(e.stdout, "Phase:    %s\n", safeText(info.Phase))
+	fmt.Fprintf(e.stdout, "State:    %s\n", safeText(state))
 	fmt.Fprintf(e.stdout, "From:     %s\n", safeText(from))
 	fmt.Fprintf(e.stdout, "Created:  %s\n", created)
+	fmt.Fprintf(e.stdout, "Next:     %s\n", safeText(next))
 }
 
 // safeText makes text from a log safe to print in a terminal: each control
@@ -226,11 +236,14 @@ func safeText(s string) string {
 
 // statusJSON is the object that "slice status --json" prints (R30). The
 // field order here is the order in the output. A pointer or an omitempty
-// field is left out when the log does not have the value.
+// field is left out when the log does not have the value. State and Next
+// come after Phase, and are left out when the phase is unknown (0002 R26).
 type statusJSON struct {
 	Slice    string       `json:"slice"`
 	Title    string       `json:"title,omitempty"`
 	Phase    string       `json:"phase"`
+	State    string       `json:"state,omitempty"`
+	Next     string       `json:"next,omitempty"`
 	From     *createdFrom `json:"from,omitempty"`
 	Created  string       `json:"created,omitempty"`
 	Warnings []string     `json:"warnings"`
@@ -243,6 +256,8 @@ func toStatusJSON(info slice.Info, repoWarnings []string) statusJSON {
 		Slice:    info.Name,
 		Title:    info.Title,
 		Phase:    info.Phase,
+		State:    info.State,
+		Next:     info.Next,
 		Warnings: append(append([]string{}, repoWarnings...), info.Warnings...),
 	}
 	if info.From != nil {

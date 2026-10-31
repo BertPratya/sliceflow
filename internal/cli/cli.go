@@ -52,6 +52,7 @@ var rootCommands = group{
 	about: "sliceflow runs a spec-driven workflow with AI coding agents.",
 	commands: []command{
 		{name: "slice", args: "<command>", about: "Create, inspect, and title slices", run: sliceCommands.route},
+		{name: "spec", args: "<command>", about: "Check and read slice specs", run: specCommands.route},
 	},
 }
 
@@ -64,5 +65,14 @@ var sliceCommands = group{
 		{name: "status", args: "[name]", about: "Show where a slice stands", usage: sliceStatusUsage, run: runSliceStatus},
 		{name: "list", about: "List the slices in progress", usage: sliceListUsage, run: runSliceList},
 		{name: "title", args: "<name> <title>", about: "Set the title of a slice", usage: sliceTitleUsage, run: runSliceTitle},
+	},
+}
+
+// specCommands is the words that can follow "sliceflow spec" (0002).
+var specCommands = group{
+	path:  "sliceflow spec",
+	about: "Check and read slice specs: the spec.md of each slice.",
+	commands: []command{
+		{name: "template", about: "Print the spec template", usage: specTemplateUsage, run: runSpecTemplate},
 	},
 }

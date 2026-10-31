@@ -41,9 +41,9 @@ var moves = []move{
 	},
 }
 
-// next moves current along the move for event, and reports whether there
+// step moves current along the move for event, and reports whether there
 // was one.
-func next(current *Place, event eventlog.Event) bool {
+func step(current *Place, event eventlog.Event) bool {
 	for _, m := range moves {
 		if *current == m.from && event.Event == m.event {
 			*current = m.to
@@ -60,7 +60,7 @@ func Replay(events []eventlog.Event) (Place, []string) {
 	current := Unknown
 	var warnings []string
 	for _, event := range events {
-		if !next(&current, event) {
+		if !step(&current, event) {
 			warnings = append(warnings, fmt.Sprintf(
 				".events.jsonl line %d: %s is not allowed in %s; skipped",
 				event.Line, event.Event, describe(current)))
@@ -76,4 +76,15 @@ func describe(p Place) string {
 		return p.Phase
 	}
 	return p.Phase + " (" + p.State + ")"
+}
+
+// Next returns the next step for a slice named name in place p, as the
+// Next: line shows it (0002 R25). It is "" when there is no next step, e.g.
+// in the place Unknown. It reads only the place, never spec.md (SD5).
+func Next(p Place, name string) string {
+	switch p {
+	case Place{Phase: "planning", State: "spec_draft"}:
+		return "write the spec, then check it: sliceflow spec validate " + name
+	}
+	return ""
 }

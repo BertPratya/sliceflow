@@ -67,3 +67,32 @@ func TestSpecFileBrokenTemplate(t *testing.T) {
 		})
 	}
 }
+
+// TestSpecTemplate: the template of "spec template" keeps {{slice}} and
+// {{date}}, and has no title (0002 R28, PD13).
+func TestSpecTemplate(t *testing.T) {
+	got, err := SpecTemplate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	front := "---\nslice: {{slice}}\ncreated: {{date}}\n---\n"
+	if !strings.HasPrefix(got, front) {
+		t.Errorf("front matter is wrong, the template starts with:\n%s", got[:min(len(got), 200)])
+	}
+	for _, bad := range []string{"{{title}}", "title:", "The title of the slice lives only", "slice, title", "\r"} {
+		if strings.Contains(got, bad) {
+			t.Errorf("template still has %q", bad)
+		}
+	}
+
+	// specFile gives the same text with the two markers filled.
+	created := time.Date(2026, 10, 24, 7, 42, 0, 0, time.UTC)
+	file, err := specFile(templates.Spec, "spec-submit", created)
+	if err != nil {
+		t.Fatal(err)
+	}
+	filled := strings.Replace(strings.Replace(got, "{{slice}}", "spec-submit", 1), "{{date}}", "2026-10-24", 1)
+	if file != filled {
+		t.Error("specFile is not SpecTemplate with {{slice}} and {{date}} filled")
+	}
+}

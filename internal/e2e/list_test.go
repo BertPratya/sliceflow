@@ -97,13 +97,18 @@ func TestS22(t *testing.T) {
 	}
 }
 
-// TestS23: --json, one object with slices and warnings.
+// TestS23: --json, one object with slices and warnings. Each slice holds
+// state and next after phase (0002 R26).
 func TestS23(t *testing.T) {
 	repo := listRepo(t)
 
 	r := run(t, repo, "slice", "list", "--json")
-	re := regexp.MustCompile(`^\{"slices":\[\{"slice":"spec-submit","phase":"planning","from":\{"branch":"main","commit":"[0-9a-f]{40}"\},"created":"2026-10-24T07:42:00Z","warnings":\[\]\},` +
-		`\{"slice":"login-google","title":"Login with Google",.*"created":"2026-10-24T08:10:00Z","warnings":\[\]\}\],"warnings":\[\]\}\n$`)
+	re := regexp.MustCompile(`^\{"slices":\[\{"slice":"spec-submit","phase":"planning",` +
+		`"state":"spec_draft","next":"write the spec, then check it: sliceflow spec validate spec-submit",` +
+		`"from":\{"branch":"main","commit":"[0-9a-f]{40}"\},"created":"2026-10-24T07:42:00Z","warnings":\[\]\},` +
+		`\{"slice":"login-google","title":"Login with Google","phase":"planning",` +
+		`"state":"spec_draft","next":"write the spec, then check it: sliceflow spec validate login-google",` +
+		`.*"created":"2026-10-24T08:10:00Z","warnings":\[\]\}\],"warnings":\[\]\}\n$`)
 	if r.code != 0 || r.stderr != "" || !re.MatchString(r.stdout) {
 		t.Errorf("code = %d, stderr = %q, stdout = %q, does not match %v", r.code, r.stderr, r.stdout, re)
 	}
