@@ -77,21 +77,10 @@ func Status(dir, name string) (Info, error) {
 	}
 
 	if name == "" {
-		branch, err := git.CurrentBranch(root)
+		name, err = currentSlice(root, "sliceflow slice status <name>")
 		if err != nil {
 			return Info{RepoWarnings: repoWarnings}, err
 		}
-		rest, onSlice := strings.CutPrefix(branch, "slice/")
-		if !onSlice {
-			where := "on no branch"
-			if branch != "" {
-				where = "on " + branch
-			}
-			return Info{RepoWarnings: repoWarnings}, fmt.Errorf("not on a slice branch (you are %s).\n"+
-				"Give a name: sliceflow slice status <name>\n"+
-				"See all slices: sliceflow slice list", where)
-		}
-		name = rest
 	}
 
 	info, err := ReadInfo(root, base, baseExists, name)
@@ -100,6 +89,28 @@ func Status(dir, name string) (Info, error) {
 	}
 	info.RepoWarnings = repoWarnings
 	return info, nil
+}
+
+// currentSlice returns the name of the slice whose branch slice/<name> is
+// checked out in root. On any other branch, or on no branch, it returns
+// the three lines of R31 (0002 R5). usage is the command with a name, e.g.
+// "sliceflow slice status <name>", for the line "Give a name: <usage>".
+func currentSlice(root, usage string) (string, error) {
+	branch, err := git.CurrentBranch(root)
+	if err != nil {
+		return "", err
+	}
+	name, onSlice := strings.CutPrefix(branch, "slice/")
+	if !onSlice {
+		where := "on no branch"
+		if branch != "" {
+			where = "on " + branch
+		}
+		return "", fmt.Errorf("not on a slice branch (you are %s).\n"+
+			"Give a name: %s\n"+
+			"See all slices: sliceflow slice list", where, usage)
+	}
+	return name, nil
 }
 
 // loadBase reads the base branch (R21) and checks that it exists. When it

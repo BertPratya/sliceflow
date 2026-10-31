@@ -73,6 +73,7 @@ var specCommands = group{
 	path:  "sliceflow spec",
 	about: "Check and read slice specs: the spec.md of each slice.",
 	commands: []command{
+		{name: "validate", args: "[name]", about: "Check a slice's spec", usage: specValidateUsage, run: runSpecValidate},
 		{name: "template", about: "Print the spec template", usage: specTemplateUsage, run: runSpecTemplate},
 	},
 }
