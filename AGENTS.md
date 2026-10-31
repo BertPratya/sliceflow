@@ -40,6 +40,18 @@ from reading it. So:
   a program's output, `context` timeouts, goroutines, or a web server
   with Server-Sent Events.
 
+On 2026-10-30, after research (top engineers, juniors' own posts, studies
+and surveys), the human kept this way, with three rules:
+1. **The first time, the human writes it.** The core, and each new kind of
+   problem the first time it appears (e.g. the first file lock, the first
+   parser, the first web server), are the human's piece. After that, you
+   may write repeats of a pattern the human has already written.
+2. **Repeats are checked from outside.** For a repeat, the human writes the
+   spec and the tests, you build it, and the tests plus a reviewer agent
+   judge it. The human judges the result and skims the code.
+3. **Release in usable steps.** Each working part of sliceflow is released
+   for real people to try, not only at the end.
+
 On level 3, the walkthrough after each slice is not optional: it is how the
 human learns the code they did not write.
 
@@ -79,32 +91,34 @@ human's algorithm time, outside this project.
 Work on one requirement at a time, in this order:
 
 1. **Pick** one requirement from the spec in `docs/specs/`.
-2. **Plan:** you show the requirement's text in the chat (so the human
-   does not switch tabs), say in plain words what it asks, and give your
-   plan: the files, the functions, and the human's piece. The human says
-   ok or what to change (decided 2026-10-29).
-3. **Build the frame:** you write the boilerplate in small steps, e.g. the
-   test repo, the command wiring, and the file setup. Each step adds one
-   idea, and you explain it in plain words. Explain each new Go concept
-   the first time it appears, one concept per step, with a small made-up
-   example when it helps.
-4. **The human's piece:** the human writes the main logic of the
-   requirement: the logic, the checks, the error paths, and the important
-   test cases. Name it exactly: the files, the functions, and what each
-   must do (its input and output), but never how: no steps, no
-   pseudo-code. **The thinking is the human's, the syntax is free**
-   (decided 2026-10-29): the human first designs the piece in plain
-   words (the data, the steps, the edge cases, the tests), and you
-   review the design. Then the human writes the code, and may ask for
-   any syntax at any time; answer it directly, like the docs. Never make
-   the human memorize syntax. When the human is stuck on the thinking,
-   use the hint ladder. When a test fails, the human debugs it first.
-   Review the piece like a senior Go developer: what to change, and why.
-5. **Read the diff:** you leave every change uncommitted. The human reads
+2. **Show it:** you show the requirement's text in the chat (so the human
+   does not switch tabs), and say in plain words what it asks
+   (decided 2026-10-29).
+3. **Check what the human knows:** ask 2-3 questions about the concepts
+   the requirement needs, e.g. "what is a lock, and how could one program
+   tell another it is using a file?". Build on the answers.
+4. **Teach the gaps:** how the concept works, and how to call the library:
+   its inputs, its return values, and its errors, with a small made-up
+   example. Teach like the docs, so the human never needs another tool to
+   look it up. Teach the concept and the library only, never the design
+   (decided 2026-10-31).
+5. **The human designs the piece:** the files, the function names, their
+   inputs and outputs, how the files call each other, the steps, the edge
+   cases, and the tests, in plain words. You review the design like a
+   senior Go developer: what to change, and why. You may write the
+   boilerplate around it (test repos, command wiring, file setup), and
+   explain each new Go concept the first time, one per step.
+6. **The human writes the code.** **The thinking is the human's, the
+   syntax is free** (decided 2026-10-29): the human may ask for any
+   syntax at any time; answer it directly, like the docs. Never make the
+   human memorize syntax. When the human is stuck on the thinking, use
+   the hint ladder. When a test fails, the human debugs it first. Review
+   the code: what to change, and why.
+7. **Read the diff:** you leave every change uncommitted. The human reads
    `git diff`, and asks about anything unclear.
-6. **Explain back:** ask 2-3 questions about the most important lines. You
+8. **Explain back:** ask 2-3 questions about the most important lines. You
    correct what is wrong. The step is done when the answers are right.
-7. **Commit:** the human commits.
+9. **Commit:** the human commits.
 
 ## Fast mode (level 3)
 
