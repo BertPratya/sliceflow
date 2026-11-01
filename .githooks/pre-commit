@@ -1,0 +1,32 @@
+#!/bin/sh
+# pre-commit: format each staged Go file with gofmt, and stage the result.
+#
+# Turn it on once per clone:
+#   git config core.hooksPath .githooks
+set -e
+
+if ! command -v gofmt >/dev/null 2>&1; then
+	echo "pre-commit: gofmt not found. Install Go, or commit with --no-verify." >&2
+	exit 1
+fi
+
+git diff --cached --name-only --diff-filter=ACMR -- '*.go' |
+	while IFS= read -r f; do
+		out=$(gofmt -l -- "$f") || {
+			echo "pre-commit: gofmt cannot read $f. Fix the syntax error first." >&2
+			exit 1
+		}
+		[ -z "$out" ] && continue
+
+		# The file has changes that are not staged. Formatting and staging
+		# it would also stage those changes, so stop instead.
+		if [ -n "$(git diff --name-only -- "$f")" ]; then
+			echo "pre-commit: $f is not formatted, and has unstaged changes." >&2
+			echo "  Run: gofmt -w $f, then stage it again." >&2
+			exit 1
+		fi
+
+		gofmt -w -- "$f"
+		git add -- "$f"
+		echo "pre-commit: formatted $f"
+	done
