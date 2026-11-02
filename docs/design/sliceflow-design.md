@@ -914,6 +914,13 @@ what replaced it.
   in the event log; with no `--title`, the name is the title. The built-in
   spec template loses its `title:` line. A readable view comes later
   (2.1, 1.13).
+- 2026-11-02, the human: the worktree folder is the git setting
+  `sliceflow.worktree.dir`: a full path, a path with `~`, or a path
+  relative to the main project's folder (1.14, 1.15).
+- 2026-11-02, the human: `sliceflow` never deletes or changes a line of an
+  event log. Before it adds a line, it closes off a cut-off last line. A
+  repair of damaged lines can only be a command a person runs on purpose
+  (1.13).
 
 ---
 

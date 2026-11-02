@@ -116,7 +116,7 @@ A developer starts a new slice with one command.
     Worktree: /home/you/.sliceflow/worktrees/shop/card-payment
   Next: write the spec in /home/you/.sliceflow/worktrees/shop/card-payment/docs/slices/card-payment/spec.md
   ```
-  Shows: R1, R2, R4, R5, R6, R7, R11, R12
+  Shows: R1, R2, R6, R7, R8, R9, R14, R15
 - **S2.** **When** I run `sliceflow slice create card.payment`,
   **Then** sliceflow changes nothing, prints this to the error output, and
   exits with code 2:
@@ -124,7 +124,7 @@ A developer starts a new slice with one command.
   Error: invalid slice name "card.payment". Nothing was changed.
   Allowed characters: letters, digits, hyphens, underscores. Start with a letter or a digit.
   ```
-  Shows: R13, R14, R58
+  Shows: R17, R18, R72
 - **S3.** **Given** a slice named `card-payment` already exists, with the
   branch `slice/card-payment`,
   **When** I run `sliceflow slice create card-payment`,
@@ -133,7 +133,7 @@ A developer starts a new slice with one command.
   ```
   Error: slice card-payment already exists (branch slice/card-payment). Nothing was changed.
   ```
-  Shows: R18
+  Shows: R22
 - **S4.** **Given** a slice named `card-payment` was finished and merged into
   `main` earlier, so its branch is gone but the folder
   `docs/slices/card-payment/` is in `main`,
@@ -143,7 +143,7 @@ A developer starts a new slice with one command.
   ```
   Error: slice card-payment already exists (folder docs/slices/card-payment/ in main). Nothing was changed.
   ```
-  Shows: R17
+  Shows: R21
 - **S5.** **Given** I am in the project `shop`, which has commits and a
   `main` branch,
   **When** I run `sliceflow slice create Card-Payment`,
@@ -156,7 +156,7 @@ A developer starts a new slice with one command.
     Worktree: /home/you/.sliceflow/worktrees/shop/card-payment
   Next: write the spec in /home/you/.sliceflow/worktrees/shop/card-payment/docs/slices/card-payment/spec.md
   ```
-  Shows: R5, R15, R16
+  Shows: R7, R19, R20
 - **S6.** **Given** I am in a folder that is not inside a git repository,
   **When** I run `sliceflow slice create card-payment`,
   **Then** sliceflow changes nothing, prints this to the error output, and
@@ -165,7 +165,7 @@ A developer starts a new slice with one command.
   Error: this folder is not in a git repository. Nothing was changed.
   Run sliceflow inside your project.
   ```
-  Shows: R9
+  Shows: R11
 - **S7.** **Given** I am in a git repository that has no commits yet,
   **When** I run `sliceflow slice create card-payment`,
   **Then** sliceflow changes nothing, prints this to the error output, and
@@ -174,7 +174,7 @@ A developer starts a new slice with one command.
   Error: this repository has no commits yet. Nothing was changed.
   Make a first commit, then try again.
   ```
-  Shows: R10
+  Shows: R13
 - **S8.** **Given** I am in a git repository whose main branch is `master`,
   and no branch named `main` exists,
   **When** I run `sliceflow slice create card-payment`,
@@ -185,7 +185,7 @@ A developer starts a new slice with one command.
   sliceflow starts from main unless you choose another branch. To choose one, run:
     sliceflow slice create card-payment --from <branch>
   ```
-  Shows: R8
+  Shows: R10
 - **S9.** **Given** I am in the project `shop`, which has a `main` branch and
   a `release` branch,
   **When** I run `sliceflow slice create card-payment --from release`,
@@ -197,18 +197,19 @@ A developer starts a new slice with one command.
     Worktree: /home/you/.sliceflow/worktrees/shop/card-payment
   Next: write the spec in /home/you/.sliceflow/worktrees/shop/card-payment/docs/slices/card-payment/spec.md
   ```
-  Shows: R6, R7
+  Shows: R8, R9
 - **S10.** **Given** the folder `/home/you/.sliceflow/worktrees/shop/card-payment`
-  already exists and has files in it,
+  already exists and is not empty,
   **When** I run `sliceflow slice create card-payment`,
-  **Then** sliceflow removes anything it made, prints this to the error
+  **Then** sliceflow removes the branch it made, prints this to the error
   output, and exits with code 1:
   ```
   Error: git could not create the worktree. The slice was not created. Nothing was changed.
   git said:
+    Preparing worktree (checking out 'slice/card-payment')
     fatal: '/home/you/.sliceflow/worktrees/shop/card-payment' already exists
   ```
-  Shows: R19, R25, R26
+  Shows: R23, R34, R35
 - **S11.** **Given** git has no name or email set on this computer,
   **When** I run `sliceflow slice create card-payment`,
   **Then** sliceflow removes the files, the worktree, and the branch it
@@ -217,12 +218,20 @@ A developer starts a new slice with one command.
   Error: git could not make the commit. The slice was not created. Nothing was changed.
   git said:
     Author identity unknown
+
     *** Please tell me who you are.
+
     Run
+
       git config --global user.email "you@example.com"
       git config --global user.name "Your Name"
+
+    to set your account's default identity.
+    Omit --global to set the identity only in this repository.
+
+    fatal: unable to auto-detect email address (got 'you@laptop.(none)')
   ```
-  Shows: R25, R26
+  Shows: R34, R35
 - **S12.** **Given** git has no name or email set on this computer, and
   the worktree sliceflow made cannot be removed (for example, a file in it
   is locked),
@@ -233,18 +242,26 @@ A developer starts a new slice with one command.
   Error: git could not make the commit. The slice was not created.
   git said:
     Author identity unknown
+
     *** Please tell me who you are.
+
     Run
+
       git config --global user.email "you@example.com"
       git config --global user.name "Your Name"
+
+    to set your account's default identity.
+    Omit --global to set the identity only in this repository.
+
+    fatal: unable to auto-detect email address (got 'you@laptop.(none)')
   Some of what sliceflow made could not be removed:
-    worktree /home/you/.sliceflow/worktrees/shop/card-payment
-    branch slice/card-payment
+    worktree  /home/you/.sliceflow/worktrees/shop/card-payment
+    branch    slice/card-payment
   To clean up, run:
-    git worktree remove --force /home/you/.sliceflow/worktrees/shop/card-payment
-    git branch -D slice/card-payment
+    git worktree remove --force "/home/you/.sliceflow/worktrees/shop/card-payment"
+    git branch -D "slice/card-payment"
   ```
-  Shows: R27
+  Shows: R37
 - **S13.** **Given** I created the slice `card-payment` with a title and a
   description, as in S1, on 2 November 2026 at 09:15:30 UTC,
   **When** I open the event log in the slice's folder,
@@ -253,19 +270,20 @@ A developer starts a new slice with one command.
   ```
   {"version":1,"seq":1,"event":"slice.created","at":"2026-11-02T09:15:30Z","data":{"name":"card-payment","title":"Pay with a card","description":"Let a customer pay with a credit or debit card.","base":"main","base_commit":"3f9a1c2e8b7d4a6f0c1e5d9b2a7f3c8e4d6b1a09"}}
   ```
-  Shows: R21
+  Shows: R25
 - **S14.** **Given** I created the slice `card-payment`, as in S1,
-  **When** I look at the slice branch with `git log --stat slice/card-payment`,
+  **When** I look at the slice branch with
+  `git show --name-only --format=%s slice/card-payment`,
   **Then** it has one new commit on top of `main`, and my own checkout has
-  no new commit. The commit has this message, and it holds exactly two
-  files:
+  no new commit. The commit has this message, and it holds exactly these
+  two files:
   ```
   card-payment: add the spec and the event log
 
-   docs/slices/card-payment/.events.jsonl | 1 +
-   docs/slices/card-payment/spec.md       | 63 +++++++++
+  docs/slices/card-payment/.events.jsonl
+  docs/slices/card-payment/spec.md
   ```
-  Shows: R2, R3, R4
+  Shows: R2, R4, R6
 - **S15.** **Given** I am in the project `shop`, which has commits and a
   `main` branch,
   **When** I run `sliceflow slice create card-payment` with no `--title`
@@ -275,7 +293,7 @@ A developer starts a new slice with one command.
   ```
   {"version":1,"seq":1,"event":"slice.created","at":"2026-11-02T09:20:05Z","data":{"name":"card-payment","title":"card-payment","description":"","base":"main","base_commit":"3f9a1c2e8b7d4a6f0c1e5d9b2a7f3c8e4d6b1a09"}}
   ```
-  Shows: R21, R22
+  Shows: R25, R26
 - **S16.** **Given** I am in the folder `shop/src/api`, inside the project
   `shop`, which has commits and a `main` branch,
   **When** I run `sliceflow slice create card-payment`,
@@ -287,7 +305,7 @@ A developer starts a new slice with one command.
     Worktree: /home/you/.sliceflow/worktrees/shop/card-payment
   Next: write the spec in /home/you/.sliceflow/worktrees/shop/card-payment/docs/slices/card-payment/spec.md
   ```
-  Shows: R1, R11
+  Shows: R1, R14
 - **S17.** **Given** I am in a git repository that has no branch named
   `release`,
   **When** I run `sliceflow slice create card-payment --from release`,
@@ -298,13 +316,56 @@ A developer starts a new slice with one command.
   Check the name. To see your branches, run:
     git branch
   ```
-  Shows: R8
+  Shows: R10
+- **S18.** **Given** I created the slice `card-payment` on 2 November 2026,
+  **When** I open `spec.md` in the slice's folder,
+  **Then** it starts with this header, followed by the rest of the built-in
+  spec template, with its comments:
+  ```
+  ---
+  slice: card-payment
+  created: 2026-11-02
+  ---
+  ```
+  Shows: R2, R3
+- **S19.** **Given** I ran
+  `git config --global sliceflow.worktree.dir ../shop-worktrees`, and the
+  project `shop` is in `/home/you/projects/shop`,
+  **When** I run `sliceflow slice create card-payment`,
+  **Then** sliceflow makes the worktree next to the project, prints this,
+  and exits with code 0:
+  ```
+  Created slice card-payment.
+    Branch:   slice/card-payment (from main, at 3f9a1c2)
+    Worktree: /home/you/projects/shop-worktrees/shop/card-payment
+  Next: write the spec in /home/you/projects/shop-worktrees/shop/card-payment/docs/slices/card-payment/spec.md
+  ```
+  Shows: R16
+- **S20.** **When** I run
+  `sliceflow slice create card-payment --title "Pay with a card` and press
+  Enter inside the quotes, then finish the title with `"` on the next line,
+  **Then** sliceflow changes nothing, prints this to the error output, and
+  exits with code 2:
+  ```
+  Error: --title has a line break or a tab. Nothing was changed.
+  Write it on one line, with no tabs.
+  ```
+  Shows: R27, R72
+- **S21.** **Given** git is not installed, or is not on the path,
+  **When** I run `sliceflow slice create card-payment`,
+  **Then** sliceflow changes nothing, prints this to the error output, and
+  exits with code 1:
+  ```
+  Error: git was not found. Nothing was changed.
+  Install git, then try again.
+  ```
+  Shows: R12
 
 ### Story 2: See one slice
 
 A developer checks one slice, and its history, even after it is merged.
 
-- **S18.** **Given** I created the slice `card-payment` with a title and a
+- **S22.** **Given** I created the slice `card-payment` with a title and a
   description, and its worktree is still there,
   **When** I run `sliceflow slice status card-payment`,
   **Then** sliceflow prints this to the normal output, changes nothing, and
@@ -318,8 +379,8 @@ A developer checks one slice, and its history, even after it is merged.
     Worktree:     /home/you/.sliceflow/worktrees/shop/card-payment
     Events:       1 (last: slice.created)
   ```
-  Shows: R15, R28, R29, R30, R31, R32, R33, R34, R36
-- **S19.** **Given** I created the slice `card-payment`, and it was merged
+  Shows: R19, R38, R39, R41, R42, R43, R44, R45, R47
+- **S23.** **Given** I created the slice `card-payment`, and it was merged
   into `main` by hand, and its branch and its worktree were deleted,
   **When** I run `sliceflow slice status card-payment`,
   **Then** sliceflow reads the log from `main`, prints this to the normal
@@ -334,8 +395,8 @@ A developer checks one slice, and its history, even after it is merged.
     Events:       1 (last: slice.created)
     Read from:    main
   ```
-  Shows: R28, R32, R33, R35, R36
-- **S20.** **Given** no slice named `card-payment` exists, and no log for it
+  Shows: R38, R43, R44, R46, R47
+- **S24.** **Given** no slice named `card-payment` exists, and no log for it
   is in a worktree, on a branch, or in `main`,
   **When** I run `sliceflow slice status card-payment`,
   **Then** sliceflow changes nothing, prints this to the error output, and
@@ -348,8 +409,8 @@ A developer checks one slice, and its history, even after it is merged.
     main      docs/slices/card-payment/.events.jsonl
   Check the name, or run: sliceflow slice list
   ```
-  Shows: R37
-- **S21.** **Given** I created the slice `card-payment`, and the second line
+  Shows: R48
+- **S25.** **Given** I created the slice `card-payment`, and the second line
   of its event log is cut off, so it cannot be read,
   **When** I run `sliceflow slice status card-payment`,
   **Then** sliceflow skips that line, prints the warning to the error output
@@ -365,25 +426,25 @@ A developer checks one slice, and its history, even after it is merged.
     Worktree:     /home/you/.sliceflow/worktrees/shop/card-payment
     Events:       1 (last: slice.created)
   ```
-  Shows: R38
-- **S22.** **Given** the event log of `card-payment` has five lines, and
-  lines 2, 4, and 5 are cut off, so they cannot be read,
+  Shows: R49
+- **S26.** **Given** the event log of `card-payment` has three lines, and
+  lines 2 and 3 cannot be read,
   **When** I run `sliceflow slice status card-payment`,
   **Then** sliceflow skips those lines, prints one warning to the error
   output and the status to the normal output, changes nothing, and exits
   with code 0:
   ```
-  Warning: lines 2, 4, 5 of docs/slices/card-payment/.events.jsonl could not be read, so they were skipped.
+  Warning: lines 2, 3 of docs/slices/card-payment/.events.jsonl could not be read, so they were skipped.
   card-payment: Pay with a card
     Description:  Let a customer pay with a credit or debit card.
     Created:      2026-11-02 09:15 UTC
     Started from: main, at 3f9a1c2
     Branch:       slice/card-payment
     Worktree:     /home/you/.sliceflow/worktrees/shop/card-payment
-    Events:       2 (last: slice.created)
+    Events:       1 (last: slice.created)
   ```
-  Shows: R34, R38
-- **S23.** **Given** the event log of `card-payment` has 13 lines, and lines
+  Shows: R45, R49
+- **S27.** **Given** the event log of `card-payment` has 13 lines, and lines
   2 to 13 are cut off, so they cannot be read,
   **When** I run `sliceflow slice status card-payment`,
   **Then** sliceflow skips those lines, prints one warning that lists the
@@ -399,8 +460,8 @@ A developer checks one slice, and its history, even after it is merged.
     Worktree:     /home/you/.sliceflow/worktrees/shop/card-payment
     Events:       1 (last: slice.created)
   ```
-  Shows: R34, R38, R39
-- **S24.** **Given** the first line of the event log of `card-payment` is
+  Shows: R45, R49, R50
+- **S28.** **Given** the first line of the event log of `card-payment` is
   cut off, so no `slice.created` event can be read,
   **When** I run `sliceflow slice status card-payment`,
   **Then** sliceflow changes nothing, prints this to the error output, and
@@ -410,15 +471,16 @@ A developer checks one slice, and its history, even after it is merged.
   Error: no slice.created event could be read for card-payment. Nothing was changed.
   Fix or restore the log, then try again.
   ```
-  Shows: R38, R40
-- **S25.** **Given** I created the slice `card-payment`, and I removed its
-  worktree, but its branch `slice/card-payment` is still there,
+  Shows: R49, R51
+- **S29.** **Given** I created the slice `card-payment` with a title and no
+  description, and I removed its worktree, but its branch
+  `slice/card-payment` is still there,
   **When** I run `sliceflow slice status card-payment`,
   **Then** sliceflow reads the log from the branch, prints this to the
   normal output, changes nothing, and exits with code 0:
   ```
   card-payment: Pay with a card
-    Description:  Let a customer pay with a credit or debit card.
+    Description:  (none)
     Created:      2026-11-02 09:15 UTC
     Started from: main, at 3f9a1c2
     Branch:       slice/card-payment
@@ -426,14 +488,14 @@ A developer checks one slice, and its history, even after it is merged.
     Events:       1 (last: slice.created)
     Read from:    branch slice/card-payment
   ```
-  Shows: R28, R33, R35, R36
+  Shows: R38, R40, R44, R46, R47
 
 ### Story 3: See all slices
 
 A developer sees all the slices of the project, including the merged ones,
 in one table.
 
-- **S26.** **Given** I am in the project `shop`, which has three slices:
+- **S30.** **Given** I am in the project `shop`, which has three slices:
   `card-payment`, which still has its worktree; `login-v2`, which has its
   branch but no worktree; and `old-search`, which was merged into `main`,
   and its branch and its worktree are gone, and `old-search` has no
@@ -447,8 +509,8 @@ in one table.
   login-v2      Login with a passkey  Replace the password login with a passkey.
   old-search    Search by name
   ```
-  Shows: R41, R42, R43, R44, R45, R46
-- **S27.** **Given** the project has the slice `card-payment`, and a branch
+  Shows: R52, R53, R54, R55, R56, R57
+- **S31.** **Given** the project has the slice `card-payment`, and a branch
   `slice/foo` that has no event log, and no folder `docs/slices/foo/` in
   `main`,
   **When** I run `sliceflow slice list`,
@@ -459,8 +521,8 @@ in one table.
   NAME          TITLE            DESCRIPTION
   card-payment  Pay with a card  Let a customer pay with a credit or debit card.
   ```
-  Shows: R48
-- **S28.** **Given** the project has the slice `card-payment`, and a folder
+  Shows: R59
+- **S32.** **Given** the project has the slice `card-payment`, and a folder
   `docs/slices/foo/` in `main` that has no event log, and no branch
   `slice/foo`,
   **When** I run `sliceflow slice list`,
@@ -471,8 +533,8 @@ in one table.
   NAME          TITLE            DESCRIPTION
   card-payment  Pay with a card  Let a customer pay with a credit or debit card.
   ```
-  Shows: R48
-- **S29.** **Given** the project has the slice `card-payment`, and both a
+  Shows: R59
+- **S33.** **Given** the project has the slice `card-payment`, and both a
   branch `slice/foo` and a folder `docs/slices/foo/` in `main`, and
   neither has an event log,
   **When** I run `sliceflow slice list`,
@@ -483,16 +545,16 @@ in one table.
   NAME          TITLE            DESCRIPTION
   card-payment  Pay with a card  Let a customer pay with a credit or debit card.
   ```
-  Shows: R48
-- **S30.** **Given** the project has no slices,
+  Shows: R59
+- **S34.** **Given** the project has no slices,
   **When** I run `sliceflow slice list`,
   **Then** sliceflow prints this to the normal output, changes nothing, and
   exits with code 0:
   ```
   No slices yet. To make one, run: sliceflow slice create <name>
   ```
-  Shows: R47
-- **S31.** **Given** the slice `card-payment` was merged into `main` by hand,
+  Shows: R58
+- **S35.** **Given** the slice `card-payment` was merged into `main` by hand,
   and its branch `slice/card-payment` was not deleted, so both the branch
   and the folder `docs/slices/card-payment/` in `main` have its log,
   **When** I run `sliceflow slice list`,
@@ -502,8 +564,8 @@ in one table.
   NAME          TITLE            DESCRIPTION
   card-payment  Pay with a card  Let a customer pay with a credit or debit card.
   ```
-  Shows: R42, R43
-- **S32.** **Given** the project has the slices `card-payment` and
+  Shows: R53, R54
+- **S36.** **Given** the project has the slices `card-payment` and
   `login-v2`, and the first line of the event log of `card-payment` cannot
   be read, and some later line of the log of `login-v2` cannot be read,
   **When** I run `sliceflow slice list`,
@@ -515,14 +577,25 @@ in one table.
   NAME      TITLE                 DESCRIPTION
   login-v2  Login with a passkey  Replace the password login with a passkey.
   ```
-  Shows: R49, R50
+  Shows: R61, R62
+- **S37.** **Given** the project has the slice `card-payment`, and a branch
+  `slice/Foo` that someone made by hand,
+  **When** I run `sliceflow slice list`,
+  **Then** sliceflow prints one warning to the error output and the table
+  to the normal output, changes nothing, and exits with code 0:
+  ```
+  Warning: Foo is not listed as a slice. It is not a valid slice name.
+  NAME          TITLE            DESCRIPTION
+  card-payment  Pay with a card  Let a customer pay with a credit or debit card.
+  ```
+  Shows: R60
 
 ### Story 4: Get help, and use a command wrongly
 
 A developer asks sliceflow for help, and learns what went wrong when a
 command is used the wrong way.
 
-- **S33.** **When** I run `sliceflow --help`,
+- **S38.** **When** I run `sliceflow --help`,
   **Then** sliceflow prints this to the normal output, changes nothing, and
   exits with code 0:
   ```
@@ -538,12 +611,16 @@ command is used the wrong way.
 
   For help with a command, run: sliceflow <command> --help
   ```
-  Shows: R51
-- **S34.** **When** I run `sliceflow` with nothing after it,
-  **Then** sliceflow prints the same guide as in S33 to the normal output,
+  Shows: R63
+- **S39.** **When** I run `sliceflow` with nothing after it,
+  **Then** sliceflow prints the same guide as in S38 to the normal output,
   changes nothing, and exits with code 0.
-  Shows: R51
-- **S35.** **When** I run `sliceflow slice create --help`,
+  Shows: R63
+- **S40.** **When** I run `sliceflow slice` with nothing after it,
+  **Then** sliceflow prints the same guide as in S38 to the normal output,
+  changes nothing, and exits with code 0.
+  Shows: R63
+- **S41.** **When** I run `sliceflow slice create --help`,
   **Then** sliceflow prints this to the normal output, changes nothing, and
   exits with code 0:
   ```
@@ -558,32 +635,45 @@ command is used the wrong way.
     --from <branch>       The branch to start from. Default: main.
     --help                Show this help.
   ```
-  Shows: R52
-- **S36.** **When** I run `sliceflow slice delete card-payment`,
+  Shows: R64
+- **S42.** **When** I run `sliceflow slice status --help`,
+  **Then** sliceflow prints this to the normal output, changes nothing, and
+  exits with code 0:
+  ```
+  Show one slice: its title, description, start, branch, worktree, and events.
+
+  Usage:
+    sliceflow slice status <name> [options]
+
+  Options:
+    --help  Show this help.
+  ```
+  Shows: R64, R65
+- **S43.** **When** I run `sliceflow slice delete card-payment`,
   **Then** sliceflow changes nothing, prints this to the error output, and
   exits with code 2:
   ```
   Error: unknown command "slice delete". Nothing was changed.
   To see the commands, run: sliceflow --help
   ```
-  Shows: R53, R58
-- **S37.** **When** I run `sliceflow slice create card-payment --titel "Pay with a card"`,
+  Shows: R66, R72
+- **S44.** **When** I run `sliceflow slice create card-payment --titel "Pay with a card"`,
   **Then** sliceflow changes nothing, prints this to the error output, and
   exits with code 2:
   ```
   Error: unknown option "--titel". Nothing was changed.
   To see the options, run: sliceflow slice create --help
   ```
-  Shows: R54, R58
-- **S38.** **When** I run `sliceflow slice create` with no name,
+  Shows: R68, R72
+- **S45.** **When** I run `sliceflow slice create` with no name,
   **Then** sliceflow changes nothing, prints this to the error output, and
   exits with code 2:
   ```
   Error: missing slice name. Nothing was changed.
   Usage: sliceflow slice create <name> [options]
   ```
-  Shows: R55, R58
-- **S39.** **When** I run `sliceflow slice create card-payment --title` with
+  Shows: R69, R72
+- **S46.** **When** I run `sliceflow slice create card-payment --title` with
   no text after `--title`,
   **Then** sliceflow changes nothing, prints this to the error output, and
   exits with code 2:
@@ -591,15 +681,15 @@ command is used the wrong way.
   Error: option "--title" needs a value. Nothing was changed.
   To see the options, run: sliceflow slice create --help
   ```
-  Shows: R56, R58
-- **S40.** **When** I run `sliceflow slice create card-payment extra`,
+  Shows: R70, R72
+- **S47.** **When** I run `sliceflow slice create card-payment extra`,
   **Then** sliceflow changes nothing, prints this to the error output, and
   exits with code 2:
   ```
   Error: unexpected argument "extra". Nothing was changed.
   Usage: sliceflow slice create <name> [options]
   ```
-  Shows: R57, R58
+  Shows: R71, R72
 
 ## Requirements
 
@@ -661,38 +751,51 @@ command is used the wrong way.
 ### Creating a slice
 
 - **R1.** When a user runs `sliceflow slice create <name>` in a git
-  repository that has commits, and the name is free, sliceflow makes the
-  branch `slice/<name>`, a worktree for it, and one commit on that branch.
-  The command takes the options `--title`, `--description`, and `--from`.
+  repository that has commits, and the name is free (R21, R22, R23),
+  sliceflow makes the branch `slice/<name>`, a worktree for it, and one
+  commit on that branch. The command takes the options `--title`,
+  `--description`, and `--from`.
   Check: e2e
 - **R2.** sliceflow adds exactly two files in that commit, both in
-  `docs/slices/<name>/` of the worktree: `spec.md`, made from the built-in
-  spec template, which has no title line, and `.events.jsonl`, the event
-  log.
+  `docs/slices/<name>/` of the worktree: `spec.md` and `.events.jsonl`, the
+  event log.
   Check: e2e
-- **R3.** The message of that commit is `<name>: add the spec and the event
+- **R3.** The file `spec.md` is the built-in spec template, with its
+  comments, and with this header: the line `slice: <name>`, and the line
+  `created: <date>`, where `<date>` is the day the slice was created, in
+  UTC, written like `2026-11-02`. The template has no title line.
+  Check: unit, e2e
+- **R4.** The message of that commit is `<name>: add the spec and the event
   log`.
   Check: e2e
-- **R4.** sliceflow never changes the user's own checkout: no new commit,
+- **R5.** sliceflow makes the commit with the user's own git settings, so
+  git hooks and commit signing work as the user set them up.
+  Check: e2e
+- **R6.** sliceflow never changes the user's own checkout: no new commit,
   no changed file, and the same branch stays checked out.
   Check: e2e
-- **R5.** When the slice is created, sliceflow prints the lines shown in S1
-  to the normal output, and exits with code 0. The `Branch:` line names
-  the base and the first seven characters of its commit. The `Worktree:`
-  line is the full path of the worktree. The `Next:` line is the full path
-  of the spec file.
+- **R7.** When the slice is created, sliceflow prints these lines to the
+  normal output, and exits with code 0: `Created slice <name>.`, then
+  `  Branch:   slice/<name> (from <base>, at <commit>)`, where `<commit>` is
+  the first seven characters of the base commit, then
+  `  Worktree: <path>`, the full path of the worktree, then
+  `Next: write the spec in <path>`, the full path of `spec.md` in the
+  worktree. The `Note:` line of R20 comes right after the first line, when
+  it applies.
   Check: e2e
 
 ### The base
 
-- **R6.** sliceflow starts the slice from the branch given with `--from`.
-  When `--from` is left out, it starts from `main`.
+- **R8.** sliceflow starts the slice from the branch given with `--from`,
+  which takes the name of a local branch. When `--from` is left out, it
+  starts from `main`. A tag, a commit, or a remote branch is not a local
+  branch, so R10 applies to it.
   Check: e2e
-- **R7.** sliceflow starts the slice from the tip of the local base branch
-  at that moment. It never fetches, and the slice has no uncommitted
-  changes.
+- **R9.** sliceflow starts the slice from the commit at the tip of the local
+  base branch at that moment. It never fetches. Changes that are not
+  committed on the base branch are not in the slice.
   Check: e2e
-- **R8.** If the base branch does not exist, sliceflow changes nothing and
+- **R10.** If the base branch does not exist, sliceflow changes nothing and
   prints this to the error output: the line "Error: base branch <base>
   does not exist. Nothing was changed." Then, when `--from` was left out,
   the line "sliceflow starts from main unless you choose another branch.
@@ -704,267 +807,362 @@ command is used the wrong way.
 
 ### The repository
 
-- **R9.** If the folder is not inside a git repository, sliceflow changes
+- **R11.** If the folder is not inside a git repository, sliceflow changes
   nothing and prints these two lines to the error output: "Error: this
   folder is not in a git repository. Nothing was changed." and "Run
-  sliceflow inside your project."
+  sliceflow inside your project." This holds for `slice create`,
+  `slice status`, and `slice list`.
   Check: e2e
-- **R10.** If the repository has no commits, sliceflow changes nothing and
+- **R12.** If git cannot be run, because it is not installed or not on the
+  path, sliceflow changes nothing and prints these two lines to the error
+  output: "Error: git was not found. Nothing was changed." and "Install
+  git, then try again." It exits with code 1. sliceflow does not check
+  the version of git.
+  Check: e2e
+- **R13.** If the repository has no commits, sliceflow changes nothing and
   prints these two lines to the error output: "Error: this repository has
   no commits yet. Nothing was changed." and "Make a first commit, then try
-  again."
+  again." This holds for `slice create`, `slice status`, and
+  `slice list`.
   Check: e2e
-- **R11.** sliceflow finds the project by asking git, from any subfolder of
+- **R14.** sliceflow finds the project by asking git, from any subfolder of
   it and from inside any of its worktrees. The project name used in a
   worktree's path is the name of the main project's folder.
   Check: e2e
-- **R12.** sliceflow makes the worktree in
+- **R15.** When the git setting `sliceflow.worktree.dir` is not set,
+  sliceflow makes the worktree in
   `<home>/.sliceflow/worktrees/<project>/<name>`, where `<home>` is the
-  user's home folder. Where the setting `worktree.dir` is set, sliceflow
-  uses that folder in place of `<home>/.sliceflow/worktrees`.
+  user's home folder.
+  Check: e2e
+- **R16.** When the git setting `sliceflow.worktree.dir` is set, sliceflow
+  makes the worktree in `<dir>/<project>/<name>`, where `<dir>` is its
+  value. sliceflow reads the value through git, so a value set for the
+  project wins over a global one. `<dir>` may be a full path, a path that
+  starts with `~` (the user's home folder), or a path relative to the main
+  project's folder. sliceflow does not check the folder beforehand. If git
+  cannot make the worktree there, R35 applies.
   Check: e2e
 
 ### The name
 
-- **R13.** Each character of a slice name is a letter, a digit, a hyphen,
-  or an underscore. The first character is a letter or a digit. The name
-  has at most 40 characters. It is not `con`, `prn`, `aux`, `nul`, `com1`
-  to `com9`, or `lpt1` to `lpt9`, which Windows reserves.
+- **R17.** A letter is one of `a` to `z` or `A` to `Z`. Each character of a
+  slice name is a letter, a digit, a hyphen, or an underscore. The first
+  character is a letter or a digit. The name has at most 40 characters.
+  It is not `con`, `prn`, `aux`, `nul`, `com1` to `com9`, or `lpt1` to
+  `lpt9`, which Windows reserves.
   Check: unit
-- **R14.** If the name breaks R13, sliceflow changes nothing and prints two
+- **R18.** If the name breaks R17, sliceflow changes nothing and prints two
   lines to the error output. The first is "Error: invalid slice name
-  "<name>". Nothing was changed." The second depends on the problem: for a
-  character or a start that is not allowed, "Allowed characters: letters,
-  digits, hyphens, underscores. Start with a letter or a digit."; for a name that
-  is too long, "A name has at most 40 characters."; for a reserved name,
-  "Windows reserves this name. Choose another."
+  "<name>". Nothing was changed.", where `<name>` is the given name. The
+  second depends on the problem: for a character or a start that is not
+  allowed, "Allowed characters: letters, digits, hyphens, underscores.
+  Start with a letter or a digit."; for a name that is too long, "A name
+  has at most 40 characters."; for a reserved name, "Windows reserves this
+  name. Choose another." When a name has more than one problem, the second
+  line is for the first one in that order. This holds for `slice create`
+  and `slice status`.
   Check: unit, e2e
-- **R15.** The name the user gives, the given name, may have capital
-  letters. sliceflow makes it lowercase, in every command that takes a
-  name. The lowercase name is the slice name.
+- **R19.** The name the user gives, the given name, may have capital
+  letters. In `slice create` and `slice status`, sliceflow first makes it
+  lowercase, then checks it with R17, and from then on uses the lowercase
+  name, the slice name.
   Check: unit, e2e
-- **R16.** When `slice create` made the given name lowercase, it prints the
+- **R20.** When `slice create` made the given name lowercase, it prints the
   line `  Note:     "<given name>" was made lowercase.` right after the
-  `Created` line. Otherwise it prints no `Note:` line.
+  `Created` line. Otherwise it prints no `Note:` line. `slice status`
+  prints no `Note:` line.
   Check: e2e
 
 ### A name that is not free
 
-- **R17.** If `docs/slices/<name>/` exists in the base commit, sliceflow
+- **R21.** If `docs/slices/<name>/` exists in the base commit, sliceflow
   changes nothing and prints "Error: slice <name> already exists (folder
   docs/slices/<name>/ in <base>). Nothing was changed." to the error
   output.
   Check: e2e
-- **R18.** If the branch `slice/<name>` exists, sliceflow changes nothing
+- **R22.** If the branch `slice/<name>` exists, sliceflow changes nothing
   and prints "Error: slice <name> already exists (branch slice/<name>).
   Nothing was changed." to the error output.
   Check: e2e
-- **R19.** If the worktree folder exists and has files in it, sliceflow
-  shows git's message, as in R26. If the folder exists and is empty,
-  sliceflow uses it.
+- **R23.** If the worktree folder exists and is not empty, git refuses to
+  make the worktree, and sliceflow shows git's message, as in R35. If the
+  folder exists and is empty, sliceflow uses it.
   Check: e2e
-- **R20.** sliceflow never looks at branches on a remote when it checks a
+- **R24.** sliceflow never looks at branches on a remote when it checks a
   name.
   Check: e2e
 
 ### The event log
 
-- **R21.** The first line of the event log is the event `slice.created`, as
+- **R25.** The first line of the event log is the event `slice.created`, as
   in S13: `version` 1, `seq` 1, `event`, `at` (UTC, written like
   `2026-11-02T09:15:30Z`), and `data` with `name`, `title`, `description`,
-  `base` (the name of the base branch), and `base_commit` (the full commit
-  hash).
+  `base` (the name of the base branch), and `base_commit` (the full hash
+  of the commit the slice started from). The keys are in the order shown
+  in S13. The line is UTF-8 JSON, and the characters `<`, `>`, and `&` are
+  written as they are.
   Check: unit, e2e
-- **R22.** The title is the text of `--title`, or the name when `--title`
-  is left out. The description is the text of `--description`, or an empty
-  string when it is left out. sliceflow stores them only in the event log.
+- **R26.** The title is the text of `--title`, or the name when `--title`
+  is left out or empty. The description is the text of `--description`,
+  or an empty string when it is left out. sliceflow stores them only in
+  the event log.
   Check: unit, e2e
-- **R23.** sliceflow adds every event to a log, including the first one,
-  with one function, under a file lock that works on Windows, macOS, and
-  Linux. When two sliceflow processes add an event at the same time, both
-  events are kept, each on its own line.
+- **R27.** If `--title` or `--description` holds a line break or a tab,
+  sliceflow changes nothing and prints these two lines to the error
+  output: "Error: <option> has a line break or a tab. Nothing was
+  changed." and "Write it on one line, with no tabs.", where `<option>` is
+  `--title` or `--description`.
+  Check: unit, e2e
+- **R28.** When two sliceflow processes add an event to the same log at the
+  same time, on Windows, macOS, or Linux, both events are kept, each one
+  whole and on its own line.
   Check: unit
-- **R24.** When sliceflow adds an event to a log that has events, the
-  `seq` of the new event is the `seq` of the last event plus one.
+- **R29.** When sliceflow adds an event to a log that has events, the `seq`
+  of the new event is the highest `seq` that can be read in the log, plus
+  one.
+  Check: unit
+- **R30.** A line of the log can be read when it is one JSON object with
+  `version` 1, a text `event`, a whole-number `seq`, and an object `data`.
+  A line with an event name that sliceflow does not know can still be
+  read. An empty line, or any other line, cannot be read. Lines are
+  counted from 1, and every line of the file counts.
+  Check: unit
+- **R31.** sliceflow ends every line it writes with `\n`. When it reads, a
+  line may end with `\n` or with `\r\n`.
+  Check: unit
+- **R32.** Before sliceflow adds an event, if the log does not end with
+  `\n`, it first adds `\n`, so a cut-off last line stays a line of its
+  own.
+  Check: unit
+- **R33.** sliceflow never deletes or changes a line of a log.
   Check: unit
 
 ### When something fails
 
-- **R25.** If a step fails after sliceflow made something, sliceflow
-  removes what it made in this run, and only that. It never removes a
-  branch, a worktree, or a file that was there before.
+- **R34.** If a step fails after sliceflow made something, sliceflow
+  removes what it made in this run, and only that: the files, the
+  worktree, the branch, and the empty folders that were made for the
+  worktree. It never removes a branch, a worktree, a file, or a folder that
+  was there before, even an empty one.
   Check: e2e
-- **R26.** When git fails and sliceflow has no message of its own for the
-  failure, sliceflow prints this to the error output: a first line
-  "Error: git could not <step>. The slice was not created. Nothing was
-  changed.", then "git said:", then git's text indented by two spaces.
-  `<step>` is "create the branch", "create the worktree", or "make the
-  commit". sliceflow does not check beforehand for what git needs.
+- **R35.** sliceflow takes these steps with git, in this order: create the
+  branch, create the worktree, then make the commit, which includes adding
+  the two files. When one of them fails and sliceflow has no message of
+  its own for the failure, sliceflow prints this to the error output: a
+  first line "Error: git could not <step>. The slice was not created.
+  Nothing was changed.", where `<step>` is "create the branch", "create
+  the worktree", or "make the commit", then "git said:", then everything
+  git printed to its error output, word for word, each line indented by
+  two spaces. sliceflow does not check beforehand for what git needs.
   Check: e2e
-- **R27.** If sliceflow could not remove something it made, its first line
-  does not say "Nothing was changed." After git's text, it prints "Some of
-  what sliceflow made could not be removed:", one line for each thing that
-  is left, then "To clean up, run:" and the commands that remove them,
-  the worktree first and then the branch.
+- **R36.** When more than one problem applies, sliceflow reports only the
+  first, in this order: the command line, with `--help` before any error
+  (R66 to R71); git not found (R12); the repository (R11, R13); a line
+  break or a tab (R27); the name (R18); the base (R10); a name that is not
+  free, the folder in the base commit before the branch (R21, R22); then
+  the git steps (R35). `slice status` and `slice list` use the same order,
+  for the checks they have.
+  Check: e2e
+- **R37.** If sliceflow could not remove something it made, its first line
+  does not say "Nothing was changed." After git's text, it prints the line
+  "Some of what sliceflow made could not be removed:", then one line for
+  each thing that is left: `  worktree  <full path>` or
+  `  branch    slice/<name>`. Then it prints the line "To clean up, run:",
+  and for each thing that is left, the worktree first, the command
+  `  git worktree remove --force "<full path>"` or
+  `  git branch -D "slice/<name>"`. Paths and branch names are in double
+  quotes.
   Check: e2e
 
 ### Seeing one slice
 
-- **R28.** When a user runs `sliceflow slice status <name>` and the log of
+- **R38.** When a user runs `sliceflow slice status <name>` and the log of
   the slice is found, sliceflow prints the status to the normal output,
   changes nothing, and exits with code 0.
   Check: e2e
-- **R29.** The first line of the status is `<slice name>: <title>`. The
+- **R39.** The first line of the status is `<slice name>: <title>`. The
   next lines have the labels `Description:`, `Created:`, `Started from:`,
   `Branch:`, `Worktree:`, and `Events:`, in this order, with the values in
   one column. The title, the description, the base branch, and the base
   commit come from the `slice.created` event.
   Check: e2e
-- **R30.** The `Created:` line shows the time of the `slice.created` event
+- **R40.** When the description is empty, the `Description:` line shows
+  `(none)`.
+  Check: unit
+- **R41.** The `Created:` line shows the time of the `slice.created` event
   in UTC, written like `2026-11-02 09:15 UTC`.
   Check: unit
-- **R31.** The `Started from:` line shows the base branch and the first
+- **R42.** The `Started from:` line shows the base branch and the first
   seven characters of the base commit, written like `main, at 3f9a1c2`.
   Check: unit
-- **R32.** The `Branch:` line shows `slice/<name>`. When that branch does
+- **R43.** The `Branch:` line shows `slice/<name>`. When that branch does
   not exist, it adds ` (not found)` after it.
   Check: e2e
-- **R33.** The `Worktree:` line shows the full path of the slice's
-  worktree. When the worktree does not exist, it shows `(not found)`.
+- **R44.** The `Worktree:` line shows the full path of the slice's
+  worktree. The slice's worktree is the worktree that git lists for the
+  branch `slice/<name>`, when its folder exists. When there is none, the
+  line shows `(not found)`.
   Check: e2e
-- **R34.** The `Events:` line shows the number of lines of the log that
-  could be read, then in brackets `last:` and the event name of the last
-  line that could be read.
+- **R45.** The `Events:` line shows the number of lines of the log that
+  can be read, then `(last: <event>)`, where `<event>` is the event name
+  of the last line that can be read.
   Check: unit
-- **R35.** When the log was not read from the worktree, the status ends with
+- **R46.** When the log was not read from the worktree, the status ends with
   a `Read from:` line. It shows `branch slice/<name>` when the log came
   from that branch, and `main` when it came from `main`. Otherwise the
   status has no `Read from:` line.
   Check: e2e
-- **R36.** sliceflow finds the log of a slice by looking in this order, and
-  stops at the first place that has it: the log file in the slice's
-  worktree, the log committed on the branch `slice/<name>`, and the log
-  committed in `main`.
+- **R47.** sliceflow finds the log of a slice by looking in these places,
+  in this order, and stops at the first place that has it: the log file in
+  the slice's worktree (R44), the log committed at the tip of the branch
+  `slice/<name>`, and the log committed at the tip of `main`. When `main`
+  does not exist, sliceflow treats it as having no log.
   Check: e2e
-- **R37.** If no log is found, sliceflow changes nothing and prints this to
+- **R48.** If no log is found, sliceflow changes nothing and prints this to
   the error output: the line "Error: no slice named <name>. Nothing was
-  changed.", the line "No log was found in any of these places:", one
-  line for each place, with the label `worktree`, `branch`, or `main` and
-  its path, then the line "Check the name, or run: sliceflow slice list".
-  It exits with code 1.
+  changed.", the line "No log was found in any of these places:", then
+  the three lines `  worktree  <path>`, where `<path>` is the full path
+  that R15 or R16 gives, `  branch    slice/<name>`, and
+  `  main      docs/slices/<name>/.events.jsonl`, then the line "Check
+  the name, or run: sliceflow slice list". It exits with code 1.
   Check: e2e
-- **R38.** When a line of the log cannot be read, sliceflow skips it, and
+- **R49.** When a line of the log cannot be read, sliceflow skips it, and
   prints one warning for the log to the error output: for one line,
   "Warning: line <n> of <path> could not be read, so it was skipped."; for
   several lines, "Warning: lines <n>, <n>, ... of <path> could not be read,
-  so they were skipped." The path is the path of the log in the project,
-  for example `docs/slices/card-payment/.events.jsonl`. The command goes
-  on, and the exit code stays 0.
+  so they were skipped." Line numbers are counted as in R30. The path is
+  the path of the log in the project, for example
+  `docs/slices/card-payment/.events.jsonl`. The command goes on, and the
+  exit code stays 0.
   Check: unit, e2e
-- **R39.** When more than 10 lines cannot be read, the warning lists the
+- **R50.** When more than 10 lines cannot be read, the warning lists the
   first 10 line numbers, then `(<k> more not listed)`, where `<k>` is the
   number of the other lines.
   Check: unit
-- **R40.** If no `slice.created` event can be read, sliceflow changes
-  nothing and prints the warning, then the line "Error: no slice.created
-  event could be read for <name>. Nothing was changed." and the line "Fix
-  or restore the log, then try again." to the error output. It exits with
-  code 1.
+- **R51.** If the log is empty, or its first line cannot be read, or its
+  first line is not a `slice.created` event, sliceflow changes nothing and
+  prints the warning of R49 when there is one, then the line "Error: no
+  slice.created event could be read for <name>. Nothing was changed." and
+  the line "Fix or restore the log, then try again." to the error output.
+  It exits with code 1.
   Check: e2e
 
 ### Seeing all slices
 
-- **R41.** When a user runs `sliceflow slice list`, sliceflow finds the
+- **R52.** When a user runs `sliceflow slice list`, sliceflow finds the
   slices of the project, prints them in a table to the normal output,
   changes nothing, and exits with code 0.
   Check: e2e
-- **R42.** sliceflow takes the candidate names from the local branches
-  called `slice/<name>` and from the folders `docs/slices/<name>/` in
-  `main`. It joins the two lists, and a name that is in both is one
-  candidate. It never looks at branches on a remote.
+- **R53.** sliceflow takes the candidate names from the local branches
+  called `slice/<name>` and from the folders `docs/slices/<name>/` at the
+  tip of `main`. It joins the two lists, and a name that is in both is one
+  candidate. When `main` does not exist, there are no folders in `main`.
+  It never looks at branches on a remote.
   Check: e2e
-- **R43.** For each candidate, sliceflow finds the log as in R36. A candidate
-  is a slice when its log is found.
+- **R54.** For each candidate, sliceflow finds the log in the places of
+  R47, in the same order. A candidate is a slice when its log is found.
   Check: e2e
-- **R44.** The table has the header line `NAME`, `TITLE`, `DESCRIPTION`, then
+- **R55.** The table has the header line `NAME`, `TITLE`, `DESCRIPTION`, then
   one row for each slice, sorted by name. The name column and the title
-  column are padded to the width of their longest value, with two spaces
-  between columns. The description is the last column, and it is not
-  padded. It is empty when the slice has no description.
+  column are padded with spaces to the width of their longest value, the
+  header included, with two spaces between columns. Width is counted in
+  characters. The description is the last column, and it is not padded. A
+  line never ends with a space, so a row with no description ends after
+  the title.
   Check: unit
-- **R45.** The title and the description of a row come from the
+- **R56.** The title and the description of a row come from the
   `slice.created` event.
   Check: unit
-- **R46.** For the list, sliceflow reads only the first line of each log.
+- **R57.** The list depends only on the first line of each log.
   Check: unit
-- **R47.** If the project has no slices, sliceflow changes nothing and
+- **R58.** If the project has no slices, sliceflow changes nothing and
   prints "No slices yet. To make one, run: sliceflow slice create <name>"
   to the normal output. It exits with code 0.
   Check: e2e
-- **R48.** If a candidate has no log, sliceflow does not list it, and prints
+- **R59.** If a candidate has no log, sliceflow does not list it, and prints
   one warning for that name to the error output, and the exit code stays
   0. For a branch only: "Warning: <name> is not listed as a slice. The
   branch slice/<name> has no event log." For a folder in `main` only:
   "Warning: <name> is not listed as a slice. The folder docs/slices/<name>/
   in main has no event log." For both: "Warning: <name> is not listed as a
   slice. Neither the branch slice/<name> nor the folder docs/slices/<name>/
-  in main has an event log."
+  in main has an event log." All warnings of `list` are sorted by name,
+  and they come before the table, or before the line of R58.
   Check: e2e
-- **R49.** If the first line of a log cannot be read, sliceflow does not list
-  the slice, and prints one warning to the error output: "Warning: <name>
-  is not listed as a slice. No slice.created event could be read from
-  <path>." The exit code stays 0.
+- **R60.** A candidate whose name breaks R17, for example from a branch
+  `slice/Foo` or `slice/a/b`, is not listed. sliceflow prints one warning
+  to the error output: "Warning: <name> is not listed as a slice. It is not
+  a valid slice name.", where `<name>` is the candidate as it was found.
+  The exit code stays 0.
   Check: e2e
-- **R50.** sliceflow never prints a warning in the list about a damaged line
+- **R61.** If a log is empty, or its first line cannot be read, or its first
+  line is not a `slice.created` event, sliceflow does not list the slice,
+  and prints one warning to the error output: "Warning: <name> is not
+  listed as a slice. No slice.created event could be read from <path>."
+  The exit code stays 0.
+  Check: e2e
+- **R62.** sliceflow never prints a warning in the list about a damaged line
   of a log other than the first line.
   Check: e2e
 
 ### Help, and a command used the wrong way
 
-- **R51.** When a user runs `sliceflow --help`, or runs `sliceflow` with no
-  command, sliceflow prints the guide shown in S33 to the normal output,
-  changes nothing, and exits with code 0. The guide has one sentence about
-  sliceflow, the usage line, the three commands with a short description
-  each, and the line that points to the help of a command.
+- **R63.** When a user runs `sliceflow --help`, `sliceflow` with no command,
+  or `sliceflow slice` with no command, sliceflow prints the guide shown in
+  S38 to the normal output, changes nothing, and exits with code 0.
   Check: e2e
-- **R52.** When a user runs a command with `--help`, sliceflow prints to the
+- **R64.** When a user runs a command with `--help`, sliceflow prints to the
   normal output one sentence about the command, its usage line, and its
   options with a short description of each, changes nothing, and exits
-  with code 0. Every command has `--help`.
+  with code 0. Every command has `--help`. The help of `slice create` is
+  shown in S41.
   Check: e2e
-- **R53.** If a user runs a command that does not exist, sliceflow changes
+- **R65.** The help of `slice status` is shown in S42. The help of
+  `slice list` is the same shape, with the sentence "Show all slices in a
+  table: name, title, and description." and the usage line
+  `sliceflow slice list [options]`.
+  Check: e2e
+- **R66.** If a user runs a command that does not exist, sliceflow changes
   nothing and prints these two lines to the error output: "Error: unknown
   command "<words>". Nothing was changed." and "To see the commands, run:
-  sliceflow --help". `<words>` are the words the user typed for the
-  command. sliceflow does not guess what the user meant.
+  sliceflow --help". `<words>` is the first word after `sliceflow` when it
+  is not `slice`, or `slice` and the word after it when that word is not a
+  command of `slice`. sliceflow does not guess what the user meant.
   Check: e2e
-- **R54.** If a user gives an option that does not exist, sliceflow changes
+- **R67.** Options may come before or after the name. `--title=<text>`
+  means the same as `--title <text>`, and the same holds for every option
+  with a value. The word after an option that needs a value is its value.
+  When an option is given more than once, the last one counts.
+  Check: unit
+- **R68.** If a user gives an option that does not exist, sliceflow changes
   nothing and prints these two lines to the error output: "Error: unknown
   option "<option>". Nothing was changed." and "To see the options, run:
   sliceflow <command> --help", with the command the user ran.
   Check: e2e
-- **R55.** If a user runs `slice create` or `slice status` with no name,
+- **R69.** If a user runs `slice create` or `slice status` with no name,
   sliceflow changes nothing and prints these two lines to the error
   output: "Error: missing slice name. Nothing was changed." and the usage
-  line of that command, written like "Usage: sliceflow slice create <name>
-  [options]".
+  line of that command: "Usage: sliceflow slice create <name> [options]"
+  or "Usage: sliceflow slice status <name> [options]".
   Check: e2e
-- **R56.** If a user gives an option that needs a value, with no value
+- **R70.** If a user gives an option that needs a value, with no value
   after it, sliceflow changes nothing and prints these two lines to the
   error output: "Error: option "<option>" needs a value. Nothing was
   changed." and "To see the options, run: sliceflow <command> --help",
   with the command the user ran.
   Check: e2e
-- **R57.** If a user gives a word that is not a name and not an option,
+- **R71.** If a user gives a word that is not a name and not an option,
   sliceflow changes nothing and prints these two lines to the error
   output: "Error: unexpected argument "<word>". Nothing was changed." and
-  the usage line of the command. `<word>` is the first such word.
+  the usage line of the command, as in R69, or "Usage: sliceflow slice
+  list [options]" for `slice list`. `<word>` is the first such word.
   Check: e2e
-- **R58.** When a command works, sliceflow exits with code 0. When the
+- **R72.** When a command works, sliceflow exits with code 0. When the
   command line is wrong, it exits with code 2. That is the case for an
-  unknown command (R53), an unknown option (R54), a missing name (R55), an
-  option with no value (R56), an unexpected argument (R57), and a name
-  that breaks R13 (R14). When a command fails for any other reason, it
+  unknown command (R66), an unknown option (R68), a missing name (R69), an
+  option with no value (R70), an unexpected argument (R71), a line break
+  or a tab in a title or a description (R27), and a name that breaks R17
+  (R18). When a command fails for any other reason, including a crash, it
   exits with code 1.
   Check: e2e
 
@@ -1041,10 +1239,10 @@ command is used the wrong way.
     commit, because it could carry unrelated work into the slice.
   Cost: a stale local branch gives a stale start, and uncommitted changes
     are not in the slice.
-  Rule: R7
+  Rule: R9
 - **SD3.** A slice's worktree is made outside the project, by default
-  under `~/.sliceflow/worktrees/<project>/<slice>`. The `worktree.dir`
-  setting chooses another folder.
+  under `~/.sliceflow/worktrees/<project>/<slice>`. The git setting
+  `sliceflow.worktree.dir` chooses another folder (SD19).
   Why: tools in other people's projects, such as ESLint, Jest, and
     `tsc`, can pick up a worktree nested in the project and give wrong
     results. The setting lets a person who prefers the worktree in their
@@ -1053,7 +1251,7 @@ command is used the wrong way.
     because it can break those tools in projects we do not control.
   Cost: a person opens the worktree in a second editor window, unless
     they set the folder themselves.
-  Rule: R12
+  Rule: R15, R16
 - **SD4.** Each character of a slice name is a letter, a digit, a hyphen,
   or an underscore. The first character is a letter or a digit. The name
   has at most 40 characters. It is not a Windows reserved name such as
@@ -1068,7 +1266,7 @@ command is used the wrong way.
     on one machine could be refused on a teammate's.
   Cost: a Windows reserved name is refused on every system, even where
     it would work.
-  Rule: R13
+  Rule: R17
 - **SD5.** sliceflow makes the name lowercase, in every command that
   takes a name, and says so when it changed the name.
   Why: Windows and macOS treat `Card` and `card` as one folder, while git
@@ -1080,7 +1278,7 @@ command is used the wrong way.
   Cost: a person or an agent that builds a path from the given name
     gets a wrong path on a case-sensitive system, unless it uses the
     path sliceflow prints.
-  Rule: R15
+  Rule: R19
 - **SD6.** sliceflow refuses a slice name that is not free. A name is not
   free when `docs/slices/<name>/` exists in the base commit, when the
   branch `slice/<name>` exists, or when the worktree folder exists and
@@ -1099,7 +1297,7 @@ command is used the wrong way.
     clash is caught when the branches are merged.
   Cost: a slice a teammate has made on a remote branch can still get the
     same name here.
-  Rule: R17, R18, R19, R20
+  Rule: R21, R22, R23, R24
 
 - **SD7.** The base branch of a new slice comes from `--from <branch>`. When
   `--from` is left out, it is `main`. sliceflow has no git setting for the
@@ -1111,7 +1309,7 @@ command is used the wrong way.
     longer in every repo; a git setting now, because it is not needed yet.
   Cost: a repo whose main branch is not `main` needs `--from <branch>` on
     every create, until a setting is added.
-  Rule: R6
+  Rule: R8
 
 - **SD8.** When git fails in a way sliceflow has no message for, sliceflow
   prints one line of its own and then git's text, word for word. Its line
@@ -1129,7 +1327,7 @@ command is used the wrong way.
     has no end and a wrong message is worse than git's.
   Cost: the user reads git's wording, which can differ between git
     versions and languages.
-  Rule: R26
+  Rule: R35, R37
 
 - **SD9.** The title of a slice, and its description, live only in the
   event log. The spec file has no title line.
@@ -1140,13 +1338,13 @@ command is used the wrong way.
     would edit Markdown and not add an event.
   Cost: `spec.md` alone does not show its title. A readable view of the
     log, for example as Markdown, can be added later.
-  Rule: R22
+  Rule: R26
 - **SD10.** A slice created with no `--title` gets its name as the title.
   Why: nothing is ever blank, so `list` and `status` need no special case.
   Not chosen: an empty title, because it leaves a blank column; a
     required `--title`, because every create would need the flag.
   Cost: an untitled slice shows its name twice in the list.
-  Rule: R22
+  Rule: R26
 
 - **SD11.** sliceflow finds the project by asking git, as git does: from any
   subfolder of the project, and from inside any worktree of it. The
@@ -1160,19 +1358,23 @@ command is used the wrong way.
     another slice's worktree it would scatter one project's slices over
     several folders.
   Cost: one more question to git; a project whose folder is renamed gets
-    a new worktree folder for its next slices.
-  Rule: R11
+    a new worktree folder for its next slices; two clones of different
+    projects with the same folder name share one worktree folder, so a
+    slice name used in both fails on the second `create` with git's
+    "already exists" message.
+  Rule: R14
 
 - **SD12.** sliceflow adds every event to a log with one function, under a
   file lock, including the first event, `slice.created`.
   Why: two ways to write an event, one with the lock and one without,
     would leave a trap for later code. One rule has no exceptions.
-  Not chosen: no lock for the first event, because `create` writes a new
-    file that nothing else can be writing to yet, since a second way of
-    writing an event is a risk, and the lock is needed in 0002 anyway.
+  Not chosen: a first event written without the lock. `create` writes a
+    new file that nothing else can write to yet, so the lock is not needed
+    there. But a second way of writing an event is a risk, and the lock is
+    needed in 0002 anyway.
   Cost: the lock, which must work on Windows too, is built in 0001 and
     not in 0002.
-  Rule: R23
+  Rule: R28
 
 - **SD13.** sliceflow finds a slice's event log by looking in this order,
   and stops at the first place that has it: the log file in the slice's
@@ -1190,11 +1392,11 @@ command is used the wrong way.
     request.
   Cost: three places to look; a slice merged into a branch other than
     `main` is not found.
-  Rule: R36
+  Rule: R47
 
 - **SD14.** The names for `list` come from the union of the local branches
   `slice/<name>` and the folders `docs/slices/<name>/` in `main`. A name is a
-  slice only when its log is found, by the gates of SD13.
+  slice only when its log is found in the places of SD13.
   Why: a merged slice often has no branch, and a slice being built has no
     folder in `main` yet, so each list alone would miss some. They are the
     same signs that `create` uses to refuse a taken name (SD6), so the two
@@ -1203,7 +1405,7 @@ command is used the wrong way.
     slice; also scanning the worktree folders, because every worktree is on
     a slice branch, so it adds nothing.
   Cost: a slice merged into a branch other than `main` is not listed.
-  Rule: R42, R43
+  Rule: R53, R54
 
 - **SD15.** `list` prints a borderless table with a header row, sorted by
   name.
@@ -1217,7 +1419,7 @@ command is used the wrong way.
     made in the same minute have no clear order.
   Cost: a very long title pushes the description to the right. Nothing is
     cut off.
-  Rule: R44
+  Rule: R55
 
 - **SD16.** In `list`, only the first line of each log counts, and only a
   damaged first line gives a warning.
@@ -1229,7 +1431,7 @@ command is used the wrong way.
   Cost: damage after the first line is not seen in `list`; `status` shows
     it. It is worth a second look when `list` shows state from later
     events.
-  Rule: R46, R50
+  Rule: R57, R62
 
 - **SD17.** sliceflow exits with 0 when a command works, with 2 when the
   command line is wrong, and with 1 when a command fails for any other
@@ -1242,7 +1444,7 @@ command is used the wrong way.
     must be remembered.
   Cost: two numbers to remember. A bad slice name counts as wrong use,
     which is a border case.
-  Rule: R58
+  Rule: R72
 
 - **SD18.** When a command is used the wrong way, sliceflow says which
   word or option it did not understand, and points to the help. It does
@@ -1253,7 +1455,77 @@ command is used the wrong way.
   Not chosen: a "did you mean" suggestion, because it needs more logic
     that can guess wrong.
   Cost: a typo costs the user one more command, to read the help.
-  Rule: R53, R54, R55, R56, R57
+  Rule: R66, R68, R69, R70, R71
+
+- **SD19.** The git setting `sliceflow.worktree.dir` chooses the folder for
+  worktrees. It may be a full path, a path that starts with `~`, or a path
+  relative to the main project's folder. sliceflow reads it through git,
+  so a value for one project wins over a global one.
+  Why: it is a personal choice, and design 1.14 puts personal settings in
+    git config. A relative path has one clear meaning when it starts from
+    the main project's folder, and it lets a person keep worktrees next to
+    the project (`../shop-worktrees`) or inside it (`.worktrees`).
+  Not chosen: refusing a relative path, because nothing breaks with it;
+    a path relative to the folder the person is in, because the same
+    command would then put worktrees in different places.
+  Cost: a worktree inside the project can confuse tools such as ESLint.
+    That is the person's own choice.
+  Rule: R16
+
+- **SD20.** sliceflow writes each line of a log with `\n` at its end, reads
+  lines that end with `\n` or `\r\n`, closes off a cut-off last line before
+  it adds an event, and never deletes or changes a line.
+  Why: the log is the only source of truth and is committed in git.
+    Without the closing `\n`, a new event would be glued to a cut-off line
+    and lost with it. Deleting a damaged line would rewrite history that
+    nobody chose to change, and the line is evidence of what went wrong.
+  Not chosen: cleaning damaged lines automatically, in this slice or in
+    0002, because it changes history; a repair can come later as a command
+    a person runs on purpose, for example `doctor`.
+  Cost: damaged lines stay in the log, and every reader skips them.
+  Rule: R31, R32, R33
+
+- **SD21.** A title or a description is one line, with no tabs. sliceflow
+  refuses a line break or a tab.
+  Why: a line break would break the layout of `status` and the rows of
+    the `list` table. Refusing it is clearer than changing what the user
+    wrote.
+  Not chosen: replacing a line break with a space, because sliceflow
+    would change the user's text without asking.
+  Cost: a person who wants a longer description must write it on one
+    line.
+  Rule: R27
+
+- **SD22.** sliceflow makes its commit with the user's own git settings,
+  including git hooks and commit signing.
+  Why: git decides what a commit needs on this computer, as in SD8, and a
+    team's hooks exist for a reason.
+  Not chosen: skipping hooks and signing, because it would go around the
+    rules the user or the team set up.
+  Cost: a slow hook makes `create` slow, and a signing prompt can wait for
+    the user.
+  Rule: R5
+
+- **SD23.** When more than one problem applies, sliceflow reports only the
+  first, in a fixed order.
+  Why: the same mistake always gives the same message, and the order puts
+    the cheapest checks first, so nothing is made before a problem is
+    found.
+  Not chosen: reporting every problem at once, because one fix often
+    removes the next problem, and a long list hides the first.
+  Cost: a person with two problems sees the second only after fixing the
+    first.
+  Rule: R36
+
+- **SD24.** A log is usable only when its first line is a readable
+  `slice.created` event. `status` and `list` use the same rule.
+  Why: the first line holds the title, the description, and the base.
+    The two commands must agree on whether a slice can be shown.
+  Not chosen: using any readable `slice.created` line in the log, because
+    `list` reads only the first line, and the two commands would disagree.
+  Cost: a log whose first line is damaged cannot be shown, even when a
+    later line holds a copy of the event.
+  Rule: R51, R61
 
 ## Open questions
 
