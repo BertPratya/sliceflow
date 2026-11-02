@@ -210,7 +210,8 @@ A developer starts a new slice with one command.
     fatal: '/home/you/.sliceflow/worktrees/shop/card-payment' already exists
   ```
   Shows: R25, R36, R37
-- **S11.** **Given** git has no name or email set on this computer,
+- **S11.** **Given** git cannot work out a name and an email on this
+  computer,
   **When** I run `sliceflow slice create card-payment`,
   **Then** sliceflow removes the files, the worktree, and the branch it
   made, prints this to the error output, and exits with code 1:
@@ -232,7 +233,8 @@ A developer starts a new slice with one command.
     fatal: unable to auto-detect email address (got 'you@laptop.(none)')
   ```
   Shows: R36, R37
-- **S12.** **Given** git has no name or email set on this computer, and
+- **S12.** **Given** git cannot work out a name and an email on this
+  computer, and
   the worktree sliceflow made cannot be removed (for example, sliceflow is not
   allowed to delete it),
   **When** I run `sliceflow slice create card-payment`,
@@ -362,8 +364,8 @@ A developer starts a new slice with one command.
   ```
   Shows: R14
 - **S22.** **Given** the empty folder
-  `/home/you/.sliceflow/worktrees/shop/card-payment` exists, and git has no
-  name or email set on this computer,
+  `/home/you/.sliceflow/worktrees/shop/card-payment` exists, and git cannot
+  work out a name and an email on this computer,
   **When** I run `sliceflow slice create card-payment`,
   **Then** sliceflow removes the files, the worktree, and the branch it
   made, prints the same error as in S11, and exits with code 1, and the
@@ -1352,7 +1354,7 @@ command is used the wrong way.
   Rule: R19
 
 - **SD5.** sliceflow makes the name lowercase, in every command that
-  takes a name, and says so when it changed the name.
+  takes a name. `slice create` says so when it changed the name.
   Why: Windows and macOS treat `Card` and `card` as one folder, while git
     treats them as two branches, so two slices differing only by case
     would clash for a teammate on another system.
@@ -1536,8 +1538,9 @@ command is used the wrong way.
   word or option it did not understand, and points to the help. It does
   not guess what the user meant.
   Why: with three commands, the help is short enough to read, and a guess
-    can be wrong. Every error of sliceflow's own has the same two lines:
-    what is wrong, with "Nothing was changed.", then what to do.
+    can be wrong. A wrong-use error has the same shape as sliceflow's other
+    errors: first what is wrong, with "Nothing was changed.", then what to
+    do.
   Not chosen: a "did you mean" suggestion, because it needs more logic
     that can guess wrong.
   Cost: a typo costs the user one more command, to read the help.
