@@ -921,6 +921,10 @@ what replaced it.
   event log. Before it adds a line, it closes off a cut-off last line. A
   repair of damaged lines can only be a command a person runs on purpose
   (1.13).
+- 2026-11-02, the human: a damaged first line of a log stops
+  `sliceflow slice status` with an error, because that line holds the
+  facts of the slice; `slice list` leaves the slice out with a warning.
+  Any other damaged line is still skipped with a warning (1.13).
 
 ---
 
