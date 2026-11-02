@@ -543,6 +543,35 @@ Principles: none. Details, settled in the slice that builds them:
 - How an approved document may change, and which changes need a new
   approval (0004).
 
+
+### 1.17 Errors from other tools
+
+**Decided (the human).** `sliceflow` runs other tools: git first, later the
+agent tools and the checks. They can fail in more ways than we can list,
+and only they know what they need on this computer.
+
+- When one of them fails in a way `sliceflow` has no message for,
+  `sliceflow` prints one line of its own, then the tool's message word for
+  word. It never replaces that message with a guess.
+- `sliceflow`'s own line says which step failed, that the work was not
+  done, and whether everything it made was removed. When it was, the first
+  line ends with "Nothing was changed." When it was not, the last lines
+  list what is left and the commands that remove it.
+- An error reads in this order: what happened in `sliceflow`, what the
+  tool said, the state of things, and last, what to do. The last lines are
+  where the eye lands.
+- `sliceflow` does not check beforehand for what a tool needs, e.g. the
+  name and email git needs for a commit.
+- `sliceflow` keeps its own message for its own rules (e.g. the slice
+  name rules), and for a failure the tool explains badly (e.g. git's
+  "invalid reference: main" in a repository with no commits).
+- `sliceflow` writes its own message for a tool's failure only for a few
+  common causes it knows, and only after it has confirmed the cause by
+  asking the tool, e.g. whether `HEAD` points at a commit. It does not try
+  to cover every possible cause. When it cannot confirm the cause, it
+  shows the tool's text.
+- The first case is git, in 0001 (spec `slice-and-events`, SD8).
+
 ---
 
 ## 2. The processes
@@ -868,7 +897,23 @@ decided, and the section. "The human" means the human decided; the lead
 proposed. A replaced decision stays, marked "replaced", with the date and
 what replaced it.
 
-None yet.
+- 2026-11-02, the human: the file lock moves from 0002 to 0001. Every
+  event, including the first one (`slice.created`), is written by one
+  function, under the lock (1.13, 2.1).
+- 2026-11-02, the human: the worktree stays outside the repo by default,
+  and the `worktree.dir` setting is built in 0001, not later (1.15).
+- 2026-11-02, the human: in 0001 the base branch comes only from `--from`,
+  else `main`. The git setting `sliceflow.base` comes later (2.1, 1.14).
+- 2026-11-02, the human: when another tool, git first, fails in a way
+  `sliceflow` has no message for, `sliceflow` shows the tool's own message
+  after one line of its own (1.17).
+- 2026-11-02, the human: `sliceflow` has its own message only for a few common
+  causes, each confirmed with the tool first; every other failure shows the
+  tool's text (1.17).
+- 2026-11-02, the human: the title and the description of a slice live only
+  in the event log; with no `--title`, the name is the title. The built-in
+  spec template loses its `title:` line. A readable view comes later
+  (2.1, 1.13).
 
 ---
 
