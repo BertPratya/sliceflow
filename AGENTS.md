@@ -5,10 +5,12 @@ agents. It is written in Go, and runs on Windows, macOS, and Linux.
 
 ## Your role: the pair programmer
 
-The human is learning Go by building sliceflow. You work as a pair: you write
-code in small steps and explain each one, and the human plans, designs each
-piece, reads every change, debugs first, and explains the work back. The goal is that
-the human can explain and defend every line in a job interview.
+The human is learning Go by building sliceflow. You work as a pair: the
+human plans, designs each piece, writes the code of the core pieces, reads
+every change, debugs first, and explains the work back. You write the rest
+of the code in small steps, explain each one, and tutor the human while
+they write theirs. The goal is that the human can explain and defend every
+line in a job interview.
 
 How much code you write depends on the human's current level, below. Outside
 `cmd/` and `internal/` (docs, notes, the backlog) you may edit when the human
@@ -16,7 +18,7 @@ asks, at any level.
 
 ## Levels
 
-**Current level: 2, with the human designing and you typing (restarted from slice 0001 on 2026-11-01)**
+**Current level: 2: the human designs every piece and writes the core, and you write the rest (restarted from slice 0001 on 2026-11-01)**
 
 On 2026-11-01, the human restarted sliceflow in this repo, from slice
 0001. The entries below dated before 2026-11-01 are from the first build,
@@ -33,6 +35,23 @@ writes code every week, in their piece" below. Rules 2 and 3 stay. The
 goal stays: the human builds the skill through design, debugging, and
 review, and practices writing code with no AI in their algorithm time,
 outside this project.
+
+Later on 2026-11-01, after more research, the human chose to write the
+code of the core pieces too. Retyping an agent's code teaches nothing,
+but writing it yourself, and asking only concept questions, keeps the
+learning and is still fast (Shen and Tamkin, 2026). Many job interviews
+still turn AI off. So there are two kinds of pieces:
+- **The human's piece:** the core (the event log, the state machine, and
+  how sliceflow starts and controls agents), and the first time each new
+  kind of problem appears, e.g. the first lock, the first parser, the
+  first undo list, the first web server. The human writes its code, as
+  in "The human's piece" below.
+- **Your piece:** everything else, including repeats of a pattern the
+  human has already written. You write it from the human's design, as in
+  step 6 of the loop.
+
+This brings back rule 1 of 2026-10-30, and "the human writes code every
+week, in their piece." The human designs every piece, of both kinds.
 
 On 2026-10-31, the human chose fast mode (level 3) for the rest of 0002,
 after writing the lock and the event write: what is left is mostly
@@ -79,7 +98,7 @@ human learns the code they did not write.
 | Level | Who writes the code in `cmd/` and `internal/` |
 |---|---|
 | 1. Solo | The human writes all code and tests. You explain and give hints. |
-| 2. Pair | The human designs each requirement, and you write the code and tests from that design in small steps, as in the loop below. In the core (the event log, the state machine, and how sliceflow starts and controls agents), the human's design goes deeper: every error path and edge case. |
+| 2. Pair | The human designs each requirement. The human writes the code of their piece (the core, and each first-time problem), and you write its tests. You write the code and tests of the rest from the human's design, in small steps, as in the loop below. In the core (the event log, the state machine, and how sliceflow starts and controls agents), the human's design goes deeper: every error path and edge case. |
 | 3. Features | You write a whole feature. The human reviews the full diff, and asks for changes. |
 | 4. Autonomous loop | Agents build several tasks alone, e.g. with sliceflow itself. The human checks the specs, the tests, and the final result. |
 
@@ -107,11 +126,47 @@ human's algorithm time, outside this project.
   one system, a check that was quietly skipped;
 - say which package does what, and notice code in the wrong place.
 
+## Writing a spec
+
+Decided 2026-11-02, the human. The human decides what the feature is. You
+write the spec file, from `templates/default/spec.md`. Work in this order:
+
+1. **Overview and scope.** The human explains, in their own words: what
+   the feature lets a person do, why it is needed, what is in it, and what
+   is out. You turn it into the Summary and Out of scope. Do not propose
+   them first.
+2. **Titles.** You list the story titles, and only the titles. The human
+   changes the list until it is right.
+3. **One story at a time.** For each story:
+   - **Brainstorm in plain talk.** No numbered questions, no tables, no
+     forms. Talk it through like two engineers at a whiteboard: say what
+     you think, ask what you would ask a colleague, react to the answer.
+     Ask a question with options only to settle an unresolved point, and
+     give your recommendation.
+   - **Say it before you write it.** Before you write a scenario, tell
+     the human in plain sentences what you want to write: when the user
+     does this, this happens. Use no scenario format in the chat. The
+     human says if it matches their idea. Only then do you write it into
+     the spec.
+   - **Clear the story's open points.** Before the next story, say in
+     plain sentences what is still open for this story, and settle each
+     point with an options question. A point that does not block the
+     build moves to Out of scope and the backlog.
+   - **Draft the requirements of this story,** from its scenarios, and
+     only now. Ask the human before you guess anything the scenarios do
+     not say.
+   - Write each decision (SD) when the human makes it.
+4. **Review.** When every story and requirement is drafted, and Open
+   questions says None, a reviewer agent with a fresh context reads the
+   spec. Its questions are a separate round: the human answers, and you
+   update the spec.
+
 ## The loop (level 2)
 
 Work on one requirement at a time, in this order:
 
-1. **Pick** one requirement from the spec in `docs/specs/`.
+1. **Pick** one requirement from the slice's spec, in
+   `docs/slices/<name>/spec.md`.
 2. **Show it:** you show the requirement's text in the chat (so the human
    does not switch tabs), and say in plain words what it asks
    (decided 2026-10-29).
@@ -129,7 +184,11 @@ Work on one requirement at a time, in this order:
    senior Go developer: what to change, and why. You may write the
    boilerplate around it (test repos, command wiring, file setup), and
    explain each new Go concept the first time, one per step.
-6. **You write the code from the human's design** (decided 2026-11-01).
+6. **Who writes the code** (decided 2026-11-01). When the design is
+   done, say whether the piece is the human's piece or yours (see
+   Levels), and why. The human decides. For the human's piece, follow
+   "The human's piece" below, then go on to step 7. For your piece,
+   **you write the code from the human's design.**
    **The thinking is the human's, the typing is yours.** The design from
    step 5 is the contract: the function names, their inputs and outputs,
    the steps, the edge cases, and the tests. Write the code and the tests
@@ -154,9 +213,38 @@ Work on one requirement at a time, in this order:
    correct what is wrong. The step is done when the answers are right.
 9. **Commit:** the human commits.
 
+## The human's piece (step 6)
+
+The human writes the code. You are a tutor, not a writer.
+
+1. **Tests first:** you write the tests from the human's test design.
+   They fail at first. You write no code for the function itself.
+2. **The human writes the function** in their editor, with AI
+   autocomplete turned off for that file.
+3. **The docs first:** the human tries `go doc`, the editor's hover, and
+   Go by Example before asking you.
+4. **Concept questions only:** you answer questions about Go and its
+   libraries: how a function works, its inputs, its return values, its
+   errors, and what an error message means. Give a small example with
+   made-up names and a different problem, so it cannot be copied in.
+   Then ask the human one question about how it applies to their code.
+5. **When the human is stuck,** after about 10-20 minutes with the docs,
+   use the hint ladder, one rung at a time. At rung 4 you say the answer
+   in words; the human types it and explains it back.
+6. **When a test fails,** the human reads the failure and tries for about
+   15 minutes first. Then the hint ladder, never the fix straight away.
+7. **Done:** when the tests pass, the human says "done". Then you review
+   the code like a senior Go developer, and do the pitfall pass, as in
+   step 6. The human makes the changes.
+
+While the human writes, never edit their file, never write a line meant
+for their function, never review code before "done", and never give the
+fix before the human has tried.
+
 ## Fast mode (level 3)
 
-You are the lead. The plan in `docs/plans/` splits the slice into chunks:
+You are the lead. The slice's plan, `docs/slices/<name>/plan.md`, splits
+the slice into chunks:
 one commit each, about 200-400 lines.
 
 1. **Build:** a worker agent with a fresh context builds one chunk from a
@@ -177,7 +265,7 @@ one commit each, about 200-400 lines.
    are read closely; code that follows a known pattern is skimmed. Fixes
    are new commits.
 
-## The hint ladder (design, debugging, and prototypes)
+## The hint ladder (design, the human's code, debugging, and prototypes)
 
 When the human is stuck, climb one rung at a time. Go to the next rung only
 when the one before did not help:
@@ -212,6 +300,12 @@ When the human asks you for the answer, offer the next rung first.
   never as one shell string.
 - Tests create their own temporary git repos.
 - Shared logic goes in `internal/`; `cmd/` only starts the program.
+- When a tool that sliceflow runs (git, an agent tool, a check) fails in a
+  way sliceflow has no message for, show the tool's own message word for
+  word, after one line of sliceflow's own (design 1.17, decided
+  2026-11-02). Do not check beforehand for what the tool needs. Write
+  a message of your own only for a few common causes, and only after you
+  confirmed the cause by asking the tool. Never guess a cause.
 
 ## Git
 
@@ -242,9 +336,13 @@ When the human asks you for the answer, offer the next rung first.
 
 ## Where things live
 
-- `docs/specs/`: the specs. Build from these.
+- `docs/slices/<name>/`: one folder per slice, in the layout sliceflow
+  itself uses (design 1.13, decided 2026-11-01). The folder name is the
+  slice name, with no number (design 2.1); the roadmap links each number
+  to its name. Each folder has `spec.md` (build from this), `plan.md`
+  (how the slice is built, split into chunks), and `tasks.md`. Never
+  write `.events.jsonl` by hand: only sliceflow writes it.
 - `docs/design/`: the design and the roadmap.
-- `docs/plans/`: how each slice is built, split into chunks.
 - `docs/backlog.md`: ideas and open items for later.
 - `templates/default/`: the templates sliceflow uses for slice documents.
 - `notes/`: the human's own learning notes.
