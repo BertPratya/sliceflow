@@ -979,7 +979,8 @@ command is used the wrong way.
   one.
   Check: unit
 - **R32.** A line of the log can be read when it is one JSON object with
-  `version` 1, a text `event`, a whole-number `seq`, and an object `data`.
+  `version` 1, a text `event`, a whole-number `seq`, a text `at` that is
+  a UTC time written like `2026-11-02T09:15:30Z`, and an object `data`.
   A line with an event name that sliceflow does not know can still be
   read. An empty line, or any other line, cannot be read. Lines are
   counted from 1, and every line of the file counts. The text after the
