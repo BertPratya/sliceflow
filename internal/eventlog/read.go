@@ -10,20 +10,6 @@ import (
 	"time"
 )
 
-// timeLayout is how at is written: UTC, to the second, for example
-// 2026-11-02T09:15:30Z.
-const timeLayout = "2006-01-02T15:04:05Z"
-
-// Event is one readable line of the log. Read returns an Event only
-// after every check has passed, so every field is set.
-type Event struct {
-	Version int             `json:"version"`
-	Seq     int             `json:"seq"`
-	Event   string          `json:"event"`
-	At      string          `json:"at"`
-	Data    json.RawMessage `json:"data"`
-}
-
 // rawEvent is a line as json.Unmarshal fills it. The fields are pointers,
 // so a missing key stays nil and can be told apart from a zero value.
 type rawEvent struct {
@@ -91,7 +77,7 @@ func jsonlLineToEvent(line []byte) (Event, error) {
 // validationRouter maps an event name to the function that checks its
 // data. An event with no entry has no extra checks.
 var validationRouter = map[string]func(json.RawMessage) error{
-	"slice.created": validateSliceCreated,
+	SliceCreatedEvent: validateSliceCreated,
 }
 
 // validateEvent checks the data of one event, with the function that
