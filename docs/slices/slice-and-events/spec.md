@@ -905,11 +905,11 @@ command is used the wrong way.
 - **R20.** If the name breaks R19, sliceflow changes nothing and prints two
   lines to the error output. The first is "Error: invalid slice name
   "<name>". Nothing was changed.", where `<name>` is the given name. The
-  second depends on the problem: for a character or a start that is not
-  allowed, "Allowed characters: letters, digits, hyphens, underscores.
-  Start with a letter or a digit."; for a name that is too long, "A name
-  has at most 40 characters."; for a reserved name, "Windows reserves this
-  name. Choose another." When a name has more than one problem, the second
+  second depends on the problem: for a name that is too long, "A name has
+  at most 40 characters."; for a reserved name, "Windows reserves this
+  name. Choose another."; for a character or a start that is not allowed,
+  "Allowed characters: letters, digits, hyphens, underscores. Start with a
+  letter or a digit." When a name has more than one problem, the second
   line is for the first one in that order. This holds for `slice create`
   and `slice status`.
   Check: unit, e2e
@@ -1651,6 +1651,17 @@ command is used the wrong way.
     differ between git versions and with every hook.
   Cost: a warning that a hook prints on success is not seen.
   Rule: R8
+
+- **SD28.** A name is checked for its length first, then for a reserved
+  name, then for its characters (decided, the human, 2026-11-08).
+  Why: a very long name is rejected before each of its characters is
+    looked at.
+  Not chosen: checking the characters first, which names the real
+    problem when a long name also has a character that is not allowed.
+  Cost: a name that is too long and also has such a character gets "A
+    name has at most 40 characters." first. After it is shortened, it
+    gets the message about its characters.
+  Rule: R20
 
 ## Open questions
 
