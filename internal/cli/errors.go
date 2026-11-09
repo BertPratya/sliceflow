@@ -38,15 +38,16 @@ func needsValue(words, option string) error {
 		"To see the options, run: " + commandPath(words) + " --help"}
 }
 
-// missingName is the problem of R73: cmd got no name, or "".
-func missingName(cmd *command) error {
+// missingName is the problem of R73: cmd, which words name, got no
+// name, or "".
+func missingName(words string, cmd *command) error {
 	return &wrongUseError{text: "Error: missing slice name. Nothing was changed.\n" +
-		"Usage: " + usageLine(cmd)}
+		"Usage: " + usageLine(words, cmd)}
 }
 
 // unexpectedArgument is the problem of R75: word is not a name and not
-// an option of cmd.
-func unexpectedArgument(cmd *command, word string) error {
+// an option of cmd, which words name.
+func unexpectedArgument(words string, cmd *command, word string) error {
 	return &wrongUseError{text: `Error: unexpected argument "` + word + `". Nothing was changed.` + "\n" +
-		"Usage: " + usageLine(cmd)}
+		"Usage: " + usageLine(words, cmd)}
 }

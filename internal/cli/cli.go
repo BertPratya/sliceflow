@@ -51,7 +51,7 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 //  5. Run the command. Print its error, if any, and return its exit
 //     code.
 func run(ctx context.Context, args []string, stdout, stderr io.Writer, f flows) int {
-	found, err := checkLine(newCommands(f), args)
+	found, err := checkLine(commands, args)
 	if found.wantsHelp {
 		return printHelp(stdout, found.helpText())
 	}
@@ -61,7 +61,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, f flows) 
 	if found.cmd == nil {
 		return printHelp(stdout, found.helpText())
 	}
-	return report(stderr, found.cmd.run(ctx, found.call, stdout, stderr))
+	return report(stderr, found.cmd.run(ctx, f, found.call, stdout, stderr))
 }
 
 // printHelp prints help to out, and returns the exit code: 0, or 1 when

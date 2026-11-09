@@ -50,7 +50,7 @@ func (l line) helpText() string {
 // Only the first problem is kept. After the last word, when there is no
 // problem yet, a command that takes a name and got none, or got "", has
 // the problem of R73: a missing name is checked last.
-func checkLine(commands []command, args []string) (found line, problem error) {
+func checkLine(commands map[string]command, args []string) (found line, problem error) {
 	found.call.options = map[string]string{}
 	lost := false // an unknown command was found
 	gotName := false
@@ -100,12 +100,12 @@ func checkLine(commands []command, args []string) (found line, problem error) {
 			found.call.name = word
 
 		default:
-			keep(unexpectedArgument(found.cmd, word))
+			keep(unexpectedArgument(found.words, found.cmd, word))
 		}
 	}
 
 	if problem == nil && found.cmd != nil && found.cmd.takesName && found.call.name == "" {
-		problem = missingName(found.cmd)
+		problem = missingName(found.words, found.cmd)
 	}
 	return found, problem
 }
@@ -141,7 +141,7 @@ func checkOption(found line, word string) (name, value string, hasValue bool, er
 //
 // A word with a space is never a command word, so that one word
 // "slice create" is not taken for two.
-func nextWord(commands []command, words, word string) (next string, cmd *command, ok bool) {
+func nextWord(commands map[string]command, words, word string) (next string, cmd *command, ok bool) {
 	if word == "" || strings.Contains(word, " ") {
 		return "", nil, false
 	}
@@ -149,11 +149,11 @@ func nextWord(commands []command, words, word string) (next string, cmd *command
 	if words != "" {
 		next = words + " " + word
 	}
-	for i := range commands {
-		if commands[i].words == next {
-			return next, &commands[i], true
-		}
-		if strings.HasPrefix(commands[i].words, next+" ") {
+	if found, ok := commands[next]; ok {
+		return next, &found, true
+	}
+	for key := range commands {
+		if strings.HasPrefix(key, next+" ") {
 			return next, nil, true
 		}
 	}
