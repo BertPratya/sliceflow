@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"io"
 )
 
@@ -88,20 +89,36 @@ var commands = map[string]command{
 	"slice list":   {help: listHelp, run: runList},
 }
 
-// runCreate runs `slice create`: it turns the call into createInput,
-// and makes the slice.
-func runCreate(ctx context.Context, c call, stdout, stderr io.Writer) error {
-	return createSlice(ctx, newCreateInput(c), stdout, stderr)
+// The work behind each command. Each one prints what the command shows
+// when it works to stdout, and its warnings to stderr. It returns an
+// error when the command fails: Run prints the error's text as it is,
+// so the text is the whole message, one or more full lines with no line
+// break at the end. An error that is wrong use (see wrongUser) gives
+// exit code 2, any other error 1.
+//
+// TEMPORARY: the work is not built yet, so each one fails with exit
+// code 1. Step 7 of the plan replaces runCreate with a call to the
+// create flow, step 8 replaces runStatus, and step 9 replaces runList.
+
+// runCreate runs `slice create`: it makes a new slice (Story 1).
+func runCreate(_ context.Context, _ call, _, _ io.Writer) error {
+	return errNotBuilt("slice create")
 }
 
-// runStatus runs `slice status`: it shows the slice with the given name.
-func runStatus(ctx context.Context, c call, stdout, stderr io.Writer) error {
-	return showSlice(ctx, c.name, stdout, stderr)
+// runStatus runs `slice status`: it shows one slice (S45).
+func runStatus(_ context.Context, _ call, _, _ io.Writer) error {
+	return errNotBuilt("slice status")
 }
 
-// runList runs `slice list`: it shows all slices.
-func runList(ctx context.Context, _ call, stdout, stderr io.Writer) error {
-	return listSlices(ctx, stdout, stderr)
+// runList runs `slice list`: it shows all slices (R69).
+func runList(_ context.Context, _ call, _, _ io.Writer) error {
+	return errNotBuilt("slice list")
+}
+
+// errNotBuilt is the error of a command whose work is not built yet.
+// TEMPORARY: it goes away with the last placeholder above.
+func errNotBuilt(command string) error {
+	return errors.New("Error: sliceflow " + command + " is not built yet.")
 }
 
 // commandPath returns the command line that words name, e.g.

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"testing"
 )
 
@@ -21,84 +22,54 @@ func readLine(t *testing.T, args ...string) line {
 
 // TestCreateOptions checks R71: options before or after the name,
 // --option=<text>, the word after an option is its value, and the last
-// one counts. It also checks that newCreateInput gives "main" when
-// --from was not given (R10), and tells an empty --from= from none.
+// one counts. An option that was not given has no key, so `--from=`
+// (given, "") is told from no --from.
 func TestCreateOptions(t *testing.T) {
 	tests := []struct {
-		name string
-		args []string
-		want createInput
+		name        string
+		args        []string
+		wantName    string
+		wantOptions map[string]string
 	}{
-		{
-			name: "no options",
-			args: []string{"slice", "create", "login"},
-			want: createInput{name: "login", from: "main"},
-		},
-		{
-			name: "options after the name",
-			args: []string{"slice", "create", "login", "--title", "Log in", "--description", "A form.", "--from", "dev"},
-			want: createInput{name: "login", title: "Log in", description: "A form.", from: "dev", fromGiven: true},
-		},
-		{
-			name: "options before the name",
-			args: []string{"slice", "create", "--title", "Log in", "--from", "dev", "login"},
-			want: createInput{name: "login", title: "Log in", from: "dev", fromGiven: true},
-		},
-		{
-			name: "option with =",
-			args: []string{"slice", "create", "login", "--title=Log in", "--description=A form.", "--from=dev"},
-			want: createInput{name: "login", title: "Log in", description: "A form.", from: "dev", fromGiven: true},
-		},
-		{
-			name: "empty value with =",
-			args: []string{"slice", "create", "login", "--title="},
-			want: createInput{name: "login", from: "main"},
-		},
-		{
-			name: "value with = inside",
-			args: []string{"slice", "create", "login", "--title=a=b"},
-			want: createInput{name: "login", title: "a=b", from: "main"},
-		},
-		{
-			name: "value that starts with -",
-			args: []string{"slice", "create", "login", "--title", "-x"},
-			want: createInput{name: "login", title: "-x", from: "main"},
-		},
-		{
-			name: "value that is --help",
-			args: []string{"slice", "create", "login", "--title", "--help"},
-			want: createInput{name: "login", title: "--help", from: "main"},
-		},
-		{
-			name: "value that is -h",
-			args: []string{"slice", "create", "--description", "-h", "login"},
-			want: createInput{name: "login", description: "-h", from: "main"},
-		},
-		{
-			name: "value that is a command word",
-			args: []string{"slice", "create", "--title", "create", "slice"},
-			want: createInput{name: "slice", title: "create", from: "main"},
-		},
-		{
-			name: "last one counts",
-			args: []string{"slice", "create", "login", "--title", "A", "--title=B", "--from", "x", "--from", "y"},
-			want: createInput{name: "login", title: "B", from: "y", fromGiven: true},
-		},
-		{
-			name: "--from main given",
-			args: []string{"slice", "create", "login", "--from", "main"},
-			want: createInput{name: "login", from: "main", fromGiven: true},
-		},
-		{
-			name: "--from empty given",
-			args: []string{"slice", "create", "login", "--from="},
-			want: createInput{name: "login", from: "", fromGiven: true},
-		},
-		{
-			name: "name not checked here",
-			args: []string{"slice", "create", "Bad Name!", "--title", "a\tb"},
-			want: createInput{name: "Bad Name!", title: "a\tb", from: "main"},
-		},
+		{"no options",
+			[]string{"slice", "create", "login"},
+			"login", map[string]string{}},
+		{"options after the name",
+			[]string{"slice", "create", "login", "--title", "Log in", "--description", "A form.", "--from", "dev"},
+			"login", map[string]string{"title": "Log in", "description": "A form.", "from": "dev"}},
+		{"options before the name",
+			[]string{"slice", "create", "--title", "Log in", "--from", "dev", "login"},
+			"login", map[string]string{"title": "Log in", "from": "dev"}},
+		{"option with =",
+			[]string{"slice", "create", "login", "--title=Log in", "--description=A form.", "--from=dev"},
+			"login", map[string]string{"title": "Log in", "description": "A form.", "from": "dev"}},
+		{"empty value with =",
+			[]string{"slice", "create", "login", "--title="},
+			"login", map[string]string{"title": ""}},
+		{"value with = inside",
+			[]string{"slice", "create", "login", "--title=a=b"},
+			"login", map[string]string{"title": "a=b"}},
+		{"value that starts with -",
+			[]string{"slice", "create", "login", "--title", "-x"},
+			"login", map[string]string{"title": "-x"}},
+		{"value that is --help",
+			[]string{"slice", "create", "login", "--title", "--help"},
+			"login", map[string]string{"title": "--help"}},
+		{"value that is -h",
+			[]string{"slice", "create", "--description", "-h", "login"},
+			"login", map[string]string{"description": "-h"}},
+		{"value that is a command word",
+			[]string{"slice", "create", "--title", "create", "slice"},
+			"slice", map[string]string{"title": "create"}},
+		{"last one counts",
+			[]string{"slice", "create", "login", "--title", "A", "--title=B", "--from", "x", "--from", "y"},
+			"login", map[string]string{"title": "B", "from": "y"}},
+		{"--from empty given",
+			[]string{"slice", "create", "login", "--from="},
+			"login", map[string]string{"from": ""}},
+		{"name not checked here",
+			[]string{"slice", "create", "Bad Name!", "--title", "a\tb"},
+			"Bad Name!", map[string]string{"title": "a\tb"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -106,8 +77,11 @@ func TestCreateOptions(t *testing.T) {
 			if found.words != "slice create" {
 				t.Fatalf("checkLine found %q, want %q", found.words, "slice create")
 			}
-			if got := newCreateInput(found.call); got != tt.want {
-				t.Errorf("newCreateInput got %+v, want %+v", got, tt.want)
+			if found.call.name != tt.wantName {
+				t.Errorf("name = %q, want %q", found.call.name, tt.wantName)
+			}
+			if !maps.Equal(found.call.options, tt.wantOptions) {
+				t.Errorf("options = %q, want %q", found.call.options, tt.wantOptions)
 			}
 		})
 	}
