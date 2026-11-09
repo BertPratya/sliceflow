@@ -9,8 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-
-	"github.com/spf13/cobra"
 )
 
 // The exit codes of R76 and SD17.
@@ -29,13 +27,6 @@ type wrongUser interface {
 	WrongUse() bool
 }
 
-func init() {
-	// Cobra's own text when sliceflow.exe is started from Explorer on
-	// Windows (TD1). An empty text turns it off. Like the settings in
-	// newCommands, it is a second guard: no test can reach it.
-	cobra.MousetrapHelpText = ""
-}
-
 // Run runs sliceflow with args, the words of the command line without
 // the program's name. It prints to stdout and stderr, and returns the
 // exit code (R76, SD17): 0 when the command works, 2 when the command
@@ -50,39 +41,33 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 // see the values the command line gives to the work.
 //
 // Steps:
-//  1. Build the commands.
-//  2. Check the command line from the left (R40, R71).
-//  3. If --help or -h was given, print the help of the command, and
+//  1. Check the command line from the left, against the table of
+//     commands (R40, R71).
+//  2. If --help or -h was given, print the help of the command, and
 //     return 0 (R67, R68). It comes before any problem (R40).
-//  4. If the command line has a problem, print it, and return 2.
-//  5. If no command was given (`sliceflow`, `sliceflow slice`), print
+//  3. If the command line has a problem, print it, and return 2.
+//  4. If no command was given (`sliceflow`, `sliceflow slice`), print
 //     the guide, and return 0 (R67).
-//  6. Let Cobra run the command. Print its error, if any, and return its
-//     exit code.
+//  5. Run the command. Print its error, if any, and return its exit
+//     code.
 func run(ctx context.Context, args []string, stdout, stderr io.Writer, f flows) int {
-	root := newCommands(f, stdout, stderr)
-
-	cmd, help, err := checkLine(root, args)
-	if help {
-		return printHelp(stdout, cmd)
+	found, err := checkLine(newCommands(f), args)
+	if found.wantsHelp {
+		return printHelp(stdout, found.helpText())
 	}
 	if err != nil {
 		return report(stderr, err)
 	}
-	if cmd.HasSubCommands() {
-		return printHelp(stdout, cmd)
+	if found.cmd == nil {
+		return printHelp(stdout, found.helpText())
 	}
-
-	// args is never nil here: an empty command line stops at step 5. A
-	// nil args would make Cobra read os.Args instead.
-	root.SetArgs(args)
-	return report(stderr, root.ExecuteContext(ctx))
+	return report(stderr, found.cmd.run(ctx, found.call, stdout, stderr))
 }
 
-// printHelp prints the help of cmd to out, and returns the exit code: 0,
-// or 1 when the help could not be written.
-func printHelp(out io.Writer, cmd *cobra.Command) int {
-	if _, err := io.WriteString(out, cmd.Long); err != nil {
+// printHelp prints help to out, and returns the exit code: 0, or 1 when
+// the help could not be written.
+func printHelp(out io.Writer, help string) int {
+	if _, err := io.WriteString(out, help); err != nil {
 		return exitFailed
 	}
 	return exitOK
