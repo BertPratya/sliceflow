@@ -62,9 +62,7 @@ type command struct {
 	help      string   // its help, printed as it is (R68, R69)
 	takesName bool     // it takes one slice name: `slice create <name>`
 	options   []string // its options without "--", e.g. "title"; each takes a value
-	// run turns the call into the input of the command's work in f, and
-	// runs it. f is given, not fixed, so that tests can give their own.
-	run func(ctx context.Context, f flows, c call, stdout, stderr io.Writer) error
+	run       func(ctx context.Context, c call, stdout, stderr io.Writer) error
 }
 
 // call is what the command line gives to a command: the name, and the
@@ -90,31 +88,20 @@ var commands = map[string]command{
 	"slice list":   {help: listHelp, run: runList},
 }
 
-// runCreate runs `slice create`: it gives the name and the options to
-// f.create, with "main" when --from was not given (R10).
-func runCreate(ctx context.Context, f flows, c call, stdout, stderr io.Writer) error {
-	from, fromGiven := c.options["from"]
-	if !fromGiven {
-		from = "main"
-	}
-	in := createInput{
-		name:        c.name,
-		title:       c.options["title"],
-		description: c.options["description"],
-		from:        from,
-		fromGiven:   fromGiven,
-	}
-	return f.create(ctx, in, stdout, stderr)
+// runCreate runs `slice create`: it turns the call into createInput,
+// and makes the slice.
+func runCreate(ctx context.Context, c call, stdout, stderr io.Writer) error {
+	return createSlice(ctx, newCreateInput(c), stdout, stderr)
 }
 
-// runStatus runs `slice status`: it gives the name to f.status.
-func runStatus(ctx context.Context, f flows, c call, stdout, stderr io.Writer) error {
-	return f.status(ctx, statusInput{name: c.name}, stdout, stderr)
+// runStatus runs `slice status`: it shows the slice with the given name.
+func runStatus(ctx context.Context, c call, stdout, stderr io.Writer) error {
+	return showSlice(ctx, c.name, stdout, stderr)
 }
 
-// runList runs `slice list`: it calls f.list.
-func runList(ctx context.Context, f flows, _ call, stdout, stderr io.Writer) error {
-	return f.list(ctx, stdout, stderr)
+// runList runs `slice list`: it shows all slices.
+func runList(ctx context.Context, _ call, stdout, stderr io.Writer) error {
+	return listSlices(ctx, stdout, stderr)
 }
 
 // commandPath returns the command line that words name, e.g.

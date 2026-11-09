@@ -32,13 +32,8 @@ type wrongUser interface {
 // exit code (R76, SD17): 0 when the command works, 2 when the command
 // line is wrong, and 1 when it fails for any other reason.
 //
-// When ctx is cancelled, e.g. by Ctrl+C, the command stops (TD5).
-func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
-	return run(ctx, args, stdout, stderr, builtFlows())
-}
-
-// run is Run with the work of each command given as f, so that tests can
-// see the values the command line gives to the work.
+// When ctx is cancelled, e.g. by Ctrl+C, the command stops (TD5): the
+// command's work gets ctx.
 //
 // Steps:
 //  1. Check the command line from the left, against the table of
@@ -50,7 +45,7 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 //     the guide, and return 0 (R67).
 //  5. Run the command. Print its error, if any, and return its exit
 //     code.
-func run(ctx context.Context, args []string, stdout, stderr io.Writer, f flows) int {
+func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	found, err := checkLine(commands, args)
 	if found.wantsHelp {
 		return printHelp(stdout, found.helpText())
@@ -61,7 +56,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer, f flows) 
 	if found.cmd == nil {
 		return printHelp(stdout, found.helpText())
 	}
-	return report(stderr, found.cmd.run(ctx, f, found.call, stdout, stderr))
+	return report(stderr, found.cmd.run(ctx, found.call, stdout, stderr))
 }
 
 // printHelp prints help to out, and returns the exit code: 0, or 1 when

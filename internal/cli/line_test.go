@@ -6,13 +6,14 @@ import (
 	"testing"
 )
 
-// runWords runs args with a recorder, and returns the exit code, the
-// two outputs, and the recorder.
-func runWords(args ...string) (int, string, string, *recorder) {
-	r := &recorder{}
+// runWords runs args with Run, and returns the exit code and the two
+// outputs. A command's work that ran would print "not built yet" to
+// stderr, so a test that wants exactly the help or a problem also shows
+// that the work did not run.
+func runWords(args ...string) (int, string, string) {
 	var stdout, stderr bytes.Buffer
-	code := run(context.Background(), args, &stdout, &stderr, r.flows())
-	return code, stdout.String(), stderr.String(), r
+	code := Run(context.Background(), args, &stdout, &stderr)
+	return code, stdout.String(), stderr.String()
 }
 
 // TestHelpComesFirst checks R40 and R71: --help or -h anywhere gives the
@@ -42,12 +43,9 @@ func TestHelpComesFirst(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			code, stdout, stderr, r := runWords(tt.args...)
+			code, stdout, stderr := runWords(tt.args...)
 			if code != 0 || stdout != tt.want || stderr != "" {
 				t.Errorf("code %d, stdout %q, stderr %q; want 0 and the help", code, stdout, stderr)
-			}
-			if r.create != nil || r.status != nil || r.list {
-				t.Error("the work ran")
 			}
 		})
 	}
@@ -153,12 +151,9 @@ func TestFirstProblem(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			code, stdout, stderr, r := runWords(tt.args...)
+			code, stdout, stderr := runWords(tt.args...)
 			if code != 2 || stdout != "" || stderr != tt.want {
 				t.Errorf("code %d, stdout %q, stderr %q; want 2, nothing, %q", code, stdout, stderr, tt.want)
-			}
-			if r.create != nil || r.status != nil || r.list {
-				t.Error("the work ran")
 			}
 		})
 	}
@@ -168,7 +163,7 @@ func TestFirstProblem(t *testing.T) {
 // command print the guide.
 func TestNoCommand(t *testing.T) {
 	for _, args := range [][]string{nil, {}, {"slice"}} {
-		code, stdout, stderr, _ := runWords(args...)
+		code, stdout, stderr := runWords(args...)
 		if code != 0 || stdout != guideHelp || stderr != "" {
 			t.Errorf("run %q: code %d, stdout %q, stderr %q; want 0 and the guide", args, code, stdout, stderr)
 		}
