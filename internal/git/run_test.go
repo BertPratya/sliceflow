@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -24,12 +25,22 @@ import (
 //   - "sleep": wait for a minute, so a test can stop it while it runs;
 //   - "fail": print a line to stdout and a line to stderr, and exit
 //     with 3;
-//   - "background": start one more copy of itself in the mode "linger",
-//     which gets its stderr and so holds it open, print a line to
-//     stdout, and exit with 0 at once, like a git whose hook started a
-//     background program;
+//   - "background": start one more copy of the test program in the mode
+//     "linger", which gets its stderr and so holds it open, print a line
+//     to stdout, and exit with 0 at once, like a git whose hook started
+//     a background program;
 //   - "linger": wait for 30 seconds.
 const envFakeGit = "SLICEFLOW_TEST_FAKE_GIT"
+
+// envLingerExe is the path of the original test program, outside the
+// fake git's folder. The "linger" copy is started from it, not from the
+// fake git: Windows cannot delete a program file while it runs, so a
+// lingering fake git would stop the test from removing its folder.
+const envLingerExe = "SLICEFLOW_TEST_LINGER_EXE"
+
+// envLingerPIDFile names a file where the fake git writes the process ID
+// of its "linger" copy, so that the test can stop it when it ends.
+const envLingerPIDFile = "SLICEFLOW_TEST_LINGER_PID_FILE"
 
 // The exact output of the fake git in the mode "fail".
 const (
@@ -50,16 +61,18 @@ func TestMain(m *testing.M) {
 		fmt.Fprint(os.Stderr, fakeStderr)
 		os.Exit(fakeExitCode)
 	case "background":
-		self, err := os.Executable()
-		if err != nil {
-			os.Exit(98)
-		}
-		child := exec.Command(self)
+		child := exec.Command(os.Getenv(envLingerExe))
 		// The last value of a repeated variable wins.
 		child.Env = append(os.Environ(), envFakeGit+"=linger")
 		child.Stderr = os.Stderr
 		if err := child.Start(); err != nil {
 			os.Exit(97)
+		}
+		if path := os.Getenv(envLingerPIDFile); path != "" {
+			pid := strconv.Itoa(child.Process.Pid)
+			if err := os.WriteFile(path, []byte(pid), 0o644); err != nil {
+				os.Exit(98)
+			}
 		}
 		fmt.Fprint(os.Stdout, fakeStdout)
 		os.Exit(0)
@@ -196,6 +209,11 @@ func TestRunStopsGitWhenTheContextEnds(t *testing.T) {
 // end, 30 seconds here, and forever for a program that never ends.
 func TestRunDoesNotWaitForProgramsGitStarted(t *testing.T) {
 	useFakeGit(t, "background")
+	pidFile := filepath.Join(t.TempDir(), "linger.pid")
+	t.Setenv(envLingerPIDFile, pidFile)
+	// Cleanups run last added first, so this runs before the folders are
+	// removed.
+	t.Cleanup(func() { stopLinger(t, pidFile) })
 
 	start := time.Now()
 	out, err := run(context.Background(), t.TempDir(), "anything")
@@ -268,6 +286,26 @@ func useFakeGit(t *testing.T, mode string) {
 	}
 	t.Setenv("PATH", dir)
 	t.Setenv(envFakeGit, mode)
+	t.Setenv(envLingerExe, self)
+}
+
+// stopLinger stops the "linger" copy whose process ID is in pidFile, so
+// it does not keep running after the test. A missing file means none was
+// started. Kill's error is ignored: the copy may have ended already.
+func stopLinger(t *testing.T, pidFile string) {
+	t.Helper()
+	data, err := os.ReadFile(pidFile)
+	if err != nil {
+		return
+	}
+	pid, err := strconv.Atoi(string(data))
+	if err != nil {
+		t.Errorf("read the linger copy's process ID %q: %v", data, err)
+		return
+	}
+	if p, err := os.FindProcess(pid); err == nil {
+		p.Kill()
+	}
 }
 
 // wantGitError fails the test now unless err is a *Error, and returns it.

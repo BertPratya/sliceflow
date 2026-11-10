@@ -53,6 +53,16 @@ still turn AI off. So there are two kinds of pieces:
 This brings back rule 1 of 2026-10-30, and "the human writes code every
 week, in their piece." The human designs every piece, of both kinds.
 
+On 2026-11-08, after the git runner (step 4), the human chose fast mode
+(level 3) for the agent's steps left in slice 0001: steps 5 and 6 now,
+and steps 8 and 9 after step 7. Step 7, the create flow with its undo
+list, stays the human's piece. Worker and reviewer agents build each
+chunk, as in "Fast mode" below, on a branch instead of `main`. The lead
+opens a pull request, and the human reviews it and merges it, after a
+walkthrough together. The spec and the plan are the design of these
+steps; every choice they do not settle is an `Assumed:` line in the
+commit and the pull request.
+
 On 2026-10-31, the human chose fast mode (level 3) for the rest of 0002,
 after writing the lock and the event write: what is left is mostly
 plumbing. The human reviews it in a walkthrough, and writes a parser of
@@ -309,7 +319,9 @@ When the human asks you for the answer, offer the next rung first.
 
 ## Git
 
-- Work directly on `main`. No worktrees.
+- Work directly on `main`. No worktrees. The exception is fast-mode
+  work that the human asked to review as a pull request (2026-11-08): it
+  goes on its own branch, which the lead pushes, and the human merges.
 - On level 2, the human commits: leave your changes uncommitted, for the
   human to read. On level 3, you commit each chunk, as in fast mode.
 - **Commit messages** follow Go's own style (decided 2026-11-01), not
