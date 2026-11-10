@@ -18,12 +18,12 @@ const (
 	exitWrongUse = 2 // the command line is wrong
 )
 
-// wrongUser is an error that says the command line is wrong. An error
+// wrongUseMarker is an error that says the command line is wrong. An error
 // from any package is wrong use when it, or an error it wraps, has the
 // method WrongUse and the method returns true. The create flow uses it
 // for a bad name (R20) and a control character (R29), without importing
 // internal/cli.
-type wrongUser interface {
+type wrongUseMarker interface {
 	WrongUse() bool
 }
 
@@ -81,12 +81,12 @@ func report(errOut io.Writer, err error) int {
 }
 
 // exitCode returns the exit code for err (R76): 0 for nil, 2 when err is
-// wrong use (see wrongUser), and 1 for any other error.
+// wrong use (see wrongUseMarker), and 1 for any other error.
 func exitCode(err error) int {
 	if err == nil {
 		return exitOK
 	}
-	var wrong wrongUser
+	var wrong wrongUseMarker
 	if errors.As(err, &wrong) && wrong.WrongUse() {
 		return exitWrongUse
 	}

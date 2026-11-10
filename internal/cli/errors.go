@@ -9,7 +9,7 @@ type wrongUseError struct {
 
 func (e *wrongUseError) Error() string { return e.text }
 
-// WrongUse reports that the command line is wrong. See wrongUser.
+// WrongUse reports that the command line is wrong. See wrongUseMarker.
 func (e *wrongUseError) WrongUse() bool { return true }
 
 // unknownCommand is the problem of R70: word is not a command word after

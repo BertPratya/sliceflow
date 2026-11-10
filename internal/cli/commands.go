@@ -93,7 +93,7 @@ var commands = map[string]command{
 // when it works to stdout, and its warnings to stderr. It returns an
 // error when the command fails: Run prints the error's text as it is,
 // so the text is the whole message, one or more full lines with no line
-// break at the end. An error that is wrong use (see wrongUser) gives
+// break at the end. An error that is wrong use (see wrongUseMarker) gives
 // exit code 2, any other error 1.
 //
 // TEMPORARY: the work is not built yet, so each one fails with exit
