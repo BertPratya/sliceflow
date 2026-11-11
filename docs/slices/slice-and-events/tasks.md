@@ -352,6 +352,16 @@ when git was stopped halfway.
       refuses it, R25); and whether git has a worktree registered at the
       path already, with `git.WorktreeRegistered`.
 3. The steps. A context that ended between two steps counts as Ctrl+C.
+   0. Before anything else (moved here on 2026-11-11, in the review of
+      task 03, so a failure cannot undo a finished slice): add the line
+      `*.events.jsonl.lock` to the file of `git.ExcludeFile`, which check
+      7 asks for (a failure there is `failedCheck("find the info/exclude
+      file", err)`). Add it unless a line of the file is exactly that,
+      with a `\r` at its end cut off. When the file is not empty and does
+      not end with a line break, write `\n` first. Make the file and its
+      folder when they are missing (R2, SD31). A failure is R38, with
+      the file's full path, and "Nothing was changed.". The line is never
+      undone.
    1. `git.CreateBranch` at the base commit, in the project's folder.
       Push the branch with `branchStep`: its undo is `git.DeleteBranch`.
    2. Push the folders step: its undo makes the worktree folder again,
@@ -373,14 +383,7 @@ when git was stopped halfway.
       `git.AddForce` on both, by their paths in the worktree; then
       `git.Commit` with the message of R4. All three run in the worktree,
       and each failure is the step "make the commit".
-   6. Add the line `*.events.jsonl.lock` to the file of
-      `git.ExcludeFile`, unless a line of the file is exactly that, with
-      a `\r` at its end cut off (Windows line ends). When the file is not
-      empty and does not end with a line break, write `\n` first, so the
-      user's last line stays as it is. Make the file and its folder when
-      they are missing (R2, SD31). A failure is R38, with the file's
-      path.
-   7. Return `Created`, with the full paths of the worktree and of
+   6. Return `Created`, with the full paths of the worktree and of
       `spec.md`, and `IgnoredFiles` in the order `spec.md`,
       `.events.jsonl`.
 4. When a step fails, or the context ends:
