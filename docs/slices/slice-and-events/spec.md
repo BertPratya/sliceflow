@@ -1265,7 +1265,7 @@ command is used the wrong way.
 - Changing a slice's title or description after it is created (0002).
 - The team settings file, `sliceflow.yaml`.
 - Worktree setup: copying files, running setup commands, ports (0005).
-- Cancelling a slice, and cleaning up after a crash during `slice create` (0015).
+- Cancelling a slice, and cleaning up after a crash during `slice create` (0013).
 - Seeing or checking slices that teammates made on remote branches.
 - A git setting for the base branch (`sliceflow.base`).
 - A readable view of the event log, for example as Markdown.

@@ -85,7 +85,7 @@ from reading it. So:
   important test cases.
 - You write the boilerplate, e.g. test repos, command wiring, and file
   setup.
-- Before each hard slice (0003, 0005-0007, 0013), the human writes a small
+- Before each hard slice (0003, 0005-0007, 0011), the human writes a small
   prototype of what is new, with no AI and the docs open, e.g. streaming
   a program's output, `context` timeouts, goroutines, or a web server
   with Server-Sent Events.
@@ -99,8 +99,10 @@ and surveys), the human kept this way, with three rules:
 2. **Repeats are checked from outside.** For a repeat, the human writes the
    spec and the tests, you build it, and the tests plus a reviewer agent
    judge it. The human judges the result and skims the code.
-3. **Release in usable steps.** Each working part of sliceflow is released
-   for real people to try, not only at the end.
+3. **One release, when the product is complete** (changed 2026-11-11,
+   the human; it was "release in usable steps"). sliceflow is released
+   once, when Part A of the roadmap is done, so the first thing people
+   try is the whole workflow, controlled from the browser.
 
 On level 3, the walkthrough after each slice is not optional: it is how the
 human learns the code they did not write.
