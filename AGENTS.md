@@ -63,6 +63,13 @@ walkthrough together. The spec and the plan are the design of these
 steps; every choice they do not settle is an `Assumed:` line in the
 commit and the pull request.
 
+On 2026-11-11, the human moved step 7 of slice 0001, the whole create
+flow with its undo list, to fast mode too, because it has many cases.
+Unlike steps 5 and 6, the human and the lead design step 7 together
+first: the functions, their inputs and outputs, the steps, the undo
+list, and the tests. That design goes into tasks.md, and the workers
+build from it. The human reviews it as a pull request, as above.
+
 On 2026-10-31, the human chose fast mode (level 3) for the rest of 0002,
 after writing the lock and the event write: what is left is mostly
 plumbing. The human reviews it in a walkthrough, and writes a parser of

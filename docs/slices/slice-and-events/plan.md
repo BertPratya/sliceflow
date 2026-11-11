@@ -82,11 +82,14 @@ takes more than twice its estimate goes to the agent.
 | 4 | Git runner | Human | R14 | 3–5 h |
 | 5 | Git operations, and finding the project | Agent | R10–R13, R15–R18, R23–R26 | |
 | 6 | Commands, help, wrong use, exit codes, crash | Agent | R67–R76 | |
-| 7 | Create flow with its undo list | Human | R1–R9, R22, R28, R36–R41 | 10–15 h |
+| 7 | Create flow with its undo list | Agent (designed together) | R1–R9, R22, R28, R36–R41 | |
 | 8 | Finding a log, and status | Agent | R42–R55 | |
 | 9 | List | Agent | R56–R66 | |
 
-The human's pieces add up to about 25–40 hours.
+The human's pieces add up to about 15–25 hours. On 2026-11-11, the
+human moved step 7 to the agent, because it has many cases. The human
+and the lead design it together first, and the human reviews it as a
+pull request.
 
 Step 0 comes first because the human works on Linux only, and the lock
 must be tested on Windows and macOS from its first commit. Step 6 comes
@@ -303,9 +306,11 @@ None.
   use a new context (TD5). Sending Ctrl+C from a test is easy on Linux
   and macOS but hard on Windows. If it does not work on Windows, that
   test is skipped there, and the skip is written in the test.
-- **The template's `title:` line.** `templates/default/spec.md` still has
-  a `title:` line in its front matter. The title now lives only in the
-  event log (SD9), so step 7 removes the line.
+- **The template's header.** `templates/default/spec.md` had a header
+  of `slice:`, `title:`, and `created:` lines. The name, the title, and
+  the date now live only in the event log (SD9, SD30), so the header was
+  removed on 2026-11-11, in the design of step 7, and `Create` writes the
+  template as it is.
 - **Size.** The slice has 76 requirements. The build order splits it into
   ten steps, and the stop-loss rule limits the human's pieces.
 
