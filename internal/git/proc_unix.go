@@ -3,6 +3,7 @@
 package git
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"syscall"
@@ -27,4 +28,14 @@ func interrupt(cmd *exec.Cmd) func() error {
 // it does not reach cmd.
 func shield(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+}
+
+// killedBySignal reports whether err says that git was ended by a signal,
+// not that it exited with a code. runGit returns such a git as an *Error
+// with ExitCode -1: Go's exec.ExitError gives -1 for a process that a
+// signal ended (ExitCode), and a process cannot exit with -1. The check is
+// on the *Error, because runGit does not return the *exec.ExitError itself.
+func killedBySignal(err error) bool {
+	var gitErr *Error
+	return errors.As(err, &gitErr) && gitErr.ExitCode == -1
 }

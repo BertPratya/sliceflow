@@ -29,6 +29,10 @@ const (
 // folder.
 const pgrpFile = "pgrp"
 
+// The file that the fake git in the modes "sigint-once" and
+// "sigint-always" writes a line to in its folder, on every run.
+const runsFile = "runs"
+
 func init() {
 	// "trap": catch the interrupt, write readyFile, and wait. On the
 	// interrupt, write gotInterruptFile and exit with 0. Without one,
@@ -62,6 +66,19 @@ func init() {
 	fakeModes["pgrp"] = func() {
 		os.Stdout.WriteString(strconv.Itoa(syscall.Getpgrp()))
 		os.Exit(0)
+	}
+	// "sigint-once": on the first run, interrupt itself, so it is killed
+	// by a signal. On the next runs, exit with 0.
+	fakeModes["sigint-once"] = func() {
+		if recordRun() == 1 {
+			interruptSelf()
+		}
+		os.Exit(0)
+	}
+	// "sigint-always": interrupt itself on every run.
+	fakeModes["sigint-always"] = func() {
+		recordRun()
+		interruptSelf()
 	}
 }
 
@@ -160,6 +177,85 @@ func TestUndoCallsAreShielded(t *testing.T) {
 			t.Errorf("%s ran git in the test's own process group, %d; want another", name, got)
 		}
 	}
+}
+
+// runShielded runs git again when a signal killed the first run. Here
+// the first run is killed by an interrupt, and the second exits with 0,
+// so runShielded returns no error, and git ran twice.
+func TestRunShieldedRetriesAfterSignal(t *testing.T) {
+	useFakeGit(t, "sigint-once")
+	dir := t.TempDir()
+
+	_, err := runShielded(context.Background(), dir, "anything")
+
+	if err != nil {
+		t.Fatalf("runShielded returned the error %v, want none: the second run exits with 0", err)
+	}
+	if got := countRuns(t, dir); got != 2 {
+		t.Errorf("git ran %d times, want 2", got)
+	}
+}
+
+// runShielded runs git at most 3 times when a signal kills every run.
+// Then it returns the error of the last run, a git killed by a signal.
+func TestRunShieldedGivesUp(t *testing.T) {
+	useFakeGit(t, "sigint-always")
+	dir := t.TempDir()
+
+	_, err := runShielded(context.Background(), dir, "anything")
+
+	if err == nil {
+		t.Fatalf("runShielded returned no error, want the error of the last run")
+	}
+	if !killedBySignal(err) {
+		t.Errorf("runShielded returned the error %v (%T), want the error of a git killed by a signal", err, err)
+	}
+	if got := countRuns(t, dir); got != 3 {
+		t.Errorf("git ran %d times, want 3", got)
+	}
+}
+
+// recordRun adds a line to runsFile in the fake git's folder, and returns
+// how many lines the file has now. That is the number of this run.
+func recordRun() int {
+	f, err := os.OpenFile(runsFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		os.Exit(97)
+	}
+	if _, err := f.WriteString("run\n"); err != nil {
+		os.Exit(98)
+	}
+	if err := f.Close(); err != nil {
+		os.Exit(98)
+	}
+	data, err := os.ReadFile(runsFile)
+	if err != nil {
+		os.Exit(98)
+	}
+	return strings.Count(string(data), "\n")
+}
+
+// interruptSelf sends the fake git's own process an interrupt, as a
+// Ctrl+C does. The test program does not catch interrupts, so Go ends the
+// process with SIGINT, and the parent sees a git killed by a signal. If the
+// process is still there after a minute, the fake git exits with 95.
+func interruptSelf() {
+	if err := syscall.Kill(os.Getpid(), syscall.SIGINT); err != nil {
+		os.Exit(94)
+	}
+	time.Sleep(time.Minute)
+	os.Exit(95)
+}
+
+// countRuns returns how many runs the fake git made in dir, one line each
+// in runsFile.
+func countRuns(t *testing.T, dir string) int {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(dir, runsFile))
+	if err != nil {
+		t.Fatalf("read the runs of the fake git: %v", err)
+	}
+	return strings.Count(string(data), "\n")
 }
 
 // waitForFile waits until the file at path exists, for at most 10

@@ -68,8 +68,26 @@ func run(ctx context.Context, dir string, args ...string) (string, error) {
 //
 // It does not shield git from ctx: give it a context that a Ctrl+C does
 // not end.
+//
+// Steps:
+//  1. Run git with runGit, shielded.
+//  2. If git was ended by a signal, and ctx has not ended, go back to
+//     step 1, at most 3 runs in all. Until the child calls setpgid, it is
+//     still in sliceflow's process group, so a Ctrl+C in that short time
+//     can kill it before git runs. Git did nothing then, so a new run is
+//     safe. The check cannot tell that case from another signal, so any
+//     signal leads to a new run.
+//  3. Otherwise, return what the last run returned.
 func runShielded(ctx context.Context, dir string, args ...string) (string, error) {
-	return runGit(ctx, dir, true, args)
+	var out string
+	var err error
+	for attempt := 1; attempt <= 3; attempt++ {
+		out, err = runGit(ctx, dir, true, args)
+		if !killedBySignal(err) || ctx.Err() != nil {
+			break
+		}
+	}
+	return out, err
 }
 
 // runGit is the code of run and runShielded, in the steps of run. When

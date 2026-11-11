@@ -25,3 +25,11 @@ func interrupt(cmd *exec.Cmd) func() error {
 func shield(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP}
 }
+
+// killedBySignal reports whether err says that git was ended by a signal.
+// Windows has no signal that ends a process this way: a Ctrl+C is given to
+// the console's processes, not sent as a signal. So it returns false, and
+// runShielded does not run git again.
+func killedBySignal(err error) bool {
+	return false
+}
