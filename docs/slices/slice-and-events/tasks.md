@@ -250,6 +250,10 @@ including R41's lines, which an e2e test can hardly make.
   creates. `left` is the R41 line without its indent, e.g. `worktree
   <full path>`; `cleanup` is the command, e.g. `git branch -D
   "slice/<name>"`. Task 03 uses it.
+- `func worktreeStep(path string, undo func(context.Context) error) undoStep`
+  and `func branchStep(name string, undo func(context.Context) error) undoStep`:
+  creates (added in the review of task 02). They build `left` and
+  `cleanup` exactly as R41 says. Task 03 uses them.
 - `type undoStack []undoStep`, `func (s *undoStack) push(step undoStep)`,
   `func (s *undoStack) unwind(ctx context.Context) []undoStep`: creates.
   Task 03 uses them.
@@ -349,7 +353,7 @@ when git was stopped halfway.
       path already, with `git.WorktreeRegistered`.
 3. The steps. A context that ended between two steps counts as Ctrl+C.
    1. `git.CreateBranch` at the base commit, in the project's folder.
-      Push the branch: its undo is `git.DeleteBranch`.
+      Push the branch with `branchStep`: its undo is `git.DeleteBranch`.
    2. Push the folders step: its undo makes the worktree folder again,
       empty, when it was there before and is gone; then removes the
       folders recorded as missing, deepest first, with `os.Remove`. It
@@ -360,7 +364,7 @@ when git was stopped halfway.
       worktree's undo; git deletes an empty folder that was there
       before when it is stopped during `worktree add`.
    3. `git.AddWorktree` at the path, in the project's folder. Push the
-      worktree: its undo is `git.RemoveWorktree`.
+      worktree with `worktreeStep`: its undo is `git.RemoveWorktree`.
    4. In the worktree, make `docs/slices/<name>`, write `spec.md` from
       `templates.Spec` as it is (R3, SD30), then the log with
       `eventlog.Create`: name, title (`Title`, or the name when empty,
