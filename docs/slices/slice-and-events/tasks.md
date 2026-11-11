@@ -679,8 +679,9 @@ times.
   `SIGINT` to the group: exit 1, R39's line, and nothing left.
   Proves: R39
 - `TestCreateCtrlCMany` (`create_fail_unix_test.go`): as S24, but
-  `SIGINT` goes to the group five times, 20 ms apart: still exit 1,
-  R39's line, and nothing left.
+  `SIGINT` goes to the group five times, 2 ms apart, so they land while
+  the undo runs (changed from 20 ms when it was built: sliceflow was
+  done after about 12 ms): still exit 1, R39's line, and nothing left.
   Proves: R36, R39
 
 ### Out of scope
