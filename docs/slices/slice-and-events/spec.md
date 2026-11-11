@@ -260,7 +260,7 @@ A developer starts a new slice with one command.
     worktree  /home/you/.sliceflow/worktrees/shop/card-payment
     branch    slice/card-payment
   To clean up, run:
-    git worktree remove --force "/home/you/.sliceflow/worktrees/shop/card-payment"
+    git worktree remove --force --force "/home/you/.sliceflow/worktrees/shop/card-payment"
     git branch -D "slice/card-payment"
   ```
   Shows: R41
@@ -321,14 +321,9 @@ A developer starts a new slice with one command.
   Shows: R12
 - **S18.** **Given** I created the slice `card-payment` on 2 November 2026,
   **When** I open `spec.md` in the slice's folder,
-  **Then** it starts with this header, followed by the rest of the built-in
-  spec template, with its comments:
-  ```
-  ---
-  slice: card-payment
-  created: 2026-11-02
-  ---
-  ```
+  **Then** it is the built-in spec template as it is, with its comments,
+  and with no header. The day I created it is in the event log, in the
+  `at` of the first event.
   Shows: R2, R3
 - **S19.** **Given** I ran
   `git config --global sliceflow.worktree.dir ../shop-worktrees`, and the
@@ -791,12 +786,14 @@ command is used the wrong way.
   Check: e2e
 - **R2.** sliceflow adds exactly two files in that commit, both in
   `docs/slices/<name>/` of the worktree: `spec.md` and `.events.jsonl`, the
-  event log.
+  event log. The lock file of the log, `.events.jsonl.lock`, is never
+  committed: when the slice is made, sliceflow adds the line
+  `*.events.jsonl.lock` to the repository's `info/exclude` file, unless
+  the line is there already, so git ignores it in every worktree (SD31).
   Check: e2e
-- **R3.** The file `spec.md` is the built-in spec template, with its
-  comments, and with this header: the line `slice: <name>`, and the line
-  `created: <date>`, where `<date>` is the day the slice was created, in
-  UTC, written like `2026-11-02`. The template has no title line.
+- **R3.** The file `spec.md` is the built-in spec template as it is,
+  with its comments, and with no header. The name, the title, and the
+  time the slice was created live only in the event log (SD9, SD30).
   Check: unit, e2e
 - **R4.** The message of that commit is `<name>: add the spec and the event
   log`.
@@ -1047,7 +1044,7 @@ command is used the wrong way.
   each thing that is left: `  worktree  <full path>` or
   `  branch    slice/<name>`. Then it prints the line "To clean up, run:",
   and for each thing that is left, the worktree first, the command
-  `  git worktree remove --force "<full path>"` or
+  `  git worktree remove --force --force "<full path>"` or
   `  git branch -D "slice/<name>"`. Paths and branch names are in double
   quotes.
   Check: e2e
@@ -1233,7 +1230,8 @@ command is used the wrong way.
   after it, sliceflow changes nothing and prints these two lines to the
   error output: "Error: option "<option>" needs a value. Nothing was
   changed." and "To see the options, run: sliceflow <command> --help",
-  with the command the user ran.
+  with the command the user ran. For `--from`, an empty value, such as
+  `--from=` or `--from ""`, counts as no value (SD29).
   Check: e2e
 - **R75.** If a user gives a word that is not a name and not an option,
   sliceflow changes nothing and prints these two lines to the error
@@ -1662,6 +1660,43 @@ command is used the wrong way.
     name has at most 40 characters." first. After it is shortened, it
     gets the message about its characters.
   Rule: R20
+- **SD30.** `spec.md` has no header: no name, no title, and no date.
+  The time the slice was created is only the `at` of its first event
+  (decided, the human, 2026-11-11, in the design of step 7). It
+  replaces the header of `slice:` and `created:` lines.
+  Why: one source of truth. With a date in both places, the two could
+    disagree, e.g. a slice made at midnight UTC.
+  Not chosen: the date in both places; passing one time to both, which
+    would change the event log only for this.
+  Cost: `spec.md` alone does not show its name or its date. Whether a
+    readable header comes back is decided later.
+  Rule: R3
+- **SD31.** git ignores the lock file of the event log through the
+  repository's `info/exclude` file, which sliceflow adds one line to
+  (decided, the human, 2026-11-11, in the review of step 7's tasks).
+  Why: the lock leaves `.events.jsonl.lock` next to the log. Without
+    this, git shows it as a new file, and a `git add .` by the user or
+    an agent would commit it. `info/exclude` is shared by every worktree
+    of the repository, and is never committed.
+  Not chosen: removing the lock file at the end of `create`, because
+    every later event makes it again; a line in the user's `.gitignore`,
+    because that changes a file of the project.
+  Cost: sliceflow writes to a file inside `.git`. The line stays when a
+    slice is removed.
+  Rule: R2
+- **SD29.** An empty `--from`, such as `--from=`, is an option with no
+  value (R74), not a base (decided, the human, 2026-11-11, in the design
+  of step 7).
+  Why: an empty `--from` usually comes from a script with an empty
+    variable, as in `--from="$BASE"`. Starting from `main` would make a
+    slice from a base the user did not ask for. R73 already treats an
+    empty name as a missing name.
+  Not chosen: treating it as left out, so the base is `main`, as R28
+    does for an empty `--title`; an empty title is harmless, a wrong base
+    is not. Not chosen either: a branch named "", which gives R12 with an
+    empty name.
+  Cost: `--from` and `--title` treat an empty value in different ways.
+  Rule: R74
 
 ## Open questions
 

@@ -1,9 +1,3 @@
----
-slice: {{slice}}
-title: {{title}}
-created: {{date}}
----
-
 <!-- HOW TO FILL THIS TEMPLATE
 
      A spec says WHAT a feature does, never HOW it is built. No endpoints,
@@ -22,10 +16,9 @@ created: {{date}}
      the label.
 
      - Replace every {{...}} with real text. The text inside says what
-       goes there. sliceflow fills slice, title, and date itself. If they
-       still show {{...}}, fill them yourself.
-     - The title of the slice lives only in this front matter. Don't
-       repeat it in a heading or in other files.
+       goes there.
+     - The name, the title, and the date of the slice live only in the
+       event log. Don't repeat them in a heading or in other files.
      - Each section has a comment like this one with its rules. Follow it.
      - Keep the sections in this order. Don't rename them.
      - Repeat a block as often as needed: stories, scenarios,
