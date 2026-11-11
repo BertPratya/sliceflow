@@ -9,3 +9,5 @@
 | On Windows, a `sliceflow.worktree.dir` like `C:wt` (a drive, but not a full path) is not handled. On Linux and macOS, `~\a\b` gives a folder named `a\b`. | 0001, PR #1 | 2026-11-10 | |
 | In a partial clone, `git ls-tree` may fetch from the remote, which breaks "no data out". `GIT_NO_LAZY_FETCH=1` would stop it, but needs git 2.44. | 0001, PR #1 | 2026-11-10 | |
 | sliceflow needs git 2.31 or later (`--path-format`), but R14 says it does not check git's version. | 0001, PR #1 | 2026-11-10 | |
+| Rule for later slices (decided 2026-11-11, the human): when sliceflow commits a file it wrote, it adds it by its exact name with `git add -f`, never a whole folder, so `.gitignore` cannot stop it and nothing the user ignored gets in. Once tracked, a plain `git add` is enough. | 0001, step 7 design | 2026-11-11 | |
+| The `plan.md` and `tasks.md` templates still have a header (`slice:`, `created:`, and `after:` in plan.md). The spec has none since SD30. Decide in the slices that write them whether they keep it. Also decide later whether a readable header, made from the event log, comes back. | 0001, step 7 design | 2026-11-11 | |
