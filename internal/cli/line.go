@@ -26,6 +26,11 @@ func (l line) helpText() string {
 	return l.cmd.help
 }
 
+// emptyIsNoValue are the options, without "--", for which an empty value
+// counts as no value (R74, SD29). An empty --title or --description is
+// a value (R28).
+var emptyIsNoValue = []string{"from"}
+
 // checkLine reads the words of the command line, args, from the left,
 // and finds the command in commands, its name and its options' values,
 // whether help was asked for, and the first problem, as R40 and R71
@@ -40,7 +45,9 @@ func (l line) helpText() string {
 //     does not exist is a problem (R72). An option that needs a value
 //     takes the next word as its value, whatever it is; with no next
 //     word, it is a problem (R74). `--title=<text>` is the same as
-//     `--title <text>`. The last value of an option counts.
+//     `--title <text>`. The last value of an option counts. An empty
+//     value of an option in emptyIsNoValue, as in `--from=` or
+//     `--from ""`, is no value: it is the problem of R74 (SD29).
 //  4. For `sliceflow` and `sliceflow slice`, any other word must be a
 //     command word of that level, or it is a problem (R70).
 //  5. For `slice create` and `slice status`, the first such word is the
@@ -83,6 +90,10 @@ func checkLine(commands map[string]command, args []string) (found line, problem 
 				}
 				i++ // the next word is the value
 				value = args[i]
+			}
+			if value == "" && slices.Contains(emptyIsNoValue, name) {
+				keep(needsValue(found.words, "--"+name))
+				continue
 			}
 			found.call.options[name] = value
 

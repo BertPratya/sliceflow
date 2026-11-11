@@ -7,9 +7,10 @@ import (
 )
 
 // runWords runs args with Run, and returns the exit code and the two
-// outputs. A command's work that ran would print "not built yet" to
-// stderr, so a test that wants exactly the help or a problem also shows
-// that the work did not run.
+// outputs. A command's work that ran would print its own lines, so a
+// test that wants exactly the help or a problem also shows that the
+// work did not run. Never give it a command line with no problem and no
+// help: the work would run in the folder of the test.
 func runWords(args ...string) (int, string, string) {
 	var stdout, stderr bytes.Buffer
 	code := Run(context.Background(), args, &stdout, &stderr)
@@ -166,6 +167,36 @@ func TestNoCommand(t *testing.T) {
 		code, stdout, stderr := runWords(args...)
 		if code != 0 || stdout != guideHelp || stderr != "" {
 			t.Errorf("run %q: code %d, stdout %q, stderr %q; want 0 and the guide", args, code, stdout, stderr)
+		}
+	}
+}
+
+// TestCreateEmptyFrom checks R74 and SD29: an empty --from, as in
+// `--from=` or `--from ""`, is an option with no value. An empty
+// --title is a value (R28).
+func TestCreateEmptyFrom(t *testing.T) {
+	const want = "Error: option \"--from\" needs a value. Nothing was changed.\n" +
+		"To see the options, run: sliceflow slice create --help"
+	for _, args := range [][]string{
+		{"slice", "create", "x", "--from="},
+		{"slice", "create", "x", "--from", ""},
+		{"slice", "create", "--from=", "x"},
+	} {
+		_, err := checkLine(commands, args)
+		if err == nil || err.Error() != want {
+			t.Errorf("checkLine %q: problem %v, want %q", args, err, want)
+		}
+		if code := exitCode(err); code != exitWrongUse {
+			t.Errorf("checkLine %q: exit code %d, want %d", args, code, exitWrongUse)
+		}
+	}
+
+	for _, args := range [][]string{
+		{"slice", "create", "x", "--title="},
+		{"slice", "create", "x", "--description", ""},
+	} {
+		if _, err := checkLine(commands, args); err != nil {
+			t.Errorf("checkLine %q: problem %v, want none", args, err)
 		}
 	}
 }

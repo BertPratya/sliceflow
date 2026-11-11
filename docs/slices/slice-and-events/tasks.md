@@ -527,8 +527,9 @@ slice that is made.
 
 - `slice.CreateInput`, `slice.Created`, `slice.Create`: uses. Task 03
   creates them.
-- `func printCreated(w io.Writer, c slice.Created) error`: creates. Used
-  only in this task.
+- `func printCreated(w io.Writer, givenName string, c slice.Created) error`:
+  creates. Used only in this task. `givenName` was added when it was
+  built, because R22's note needs the name as the user gave it.
 - `type createOpts struct { NoIdentity bool; Config map[string]string; Path string }`:
   creates. `Path` "" means the normal `PATH`. Tasks 05 and 06 use it.
 - `func createCmd(t *testing.T, dir string, opts createOpts, args ...string) (cmd *exec.Cmd, home string)`:

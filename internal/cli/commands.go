@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os"
+	"strings"
+
+	"github.com/BertPratya/sliceflow/internal/slice"
 )
 
 // The help texts, word for word. printHelp prints them as they are.
@@ -73,7 +77,7 @@ type call struct {
 	// options holds the value of each option that was given, by its name
 	// without "--", e.g. "title". The last value counts when an option is
 	// given more than once (R71). An option that was not given has no
-	// key, so a command can tell `--from=` (given, "") from no --from.
+	// key, so a command can tell `--title=` (given, "") from no --title.
 	options map[string]string
 }
 
@@ -96,13 +100,65 @@ var commands = map[string]command{
 // break at the end. An error that is wrong use (see wrongUseMarker) gives
 // exit code 2, any other error 1.
 //
-// TEMPORARY: the work is not built yet, so each one fails with exit
-// code 1. Step 7 of the plan replaces runCreate with a call to the
-// create flow, step 8 replaces runStatus, and step 9 replaces runList.
+// TEMPORARY: the work of status and list is not built yet, so each one
+// fails with exit code 1. Step 8 of the plan replaces runStatus, and
+// step 9 replaces runList.
 
 // runCreate runs `slice create`: it makes a new slice (Story 1).
-func runCreate(_ context.Context, _ call, _, _ io.Writer) error {
-	return errNotBuilt("slice create")
+//
+// Steps:
+//  1. Get the current folder with os.Getwd. A failure is an error of
+//     two lines: sliceflow's own, then the system's text.
+//  2. Build slice.CreateInput from c: the name, and the values of
+//     --title, --description, and --from ("" when not given).
+//  3. Call slice.Create in that folder. Its error is returned as it is:
+//     its text is the whole message.
+//  4. Print the lines of R8 to stdout, with printCreated.
+func runCreate(ctx context.Context, c call, stdout, _ io.Writer) error {
+	dir, err := os.Getwd()
+	if err != nil {
+		return errors.New("Error: sliceflow could not find the current folder. Nothing was changed.\n" + err.Error())
+	}
+	created, err := slice.Create(ctx, dir, slice.CreateInput{
+		GivenName:   c.name,
+		Title:       c.options["title"],
+		Description: c.options["description"],
+		From:        c.options["from"],
+	})
+	if err != nil {
+		return err
+	}
+	return printCreated(stdout, c.name, created)
+}
+
+// printCreated prints to w the lines of R8 for the slice c, which was
+// made from the given name givenName:
+//  1. `Created slice <name>.`
+//  2. When c.Lowered, the Note of R22, with givenName.
+//  3. One Note of R5 for each file of c.IgnoredFiles, in its order.
+//  4. `  Branch:   slice/<name> (from <base>, at <commit>)`, with the
+//     first 7 characters of c.BaseCommit.
+//  5. `  Worktree: <path>`, then `Next: write the spec in <path>`.
+//
+// The lines are written at once. It returns the error of the write.
+func printCreated(w io.Writer, givenName string, c slice.Created) error {
+	var b strings.Builder
+	b.WriteString("Created slice " + c.Name + ".\n")
+	if c.Lowered {
+		b.WriteString(`  Note:     "` + givenName + `" was made lowercase.` + "\n")
+	}
+	for _, file := range c.IgnoredFiles {
+		b.WriteString("  Note:     " + file + " matches a .gitignore rule, so sliceflow added it anyway.\n")
+	}
+	commit := c.BaseCommit
+	if len(commit) > 7 {
+		commit = commit[:7]
+	}
+	b.WriteString("  Branch:   slice/" + c.Name + " (from " + c.Base + ", at " + commit + ")\n")
+	b.WriteString("  Worktree: " + c.Worktree + "\n")
+	b.WriteString("Next: write the spec in " + c.SpecPath + "\n")
+	_, err := io.WriteString(w, b.String())
+	return err
 }
 
 // runStatus runs `slice status`: it shows one slice (S45).

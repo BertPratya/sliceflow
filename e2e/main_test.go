@@ -6,12 +6,17 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
+
+	"github.com/BertPratya/sliceflow/internal/gittest"
 )
 
 // program is the path of the sliceflow program that TestMain built.
@@ -78,20 +83,125 @@ func runIn(t *testing.T, dir string, args ...string) result {
 		"GIT_CONFIG_NOSYSTEM=1",
 		"GIT_CONFIG_GLOBAL="+gitConfig,
 	)
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	return runCmd(t, cmd)
+}
 
-	err := cmd.Run()
+// createOpts are the choices of createCmd.
+type createOpts struct {
+	// NoIdentity gives git no name and no email, and sets
+	// user.useConfigOnly=true, so git cannot make a commit on any
+	// machine (TD8).
+	NoIdentity bool
+	// Config holds more settings of the global git config, by key, e.g.
+	// "sliceflow.worktree.dir".
+	Config map[string]string
+	// Path is the PATH of the program; "" means the normal PATH.
+	Path string
+}
+
+// createCmd prepares sliceflow with args, in the folder dir, and does
+// not start it. It returns the command and its home folder.
+//
+// Steps:
+//  1. Make a new home folder, with filepath.EvalSymlinks, so it is the
+//     real path that git also gives (/private/var on macOS).
+//  2. Write the global git config in it, with `git config --file`: a
+//     name and an email, or, with opts.NoIdentity, only
+//     user.useConfigOnly=true; gc.auto=0 and maintenance.auto=false, so
+//     no git is left running in the background; then each setting of
+//     opts.Config, in the order of their keys.
+//  3. The environment is cleanEnv, with HOME and USERPROFILE set to the
+//     home folder, GIT_CONFIG_NOSYSTEM=1, and GIT_CONFIG_GLOBAL set to
+//     the config. With opts.NoIdentity, EMAIL is removed too. When
+//     opts.Path is not "", PATH is opts.Path.
+//  4. The outputs go to two new bytes.Buffer, which runCmd reads.
+//
+// A test may set SysProcAttr, and call Start itself, before runCmd.
+func createCmd(t *testing.T, dir string, opts createOpts, args ...string) (cmd *exec.Cmd, home string) {
+	t.Helper()
+	home, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatalf("find the real path of the home folder: %v", err)
+	}
+
+	gitConfig := filepath.Join(home, "gitconfig")
+	settings := [][2]string{{"gc.auto", "0"}, {"maintenance.auto", "false"}}
+	if opts.NoIdentity {
+		settings = append(settings, [2]string{"user.useConfigOnly", "true"})
+	} else {
+		settings = append(settings, [2]string{"user.name", "Test User"}, [2]string{"user.email", "test@example.com"})
+	}
+	for _, key := range slices.Sorted(maps.Keys(opts.Config)) {
+		settings = append(settings, [2]string{key, opts.Config[key]})
+	}
+	for _, kv := range settings {
+		gittest.Git(t, home, "config", "--file", gitConfig, kv[0], kv[1])
+	}
+
+	var env []string
+	for _, kv := range cleanEnv() {
+		key, _, _ := strings.Cut(kv, "=")
+		upper := strings.ToUpper(key)
+		if (opts.NoIdentity && upper == "EMAIL") || (opts.Path != "" && upper == "PATH") {
+			continue
+		}
+		env = append(env, kv)
+	}
+	env = append(env,
+		"HOME="+home,
+		"USERPROFILE="+home,
+		"GIT_CONFIG_NOSYSTEM=1",
+		"GIT_CONFIG_GLOBAL="+gitConfig,
+	)
+	if opts.Path != "" {
+		env = append(env, "PATH="+opts.Path)
+	}
+
+	cmd = exec.Command(program, args...)
+	cmd.Dir = dir
+	cmd.Env = env
+	cmd.Stdout = &bytes.Buffer{}
+	cmd.Stderr = &bytes.Buffer{}
+	return cmd, home
+}
+
+// runCmd starts cmd, unless the test has started it already, waits for
+// it, and returns what it printed and its exit code. Each output is read
+// when it is a *bytes.Buffer; when cmd.Stdout or cmd.Stderr is nil, it
+// gets a new one first. The exit code is -1 when a signal ended it.
+func runCmd(t *testing.T, cmd *exec.Cmd) result {
+	t.Helper()
+	if cmd.Process == nil {
+		if cmd.Stdout == nil {
+			cmd.Stdout = &bytes.Buffer{}
+		}
+		if cmd.Stderr == nil {
+			cmd.Stderr = &bytes.Buffer{}
+		}
+		if err := cmd.Start(); err != nil {
+			t.Fatalf("start sliceflow %q: %v", cmd.Args[1:], err)
+		}
+	}
+
+	err := cmd.Wait()
 	code := 0
 	if err != nil {
 		var exitErr *exec.ExitError
 		if !errors.As(err, &exitErr) {
-			t.Fatalf("run sliceflow %q: %v", args, err)
+			t.Fatalf("run sliceflow %q: %v", cmd.Args[1:], err)
 		}
 		code = exitErr.ExitCode()
 	}
-	return result{stdout: stdout.String(), stderr: stderr.String(), code: code}
+	return result{stdout: bufferText(cmd.Stdout), stderr: bufferText(cmd.Stderr), code: code}
+}
+
+// bufferText returns the text of out when it is a *bytes.Buffer, and ""
+// otherwise.
+func bufferText(out io.Writer) string {
+	if b, ok := out.(*bytes.Buffer); ok {
+		return b.String()
+	}
+	return ""
 }
 
 // cleanEnv returns the environment of the tests without the variables

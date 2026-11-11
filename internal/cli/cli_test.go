@@ -6,7 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"path/filepath"
 	"testing"
+
+	"github.com/BertPratya/sliceflow/internal/slice"
 )
 
 // readLine reads args with checkLine, and fails the test now when the
@@ -22,8 +25,8 @@ func readLine(t *testing.T, args ...string) line {
 
 // TestCreateOptions checks R71: options before or after the name,
 // --option=<text>, the word after an option is its value, and the last
-// one counts. An option that was not given has no key, so `--from=`
-// (given, "") is told from no --from.
+// one counts. An option that was not given has no key, so `--title=`
+// (given, "") is told from no --title.
 func TestCreateOptions(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -64,9 +67,6 @@ func TestCreateOptions(t *testing.T) {
 		{"last one counts",
 			[]string{"slice", "create", "login", "--title", "A", "--title=B", "--from", "x", "--from", "y"},
 			"login", map[string]string{"title": "B", "from": "y"}},
-		{"--from empty given",
-			[]string{"slice", "create", "login", "--from="},
-			"login", map[string]string{"from": ""}},
 		{"name not checked here",
 			[]string{"slice", "create", "Bad Name!", "--title", "a\tb"},
 			"Bad Name!", map[string]string{"title": "a\tb"}},
@@ -153,7 +153,6 @@ func TestPlaceholders(t *testing.T) {
 		args []string
 		want string
 	}{
-		{[]string{"slice", "create", "x"}, "Error: sliceflow slice create is not built yet.\n"},
 		{[]string{"slice", "status", "x"}, "Error: sliceflow slice status is not built yet.\n"},
 		{[]string{"slice", "list"}, "Error: sliceflow slice list is not built yet.\n"},
 	}
@@ -164,5 +163,59 @@ func TestPlaceholders(t *testing.T) {
 			t.Errorf("Run %q: code %d, stdout %q, stderr %q; want 1, nothing, %q",
 				tt.args, code, stdout.String(), stderr.String(), tt.want)
 		}
+	}
+}
+
+// TestPrintCreated checks R5, R8, and R22: the lines of a slice that
+// was made, in their order, with both notes.
+func TestPrintCreated(t *testing.T) {
+	worktree := filepath.Join("home", "you", ".sliceflow", "worktrees", "shop", "card-payment")
+	spec := filepath.Join(worktree, "docs", "slices", "card-payment", "spec.md")
+	c := slice.Created{
+		Name:         "card-payment",
+		Lowered:      true,
+		Base:         "main",
+		BaseCommit:   "3f9a1c2e8b7d4a6f0c1e5d9b2a7f3c8e4d6b1a09",
+		Worktree:     worktree,
+		SpecPath:     spec,
+		IgnoredFiles: []string{"spec.md", ".events.jsonl"},
+	}
+	want := "Created slice card-payment.\n" +
+		"  Note:     \"Card-Payment\" was made lowercase.\n" +
+		"  Note:     spec.md matches a .gitignore rule, so sliceflow added it anyway.\n" +
+		"  Note:     .events.jsonl matches a .gitignore rule, so sliceflow added it anyway.\n" +
+		"  Branch:   slice/card-payment (from main, at 3f9a1c2)\n" +
+		"  Worktree: " + worktree + "\n" +
+		"Next: write the spec in " + spec + "\n"
+
+	var out bytes.Buffer
+	if err := printCreated(&out, "Card-Payment", c); err != nil {
+		t.Fatalf("printCreated: %v", err)
+	}
+	if out.String() != want {
+		t.Errorf("printCreated printed:\n%s\nwant:\n%s", out.String(), want)
+	}
+}
+
+// TestPrintCreatedNoNotes checks R8 and R22: with no lowercase and no
+// ignored file, there is no Note line.
+func TestPrintCreatedNoNotes(t *testing.T) {
+	c := slice.Created{
+		Name:       "login",
+		Base:       "dev",
+		BaseCommit: "8c41d07aa",
+		Worktree:   "wt",
+		SpecPath:   "spec",
+	}
+	want := "Created slice login.\n" +
+		"  Branch:   slice/login (from dev, at 8c41d07)\n" +
+		"  Worktree: wt\n" +
+		"Next: write the spec in spec\n"
+	var out bytes.Buffer
+	if err := printCreated(&out, "login", c); err != nil {
+		t.Fatalf("printCreated: %v", err)
+	}
+	if out.String() != want {
+		t.Errorf("printCreated printed:\n%s\nwant:\n%s", out.String(), want)
 	}
 }
