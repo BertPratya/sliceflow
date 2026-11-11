@@ -39,19 +39,43 @@ var ErrNotFound = errors.New("git not found.")
 //     buffers. After git exits, wait at most 5 seconds for its output
 //     (WaitDelay): a program that git started, such as a hook's
 //     background job, may hold the output open long after git is done.
-//  2. If git exited with 0, return the normal output and no error. This
+//  2. When ctx ends while git runs, send git an interrupt, not a kill
+//     (interrupt), so git can clean up after itself, for example remove
+//     its own lock files (R39). If git has not exited 5 seconds after
+//     the interrupt, Go kills it (WaitDelay).
+//  3. If git exited with 0, return the normal output and no error. This
 //     also holds when the 5 seconds ran out (exec.ErrWaitDelay): git
 //     itself exited with 0.
-//  3. If ctx ended (Ctrl+C, or a time limit), return ctx.Err(). This
-//     comes before step 5: Go kills git when ctx ends, and a killed git
-//     looks like a git that failed.
-//  4. If git was not found, return ErrNotFound.
-//  5. If git exited with another code, return an *Error with that code
+//  4. If ctx ended (Ctrl+C, or a time limit), return ctx.Err(). This
+//     comes before step 6: a git that was stopped looks like a git that
+//     failed. A git that exits with 0 after the interrupt also returns
+//     ctx.Err(): it may have stopped half way. The caller then asks git
+//     what is there.
+//  5. If git was not found, return ErrNotFound.
+//  6. If git exited with another code, return an *Error with that code
 //     and git's error output.
-//  6. Otherwise, return the error as it is.
+//  7. Otherwise, return the error as it is.
 //
 // On an error, the normal output is "".
 func run(ctx context.Context, dir string, args ...string) (string, error) {
+	return runGit(ctx, dir, false, args)
+}
+
+// runShielded is run, with git in a process group of its own (shield).
+// A Ctrl+C in the terminal goes to the terminal's process group, so it
+// does not reach this git, even when it is pressed many times. The undo
+// after a failure, and the questions it asks git, use it (R36, R39).
+//
+// It does not shield git from ctx: give it a context that a Ctrl+C does
+// not end.
+func runShielded(ctx context.Context, dir string, args ...string) (string, error) {
+	return runGit(ctx, dir, true, args)
+}
+
+// runGit is the code of run and runShielded, in the steps of run. When
+// shielded is true, it starts git in a process group of its own, with
+// shield.
+func runGit(ctx context.Context, dir string, shielded bool, args []string) (string, error) {
 
 	var stdout, stderr bytes.Buffer
 	var exitErr *exec.ExitError
@@ -61,6 +85,10 @@ func run(ctx context.Context, dir string, args ...string) (string, error) {
 	cmd.Stdout = &stdout
 	cmd.Dir = dir
 	cmd.WaitDelay = 5 * time.Second
+	cmd.Cancel = interrupt(cmd)
+	if shielded {
+		shield(cmd)
+	}
 
 	err := cmd.Run()
 

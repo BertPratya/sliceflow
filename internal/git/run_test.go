@@ -29,8 +29,15 @@ import (
 //     "linger", which gets its stderr and so holds it open, print a line
 //     to stdout, and exit with 0 at once, like a git whose hook started
 //     a background program;
-//   - "linger": wait for 30 seconds.
+//   - "linger": wait for 30 seconds;
+//   - the modes in fakeModes.
 const envFakeGit = "SLICEFLOW_TEST_FAKE_GIT"
+
+// fakeModes holds more modes of the fake git, for the tests of one
+// system only. A test file for that system adds its modes in its init
+// function, for example run_unix_test.go. Each mode ends the program
+// itself, with os.Exit.
+var fakeModes = map[string]func(){}
 
 // envLingerExe is the path of the original test program, outside the
 // fake git's folder. The "linger" copy is started from it, not from the
@@ -80,6 +87,9 @@ func TestMain(m *testing.M) {
 		time.Sleep(30 * time.Second)
 		os.Exit(0)
 	default:
+		if mode, ok := fakeModes[os.Getenv(envFakeGit)]; ok {
+			mode()
+		}
 		fmt.Fprintf(os.Stderr, "unknown %s mode %q\n", envFakeGit, os.Getenv(envFakeGit))
 		os.Exit(99)
 	}
@@ -175,11 +185,13 @@ func TestRunReturnsErrNotFound(t *testing.T) {
 }
 
 // Test 6: when the context ends while git runs, run stops git and returns
-// the context's error. Go kills git, and a killed git looks like git that
-// failed (an *exec.ExitError). So this test fails if run asks about the
-// exit code before it asks about the context. A context that is already
-// cancelled before git starts would not catch that, so the fake git
-// sleeps, and the time limit ends while it runs.
+// the context's error. On Linux and macOS, git gets an interrupt and
+// exits; on Windows, Go kills git when WaitDelay runs out, about 5
+// seconds later. A stopped git looks like git that failed (an
+// *exec.ExitError). So this test fails if run asks about the exit code
+// before it asks about the context. A context that is already cancelled
+// before git starts would not catch that, so the fake git sleeps, and
+// the time limit ends while it runs.
 func TestRunStopsGitWhenTheContextEnds(t *testing.T) {
 	useFakeGit(t, "sleep")
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
@@ -196,8 +208,8 @@ func TestRunStopsGitWhenTheContextEnds(t *testing.T) {
 	if errors.As(err, &gitErr) {
 		t.Errorf("run returned a *Error %v, want only the context's error", gitErr)
 	}
-	if took > 10*time.Second {
-		t.Errorf("run took %v, want it to stop git at once", took)
+	if took > 15*time.Second {
+		t.Errorf("run took %v, want it to stop git within about 5 seconds", took)
 	}
 	wantNoStdout(t, out)
 }

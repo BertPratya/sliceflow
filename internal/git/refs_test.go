@@ -118,3 +118,64 @@ func TestBranchNotARepo(t *testing.T) {
 		t.Errorf("BranchCommit returned the error %v (%T), want a *git.Error", err, err)
 	}
 }
+
+// Test 6: CreateBranch makes the branch at the given commit, and the
+// branch that is checked out stays main (R37). A second branch at an
+// older commit shows that the commit is used, not the commit that is
+// checked out. On a branch that exists, git refuses, and CreateBranch
+// returns git's error.
+func TestCreateBranch(t *testing.T) {
+	r := gittest.New(t)
+	first := r.Git("rev-parse", "HEAD")
+	mainTip := r.Commit("b.txt", "b\n")
+
+	if err := git.CreateBranch(context.Background(), r.Dir, "slice/login", mainTip); err != nil {
+		t.Fatalf("CreateBranch returned the error %v, want none", err)
+	}
+	if got := r.Git("rev-parse", "refs/heads/slice/login"); got != mainTip {
+		t.Errorf("slice/login is at %q, want %q", got, mainTip)
+	}
+	if err := git.CreateBranch(context.Background(), r.Dir, "slice/old", first); err != nil {
+		t.Fatalf("CreateBranch at the first commit returned the error %v, want none", err)
+	}
+	if got := r.Git("rev-parse", "refs/heads/slice/old"); got != first {
+		t.Errorf("slice/old is at %q, want %q", got, first)
+	}
+	if got := r.Git("symbolic-ref", "--short", "HEAD"); got != "main" {
+		t.Errorf("the checked-out branch is %q, want main", got)
+	}
+
+	err := git.CreateBranch(context.Background(), r.Dir, "slice/login", first)
+	var gitErr *git.Error
+	if !errors.As(err, &gitErr) {
+		t.Fatalf("CreateBranch on a branch that exists returned %v (%T), want a *git.Error", err, err)
+	}
+	if got := r.Git("rev-parse", "refs/heads/slice/login"); got != mainTip {
+		t.Errorf("after the refusal, slice/login is at %q, want %q", got, mainTip)
+	}
+}
+
+// Test 7: DeleteBranch removes the branch that CreateBranch made (R36),
+// and BranchExistsShielded sees it before and not after.
+func TestDeleteBranch(t *testing.T) {
+	r := gittest.New(t)
+	ctx := context.Background()
+	if err := git.CreateBranch(ctx, r.Dir, "slice/login", r.Git("rev-parse", "HEAD")); err != nil {
+		t.Fatalf("CreateBranch returned the error %v, want none", err)
+	}
+	if got, err := git.BranchExistsShielded(ctx, r.Dir, "slice/login"); err != nil || !got {
+		t.Fatalf("before the delete, BranchExistsShielded = %v, %v, want true, no error", got, err)
+	}
+
+	if err := git.DeleteBranch(ctx, r.Dir, "slice/login"); err != nil {
+		t.Fatalf("DeleteBranch returned the error %v, want none", err)
+	}
+
+	got, err := git.BranchExistsShielded(ctx, r.Dir, "slice/login")
+	if err != nil {
+		t.Fatalf("BranchExistsShielded returned the error %v, want none", err)
+	}
+	if got {
+		t.Errorf("after DeleteBranch, BranchExistsShielded = true, want false")
+	}
+}
