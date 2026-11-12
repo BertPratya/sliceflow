@@ -201,7 +201,7 @@ files, not in a chat.
   wakes the lead when a background command ends. Cursor has no reliable
   wake-up yet, so a Cursor lead does not listen during a run.
 - **One guide for every lead tool**, shipped as a skill with the first
-  release (0009).
+  release (0014).
 
 **The fallback lead is required and always on** (decided, the human).
 When a case needs a lead and no chat lead is listening, `sliceflow` starts
@@ -214,7 +214,7 @@ fresh context with just that case. Without it, "walk away" breaks.
   again.
 - **Open:** what a "solved" answer looks like: an answer `sliceflow` acts
   on, or the lead simply continues the flow through commands. Settled in
-  the slice that builds it (0011).
+  the slice that builds it (0009).
 - An off switch may come later, with configurable steps.
 
 **A session bound to a slice** (decided, the human). A bound session
@@ -357,7 +357,7 @@ and dollars only when the tool reports them.
 - `slice status` and the dashboard show usage per task, per review, and
   per slice. Codex users see their rate-limit window.
 - Optional budget caps in tokens, per task and per slice, with no cap by
-  default (0015).
+  default (0013).
 
 **Known facts about Codex, for 0008** (from the human's other project):
 
@@ -380,7 +380,7 @@ Three levels of "configurable":
 | 2. Steps from a fixed set | per phase, pick and order built-in steps | medium |
 | 3. Any workflow | your own steps and states | hard: a general engine |
 
-Levels 1 and 2 are required (configurable steps is slice 0014). Level 3
+Levels 1 and 2 are required (configurable steps is slice 0012). Level 3
 breaks the reliability promise: `sliceflow` can recover a step safely only
 if it knows what the step does. Each built-in step has the same shape
 (what it reads, what it writes, its events, safe to run twice), so level 3
@@ -537,7 +537,7 @@ tracked files: no `.env`, no installed packages, and ports clash.
 
 Principles: none. Details, settled in the slice that builds them:
 
-- What a lead's "solved" answer looks like (1.7; 0011).
+- What a lead's "solved" answer looks like (1.7; 0009).
 - Which run reach is the default (1.5).
 - Each event's fields beyond the shared ones.
 - How an approved document may change, and which changes need a new
@@ -759,7 +759,7 @@ only), and a wider `touches` by the rules. Anything else is a plan change.
 `sliceflow run` builds an approved plan by itself.
 
 1. **Pick a task** whose dependencies are done. In 0005, one at a time.
-   In 0013, up to the worker limit, never two tasks with overlapping
+   In 0011, up to the worker limit, never two tasks with overlapping
    `touches` at the same time.
 2. **Start a worker** in a worktree (1.15), with its brief. A fresh worker
    for each fix round, with the findings and what the last worker did.
@@ -801,7 +801,7 @@ only), and a wider `touches` by the rules. Anything else is a plan change.
 **Stop, continue, retry.** `sliceflow stop` stops the run: agents are
 interrupted, and their work is saved on their branches. `sliceflow run`
 continues from the log. A failed task can be retried from 0005; any failed
-or stopped step from 0012.
+or stopped step from 0010.
 
 ### 2.5 Preview and finish
 
@@ -858,7 +858,7 @@ The human wants to design the next slice while one is being built
 5. Building on top of an unmerged slice (restacking) only if waiting turns
    out to be too slow.
 
-### 2.7 Cancel a slice (0015)
+### 2.7 Cancel a slice (0013)
 
 **Decided (the human):**
 
@@ -884,7 +884,7 @@ The human wants to design the next slice while one is being built
 ## 3. The slices
 
 The order and contents of the slices are in `roadmap.md`: Part A
-(required, 0001-0015) and Part B (optional). The rules for cutting slices
+(required, 0001-0014) and Part B (optional). The rules for cutting slices
 are there too.
 
 ---

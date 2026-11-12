@@ -53,6 +53,78 @@ still turn AI off. So there are two kinds of pieces:
 This brings back rule 1 of 2026-10-30, and "the human writes code every
 week, in their piece." The human designs every piece, of both kinds.
 
+On 2026-11-08, after the git runner (step 4), the human chose fast mode
+(level 3) for the agent's steps left in slice 0001: steps 5 and 6 now,
+and steps 8 and 9 after step 7. Step 7, the create flow with its undo
+list, stays the human's piece. Worker and reviewer agents build each
+chunk, as in "Fast mode" below, on a branch instead of `main`. The lead
+opens a pull request, and the human reviews it and merges it, after a
+walkthrough together. The spec and the plan are the design of these
+steps; every choice they do not settle is an `Assumed:` line in the
+commit and the pull request.
+
+On 2026-11-11, the human moved step 7 of slice 0001, the whole create
+flow with its undo list, to fast mode too, because it has many cases.
+Unlike steps 5 and 6, the human and the lead design step 7 together
+first: the functions, their inputs and outputs, the steps, the undo
+list, and the tests. That design goes into tasks.md, and the workers
+build from it. The human reviews it as a pull request, as above.
+
+On 2026-11-12, after research (four AI reports on hand-writing and
+reading code in 2026), the human kept this way: design, write the
+first of each kind of problem, and read every diff by risk. The human
+added four changes:
+1. **Debug first, in fast mode too.** When a test of the core fails
+   (the lock, processes, the undo list, the event log), the human looks
+   for the cause first, for about 30 minutes. Then the agent explains;
+   the human decides the fix. For a bug that agents found and fixed
+   during a build, the human traces its cause in the walkthrough
+   before the lead explains it.
+2. **A changed test is a red flag.** Every pull request lists each
+   existing test that an agent changed, and the human reads those
+   closely.
+3. **For the agent's pieces, the agent drafts the design.** The agent
+   proposes it (2-3 options when there is a real choice, with how each
+   can fail); the human questions it and decides. This replaces step 5
+   of the loop for the agent's pieces. The human's pieces are still
+   designed by the human, and hard cases are designed together, as in
+   step 7 of slice 0001.
+4. **A monthly self-test.** Once a month, 1 hour, no AI: the human
+   explains one core module aloud, then finds a bug the agent planted
+   in it, within 45 minutes. If not, the human writes more by hand the
+   next month.
+
+Later on 2026-11-12, the human threw away the agent-written code made
+since the git runner (`b519861`): it worked, and the human could read
+it, but did not know all the principles behind it. After research (four
+more AI reports), the human chose co-programming for the rest of 0001
+and after. It replaces fast mode for steps 5 to 9 of 0001 (2026-11-08
+and 2026-11-11 above). The rules:
+1. **The human writes** the main path of each new function, the first
+   example of each pattern, and the first version for each system
+   (Windows, Unix). A version for another system is new work, not a
+   repeat.
+2. **The agent writes** the repeats and the boilerplate, from a list
+   the human writes first: one line per repeat, e.g. "`unknownOption`:
+   R72".
+3. **The test for each piece:** does it hold a decision the human has
+   not made, e.g. which layer owns a message, which exit code, what
+   happens on failure? If yes, it is the human's. The human draws this
+   line in writing, before the agent starts.
+4. **The agent reports what it decided.** With each piece, the agent
+   lists anything the design did not settle: a new error kind, a new
+   branch for one system, a changed test. If the list is not empty,
+   that part goes back to the human.
+5. **Predict first.** Before reading the agent's repeats, the human
+   writes one line on what they expect.
+6. **A weekly blank rebuild.** Every week, 30-45 minutes, no AI: the
+   human picks one function from the week before, deletes its body,
+   keeps its tests, and writes it again from the docs. This is on top
+   of the monthly self-test.
+7. **Fast mode** only for a step with no new decision at all.
+8. **Check the split once a month.** As the human gets better, more
+   becomes a repeat.
+
 On 2026-10-31, the human chose fast mode (level 3) for the rest of 0002,
 after writing the lock and the event write: what is left is mostly
 plumbing. The human reviews it in a walkthrough, and writes a parser of
@@ -75,7 +147,7 @@ from reading it. So:
   important test cases.
 - You write the boilerplate, e.g. test repos, command wiring, and file
   setup.
-- Before each hard slice (0003, 0005-0007, 0013), the human writes a small
+- Before each hard slice (0003, 0005-0007, 0011), the human writes a small
   prototype of what is new, with no AI and the docs open, e.g. streaming
   a program's output, `context` timeouts, goroutines, or a web server
   with Server-Sent Events.
@@ -89,8 +161,10 @@ and surveys), the human kept this way, with three rules:
 2. **Repeats are checked from outside.** For a repeat, the human writes the
    spec and the tests, you build it, and the tests plus a reviewer agent
    judge it. The human judges the result and skims the code.
-3. **Release in usable steps.** Each working part of sliceflow is released
-   for real people to try, not only at the end.
+3. **One release, when the product is complete** (changed 2026-11-11,
+   the human; it was "release in usable steps"). sliceflow is released
+   once, when Part A of the roadmap is done, so the first thing people
+   try is the whole workflow, controlled from the browser.
 
 On level 3, the walkthrough after each slice is not optional: it is how the
 human learns the code they did not write.
@@ -257,7 +331,9 @@ one commit each, about 200-400 lines.
    read the diff yourself.
 4. **Commit:** you commit the chunk, and never push. The message body says
    what is new, which parts follow a known pattern, the commands to try,
-   and every `Assumed:` choice the spec did not settle.
+   and every `Assumed:` choice the spec did not settle. The pull request
+   lists every existing test that an agent changed, and every bug that
+   agents found and fixed during the build.
 5. **The human reviews** the current code, not each commit's diff, in a
    walkthrough session: it follows the code the way it runs, one stop at a
    time, with 2-3 questions at each stop. The human reads in their editor,
@@ -309,7 +385,9 @@ When the human asks you for the answer, offer the next rung first.
 
 ## Git
 
-- Work directly on `main`. No worktrees.
+- Work directly on `main`. No worktrees. The exception is fast-mode
+  work that the human asked to review as a pull request (2026-11-08): it
+  goes on its own branch, which the lead pushes, and the human merges.
 - On level 2, the human commits: leave your changes uncommitted, for the
   human to read. On level 3, you commit each chunk, as in fast mode.
 - **Commit messages** follow Go's own style (decided 2026-11-01), not

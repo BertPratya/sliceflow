@@ -34,6 +34,11 @@ Why this order:
   to show.
 - **Claude Code is the first agent tool.** Codex comes in 0008. The
   first release needs both.
+- **One release, at the end of Part A** (decided 2026-11-11, the human).
+  sliceflow is released once, when Part A is done, so the first thing
+  people try is the complete product. Renumbered the same day: the
+  release moved from 0009 to 0014, and finish (was 0010) moved to
+  Part B.
 
 ### Part A: required
 
@@ -47,13 +52,12 @@ Why this order:
 | 0006 | dashboard | `sliceflow serve`: every slice live in the browser, on 127.0.0.1 with a token: tasks, agent activity grouped by slice, usage, "Needs you", and the diff view (changed files, a colored diff, the comparison picker, from the same core as `sliceflow diff`) | 1.8 |
 | 0007 | web actions | stop, continue, and retry from the browser; approve or reject in the browser (`via: browser`), with the document and what changed; browser notifications; open a worktree in the editor (`sliceflow open`) | 1.6, 1.8, 2.4 |
 | 0008 | Codex | a second agent tool, through the Codex app server; proves the adapter shape; one tool can review what the other wrote; binding and the sandbox for Codex | 1.9 |
-| 0009 | first release | `sliceflow init`, the lead's guide as a skill, `--version`, release binaries for Windows, macOS, and Linux, a README with the pitch, and a demo | 1.1, 1.7 |
-| 0010 | finish | the full path to `main`: integration review, the preview, result approval, update from `main`, then a local `--no-ff` merge or a pull request (`finish: pr`, the push approved by the human); deferred findings go to the backlog | 2.4, 2.5 |
-| 0011 | cases and the lead | each stop goes to the right level: the case shape, routing by kind, the chat lead through `sliceflow wait`, the fallback lead (always on), and "blocked: needs the human" | 1.6, 1.7 |
-| 0012 | reliability | a run survives a killed `sliceflow`, a lost network, a stuck agent: heartbeats, time limits per agent run, retries, checking the log against reality on restart; `sliceflow retry` for any failed or stopped step; taking over a lock left by a crashed `sliceflow` | 1.8, 2.4 |
-| 0013 | parallel tasks | independent tasks run at the same time: worker slots (one reused worktree each), `touches` overlap, merge queue, conflicts | 2.4 |
-| 0014 | configurable steps | pick and order the built-in steps | 1.10 |
-| 0015 | budgets, cancel, cleanup | budget caps in tokens per task and per slice; cancel and reopen a slice; clean up a slice half made by a crash | 1.9, 2.7 |
+| 0009 | cases and the lead | each stop goes to the right level: the case shape, routing by kind, the chat lead through `sliceflow wait`, the fallback lead (always on), and "blocked: needs the human" | 1.6, 1.7 |
+| 0010 | reliability | a run survives a killed `sliceflow`, a lost network, a stuck agent: heartbeats, time limits per agent run, retries, checking the log against reality on restart; `sliceflow retry` for any failed or stopped step; taking over a lock left by a crashed `sliceflow` | 1.8, 2.4 |
+| 0011 | parallel tasks | independent tasks run at the same time: worker slots (one reused worktree each), `touches` overlap, merge queue, conflicts | 2.4 |
+| 0012 | configurable steps | pick and order the built-in steps | 1.10 |
+| 0013 | budgets, cancel, cleanup | budget caps in tokens per task and per slice; cancel and reopen a slice; clean up a slice half made by a crash | 1.9, 2.7 |
+| 0014 | first release | `sliceflow init`, the lead's guide as a skill, `--version`, release binaries for Windows, macOS, and Linux, a README with the pitch, a demo GIF and video, and a website for sliceflow | 1.1, 1.7 |
 
 ### Part B: optional
 
@@ -61,6 +65,7 @@ Numbered when they are picked. No fixed order.
 
 | Slice | What you can do after it | Design |
 |---|---|---|
+| finish | the full path to `main`: integration review, the preview, result approval, update from `main`, then a local `--no-ff` merge or a pull request (`finish: pr`, the push approved by the human); deferred findings go to the backlog. Moved from Part A on 2026-11-11; whether it comes back is decided later | 2.4, 2.5 |
 | stacking | design a slice ahead, on top of another | 2.6 |
 | stable output | errors as JSON with codes; the event log and `--json` documented and versioned; a parsed document as JSON (e.g. `sliceflow spec show --json`) | 1.13 |
 | user hooks | your own hooks before and after events, with a trust check before a repo's hooks run | - |
@@ -77,10 +82,11 @@ Numbered when they are picked. No fixed order.
 
 ### Notes
 
-- **0009 is the first public release.** It comes after web control and
-  both agent tools. So the first thing people try is a slice built and
-  controlled from the browser, with Claude Code or Codex. Until 0010,
-  merging into `main` is done by hand with git.
+- **0014 is the first public release.** It comes after all of Part A.
+  So the first thing people try is a slice built and controlled from the
+  browser, with Claude Code or Codex, that survives a crash, and runs
+  tasks in parallel. Without finish (Part B), merging into `main` is
+  done by hand with git.
 - **0002 to 0004 make one planning phase with one approval.** 0002 ends
   at a checked spec. 0003 adds the spec review by an agent. 0004 ends at
   the approval of the spec, plan, and tasks together.
@@ -88,7 +94,7 @@ Numbered when they are picked. No fixed order.
   Code (design 1.9). So until 0008, a run on Windows has only layers 1
   and 3 of the permissions.
 - **The biggest unknowns** are 0003 (running agents headless, and the
-  permissions without a sandbox on Windows) and 0012 (processes and
+  permissions without a sandbox on Windows) and 0010 (processes and
   restarts on three systems). A small prototype before each of them
   lowers the risk.
 - The numbers, order, and contents of the later slices may still change
@@ -100,3 +106,5 @@ Numbered when they are picked. No fixed order.
   `sliceflow` on this repo and one other project, and fix what hurts.
   Then a write-up with real numbers: time, tokens, and how often the lead
   or the human was needed. This is an activity, not a slice.
+- **A portfolio website** for the human, made with AI. It is not part of
+  sliceflow, so it is an activity, not a slice.

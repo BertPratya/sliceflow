@@ -37,7 +37,6 @@ it is done.
 | Tests on three systems | .github/workflows/test.yml | new |
 
 New dependencies:
-- `github.com/spf13/cobra`, to read the command line (TD1).
 - `golang.org/x/sys`, for the lock calls of each system (TD2).
 
 ### How the pieces connect
@@ -47,7 +46,7 @@ Each arrow means "calls". Calls only go down, never up.
 ```
 cmd/sliceflow       starts the program, catches a crash, handles Ctrl+C
       |
-internal/cli        the routing: reads the command line with Cobra,
+internal/cli        the routing: reads the command line with a table,
       |             picks the command, turns the result into an exit code
       |
       |-- slice create  --> internal/slice  (create flow)
@@ -60,8 +59,8 @@ internal/slice  ------> internal/git        (runner, then git operations)
 
 - `internal/cli` holds only the routing. It knows the commands and the
   options, but not how a slice is made.
-- `internal/slice` holds the work. It knows nothing about Cobra, so its
-  tests call it directly, without the command line.
+- `internal/slice` holds the work. It knows nothing about the command
+  line, so its tests call it directly.
 - `internal/git`, `internal/eventlog`, and `internal/filelock` know
   nothing about slices.
 
@@ -100,8 +99,8 @@ yet, and its tests fail.
 
 ### Flow 1: Create a slice
 
-1. Cobra reads the command line. A wrong command line stops here (R70
-   to R75), with `--help` first.
+1. `internal/cli` reads the command line. A wrong command line stops
+   here (R70 to R75), with `--help` first.
 2. The create flow checks, in the order of R40: control characters,
    the name, git found, the repository, the base, then a name that is
    not free.
@@ -115,7 +114,8 @@ yet, and its tests fail.
 
 ### Flow 2: See one slice
 
-1. Cobra reads the command line, and the name is checked as in R40.
+1. `internal/cli` reads the command line, and the name is checked as
+   in R40.
 2. The log is found in the order of R51: the worktree file, the branch
    tip, then the `main` tip.
 3. The first line must be a readable `slice.created` (R55). The other
@@ -223,17 +223,22 @@ None.
 
 ## Decisions
 
-- **TD1.** Read the command line with Cobra.
-  Why: it supports commands inside commands, and options before or after
-    the name (R71). It lets us replace its help and its error messages
-    with the spec's own text.
-  Not chosen: the standard `flag` package. It stops reading options at
-    the first word that is not an option, and has no commands, so we
-    would write both ourselves.
-  Cost: an outside library. Cobra prints its own text by default: usage
-    on an error, a `completion` command, its own help layout. Each one
-    must be turned off, and the e2e tests compare the full output to
-    catch any that is left.
+- **TD1.** Read the command line with a table of our own: a map from
+  the command words ("slice create") to each command's help, whether it
+  takes a name, its options, and the function that does its work. One
+  function, `checkLine`, reads the words from the left against the
+  table. Changed on 2026-11-10, in the review of PR #1: the first build
+  used Cobra.
+  Why: sliceflow has three commands. The table is short, has no outside
+    library, and prints only the spec's own text. Go's own `go` command
+    and Terraform read their command lines the same way.
+  Not chosen: Cobra. It needed each of its own texts turned off: usage
+    on an error, the `help` and `completion` commands, its help layout.
+    Not chosen either: the standard `flag` package. It stops reading
+    options at the first word that is not an option, and has no
+    commands.
+  Cost: we write and test the reading ourselves, e.g. options before or
+    after the name, `--title=<text>`, and the last value counting (R71).
 - **TD2.** Write the lock with `golang.org/x/sys`: `unix.Flock` on Linux
   and macOS, `windows.LockFileEx` on Windows, one file for each, picked
   by Go when it builds.
@@ -298,7 +303,6 @@ None.
   use a new context (TD5). Sending Ctrl+C from a test is easy on Linux
   and macOS but hard on Windows. If it does not work on Windows, that
   test is skipped there, and the skip is written in the test.
-- **Cobra's own text.** See TD1.
 - **The template's `title:` line.** `templates/default/spec.md` still has
   a `title:` line in its front matter. The title now lives only in the
   event log (SD9), so step 7 removes the line.
