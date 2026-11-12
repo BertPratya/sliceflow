@@ -162,8 +162,9 @@ A developer starts a new slice with one command.
   **Then** sliceflow changes nothing, prints this to the error output, and
   exits with code 1:
   ```
-  Error: this folder is not in a git repository. Nothing was changed.
-  Run sliceflow inside your project.
+  Error: git could not find the project. Nothing was changed.
+  git said:
+    fatal: not a git repository (or any of the parent directories): .git
   ```
   Shows: R13
 - **S7.** **Given** I am in a git repository that has no commits yet,
@@ -854,11 +855,12 @@ command is used the wrong way.
 
 ### The repository
 
-- **R13.** If the folder is not inside a git repository, sliceflow changes
-  nothing and prints these two lines to the error output: "Error: this
-  folder is not in a git repository. Nothing was changed." and "Run
-  sliceflow inside your project." This holds for `slice create`,
-  `slice status`, and `slice list`.
+- **R13.** If git cannot find the project, e.g. because the folder is
+  not inside a git repository, sliceflow changes nothing and prints this
+  to the error output: the line "Error: git could not find the project.
+  Nothing was changed.", then "git said:", then git's error output, word
+  for word, as in R37. sliceflow does not guess the cause (SD29). This
+  holds for `slice create`, `slice status`, and `slice list`.
   Check: e2e
 - **R14.** If git cannot be run, because it is not installed or not on the
   path, sliceflow changes nothing and prints these two lines to the error
@@ -1662,6 +1664,20 @@ command is used the wrong way.
     name has at most 40 characters." first. After it is shortened, it
     gets the message about its characters.
   Rule: R20
+
+- **SD29.** When git cannot find the project, sliceflow shows git's own
+  message after one line of its own. It has no message of its own for
+  "not a git repository" (decided, the human, 2026-11-12).
+  Why: git exits with code 128 for many fatal errors, e.g. not a
+    repository, dubious ownership, or a worktree whose project was moved,
+    and its text is translated. So sliceflow cannot confirm the cause
+    without guessing (design 1.17). Git's message already names it.
+  Not chosen: R13's own two lines, "Error: this folder is not in a git
+    repository." and "Run sliceflow inside your project.", which are
+    friendlier but need the cause confirmed.
+  Cost: no line tells the user to run sliceflow inside their project;
+    git's text says it in its own words.
+  Rule: R13
 
 ## Open questions
 
