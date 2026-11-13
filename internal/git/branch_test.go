@@ -55,6 +55,14 @@ func TestBranchExistsOutsideARepo(t *testing.T) {
 	}
 }
 
+// Test 5b: a branch that exists only on a remote is not a local branch
+// (R26). The remote branch is made by hand, so no remote is needed.
+func TestBranchExistsForARemoteBranch(t *testing.T) {
+	repo := newRepoWithMain(t)
+	gitIn(t, repo, "update-ref", "refs/remotes/origin/slice/login", "HEAD")
+	wantBranchExists(t, repo, "slice/login", false)
+}
+
 // Tests of BranchCommit.
 
 // Test 6: for a local branch, BranchCommit returns the commit at its
