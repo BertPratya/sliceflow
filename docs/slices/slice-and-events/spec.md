@@ -890,10 +890,10 @@ command is used the wrong way.
   project wins over a global one. `<dir>` may be a full path, a path that
   starts with `~` (the user's home folder), or a path relative to the main
   project's folder. `~` means the home folder only at the start of the
-  value, as `~`, `~/`, or `~\`. An empty value counts as not set. The path
-  that sliceflow prints has no `.` or `..` parts. sliceflow does not check
-  the folder beforehand. If git cannot make the worktree there, R37
-  applies.
+  value, as `~`, `~/`, or, on Windows only, `~\`. An empty value counts
+  as not set. The path that sliceflow prints has no `.` or `..` parts.
+  sliceflow does not check the folder beforehand. If git cannot make the
+  worktree there, R37 applies.
   Check: e2e
 
 ### The name
