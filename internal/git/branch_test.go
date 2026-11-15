@@ -144,3 +144,63 @@ func wantNoBranch(t *testing.T, repo, branch string) {
 		t.Errorf("BranchCommit(%q) returned %q with its error, want \"\"", branch, got)
 	}
 }
+
+// CreateBranch makes the branch at the given commit, which need not be
+// the tip of the current branch.
+func TestCreateBranchAtACommit(t *testing.T) {
+	repo := newRepoWithMain(t)
+	commit := gitOutput(t, repo, "rev-parse", "main~1")
+
+	if err := CreateBranch(context.Background(), repo, "slice/login", commit); err != nil {
+		t.Fatalf("CreateBranch returned the error %v, want none", err)
+	}
+	if got := gitOutput(t, repo, "rev-parse", "refs/heads/slice/login"); got != commit {
+		t.Errorf("slice/login is at %s, want %s", got, commit)
+	}
+	if got := gitOutput(t, repo, "branch", "--show-current"); got != "main" {
+		t.Errorf("the checked-out branch is %q, want main", got)
+	}
+}
+
+// CreateBranch returns git's error for a branch that exists.
+func TestCreateBranchThatExists(t *testing.T) {
+	repo := newRepoWithMain(t)
+	commit := gitOutput(t, repo, "rev-parse", "main")
+
+	err := CreateBranch(context.Background(), repo, "main", commit)
+	wantGitError(t, err)
+}
+
+// DeleteBranch deletes a branch with commits that are on no other
+// branch.
+func TestDeleteBranch(t *testing.T) {
+	repo := newRepoWithMain(t)
+	gitIn(t, repo, "switch", "--quiet", "-c", "slice/login")
+	gitIn(t, repo, "commit", "--quiet", "--allow-empty", "-m", "only here")
+	gitIn(t, repo, "switch", "--quiet", "main")
+
+	if err := DeleteBranch(context.Background(), repo, "slice/login"); err != nil {
+		t.Fatalf("DeleteBranch returned the error %v, want none", err)
+	}
+	wantBranchExists(t, repo, "slice/login", false)
+}
+
+// DeleteBranch returns git's error for a branch that does not exist.
+func TestDeleteBranchThatDoesNotExist(t *testing.T) {
+	repo := newRepoWithMain(t)
+
+	err := DeleteBranch(context.Background(), repo, "nosuch")
+	wantGitError(t, err)
+}
+
+// DeleteBranch returns git's error for a branch that is checked out in a
+// worktree, and the branch stays.
+func TestDeleteBranchCheckedOutInAWorktree(t *testing.T) {
+	repo := newRepoWithMain(t)
+	gitIn(t, repo, "branch", "slice/login")
+	gitIn(t, repo, "worktree", "add", "--quiet", filepath.Join(t.TempDir(), "login"), "slice/login")
+
+	err := DeleteBranch(context.Background(), repo, "slice/login")
+	wantGitError(t, err)
+	wantBranchExists(t, repo, "slice/login", true)
+}

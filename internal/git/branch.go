@@ -56,3 +56,20 @@ func BranchExists(ctx context.Context, dir, branch string) (bool, error) {
 	return false, err
 
 }
+
+// CreateBranch makes the local branch at commit, without checking it
+// out. When git cannot make it, for example because the branch exists,
+// it returns git's error as a *Error, with git's message word for word.
+func CreateBranch(ctx context.Context, dir, branch, commit string) error {
+	_, err := run(ctx, dir, "branch", branch, commit)
+	return err
+}
+
+// DeleteBranch deletes the local branch, even when its commits are on no
+// other branch. Git refuses, with a *Error, when the branch does not
+// exist or is checked out in a worktree, so a worktree of the branch
+// must be removed first.
+func DeleteBranch(ctx context.Context, dir, branch string) error {
+	_, err := run(ctx, dir, "branch", "-D", branch)
+	return err
+}
