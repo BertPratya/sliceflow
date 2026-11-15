@@ -639,20 +639,34 @@ command is used the wrong way.
     sliceflow <command> [options]
 
   Commands:
-    slice create <name>  Make a new slice
-    slice status <name>  Show one slice
-    slice list           Show all slices
+    slice  Make and see slices
 
-  For help with a command, run: sliceflow <command> --help
+  Options:
+    -h, --help  Show this help.
   ```
   Shows: R67
 - **S42.** **When** I run `sliceflow` with nothing after it,
   **Then** sliceflow prints the same guide as in S41 to the normal output,
   changes nothing, and exits with code 0.
   Shows: R67
-- **S43.** **When** I run `sliceflow slice` with nothing after it,
-  **Then** sliceflow prints the same guide as in S41 to the normal output,
-  changes nothing, and exits with code 0.
+- **S43.** **When** I run `sliceflow slice --help`, or `sliceflow slice`
+  with nothing after it,
+  **Then** sliceflow prints the help of the group `slice` to the normal
+  output, changes nothing, and exits with code 0:
+  ```
+  Make and see slices.
+
+  Usage:
+    sliceflow slice <command> [options]
+
+  Commands:
+    create <name>  Make a new slice
+    list           Show all slices
+    status <name>  Show one slice
+
+  Options:
+    -h, --help  Show this help.
+  ```
   Shows: R67
 - **S44.** **When** I run `sliceflow slice create --help`,
   **Then** sliceflow prints this to the normal output, changes nothing, and
@@ -664,10 +678,10 @@ command is used the wrong way.
     sliceflow slice create <name> [options]
 
   Options:
-    --title <text>        A short title for the slice. Default: the name.
     --description <text>  One or two sentences about the slice.
     --from <branch>       The branch to start from. Default: main.
-    --help                Show this help.
+    --title <text>        A short title for the slice. Default: the name.
+    -h, --help            Show this help.
   ```
   Shows: R68
 - **S45.** **When** I run `sliceflow slice status --help`,
@@ -680,7 +694,7 @@ command is used the wrong way.
     sliceflow slice status <name> [options]
 
   Options:
-    --help  Show this help.
+    -h, --help  Show this help.
   ```
   Shows: R68, R69
 - **S46.** **When** I run `sliceflow slice delete card-payment`,
@@ -1189,14 +1203,19 @@ command is used the wrong way.
 
 ### Help, and a command used the wrong way
 
-- **R67.** When a user runs `sliceflow --help`, `sliceflow slice --help`,
-  `sliceflow` with no command, or `sliceflow slice` with no command, sliceflow prints the guide shown in
-  S41 to the normal output, changes nothing, and exits with code 0.
+- **R67.** When a user runs `sliceflow --help`, `sliceflow -h`, or
+  `sliceflow` with no command, sliceflow prints the guide shown in S41:
+  one line for each group of commands. When a user runs a group with
+  `--help` or `-h`, or a group with no command after it, as in
+  `sliceflow slice`, sliceflow prints the help of that group, shown in
+  S43: one line for each of its commands. Both list their lines in
+  alphabetical order (SD30). Both go to the normal output, change
+  nothing, and exit with code 0.
   Check: e2e
 - **R68.** When a user runs a command with `--help`, sliceflow prints to the
   normal output one sentence about the command, its usage line, and its
-  options with a short description of each, changes nothing, and exits
-  with code 0. Every command has `--help`. The help of `slice create` is
+  options with a short description of each, in alphabetical order, with
+  `-h, --help` last (SD30). It changes nothing, and exits with code 0. Every command has `--help`. The help of `slice create` is
   shown in S44.
   Check: e2e
 - **R69.** The help of `slice status` is shown in S45. The help of
@@ -1209,7 +1228,8 @@ command is used the wrong way.
   command "<words>". Nothing was changed." and "To see the commands, run:
   sliceflow --help". `<words>` is the first word after `sliceflow` when it
   is not `slice`, or `slice` and the word after it when that word is not a
-  command of `slice`. sliceflow does not guess what the user meant.
+  command of `slice`. sliceflow does not guess what the user meant. This
+  holds even when the words include `--help`.
   Check: e2e
 - **R71.** A word that starts with `-` is an option. `-h` means the same as
   `--help`. Options may come before or after the name. `--title=<text>`
@@ -1678,6 +1698,21 @@ command is used the wrong way.
   Cost: no line tells the user to run sliceflow inside their project;
     git's text says it in its own words.
   Rule: R13
+- **SD30.** Help has two levels: `sliceflow --help` lists the groups of
+  commands, such as `slice`, and `sliceflow <group> --help` lists the
+  commands of that group. Each list is in alphabetical order, and ends
+  with the options, as `-h, --help`. The help of a command lists its
+  options in alphabetical order too, with `-h, --help` last (decided,
+  the human, 2026-11-15).
+  Why: the roadmap has about 25 commands; one list of all of them would
+    be too long. gh and docker show help the same way.
+  Not chosen: one guide with every command, as before, because it grows
+    with each slice; the order in which the commands are used, because
+    each command would need a place in the list.
+  Cost: a user needs one more step to see a group's commands. In 0001
+    the guide has a single group. The options of slice create are no
+    longer in the order a user fills them in.
+  Rule: R67, R68
 
 ## Open questions
 

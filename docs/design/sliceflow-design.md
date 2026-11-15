@@ -572,6 +572,20 @@ and only they know what they need on this computer.
   shows the tool's text.
 - The first case is git, in 0001 (spec `slice-and-events`, SD8).
 
+### 1.18 Commands and options
+
+**Decided (the human).** Each slice adds commands, and the help must stay
+easy to read as they grow.
+
+- Help has two levels: `sliceflow --help` lists the groups of commands,
+  and `sliceflow <group> --help` lists the commands of one group (spec
+  `slice-and-events`, SD30).
+- An option name means the same thing in every command that has it, e.g.
+  `--from <branch>` is always the branch to start from. An option with a
+  different meaning gets a different name, e.g. `--file <path>`, not a
+  second `--from`.
+- `-h` and `--help` are the only options that every command has.
+
 ---
 
 ## 2. The processes
@@ -925,6 +939,9 @@ what replaced it.
   `sliceflow slice status` with an error, because that line holds the
   facts of the slice; `slice list` leaves the slice out with a warning.
   Any other damaged line is still skipped with a warning (1.13).
+- 2026-11-15, the human: help has two levels, the groups and then the
+  commands of one group; an option name means the same thing in every
+  command, and a different meaning gets a different name (1.18).
 
 ---
 
