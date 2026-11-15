@@ -12,9 +12,9 @@ type row struct {
 	left, right string
 }
 
-// guideText returns the guide of S41, built from registry: the intro,
-// the usage line, one line for each group in alphabetical order, and the
-// help option (R67, SD30).
+// guideText returns the guide that sliceflow --help shows, built from
+// registry: the intro, the usage line, one line for each group in
+// alphabetical order, and the help option.
 func guideText(registry CommandRegistry) string {
 	var rows []row
 	for _, name := range slices.Sorted(maps.Keys(registry.Groups)) {
@@ -32,10 +32,10 @@ func guideText(registry CommandRegistry) string {
 	return b.String()
 }
 
-// groupHelpText returns the help of the group name, as in S43: the
-// group's description, its usage line, one line for each of its
-// commands in alphabetical order, with their arguments, and the help
-// option (R67, SD30).
+// groupHelpText returns the help of the group name, e.g. what
+// sliceflow slice --help shows: the group's description, its usage line,
+// one line for each of its commands in alphabetical order, with their
+// arguments, and the help option.
 func groupHelpText(name string, group CommandGroup) string {
 	var rows []row
 	for _, actionName := range slices.Sorted(maps.Keys(group.Actions)) {
@@ -87,10 +87,10 @@ func writeRows(b *strings.Builder, rows []row) {
 	}
 }
 
-// commandHelpText returns the help of one command, as in S44 and S45:
-// its long description, its usage line, its arguments in their order on
-// the command line, when it has any, and its options in alphabetical
-// order, with -h, --help last (R68, R69, SD30).
+// commandHelpText returns the help of one command, e.g. what
+// sliceflow slice create --help shows: its long description, its usage
+// line, its arguments in their order on the command line, when it has
+// any, and its options in alphabetical order, with -h, --help last.
 func commandHelpText(groupName, actionName string, action CommandAction) string {
 	var rows []row
 	for _, name := range slices.Sorted(maps.Keys(action.Options)) {
@@ -101,7 +101,7 @@ func commandHelpText(groupName, actionName string, action CommandAction) string 
 	var b strings.Builder
 	b.WriteString(action.LongDescription)
 	b.WriteString("\n\n")
-	fmt.Fprintf(&b, "Usage:\n  sliceflow %s %s%s [options]\n\n", groupName, actionName, argsUsage(action.Args))
+	fmt.Fprintf(&b, "Usage:\n  %s\n\n", usageLine(groupName, actionName, action))
 	if len(action.Args) > 0 {
 		b.WriteString("Arguments:\n")
 		writeRows(&b, argRows(action.Args))
@@ -129,4 +129,10 @@ func argRows(args []CommandArg) []row {
 		rows = append(rows, row{argUsage(arg), arg.Description})
 	}
 	return rows
+}
+
+// usageLine returns how a command is typed, e.g.
+// "sliceflow slice create <name> [options]". Help and some errors show it.
+func usageLine(groupName, actionName string, action CommandAction) string {
+	return "sliceflow " + groupName + " " + actionName + argsUsage(action.Args) + " [options]"
 }

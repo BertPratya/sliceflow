@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-// wantGuide is the guide of S41, word for word. The test keeps its own
-// copy, so a change to the guide's wording must change the spec too.
+// wantGuide is the guide, word for word. The test keeps its own copy, so
+// a change to the wording fails until the test is changed too.
 const wantGuide = `sliceflow runs a spec-driven workflow with AI coding agents.
 
 Usage:
@@ -20,8 +20,8 @@ Options:
   -h, --help  Show this help.
 `
 
-// wantSliceHelp is the help of the group slice, in S43, word for word.
-// Its commands are in alphabetical order (SD30).
+// wantSliceHelp is the help of the group slice, word for word. Its
+// commands are in alphabetical order.
 const wantSliceHelp = `Make and see slices.
 
 Usage:
@@ -36,7 +36,7 @@ Options:
   -h, --help  Show this help.
 `
 
-// wantCreateHelp is the help of slice create, in S44, word for word.
+// wantCreateHelp is the help of slice create, word for word.
 const wantCreateHelp = `Make a new slice: a branch, a worktree, a spec, and an event log.
 
 Usage:
@@ -52,7 +52,7 @@ Options:
   -h, --help            Show this help.
 `
 
-// wantStatusHelp is the help of slice status, in S45, word for word.
+// wantStatusHelp is the help of slice status, word for word.
 const wantStatusHelp = `Show one slice: its title, description, start, branch, worktree, and events.
 
 Usage:
@@ -65,7 +65,7 @@ Options:
   -h, --help  Show this help.
 `
 
-// wantListHelp is the help of slice list, as R69 gives it.
+// wantListHelp is the help of slice list, word for word.
 const wantListHelp = `Show all slices in a table: name, title, and description.
 
 Usage:
@@ -75,7 +75,7 @@ Options:
   -h, --help  Show this help.
 `
 
-// unknownCommand is the error output of R70 for words.
+// unknownCommand is the error output for words that name no command.
 func unknownCommand(words string) string {
 	return "Error: unknown command \"" + words + "\". Nothing was changed.\n" +
 		"To see the commands, run: sliceflow --help\n"
@@ -91,7 +91,7 @@ func TestRunRouting(t *testing.T) {
 		wantStdout string
 		wantStderr string
 	}{
-		// R67: the guide, and the help of the group slice.
+		// The guide, and the help of the group slice.
 		{"no words", nil, 0, wantGuide, ""},
 		{"--help", []string{"--help"}, 0, wantGuide, ""},
 		{"-h", []string{"-h"}, 0, wantGuide, ""},
@@ -99,19 +99,39 @@ func TestRunRouting(t *testing.T) {
 		{"slice --help", []string{"slice", "--help"}, 0, wantSliceHelp, ""},
 		{"slice -h", []string{"slice", "-h"}, 0, wantSliceHelp, ""},
 
-		// R68, R69: the help of a command. --help may come after the
-		// name, because it comes before any error (R40).
+		// The help of a command. --help may come after the name,
+		// because it comes before any error.
 		{"slice create -h", []string{"slice", "create", "-h"}, 0, wantCreateHelp, ""},
 		{"slice create --help", []string{"slice", "create", "--help"}, 0, wantCreateHelp, ""},
 		{"slice create, a name, then --help", []string{"slice", "create", "login", "--help"}, 0, wantCreateHelp, ""},
 		{"slice status --help", []string{"slice", "status", "--help"}, 0, wantStatusHelp, ""},
 		{"slice list -h", []string{"slice", "list", "-h"}, 0, wantListHelp, ""},
 
-		// R70: an unknown command.
+		// An unknown command.
 		{"an unknown word", []string{"nosuch"}, 2, "", unknownCommand("nosuch")},
 		{"an unknown word, then more", []string{"nosuch", "extra"}, 2, "", unknownCommand("nosuch")},
 		{"slice, then an unknown word", []string{"slice", "nosuch"}, 2, "", unknownCommand("slice nosuch")},
 		{"an unknown command with --help", []string{"slice", "nosuch", "--help"}, 2, "", unknownCommand("slice nosuch")},
+
+		// A wrong command line, with exit code 2.
+		{"an option with no command", []string{"--version"}, 2, "",
+			"Error: unknown option \"--version\". Nothing was changed.\nTo see the options, run: sliceflow --help\n"},
+		{"an unknown option of a group", []string{"slice", "--bogus"}, 2, "",
+			"Error: unknown option \"--bogus\". Nothing was changed.\nTo see the options, run: sliceflow slice --help\n"},
+		{"an unknown option", []string{"slice", "create", "card-payment", "--titel", "Pay with a card"}, 2, "",
+			"Error: unknown option \"--titel\". Nothing was changed.\nTo see the options, run: sliceflow slice create --help\n"},
+		{"no name", []string{"slice", "create"}, 2, "",
+			"Error: missing slice name. Nothing was changed.\nUsage: sliceflow slice create <name> [options]\n"},
+		{"an empty name", []string{"slice", "status", ""}, 2, "",
+			"Error: missing slice name. Nothing was changed.\nUsage: sliceflow slice status <name> [options]\n"},
+		{"an option with no value", []string{"slice", "create", "card-payment", "--title"}, 2, "",
+			"Error: option \"--title\" needs a value. Nothing was changed.\nTo see the options, run: sliceflow slice create --help\n"},
+		{"an unexpected argument", []string{"slice", "create", "card-payment", "extra"}, 2, "",
+			"Error: unexpected argument \"extra\". Nothing was changed.\nUsage: sliceflow slice create <name> [options]\n"},
+		{"an unexpected argument for list", []string{"slice", "list", "extra"}, 2, "",
+			"Error: unexpected argument \"extra\". Nothing was changed.\nUsage: sliceflow slice list [options]\n"},
+		{"--help as an option's value is not help", []string{"slice", "create", "login", "--title", "--help"}, 1, "",
+			"Error: not built yet.\n"},
 
 		// A known command reaches its function. For now, every command
 		// is the placeholder notBuilt.

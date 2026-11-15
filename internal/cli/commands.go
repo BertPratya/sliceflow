@@ -6,7 +6,8 @@ import (
 	"io"
 )
 
-func notImplemented(ctx context.Context, args []string, stdout, stderr io.Writer) int {
+// notImplemented is the Run of a command that is not built yet.
+func notImplemented(ctx context.Context, in input, stdout, stderr io.Writer) int {
 	fmt.Fprintln(stderr, "Error: not built yet.")
 	return 1
 }
@@ -25,7 +26,7 @@ type CommandAction struct {
 	LongDescription string
 	Args            []CommandArg
 	Options         map[string]CommandOption
-	Run             func(context.Context, []string, io.Writer, io.Writer) int
+	Run             func(ctx context.Context, in input, stdout, stderr io.Writer) int
 }
 
 type CommandArg struct {
