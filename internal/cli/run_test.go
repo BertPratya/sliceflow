@@ -42,6 +42,9 @@ const wantCreateHelp = `Make a new slice: a branch, a worktree, a spec, and an e
 Usage:
   sliceflow slice create <name> [options]
 
+Arguments:
+  <name>  Up to 40 letters, digits, - and _. Starts with a letter or a digit.
+
 Options:
   --description <text>  One or two sentences about the slice.
   --from <branch>       The branch to start from. Default: main.
@@ -54,6 +57,9 @@ const wantStatusHelp = `Show one slice: its title, description, start, branch, w
 
 Usage:
   sliceflow slice status <name> [options]
+
+Arguments:
+  <name>  The name of the slice to show.
 
 Options:
   -h, --help  Show this help.

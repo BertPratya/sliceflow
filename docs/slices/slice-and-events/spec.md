@@ -677,6 +677,9 @@ command is used the wrong way.
   Usage:
     sliceflow slice create <name> [options]
 
+  Arguments:
+    <name>  Up to 40 letters, digits, - and _. Starts with a letter or a digit.
+
   Options:
     --description <text>  One or two sentences about the slice.
     --from <branch>       The branch to start from. Default: main.
@@ -692,6 +695,9 @@ command is used the wrong way.
 
   Usage:
     sliceflow slice status <name> [options]
+
+  Arguments:
+    <name>  The name of the slice to show.
 
   Options:
     -h, --help  Show this help.
@@ -1213,9 +1219,10 @@ command is used the wrong way.
   nothing, and exit with code 0.
   Check: e2e
 - **R68.** When a user runs a command with `--help`, sliceflow prints to the
-  normal output one sentence about the command, its usage line, and its
-  options with a short description of each, in alphabetical order, with
-  `-h, --help` last (SD30). It changes nothing, and exits with code 0. Every command has `--help`. The help of `slice create` is
+  normal output one sentence about the command, its usage line, its
+  arguments when it has any, and its options, each with a short
+  description. The options are in alphabetical order, with `-h, --help`
+  last (SD30). It changes nothing, and exits with code 0. Every command has `--help`. The help of `slice create` is
   shown in S44.
   Check: e2e
 - **R69.** The help of `slice status` is shown in S45. The help of

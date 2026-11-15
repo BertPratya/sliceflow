@@ -59,7 +59,7 @@ var sliceGroup = CommandGroup{
 		"create": {
 			Description:     "Make a new slice",
 			LongDescription: "Make a new slice: a branch, a worktree, a spec, and an event log.",
-			Args:            []CommandArg{{Name: "name", Description: "The slice's name", Required: true}},
+			Args:            []CommandArg{{Name: "name", Description: "Up to 40 letters, digits, - and _. Starts with a letter or a digit.", Required: true}},
 			Options: map[string]CommandOption{
 				"title":       {Description: "A short title for the slice. Default: the name.", ValueName: "text", Type: "string"},
 				"description": {Description: "One or two sentences about the slice.", ValueName: "text", Type: "string"},
@@ -75,7 +75,7 @@ var sliceGroup = CommandGroup{
 		"status": {
 			Description:     "Show one slice",
 			LongDescription: "Show one slice: its title, description, start, branch, worktree, and events.",
-			Args:            []CommandArg{{Name: "name", Description: "The slice's name", Required: true}},
+			Args:            []CommandArg{{Name: "name", Description: "The name of the slice to show.", Required: true}},
 			Run:             notImplemented,
 		},
 	},

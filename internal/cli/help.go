@@ -54,19 +54,25 @@ func groupHelpText(name string, group CommandGroup) string {
 	return b.String()
 }
 
-// argsUsage returns the arguments of a command as they appear in help,
-// each after a space: <name> when it is required, [name] when it is not.
-// It returns "" for a command with no arguments.
+// argsUsage returns the arguments of a command as they appear in a usage
+// line, each after a space, e.g. " <name>". It returns "" for a command
+// with no arguments.
 func argsUsage(args []CommandArg) string {
 	var b strings.Builder
 	for _, arg := range args {
-		if arg.Required {
-			fmt.Fprintf(&b, " <%s>", arg.Name)
-		} else {
-			fmt.Fprintf(&b, " [%s]", arg.Name)
-		}
+		b.WriteString(" ")
+		b.WriteString(argUsage(arg))
 	}
 	return b.String()
+}
+
+// argUsage returns one argument as it appears in help: <name> when it is
+// required, [name] when it is not.
+func argUsage(arg CommandArg) string {
+	if arg.Required {
+		return "<" + arg.Name + ">"
+	}
+	return "[" + arg.Name + "]"
 }
 
 // writeRows writes each row on its own line, indented by two spaces,
@@ -82,7 +88,8 @@ func writeRows(b *strings.Builder, rows []row) {
 }
 
 // commandHelpText returns the help of one command, as in S44 and S45:
-// its long description, its usage line, and its options in alphabetical
+// its long description, its usage line, its arguments in their order on
+// the command line, when it has any, and its options in alphabetical
 // order, with -h, --help last (R68, R69, SD30).
 func commandHelpText(groupName, actionName string, action CommandAction) string {
 	var rows []row
@@ -95,6 +102,11 @@ func commandHelpText(groupName, actionName string, action CommandAction) string 
 	b.WriteString(action.LongDescription)
 	b.WriteString("\n\n")
 	fmt.Fprintf(&b, "Usage:\n  sliceflow %s %s%s [options]\n\n", groupName, actionName, argsUsage(action.Args))
+	if len(action.Args) > 0 {
+		b.WriteString("Arguments:\n")
+		writeRows(&b, argRows(action.Args))
+		b.WriteString("\n")
+	}
 	b.WriteString("Options:\n")
 	writeRows(&b, rows)
 	return b.String()
@@ -107,4 +119,14 @@ func optionUsage(name string, option CommandOption) string {
 		return "--" + name
 	}
 	return "--" + name + " <" + option.ValueName + ">"
+}
+
+// argRows returns one help row for each argument, in their order on the
+// command line: <name> or [name], and its description.
+func argRows(args []CommandArg) []row {
+	var rows []row
+	for _, arg := range args {
+		rows = append(rows, row{argUsage(arg), arg.Description})
+	}
+	return rows
 }
