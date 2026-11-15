@@ -369,8 +369,8 @@ A developer starts a new slice with one command.
   work out a name and an email on this computer,
   **When** I run `sliceflow slice create card-payment`,
   **Then** sliceflow removes the files, the worktree, and the branch it
-  made, prints the same error as in S11, and exits with code 1, and the
-  folder is still there, and still empty.
+  made, prints the same error as in S11, and exits with code 1. The
+  folder `card-payment` is removed with the worktree (SD31).
   Shows: R36
 - **S23.** **Given** the `.gitignore` of the project `shop` has the line
   `*.jsonl`,
@@ -1023,10 +1023,12 @@ command is used the wrong way.
 ### When something fails
 
 - **R36.** If a step fails after sliceflow made something, sliceflow
-  removes what it made in this run, and only that: the files, the
-  worktree, the branch, and the empty folders that were made for the
-  worktree. It never removes a branch, a worktree, a file, or a folder that
-  was there before, even an empty one.
+  removes what it made in this run, and only that: the worktree, with
+  the files in it, and the branch. It never removes a branch, a
+  worktree, or a file that was there before. Empty folders that were
+  made above the worktree stay, and an empty folder that was there
+  before, where the worktree was made, is removed with the worktree
+  (SD31).
   Check: e2e
 - **R37.** sliceflow takes these steps with git, in this order: create the
   branch, create the worktree, then make the commit, which includes adding
@@ -1071,7 +1073,8 @@ command is used the wrong way.
   and for each thing that is left, the worktree first, the command
   `  git worktree remove --force "<full path>"` or
   `  git branch -D "slice/<name>"`. Paths and branch names are in double
-  quotes.
+  quotes. An empty folder that could not be removed is not listed
+  (SD31).
   Check: e2e
 
 ### Seeing one slice
@@ -1720,6 +1723,26 @@ command is used the wrong way.
     the guide has a single group. The options of slice create are no
     longer in the order a user fills them in.
   Rule: R67, R68
+- **SD31.** To undo, sliceflow removes only the worktree and the
+  branch, as git does: removing a worktree removes its folder, but not
+  the folders above it. Empty folders that were made above the worktree
+  stay. An empty folder that was there before, where the worktree was
+  made, is removed with the worktree. R41 lists only a worktree and a
+  branch (decided, the human, 2026-11-16).
+  Why: an empty folder does no harm and holds no data. The folder above
+    a worktree, e.g. `~/.sliceflow/worktrees/shop/`, holds every worktree
+    of the project, so the next slice uses it again. Undo stays two
+    things, with no list of folders to keep.
+  Not chosen: remembering which folders were made and removing them,
+    and making an empty folder that was there before again, because each
+    adds cases to the undo for no data kept; a `folder <path>` line in
+    R41, because its command differs between Windows and the other
+    systems.
+  Cost: after a failed `slice create`, an empty folder may stay above
+    the worktree's place, and an empty folder the user made for the
+    worktree may be gone. "Nothing was changed." still holds for
+    branches, commits, and files.
+  Rule: R36, R41
 
 ## Open questions
 
