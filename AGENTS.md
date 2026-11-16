@@ -274,8 +274,11 @@ Work on one requirement at a time, in this order:
    step 5 is the contract: the function names, their inputs and outputs,
    the steps, the edge cases, and the tests. Write the code and the tests
    to match it:
-   - Put the human's steps in the function's doc comment, as a numbered
-     list, and follow them in the code in the same order.
+   - Write the doc comment as the contract (decided 2026-11-15): what
+     the function does, its inputs and outputs, its errors, and what it
+     promises. No numbered steps, and no spec or plan IDs such as R12:
+     the comment must make sense to a reader who has only the code.
+     Follow the human's steps in the code, in the same order.
    - Never change a name, an input, an output, or a step on your own.
      When the code needs a choice the design does not settle, stop and
      ask: the options, and your recommendation. The human decides in
