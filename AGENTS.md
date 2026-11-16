@@ -217,20 +217,22 @@ write the spec file, from `templates/default/spec.md`. Work in this order:
      you think, ask what you would ask a colleague, react to the answer.
      Ask a question with options only to settle an unresolved point, and
      give your recommendation.
-   - **Say it before you write it.** Before you write a scenario, tell
+   - **Say it before you write it.** Before you write an example, tell
      the human in plain sentences what you want to write: when the user
-     does this, this happens. Use no scenario format in the chat. The
+     does this, this happens. Use no example format in the chat. The
      human says if it matches their idea. Only then do you write it into
      the spec.
    - **Clear the story's open points.** Before the next story, say in
      plain sentences what is still open for this story, and settle each
      point with an options question. A point that does not block the
      build moves to Out of scope and the backlog.
-   - **Draft the requirements of this story,** from its scenarios, and
-     only now. Ask the human before you guess anything the scenarios do
-     not say.
+   - **Draft the rules of this story,** from its examples, and only
+     now. Each example goes under the one rule it proves. A rule that
+     another story also needs goes to Shared rules, and each story names
+     it in its `Uses:` line. Ask the human before you guess anything the
+     examples do not say.
    - Write each decision (SD) when the human makes it.
-4. **Review.** When every story and requirement is drafted, and Open
+4. **Review.** When every story and rule is drafted, and Open
    questions says None, a reviewer agent with a fresh context reads the
    spec. Its questions are a separate round: the human answers, and you
    update the spec.

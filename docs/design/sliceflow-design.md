@@ -345,7 +345,7 @@ shape, not the quality.
 - The reviewer's instructions hold the review rules: high, medium, and low
   levels; `Breaks:` with the scope rule (behavior nothing asks for is at
   least medium); each test marked ok, weak, or missing; previous findings
-  verified or reopened; the requirements check; questions with a
+  verified or reopened; the check of the spec's rules; questions with a
   `Guess:`.
 
 **Usage** (decided, the human). Every agent run records its usage in the
@@ -447,7 +447,7 @@ slice has one log, `docs/slices/<name>/.events.jsonl`, one event per line.
 - **Settings:** YAML, read strictly (`sliceflow.yaml`, 1.14).
 - Why: models understand the common formats about equally; Markdown costs
   the fewest tokens; strict formats make free text worse. So accuracy comes
-  from rules, not the format: each fact has one copy (requirements are
+  from rules, not the format: each fact has one copy (rules are
   named, not copied); every file is read strictly, with unknown keys
   refused; state changes only through `sliceflow` commands.
 - Exception: a reviewer answers in JSON, because the tool enforces the
@@ -632,7 +632,8 @@ else.
 
 1. The lead and the human write `spec.md`. Its state is **draft**.
 2. `sliceflow spec validate` checks it like a compiler, one problem per
-   line, e.g. `spec.md:42: error: R7 has no Check: line`. Every error
+   line, e.g. `spec.md:42: error: rule lowercase-name has no Check:
+   line`. Every error
    carries a hint on how to fix it. Errors block submit. An open question
    is an error too (decided, the human).
 3. `spec validate` checks only the facts later code relies on. Writing
@@ -645,17 +646,23 @@ else.
    plan, and tasks once, together, at the end of planning (2.3; decided,
    the human).
 
-**What a spec holds** (decided, the human). A spec says WHAT, never HOW.
+**What a spec holds** (decided, the human, 2026-11-16). A spec says
+WHAT, never HOW. It is a list of stories; each story holds its rules,
+and each rule holds its examples, so a rule and its proof are read in
+one place (example mapping: story, rules, examples).
 
 - **Summary:** two or three sentences: what it lets someone do, and why.
-  The why helps a worker guess right when a requirement leaves something
-  open.
-- **User stories:** every scenario sits under a story. Each story always
-  has a short title and one sentence (who wants to do what). Scenarios
-  are numbered S1, S2, ... across the spec, with Given / When / Then, the
-  real output, and a `Shows:` line naming their requirements. Every
-  requirement a user can see appears in at least one scenario.
-- **Requirements:** R1, R2, ..., grouped under headings.
+  The why helps a worker guess right when a rule leaves something open.
+- **Shared rules:** the rules that two or more stories need, written
+  once, e.g. an error every command can hit, or the exit codes. Each is
+  named in at least one story's `Uses:` line. "None" allowed.
+- **Stories,** one `## Story <n>: <title>` section each: one sentence
+  (who wants to do what), a `Uses:` line naming the shared rules it
+  needs, then its own rules. A story has at least one rule of its own,
+  and its first rule is the success case.
+- **Rules:** a `### Rule `<name>`: <one line>` heading. The name is
+  lowercase words joined by hyphens, says what the rule is about, and is
+  used once in the spec.
   - EARS forms without "shall", in the present tense: "When <trigger>,
     sliceflow prints ...", "If <bad case>, sliceflow ...", "While",
     "Where", or a plain "sliceflow ...". "never" for what it must not do.
@@ -664,15 +671,22 @@ else.
   - A term that needs one fixed meaning is defined where it first
     appears.
   - Each has a `Check:` line: unit, api, e2e, or manual.
+  - **Examples** under it, each with Given / When / Then and the real
+    output. A rule the user can see has at least one, one per case. An
+    example is named by its rule and its place under it, e.g.
+    `log-places` example 2.
 - **Out of scope:** one line per item. What should be done later goes into
   the backlog directly.
 - **Decisions:** SD1, SD2, ..., each with `Why:`, `Not chosen:`, `Cost:`
-  (required; "None" allowed), and `Rule:` (the requirement that states it,
-  or none). `Replaces:` when it replaces an earlier slice's decision.
+  (required; "None" allowed), and `Rule:` (the rules that state it, by
+  name, or none). `Replaces:` when it replaces an earlier slice's
+  decision.
 - **Open questions:** must say None before the review starts.
 
-Numbers are renumbered freely only before the first approval. After it, a
-number is never reused, and a removed item stays, marked removed.
+After the first approval, a rule is never renamed and a name is never
+reused; a removed rule keeps its heading, marked removed. A new example
+goes after the others, so an example's place never changes. Decision
+and question numbers are never reused either.
 
 **History is in git** (decided, the human).
 
@@ -708,7 +722,7 @@ Open question, so the spec changes.
 - **Interfaces, Data:** "None" when there is nothing.
 - **Testing:** how each kind of check runs, so every task uses the same
   helpers; and **Trying it by hand**: Setup steps, and steps for each
-  `Check: manual` requirement, each with an `Expect:` line.
+  `Check: manual` rule, each with an `Expect:` line.
 - **Decisions:** TD1, TD2, ..., like spec decisions, with `Cost:` required.
   Each is named in at least one task's `follows`, or has a `Plan only:`
   line saying why.
@@ -720,7 +734,7 @@ The lead writes all of it, and `sliceflow plan validate` checks every fixed
 part strictly. Each task has:
 
 - `## Task 01: <name>`, then a YAML block:
-  - `covers`: the requirements;
+  - `covers`: the rules, by name;
   - `depends_on`;
   - `touches`: the files and folders it may change; `sliceflow` rejects a
     change outside it;
@@ -737,9 +751,9 @@ part strictly. Each task has:
   (creates, changes, or uses). A task that uses a name another task
   creates must depend on it. `plan validate` checks this.
 - **Done when:** each test with real input and expected result, a
-  `Proves:` line, and a `Scenario:` line for an e2e test of a spec
-  scenario. Every scenario gets at least one e2e test. Each task puts its
-  e2e tests in its own file.
+  `Proves:` line, and an `Example:` line for an e2e test of a spec
+  example, e.g. `Example: log-places 2`. Every example gets at least one
+  e2e test. Each task puts its e2e tests in its own file.
 - **Out of scope**, with `Done in:` (another task, or not in this slice).
 
 **Risk** (decided, the human):
@@ -756,8 +770,7 @@ simple/complex track.
 only what its task links to, and never guesses:
 
 - its own section;
-- the text of the requirements in `covers`;
-- the scenarios whose `Shows:` names one of them;
+- the text of the rules in `covers`, each with its examples;
 - the exact text of the plan items in `follows`.
 
 It ends by saying where the full spec and plan are. `plan validate` warns
@@ -765,8 +778,7 @@ when a brief is over a set size (about 1,500 words), for the plan reviewer
 to judge.
 
 **After approval**, `tasks.md` may change without a new approval only in
-two ways: fix tasks added at the end (covering approved requirements
-only), and a wider `touches` by the rules. Anything else is a plan change.
+two ways: fix tasks added at the end (covering approved rules only), and a wider `touches` by the rules. Anything else is a plan change.
 
 ### 2.4 The run
 
@@ -826,8 +838,9 @@ behave differently from the correct fix. So the human tries the result
 before it leaves the slice.
 
 - **The checklist is built by `sliceflow` from the spec** (decided, the
-  human): the first scenario of each story, with its exact command and
-  output, and each `Check: manual` requirement. The plan's "Trying it by
+  human): the first example of each story's first rule, its success
+  case, with its exact command and output, and each `Check: manual`
+  rule. The plan's "Trying it by
   hand" adds the setup and the manual steps. There is no `preview.md`.
 - A problem: fix tasks, and the run goes on. Something new: a spec change,
   not a fix.
@@ -942,6 +955,13 @@ what replaced it.
 - 2026-11-15, the human: help has two levels, the groups and then the
   commands of one group; an option name means the same thing in every
   command, and a different meaning gets a different name (1.18).
+- 2026-11-16, the human: a spec is stories with their rules, and rules
+  with their examples, in one place, as in example mapping. Rules have
+  names, e.g. `lowercase-name`, not numbers; a rule that several stories
+  need is written once, in Shared rules. It replaces the separate list
+  of numbered requirements and scenarios, which made a reader jump
+  between a rule and its proof, and whose numbers said nothing. The 0001
+  spec keeps the old format (2.2).
 
 ---
 
