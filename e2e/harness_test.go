@@ -48,12 +48,7 @@ func runSliceflow(t *testing.T, dir, home string, args ...string) result {
 	t.Helper()
 	cmd := exec.Command(program, args...)
 	cmd.Dir = dir
-	cmd.Env = append(withoutGitVariables(os.Environ()),
-		"HOME="+home,
-		"USERPROFILE="+home,
-		"XDG_CONFIG_HOME="+filepath.Join(home, ".config"),
-		"GIT_CONFIG_NOSYSTEM=1",
-	)
+	cmd.Env = testEnv(home)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -67,6 +62,52 @@ func runSliceflow(t *testing.T, dir, home string, args ...string) result {
 		t.Fatalf("could not run sliceflow %q: %v", args, err)
 	}
 	return result{stdout: stdout.String(), stderr: stderr.String(), code: code}
+}
+
+// testEnv returns the environment of a program that a test runs: the
+// test runner's own, without its GIT_ variables, with home as the home
+// folder, and with no system git config.
+func testEnv(home string) []string {
+	return append(withoutGitVariables(os.Environ()),
+		"HOME="+home,
+		"USERPROFILE="+home,
+		"XDG_CONFIG_HOME="+filepath.Join(home, ".config"),
+		"GIT_CONFIG_NOSYSTEM=1",
+	)
+}
+
+// newProject makes a git repo called shop in a new temp folder, with one
+// commit on main, and returns its folder. Git runs with home as the home
+// folder, so it uses the test's git config.
+func newProject(t *testing.T, home string) string {
+	t.Helper()
+	repo := filepath.Join(t.TempDir(), "shop")
+	if err := os.Mkdir(repo, 0o755); err != nil {
+		t.Fatalf("could not make the project folder: %v", err)
+	}
+	gitOutput(t, repo, home, "init", "--quiet")
+	gitOutput(t, repo, home, "commit", "--quiet", "--allow-empty", "-m", "first")
+	return repo
+}
+
+// gitOutput runs git with args in the folder dir, with home as the home
+// folder, and returns its output without the line break at the end. It
+// fails the test now if git fails.
+func gitOutput(t *testing.T, dir, home string, args ...string) string {
+	t.Helper()
+	cmd := exec.Command("git", args...)
+	cmd.Dir = dir
+	cmd.Env = testEnv(home)
+	out, err := cmd.Output()
+	if err != nil {
+		var stderr []byte
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			stderr = exitErr.Stderr
+		}
+		t.Fatalf("git %q in %s: %v\n%s", args, dir, err, stderr)
+	}
+	return strings.TrimSuffix(string(out), "\n")
 }
 
 // withoutGitVariables returns env, a list of NAME=value entries, without

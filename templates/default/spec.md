@@ -1,6 +1,5 @@
 ---
 slice: {{slice}}
-title: {{title}}
 created: {{date}}
 ---
 

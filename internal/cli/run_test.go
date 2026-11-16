@@ -130,12 +130,10 @@ func TestRunRouting(t *testing.T) {
 			"Error: unexpected argument \"extra\". Nothing was changed.\nUsage: sliceflow slice create <name> [options]\n"},
 		{"an unexpected argument for list", []string{"slice", "list", "extra"}, 2, "",
 			"Error: unexpected argument \"extra\". Nothing was changed.\nUsage: sliceflow slice list [options]\n"},
-		{"--help as an option's value is not help", []string{"slice", "create", "login", "--title", "--help"}, 1, "",
-			"Error: not built yet.\n"},
 
-		// A known command reaches its function. For now, every command
-		// is the placeholder notBuilt.
-		{"slice create", []string{"slice", "create", "login"}, 1, "", "Error: not built yet.\n"},
+		// A known command reaches its function. slice status and slice
+		// list are still the placeholder notImplemented. slice create
+		// makes a real slice, so it is tested in e2e, in a repo of its own.
 		{"slice status", []string{"slice", "status", "login"}, 1, "", "Error: not built yet.\n"},
 		{"slice list", []string{"slice", "list"}, 1, "", "Error: not built yet.\n"},
 	}

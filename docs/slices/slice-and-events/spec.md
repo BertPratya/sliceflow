@@ -854,8 +854,8 @@ command is used the wrong way.
 ### The base
 
 - **R10.** sliceflow starts the slice from the branch given with `--from`,
-  which takes the name of a local branch. When `--from` is left out, it
-  starts from `main`. A tag, a commit, or a remote branch is not a local
+  which takes the name of a local branch. When `--from` is left out or
+  empty, it starts from `main` (SD32). A tag, a commit, or a remote branch is not a local
   branch, so R12 applies to it.
   Check: e2e
 - **R11.** sliceflow starts the slice from the commit at the tip of the local
@@ -864,11 +864,11 @@ command is used the wrong way.
   Check: e2e
 - **R12.** If the base branch does not exist, sliceflow changes nothing and
   prints this to the error output: the line "Error: base branch <base>
-  does not exist. Nothing was changed." Then, when `--from` was left out,
-  the line "sliceflow starts from main unless you choose another branch.
+  does not exist. Nothing was changed." Then, when `--from` was left out
+  or empty, the line "sliceflow starts from main unless you choose another branch.
   To choose one, run:" and the command `sliceflow slice create <name>
   --from <branch>`, with the slice name filled in. When `--from` was
-  given, it prints the line "Check the name. To see your branches, run:"
+  given with a name, it prints the line "Check the name. To see your branches, run:"
   and the command `git branch`. Each command is on its own line, indented
   by two spaces.
   Check: e2e
@@ -1743,6 +1743,17 @@ command is used the wrong way.
     worktree may be gone. "Nothing was changed." still holds for
     branches, commits, and files.
   Rule: R36, R41
+- **SD32.** An empty `--from`, e.g. `--from ""`, counts as left out, so
+  the slice starts from `main` (decided, the human, 2026-11-16).
+  Why: the spec treats other empty values the same way: an empty
+    `--title` gives the name (R28), and an empty
+    `sliceflow.worktree.dir` counts as not set (R18).
+  Not chosen: R12's error for a branch with no name, which catches a
+    script whose variable is empty, but reads "base branch  does not
+    exist".
+  Cost: a script that passes an empty variable by mistake gets a slice
+    from `main`, with no warning.
+  Rule: R10, R12
 
 ## Open questions
 

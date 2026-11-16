@@ -25,3 +25,14 @@ const (
 	seeAllOptionsHint = "To see the options, run: sliceflow --help"
 	usageHint         = "Usage: %s"
 )
+
+// The lines that slice create prints when the slice is made. Each Note
+// comes right after the first line, when it applies.
+const (
+	createdLine       = "Created slice %s.\n"
+	madeLowercaseNote = "  Note:     \"%s\" was made lowercase.\n"
+	ignoredFileNote   = "  Note:     %s matches a .gitignore rule, so sliceflow added it anyway.\n"
+	branchLine        = "  Branch:   slice/%s (from %s, at %s)\n"
+	worktreeLine      = "  Worktree: %s\n"
+	nextLine          = "Next: write the spec in %s\n"
+)

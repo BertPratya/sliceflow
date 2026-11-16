@@ -66,7 +66,7 @@ var sliceGroup = CommandGroup{
 				"description": {Description: "One or two sentences about the slice.", ValueName: "text", Type: "string"},
 				"from":        {Description: "The branch to start from. Default: main.", ValueName: "branch", Type: "string"},
 			},
-			Run: notImplemented,
+			Run: runSliceCreate,
 		},
 		"list": {
 			Description:     "Show all slices",
