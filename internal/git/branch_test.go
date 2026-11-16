@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -203,4 +204,21 @@ func TestDeleteBranchCheckedOutInAWorktree(t *testing.T) {
 	err := DeleteBranch(context.Background(), repo, "slice/login")
 	wantGitError(t, err)
 	wantBranchExists(t, repo, "slice/login", true)
+}
+
+// BranchesWithPrefix lists the local branches under the prefix, without
+// it, also names with a / in them, and leaves out other branches.
+func TestBranchesWithPrefix(t *testing.T) {
+	repo := newRepoWithMain(t)
+	gitIn(t, repo, "branch", "slice/login")
+	gitIn(t, repo, "branch", "slice/a/b")
+	gitIn(t, repo, "branch", "slicer")
+
+	got, err := BranchesWithPrefix(context.Background(), repo, "slice/")
+	if err != nil {
+		t.Fatalf("BranchesWithPrefix returned the error %v, want none", err)
+	}
+	if !slices.Equal(got, []string{"a/b", "login"}) {
+		t.Errorf("BranchesWithPrefix returned %q, want [a/b login]", got)
+	}
 }

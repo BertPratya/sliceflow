@@ -73,3 +73,20 @@ func DeleteBranch(ctx context.Context, dir, branch string) error {
 	_, err := run(ctx, dir, "branch", "-D", branch)
 	return err
 }
+
+// BranchesWithPrefix returns the names of the local branches that start
+// with prefix, with the prefix cut off, in git's order: prefix "slice/"
+// gives "login" for the branch slice/login.
+func BranchesWithPrefix(ctx context.Context, dir, prefix string) ([]string, error) {
+	out, err := run(ctx, dir, "for-each-ref", "--format=%(refname)", "refs/heads/"+prefix)
+	if err != nil {
+		return nil, err
+	}
+	var names []string
+	for _, line := range strings.Split(out, "\n") {
+		if name, ok := strings.CutPrefix(line, "refs/heads/"+prefix); ok && name != "" {
+			names = append(names, name)
+		}
+	}
+	return names, nil
+}

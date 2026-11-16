@@ -95,3 +95,29 @@ func newRepoWithBranch(t *testing.T) string {
 	gitIn(t, repo, "branch", "slice/login")
 	return repo
 }
+
+// WorktreeOf finds the worktree that has the branch checked out, and
+// gives "" for a branch that no worktree has.
+func TestWorktreeOf(t *testing.T) {
+	repo := newRepoWithBranch(t)
+	gitIn(t, repo, "branch", "slice/other")
+	path := filepath.Join(t.TempDir(), "login")
+	gitIn(t, repo, "worktree", "add", "--quiet", path, "slice/login")
+
+	got, err := WorktreeOf(context.Background(), repo, "slice/login")
+	if err != nil {
+		t.Fatalf("WorktreeOf returned the error %v, want none", err)
+	}
+	real, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != real {
+		t.Errorf("WorktreeOf returned %q, want %q", got, real)
+	}
+
+	got, err = WorktreeOf(context.Background(), repo, "slice/other")
+	if err != nil || got != "" {
+		t.Errorf("WorktreeOf(slice/other) returned %q and the error %v, want \"\" and none", got, err)
+	}
+}

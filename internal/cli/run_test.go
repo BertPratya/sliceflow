@@ -131,11 +131,8 @@ func TestRunRouting(t *testing.T) {
 		{"an unexpected argument for list", []string{"slice", "list", "extra"}, 2, "",
 			"Error: unexpected argument \"extra\". Nothing was changed.\nUsage: sliceflow slice list [options]\n"},
 
-		// A known command reaches its function. slice status and slice
-		// list are still the placeholder notImplemented. slice create
-		// makes a real slice, so it is tested in e2e, in a repo of its own.
-		{"slice status", []string{"slice", "status", "login"}, 1, "", "Error: not built yet.\n"},
-		{"slice list", []string{"slice", "list"}, 1, "", "Error: not built yet.\n"},
+		// The commands themselves are tested in e2e, each in a repo of
+		// its own: run from here, they would work on sliceflow's own repo.
 	}
 	for _, tt := range tests {
 		t.Run(tt.about, func(t *testing.T) {

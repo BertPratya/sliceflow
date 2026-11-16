@@ -3,6 +3,7 @@ package git
 import (
 	"context"
 	"errors"
+	"strings"
 )
 
 // DirectoryExists reports whether path is a folder in commit (R23). A
@@ -30,4 +31,22 @@ func DirectoryExists(ctx context.Context, dir, commit, path string) (bool, error
 		return false, nil
 	}
 	return false, err
+}
+
+// FoldersAt returns the names of the folders right inside path, relative
+// to the repo's top folder and written with /, as committed at the tip of
+// the local branch. It returns none when path is not a folder there. The
+// branch must exist.
+func FoldersAt(ctx context.Context, dir, branch, path string) ([]string, error) {
+	out, err := run(ctx, dir, "ls-tree", "-d", "-z", "--name-only", "refs/heads/"+branch, "--", path+"/")
+	if err != nil {
+		return nil, err
+	}
+	var names []string
+	for _, entry := range strings.Split(out, "\x00") {
+		if name, ok := strings.CutPrefix(entry, path+"/"); ok && name != "" {
+			names = append(names, name)
+		}
+	}
+	return names, nil
 }

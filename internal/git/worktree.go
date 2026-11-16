@@ -1,6 +1,10 @@
 package git
 
-import "context"
+import (
+	"context"
+	"path/filepath"
+	"strings"
+)
 
 // AddWorktree checks out the existing local branch in a new worktree at
 // path. Git makes the folder and any missing folders above it. A folder
@@ -20,4 +24,25 @@ func AddWorktree(ctx context.Context, dir, path, branch string) error {
 func RemoveWorktree(ctx context.Context, dir, path string) error {
 	_, err := run(ctx, dir, "worktree", "remove", "--force", path)
 	return err
+}
+
+// WorktreeOf returns the full path of the worktree that has the local
+// branch checked out, written with the separator of this system, or ""
+// when no worktree has it. The path is as git records it: the folder may
+// be gone.
+func WorktreeOf(ctx context.Context, dir, branch string) (string, error) {
+	out, err := run(ctx, dir, "worktree", "list", "--porcelain")
+	if err != nil {
+		return "", err
+	}
+	var path string
+	for _, line := range strings.Split(out, "\n") {
+		if value, ok := strings.CutPrefix(line, "worktree "); ok {
+			path = value
+		}
+		if line == "branch refs/heads/"+branch {
+			return filepath.FromSlash(path), nil
+		}
+	}
+	return "", nil
 }

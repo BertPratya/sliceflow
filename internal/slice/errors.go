@@ -77,3 +77,27 @@ func (e *CheckError) Error() string {
 func (e *CheckError) Unwrap() error {
 	return e.Err
 }
+
+// NoLogError is returned when no log of the slice is found: not in its
+// worktree, not on its branch, and not in main.
+type NoLogError struct {
+	Name     string // the slice name
+	Worktree string // where the slice's worktree would be
+}
+
+func (e *NoLogError) Error() string {
+	return "slice: no slice named " + e.Name
+}
+
+// NoCreatedEventError is returned when the log of a slice is found, but
+// it is empty, its first line cannot be read, or its first line is not a
+// slice.created event.
+type NoCreatedEventError struct {
+	Name     string // the slice name
+	LogPath  string // where the log is in the project, written with /
+	BadLines []int  // the numbers of the lines that could not be read, from 1
+}
+
+func (e *NoCreatedEventError) Error() string {
+	return "slice: no slice.created event could be read for " + e.Name
+}

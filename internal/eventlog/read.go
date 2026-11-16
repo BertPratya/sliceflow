@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"time"
 )
@@ -96,28 +97,28 @@ func validateEvent(event string, data json.RawMessage) error {
 
 // Read reads the log at path. It returns the readable lines as events, in
 // file order, and the lines it skipped as bad lines. Plain reads need no
-// lock.
-//
-// Steps:
-//  1. Open the file. If that fails, return the error, for example one
-//     that matches fs.ErrNotExist.
-//  2. Read it line by line, with lines of up to 4 MiB. "\r\n" counts as
-//     a line end, and the text after the last "\n" is a line when it is
-//     not empty.
-//  3. Count each line from 1, and turn it into an event with
-//     jsonlLineToEvent, then check its data with validateEvent. A line
-//     that fails either one becomes a bad line, and reading goes on.
-//  4. If reading stops early, for example on a line longer than 4 MiB,
-//     return the error. The events are then incomplete, so a caller
-//     that writes must not go on.
+// lock. When the file cannot be opened, it returns that error, for
+// example one that matches fs.ErrNotExist. Otherwise it reads as ReadFrom
+// does.
 func Read(path string) ([]Event, []BadLine, error) {
 	file, err := os.OpenFile(path, os.O_RDONLY, 0400)
 	if err != nil {
 		return []Event{}, []BadLine{}, err
 	}
 	defer file.Close()
+	return ReadFrom(file)
+}
 
-	scanner := bufio.NewScanner(file)
+// ReadFrom reads a log from r, e.g. a log that git keeps in a commit. It
+// returns the readable lines as events, in order, and the lines it
+// skipped as bad lines, each with its number, counted from 1. Lines may
+// be up to 4 MiB long, and end with "\n" or "\r\n"; the text after the
+// last "\n" is a line when it is not empty. A line is readable when it is
+// an event of the right form, and its data fits its event. When reading
+// stops early, e.g. on a line longer than 4 MiB, it returns the error:
+// the events are then incomplete, so a caller that writes must not go on.
+func ReadFrom(r io.Reader) ([]Event, []BadLine, error) {
+	scanner := bufio.NewScanner(r)
 	scanner.Buffer(make([]byte, 64*1024), 4*1024*1024)
 
 	var events []Event
@@ -148,6 +149,5 @@ func Read(path string) ([]Event, []BadLine, error) {
 		return []Event{}, []BadLine{}, err
 	}
 
-	return events, badLines, err
-
+	return events, badLines, nil
 }

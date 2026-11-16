@@ -68,3 +68,32 @@ const (
 	removeWorktreeCmd = "  git worktree remove --force \"%s\"\n"
 	deleteBranchCmd   = "  git branch -D \"%s\"\n"
 )
+
+// The lines of slice status. Each label line has its value in one column.
+const (
+	statusFirstLine     = "%s: %s\n"
+	statusLine          = "  %-13s %s\n"
+	noneValue           = "(none)"
+	notFoundValue       = "(not found)"
+	createdTimeLayout   = "2006-01-02 15:04 UTC"
+	startedFromValue    = "%s, at %s"
+	eventsValue         = "%d (last: %s)"
+	oneBadLineWarning   = "Warning: line %d of %s could not be read, so it was skipped.\n"
+	badLinesWarning     = "Warning: lines %s of %s could not be read, so they were skipped.\n"
+	moreBadLines        = " (%d more not listed)"
+	noSliceLines        = "Error: no slice named %s. Nothing was changed.\nNo log was found in any of these places:\n  worktree  %s\n  branch    slice/%s\n  main      docs/slices/%s/.events.jsonl\nCheck the name, or run: sliceflow slice list\n"
+	noCreatedEventLines = "Error: no slice.created event could be read for %s. Nothing was changed.\nFix or restore the log, then try again.\n"
+)
+
+// The lines of slice list.
+const (
+	notValidWarning       = "Warning: %s is not listed as a slice. It is not a valid slice name.\n"
+	noLogOnBranchWarning  = "Warning: %s is not listed as a slice. The branch slice/%s has no event log.\n"
+	noLogInMainWarning    = "Warning: %s is not listed as a slice. The folder docs/slices/%s/ in main has no event log.\n"
+	noLogInBothWarning    = "Warning: %s is not listed as a slice. Neither the branch slice/%s nor the folder docs/slices/%s/ in main has an event log.\n"
+	noCreatedEventWarning = "Warning: %s is not listed as a slice. No slice.created event could be read from %s.\n"
+	noSlicesLine          = "No slices yet. To make one, run: sliceflow slice create <name>\n"
+)
+
+// listHeader is the header line of the table of slice list.
+var listHeader = [3]string{"NAME", "TITLE", "DESCRIPTION"}

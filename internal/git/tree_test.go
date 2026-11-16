@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 )
 
@@ -107,5 +108,28 @@ func wantDirectoryExists(t *testing.T, dir, commit, path string, want bool) {
 	}
 	if got != want {
 		t.Errorf("DirectoryExists(%q) returned %v, want %v", path, got, want)
+	}
+}
+
+// FoldersAt lists the folders right inside a path, and no files; a path
+// that is not there gives none.
+func TestFoldersAt(t *testing.T) {
+	repo, _ := newRepoWithSlices(t)
+	gitIn(t, repo, "branch", "-M", "main")
+	writeFile(t, filepath.Join(repo, "docs", "slices", "signup", "spec.md"))
+	gitIn(t, repo, "add", ".")
+	gitIn(t, repo, "commit", "--quiet", "-m", "signup")
+
+	got, err := FoldersAt(context.Background(), repo, "main", "docs/slices")
+	if err != nil {
+		t.Fatalf("FoldersAt returned the error %v, want none", err)
+	}
+	if !slices.Equal(got, []string{"login", "signup"}) {
+		t.Errorf("FoldersAt returned %q, want [login signup]", got)
+	}
+
+	got, err = FoldersAt(context.Background(), repo, "main", "nosuch")
+	if err != nil || len(got) != 0 {
+		t.Errorf("FoldersAt(nosuch) returned %q and the error %v, want none and none", got, err)
 	}
 }

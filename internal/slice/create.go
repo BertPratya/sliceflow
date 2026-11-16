@@ -66,16 +66,9 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		return CreateResult{}, &InvalidNameError{Given: opts.Name, Problem: err}
 	}
 
-	root, err := git.RepoRoot(ctx, dir)
+	root, err := findProject(ctx, dir)
 	if err != nil {
-		return CreateResult{}, &CheckError{Check: "find the project", Err: err}
-	}
-	hasCommits, err := git.HasCommits(ctx, root)
-	if err != nil {
-		return CreateResult{}, &CheckError{Check: "read the commits", Err: err}
-	}
-	if !hasCommits {
-		return CreateResult{}, ErrNoCommits
+		return CreateResult{}, err
 	}
 
 	base := opts.From

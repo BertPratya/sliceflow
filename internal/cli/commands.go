@@ -2,15 +2,8 @@ package cli
 
 import (
 	"context"
-	"fmt"
 	"io"
 )
-
-// notImplemented is the Run of a command that is not built yet.
-func notImplemented(ctx context.Context, in input, stdout, stderr io.Writer) int {
-	fmt.Fprintln(stderr, "Error: not built yet.")
-	return 1
-}
 
 type CommandRegistry struct {
 	Groups map[string]CommandGroup
@@ -71,13 +64,13 @@ var sliceGroup = CommandGroup{
 		"list": {
 			Description:     "Show all slices",
 			LongDescription: "Show all slices in a table: name, title, and description.",
-			Run:             notImplemented,
+			Run:             runSliceList,
 		},
 		"status": {
 			Description:     "Show one slice",
 			LongDescription: "Show one slice: its title, description, start, branch, worktree, and events.",
 			Args:            []CommandArg{{Name: "name", Description: "The name of the slice to show.", Required: true}},
-			Run:             notImplemented,
+			Run:             runSliceStatus,
 		},
 	},
 }
