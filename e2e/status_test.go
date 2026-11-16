@@ -20,12 +20,14 @@ func TestStatusWithItsWorktree(t *testing.T) {
 
 	got := runSliceflow(t, repo, home, "slice", "status", "Login")
 
+	// The path comes from git, which gives it with its links and short
+	// names resolved, e.g. /private/var on macOS.
 	want := "login: Log in\n" +
 		"  Description:  Lets a user log in.\n" +
 		"  Created:      " + createdTime(t, home, "login") + "\n" +
 		"  Started from: main, at " + base[:7] + "\n" +
 		"  Branch:       slice/login\n" +
-		"  Worktree:     " + defaultWorktree(home, "login") + "\n" +
+		"  Worktree:     " + realPath(t, defaultWorktree(home, "login")) + "\n" +
 		"  Events:       1 (last: slice.created)\n"
 	wantOutput(t, got, want, "")
 }
