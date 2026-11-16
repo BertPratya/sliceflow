@@ -28,8 +28,18 @@ import (
 //     which gets its stderr and so holds it open, print a line to
 //     stdout, and exit with 0 at once, like a git whose hook started a
 //     background program;
-//   - "linger": wait for 30 seconds.
+//   - "linger": wait for lingerTime, then write a file at the path in
+//     envLingerDone, when it is set, to say it has ended.
 const envFakeGit = "SLICEFLOW_TEST_FAKE_GIT"
+
+// envLingerDone holds the path of the file that the fake git in the mode
+// "linger" writes when it ends, so a test can wait for it. On Windows, a
+// test's folders cannot be deleted while a program still runs from them.
+const envLingerDone = "SLICEFLOW_TEST_LINGER_DONE"
+
+// lingerTime is how long the fake git in the mode "linger" runs: longer
+// than run waits for a program that git started.
+const lingerTime = 10 * time.Second
 
 // The exact output of the fake git in the mode "fail".
 const (
@@ -64,7 +74,12 @@ func TestMain(m *testing.M) {
 		fmt.Fprint(os.Stdout, fakeStdout)
 		os.Exit(0)
 	case "linger":
-		time.Sleep(30 * time.Second)
+		time.Sleep(lingerTime)
+		if done := os.Getenv(envLingerDone); done != "" {
+			if err := os.WriteFile(done, nil, 0o644); err != nil {
+				os.Exit(96)
+			}
+		}
 		os.Exit(0)
 	default:
 		fmt.Fprintf(os.Stderr, "unknown %s mode %q\n", envFakeGit, os.Getenv(envFakeGit))
@@ -193,9 +208,14 @@ func TestRunStopsGitWhenTheContextEnds(t *testing.T) {
 // hook's background job) still holds git's stderr open, run waits for
 // at most a few seconds, then returns git's stdout and no error: git
 // did its job. Without WaitDelay, run would wait for the program to
-// end, 30 seconds here, and forever for a program that never ends.
+// end, lingerTime here, and forever for a program that never ends.
 func TestRunDoesNotWaitForProgramsGitStarted(t *testing.T) {
 	useFakeGit(t, "background")
+	done := filepath.Join(t.TempDir(), "linger-done")
+	t.Setenv(envLingerDone, done)
+	// The program must end before the test does: on Windows, the test's
+	// folders cannot be deleted while it still runs from them.
+	defer waitForFile(t, done, 3*lingerTime)
 
 	start := time.Now()
 	out, err := run(context.Background(), t.TempDir(), "anything")
@@ -207,9 +227,23 @@ func TestRunDoesNotWaitForProgramsGitStarted(t *testing.T) {
 	if out != fakeStdout {
 		t.Errorf("run returned %q, want %q", out, fakeStdout)
 	}
-	if took > 15*time.Second {
-		t.Errorf("run took %v, want it to stop waiting after a few seconds", took)
+	if took >= lingerTime-time.Second {
+		t.Errorf("run took %v, want it to stop waiting after a few seconds, well before the program ends", took)
 	}
+}
+
+// waitForFile waits until path exists, for at most limit, and fails the
+// test if it does not appear.
+func waitForFile(t *testing.T, path string, limit time.Duration) {
+	t.Helper()
+	deadline := time.Now().Add(limit)
+	for time.Now().Before(deadline) {
+		if _, err := os.Stat(path); err == nil {
+			return
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	t.Errorf("%s did not appear within %v", path, limit)
 }
 
 // Test 7: any other failure is returned as it is. Here dir does not
