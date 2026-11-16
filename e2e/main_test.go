@@ -5,10 +5,12 @@ package e2e
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -41,4 +43,26 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	os.RemoveAll(dir)
 	os.Exit(code)
+}
+
+// statSources looks at every file under root that the program is built
+// from: the Go files and the templates. go test keeps a package's result
+// until a file that one of its tests looked at changes. The program is
+// built by another process, which go test does not watch, so without
+// this, a change to the code could give an old result. It must be called
+// from a test: go test does not watch TestMain.
+func statSources(root string) error {
+	return filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() && strings.HasPrefix(entry.Name(), ".") && path != root {
+			return filepath.SkipDir
+		}
+		if entry.IsDir() || strings.HasSuffix(path, ".go") || strings.HasSuffix(path, ".md") {
+			_, err := os.Stat(path)
+			return err
+		}
+		return nil
+	})
 }

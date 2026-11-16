@@ -36,3 +36,35 @@ const (
 	worktreeLine      = "  Worktree: %s\n"
 	nextLine          = "Next: write the spec in %s\n"
 )
+
+// The messages of slice create when it cannot make the slice. Each goes
+// to stderr. "Nothing was changed." is left out of a first line when
+// something sliceflow made could not be removed.
+const (
+	controlCharacterLines = "Error: --%s has a control character. Nothing was changed.\n" +
+		"Received: \"%s\"\n" +
+		"Write it as plain text on one line, with no control characters.\n"
+	invalidNameLines = "Error: invalid slice name \"%s\". Nothing was changed.\n%s\n"
+	gitNotFoundLines = "Error: git was not found. Nothing was changed.\n" +
+		"Install git, then try again.\n"
+	noCommitsLines = "Error: this repository has no commits yet. Nothing was changed.\n" +
+		"Make a first commit, then try again.\n"
+	noBaseLine        = "Error: base branch %s does not exist. Nothing was changed.\n"
+	defaultBaseHint   = "sliceflow starts from main unless you choose another branch. To choose one, run:\n  sliceflow slice create %s --from <branch>\n"
+	chosenBaseHint    = "Check the name. To see your branches, run:\n  git branch\n"
+	folderTakenLine   = "Error: slice %s already exists (folder docs/slices/%s/ in %s). Nothing was changed.\n"
+	branchTakenLine   = "Error: slice %s already exists (branch slice/%s). Nothing was changed.\n"
+	gitFailedLine     = "Error: git could not %s.%s\n"
+	systemFailedLine  = "Error: could not %s.%s\n"
+	stoppedLine       = "Stopped.%s\n"
+	notCreated        = " The slice was not created."
+	nothingChanged    = " Nothing was changed."
+	gitSaid           = "git said:\n"
+	gitSaidNothing    = "git printed no message.\n"
+	systemSaid        = "The system said:\n"
+	leftoversLine     = "Some of what sliceflow made could not be removed:\n"
+	leftoverLine      = "  %-8s  %s\n"
+	cleanUpLine       = "To clean up, run:\n"
+	removeWorktreeCmd = "  git worktree remove --force \"%s\"\n"
+	deleteBranchCmd   = "  git branch -D \"%s\"\n"
+)

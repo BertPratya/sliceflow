@@ -1,0 +1,90 @@
+package cli
+
+import (
+	"context"
+	"errors"
+	"io/fs"
+	"strings"
+	"testing"
+
+	"github.com/BertPratya/sliceflow/internal/git"
+	"github.com/BertPratya/sliceflow/internal/slice"
+)
+
+// Each case prints an error that slice.Create can return, and checks the
+// exact message and the exit code. These are the cases that are hard to
+// make happen with a real repository; the others are tested in e2e.
+func TestPrintCreateError(t *testing.T) {
+	writeFailed := &fs.PathError{Op: "open", Path: "/wt/docs/slices/login/spec.md", Err: fs.ErrPermission}
+	worktree := slice.Leftover{Kind: "worktree", Name: "/wt/shop/login"}
+	branch := slice.Leftover{Kind: "branch", Name: "slice/login"}
+
+	tests := []struct {
+		about string
+		err   error
+		code  int
+		want  string
+	}{
+		{"a file that cannot be written",
+			&slice.StepError{Step: "write /wt/docs/slices/login/spec.md", Err: writeFailed}, 1,
+			"Error: could not write /wt/docs/slices/login/spec.md. The slice was not created. Nothing was changed.\n" +
+				"The system said:\n" +
+				"  permission denied\n"},
+		{"git printed nothing",
+			&slice.StepError{Step: "make the commit", Err: &git.Error{ExitCode: 1, Stderr: ""}}, 1,
+			"Error: git could not make the commit. The slice was not created. Nothing was changed.\n" +
+				"git printed no message.\n"},
+		{"git's empty lines stay empty, and Windows line ends are kept out",
+			&slice.StepError{Step: "make the commit", Err: &git.Error{ExitCode: 1, Stderr: "first\r\n\r\nthird\r\n"}}, 1,
+			"Error: git could not make the commit. The slice was not created. Nothing was changed.\n" +
+				"git said:\n" +
+				"  first\n" +
+				"\n" +
+				"  third\n"},
+		{"the worktree's command comes first",
+			&slice.StepError{Step: "make the commit", Err: &git.Error{ExitCode: 1, Stderr: "no\n"},
+				Left: []slice.Leftover{branch, worktree}}, 1,
+			"Error: git could not make the commit. The slice was not created.\n" +
+				"git said:\n" +
+				"  no\n" +
+				"Some of what sliceflow made could not be removed:\n" +
+				"  branch    slice/login\n" +
+				"  worktree  /wt/shop/login\n" +
+				"To clean up, run:\n" +
+				"  git worktree remove --force \"/wt/shop/login\"\n" +
+				"  git branch -D \"slice/login\"\n"},
+		{"stopped, with something left",
+			&slice.StepError{Step: "make the commit", Err: context.Canceled, Left: []slice.Leftover{worktree}}, 1,
+			"Stopped. The slice was not created.\n" +
+				"Some of what sliceflow made could not be removed:\n" +
+				"  worktree  /wt/shop/login\n" +
+				"To clean up, run:\n" +
+				"  git worktree remove --force \"/wt/shop/login\"\n"},
+		{"stopped during a check",
+			&slice.CheckError{Check: "find the project", Err: context.Canceled}, 1,
+			"Stopped. The slice was not created. Nothing was changed.\n"},
+		{"git not found during a check",
+			&slice.CheckError{Check: "find the project", Err: git.ErrNotFound}, 1,
+			"Error: git was not found. Nothing was changed.\nInstall git, then try again.\n"},
+		{"a check that fails without git",
+			&slice.CheckError{Check: "find the home folder", Err: errors.New("$HOME is not defined")}, 1,
+			"Error: could not find the home folder. Nothing was changed.\n" +
+				"The system said:\n" +
+				"  $HOME is not defined\n"},
+		{"an error with no message of its own",
+			errors.New("something new"), 1,
+			"Error: something new\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.about, func(t *testing.T) {
+			var out strings.Builder
+			code := printCreateError(&out, tt.err)
+			if code != tt.code {
+				t.Errorf("printCreateError returned %d, want %d", code, tt.code)
+			}
+			if out.String() != tt.want {
+				t.Errorf("printCreateError printed:\n%s\nwant:\n%s", out.String(), tt.want)
+			}
+		})
+	}
+}

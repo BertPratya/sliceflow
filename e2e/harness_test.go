@@ -7,8 +7,13 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 )
+
+// watchSources makes the first run of sliceflow look at its source
+// files, so go test runs the tests again when the code changes.
+var watchSources sync.Once
 
 // result is what one run of sliceflow printed, and its exit code.
 type result struct {
@@ -46,9 +51,22 @@ func newHome(t *testing.T) string {
 // when sliceflow cannot be started.
 func runSliceflow(t *testing.T, dir, home string, args ...string) result {
 	t.Helper()
+	return runSliceflowWith(t, dir, home, nil, args...)
+}
+
+// runSliceflowWith is runSliceflow with more environment variables, e.g.
+// "PATH=" + an empty folder. A variable in env replaces one of the same
+// name.
+func runSliceflowWith(t *testing.T, dir, home string, env []string, args ...string) result {
+	t.Helper()
+	watchSources.Do(func() {
+		if err := statSources(".."); err != nil {
+			t.Fatalf("could not look at the source files: %v", err)
+		}
+	})
 	cmd := exec.Command(program, args...)
 	cmd.Dir = dir
-	cmd.Env = testEnv(home)
+	cmd.Env = append(testEnv(home), env...)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr

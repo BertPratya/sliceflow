@@ -11,11 +11,13 @@ import (
 
 // runSliceCreate makes a new slice from the name and the options in in,
 // in the project of the current folder. When it works, it prints where
-// the branch, the worktree, and the spec are, and returns 0.
+// the branch, the worktree, and the spec are, and returns 0. Otherwise
+// it prints what went wrong, and returns 2 for a title, a description,
+// or a name that cannot be used, or 1 for any other failure.
 func runSliceCreate(ctx context.Context, in input, stdout, stderr io.Writer) int {
 	dir, err := os.Getwd()
 	if err != nil {
-		fmt.Fprintf(stderr, "Error: %v\n", err)
+		printFailure(stderr, "find the current folder", err, nothingChanged)
 		return 1
 	}
 
@@ -27,8 +29,7 @@ func runSliceCreate(ctx context.Context, in input, stdout, stderr io.Writer) int
 		From:        in.options["from"],
 	})
 	if err != nil {
-		fmt.Fprintf(stderr, "Error: %v\n", err)
-		return 1
+		return printCreateError(stderr, err)
 	}
 
 	fmt.Fprintf(stdout, createdLine, created.Name)

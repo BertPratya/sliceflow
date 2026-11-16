@@ -3,7 +3,6 @@ package slice
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,10 +13,6 @@ import (
 	"github.com/BertPratya/sliceflow/internal/project"
 	"github.com/BertPratya/sliceflow/templates"
 )
-
-// ErrNoCommits is returned when the project's repository has no commit
-// yet, so there is nothing to start a slice from.
-var ErrNoCommits = errors.New("slice: the repository has no commits")
 
 // worktreeSetting is the git setting that chooses where worktrees go.
 const worktreeSetting = "sliceflow.worktree.dir"
@@ -51,29 +46,33 @@ type CreateResult struct {
 // user's own checkout.
 //
 // It checks, in this order, and stops at the first problem: a control
-// character in the title or the description, the name, the project, the
-// base branch, and a name that is taken. Nothing is made before all the
-// checks pass. When a step that makes the slice fails, what was made is
-// removed, and the error is a *StepError.
+// character in the title or the description (*ControlCharacterError),
+// the name (*InvalidNameError), the project (ErrNoCommits), the base
+// branch (*NoBaseError), and a name that is taken (*NameTakenError).
+// When a check cannot be done, e.g. because git fails, the error is a
+// *CheckError. Nothing is made before all the checks pass. When a step
+// that makes the slice fails, what was made is removed, and the error is
+// a *StepError. A failure because git is not found holds
+// git.ErrNotFound, and a stop through ctx holds ctx's error.
 func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, error) {
 	if HasControlCharacter(opts.Title) {
-		return CreateResult{}, fmt.Errorf("the title has a control character")
+		return CreateResult{}, &ControlCharacterError{Option: "title", Text: opts.Title}
 	}
 	if HasControlCharacter(opts.Description) {
-		return CreateResult{}, fmt.Errorf("the description has a control character")
+		return CreateResult{}, &ControlCharacterError{Option: "description", Text: opts.Description}
 	}
 	name, err := ParseName(opts.Name)
 	if err != nil {
-		return CreateResult{}, err
+		return CreateResult{}, &InvalidNameError{Given: opts.Name, Problem: err}
 	}
 
 	root, err := git.RepoRoot(ctx, dir)
 	if err != nil {
-		return CreateResult{}, err
+		return CreateResult{}, &CheckError{Check: "find the project", Err: err}
 	}
 	hasCommits, err := git.HasCommits(ctx, root)
 	if err != nil {
-		return CreateResult{}, err
+		return CreateResult{}, &CheckError{Check: "read the commits", Err: err}
 	}
 	if !hasCommits {
 		return CreateResult{}, ErrNoCommits
@@ -84,20 +83,27 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		base = "main"
 	}
 	baseCommit, err := git.BranchCommit(ctx, root, base)
-	if err != nil {
-		return CreateResult{}, err
+	if errors.Is(err, git.ErrNoBranch) {
+		return CreateResult{}, &NoBaseError{Name: name, Base: base, Chosen: opts.From != ""}
 	}
-	if err := CheckNameFree(ctx, root, baseCommit, name); err != nil {
-		return CreateResult{}, err
+	if err != nil {
+		return CreateResult{}, &CheckError{Check: "read the branch " + base, Err: err}
+	}
+	err = CheckNameFree(ctx, root, baseCommit, name)
+	if errors.Is(err, ErrFolderTaken) || errors.Is(err, ErrBranchTaken) {
+		return CreateResult{}, &NameTakenError{Name: name, Base: base, Err: err}
+	}
+	if err != nil {
+		return CreateResult{}, &CheckError{Check: "check the name", Err: err}
 	}
 
 	setting, err := git.Config(ctx, root, worktreeSetting)
 	if err != nil {
-		return CreateResult{}, err
+		return CreateResult{}, &CheckError{Check: "read the setting " + worktreeSetting, Err: err}
 	}
 	worktree, err := project.WorktreePath(root, setting, name)
 	if err != nil {
-		return CreateResult{}, err
+		return CreateResult{}, &CheckError{Check: "find the home folder", Err: err}
 	}
 
 	title := opts.Title
