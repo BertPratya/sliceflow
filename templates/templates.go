@@ -3,8 +3,8 @@ package templates
 
 import _ "embed"
 
-// Spec is the text of templates/default/spec.md, built into the program
-// (PD5). The slice package makes the spec of a new slice from it.
+// Spec is the text of templates/default/spec.md, built into the program,
+// so sliceflow needs no files of its own to run. The slice package makes the spec of a new slice from it.
 //
 //go:embed default/spec.md
 var Spec string

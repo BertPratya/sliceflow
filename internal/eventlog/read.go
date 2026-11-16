@@ -84,7 +84,7 @@ var validationRouter = map[string]func(json.RawMessage) error{
 // validateEvent checks the data of one event, with the function that
 // validationRouter has for its name. An event name that is not in
 // validationRouter is not an error: a newer sliceflow may have written
-// it (R32).
+// it.
 func validateEvent(event string, data json.RawMessage) error {
 	check, ok := validationRouter[event]
 	if !ok {

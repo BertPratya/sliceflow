@@ -19,10 +19,10 @@ func main() {
 }
 
 // run runs the command the user typed, and returns the exit code for the
-// program: the command's own code (R76), or 1 when sliceflow crashes.
-// A crash is reported on stderr the way Go reports it, with the panic
-// and the stack trace (TD4). Ctrl+C and SIGTERM cancel the context that
-// the command gets, which stops a running git (TD5).
+// program: the command's own code, or 1 when sliceflow crashes. A crash
+// is reported on stderr the way Go reports it, with the panic and the
+// stack trace. Ctrl+C and SIGTERM cancel the context that the command
+// gets, which stops a running git.
 func run() (exitCode int) {
 	defer func() {
 		if r := recover(); r != nil {

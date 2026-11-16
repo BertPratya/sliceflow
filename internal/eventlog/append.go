@@ -13,7 +13,7 @@ import (
 // eventToWrite is a line as Append writes it. It is Event with Data as
 // any, so the caller's own value is turned into JSON by the same encoder
 // as the rest of the line. The fields are in the order of the keys in
-// the line (R27).
+// the line.
 type eventToWrite struct {
 	Version int    `json:"version"`
 	Seq     int    `json:"seq"`
@@ -23,8 +23,9 @@ type eventToWrite struct {
 }
 
 // needsNewline reports whether the log in f must get a "\n" before a new
-// line: when it is not empty, and its last byte is not "\n" (R34). A file
-// that ends with "\r\n" also ends with "\n".
+// line: when it is not empty, and its last byte is not "\n". Then a
+// cut-off last line stays a line of its own. A file that ends with
+// "\r\n" also ends with "\n".
 func needsNewline(f *os.File) (bool, error) {
 	info, err := f.Stat()
 	if err != nil {
@@ -42,23 +43,21 @@ func needsNewline(f *os.File) (bool, error) {
 }
 
 // Append adds one event to the end of the log at logPath, with the name
-// event and the data data. The log must exist: Append never creates it
-// (see Create). Append never changes a line that is already in the log
-// (R35).
+// event and the data data, as one line of JSON. The log must exist:
+// Append never creates it (see Create), and never changes a line that is
+// already in it.
 //
-// Steps:
-//  1. Take the lock on logPath + ".lock", waiting up to 10 seconds, or
-//     until ctx is cancelled. Release it when Append ends.
-//  2. Read the log. If Read returns an error, return it. The new seq is
-//     the highest seq of the events, plus one; bad lines do not count
-//     (R31).
-//  3. Open the log to read and to add at the end. If the last line has
-//     no "\n", start the new text with "\n" (R34).
-//  4. Turn the event into one line of JSON, with <, >, and & as they are
-//     (R27), and the time as UTC, to the second.
-//  5. Write it with one Write, so the log gets the whole line or nothing.
-//  6. Close the log. When nothing else failed, Close's error is the
-//     result: the line may not have been saved.
+// Two processes can append to the same log at the same time: Append
+// holds the lock on logPath + ".lock" while it works, and waits for it up
+// to 10 seconds, or until ctx is cancelled. Both events are kept, each
+// whole and on its own line.
+//
+// The new event's seq is the highest seq that can be read in the log,
+// plus one; lines that cannot be read do not count. Its time is now, in
+// UTC, to the second. <, >, and & are written as they are. The line is
+// written with one Write, so the log gets the whole line or nothing. When
+// nothing else failed, an error from closing the log is returned: the
+// line may not have been saved.
 func Append(ctx context.Context, logPath string, event string, data any) (err error) {
 	lock, err := filelock.Acquire(ctx, logPath+".lock", 10*time.Second, 50*time.Millisecond)
 	if err != nil {

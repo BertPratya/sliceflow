@@ -2,7 +2,7 @@ package eventlog
 
 import "encoding/json"
 
-// SliceCreated is the data of the slice.created event (R27). Every field
+// SliceCreated is the data of the slice.created event. Every field
 // is always written, even when it is empty, so a slice.created line
 // always has the five keys that Read checks.
 type SliceCreated struct {

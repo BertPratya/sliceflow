@@ -7,7 +7,8 @@ import (
 	"unicode/utf8"
 )
 
-// The three problems of R20, in its order (SD28). The text of each error
+// The three problems a name can have, in the order they are checked: when
+// a name has more than one, the first is reported. The text of each error
 // is the second line that the command prints.
 var (
 	errTooLong    = errors.New("A name has at most 40 characters.")
@@ -16,7 +17,7 @@ var (
 )
 
 // reservedNames are the names Windows does not allow for a file or a
-// folder (R19).
+// folder.
 var reservedNames = map[string]struct{}{
 	"con": {}, "prn": {}, "aux": {}, "nul": {},
 	"com1": {}, "com2": {}, "com3": {}, "com4": {}, "com5": {},
@@ -25,9 +26,9 @@ var reservedNames = map[string]struct{}{
 	"lpt6": {}, "lpt7": {}, "lpt8": {}, "lpt9": {},
 }
 
-// isAlphaNum reports whether r is one of a to z, A to Z, or 0 to 9, the
-// letters and digits of R19. unicode.IsLetter is not used, because it
-// also accepts letters such as é.
+// isAlphaNum reports whether r is one of a to z, A to Z, or 0 to 9: the
+// letters and digits a name may have. unicode.IsLetter is not used,
+// because it also accepts letters such as é.
 func isAlphaNum(r rune) bool {
 	return (r >= 'a' && r <= 'z') ||
 		(r >= 'A' && r <= 'Z') ||
@@ -35,7 +36,7 @@ func isAlphaNum(r rune) bool {
 }
 
 // lowercaseAZ makes only the letters A to Z lowercase, and leaves every
-// other character as it is (R21). unicode.ToLower is called only inside
+// other character as it is. unicode.ToLower is called only inside
 // the A to Z check: on its own, it also changes other characters, such
 // as the Kelvin sign, which becomes a plain k and would then pass the
 // character check.
@@ -50,19 +51,14 @@ func lowercaseAZ(given string) string {
 	return result.String()
 }
 
-// ParseName turns the name the user gave into the slice name, or returns
-// the first problem in R20's order (SD28). On an error, the name is "".
-//
-// Steps:
-//  1. If the name has more than 40 characters, return errTooLong. The
-//     length counts characters, not bytes: the characters are not
-//     checked yet, and é is 2 bytes.
-//  2. Make A to Z lowercase (R21).
-//  3. If the lowercase name is reserved, return errReserved.
-//  4. If the name is empty, does not start with a letter or a digit, or
-//     has a character that is not a letter, a digit, a hyphen, or an
-//     underscore, return errCharacters.
-//  5. Return the lowercase name.
+// ParseName turns the name the user gave into the slice name: the same
+// name, with A to Z made lowercase. A slice name has at most 40
+// characters, counted as characters, not bytes; is not a name that
+// Windows reserves, such as con or lpt1; and has only letters a to z,
+// digits, hyphens, and underscores, starting with a letter or a digit.
+// When the name breaks more than one rule, the error is the first of
+// errTooLong, errReserved, and errCharacters. On an error, the name is
+// "".
 func ParseName(given string) (string, error) {
 	if utf8.RuneCountInString(given) > 40 {
 		return "", errTooLong

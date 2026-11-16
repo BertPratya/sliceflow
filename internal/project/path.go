@@ -6,21 +6,20 @@ import (
 )
 
 // WorktreePath returns the folder for the worktree of the slice name, in
-// the project whose main folder is root (R17, R18). setting is the value
-// of the git setting sliceflow.worktree.dir, or "" when it is not set or
-// is empty.
+// the project whose main folder is root:
+// <worktrees>/<project>/<name>, where <project> is the last part of root.
+// The path has no . or .. parts.
 //
-// Steps:
-//  1. If setting is "", the folder is <home>/.sliceflow/worktrees (R17).
-//  2. If setting is "~", or "~" then a folder separator of this system,
-//     the folder is the home folder joined with the rest of setting.
-//  3. If setting is a full path, the folder is setting.
-//  4. Otherwise, the folder is setting joined to root.
-//  5. Return the folder joined with the project's name (the last part of
-//     root) and name. Join cleans the result, so it has no . or .. parts.
+// setting is the value of the git setting sliceflow.worktree.dir, or ""
+// when it is not set or is empty. <worktrees> is:
+//   - <home>/.sliceflow/worktrees when setting is "";
+//   - in the home folder when setting is "~", or starts with "~" and a
+//     folder separator, e.g. ~/wt;
+//   - setting itself when it is a full path;
+//   - setting joined to root otherwise, e.g. ../wt.
 //
-// It looks up the home folder only in steps 1 and 2. When the home folder
-// is unknown there, it returns the error of os.UserHomeDir as it is.
+// It needs the home folder only for the first two. When the home folder
+// is unknown then, it returns the error of os.UserHomeDir as it is.
 func WorktreePath(root, setting, name string) (string, error) {
 	dir, err := worktreesDir(root, setting)
 	if err != nil {
@@ -29,7 +28,8 @@ func WorktreePath(root, setting, name string) (string, error) {
 	return filepath.Join(dir, filepath.Base(root), name), nil
 }
 
-// worktreesDir does steps 1 to 4 of WorktreePath.
+// worktreesDir returns the <worktrees> folder of WorktreePath for
+// setting.
 func worktreesDir(root, setting string) (string, error) {
 	if setting == "" {
 		home, err := os.UserHomeDir()
