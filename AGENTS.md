@@ -258,6 +258,13 @@ Work on one requirement at a time, in this order:
    senior Go developer: what to change, and why. You may write the
    boilerplate around it (test repos, command wiring, file setup), and
    explain each new Go concept the first time, one per step.
+   **Design from the caller down** (decided 2026-11-16). Start at the
+   entry point: the command and its e2e test. Write the code that calls
+   the piece first, as if the functions it needs already exist (wishful
+   thinking), and let that caller decide each function's inputs and
+   outputs. Then build the missing functions, top to bottom, each with a
+   placeholder (`panic("not written yet")`) until it is written. A hard
+   new mechanism, e.g. a lock, may be prototyped on its own first.
 6. **Who writes the code** (decided 2026-11-01). When the design is
    done, say whether the piece is the human's piece or yours (see
    Levels), and why. The human decides. For the human's piece, follow
