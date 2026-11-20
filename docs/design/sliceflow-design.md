@@ -45,7 +45,8 @@ and plan; a run that follows fixed rules in code; review gates; recovery
 after a crash; a "Needs you" list; and all of it controlled from a local
 web dashboard. A web board alone is not new (vibe-kanban has one).
 
-A **slice** is one feature, built on its own branch, from spec to merge.
+A **slice** is one feature, from spec to merge: planned on the base
+branch, then built on its own branch.
 The workflow runs from creating the slice to finishing it: a local merge
 into `main`, or a pull request (2.5).
 
@@ -435,6 +436,19 @@ slice has one log, `docs/slices/<name>/.events.jsonl`, one event per line.
   finished), not after every event. On restart it commits what is left. An
   approval's tag points at a commit that holds the approval event. One lock
   covers log commits and merges.
+- **While a slice is planned** (decided, the human, 2026-11-19): the log
+  is in the user's own checkout, on the base branch. A command that
+  changes the slice makes one commit when it ends, of only the slice's
+  folder, so the log is never left uncommitted between commands and the
+  user's other work is never swept in. The command refuses when the
+  checkout is not on the slice's base branch.
+- **Where the log is read** (decided, the human, 2026-11-19): `slice
+  status` and `slice list` read logs only from the user's checkout, as
+  Spec Kit and OpenSpec do. A log whose base branch has commits the
+  checkout does not hold is shown with a warning that it may be out of
+  date.
+  Once a slice's build has started, its newest events are in its
+  worktree (1.15; 0005).
 - **Reviews** are events too (1.9). A finding's state (fixed, wontfix,
   deferred, verified, reopened) is more events. There is no review file and
   no findings file.
@@ -494,6 +508,13 @@ a part can truly be empty. Sections 2.2 and 2.3 say what each holds.
 - Settled before 0003 adds per-role settings.
 
 ### 1.15 Worktrees
+
+**Made when the build starts** (decided, the human, 2026-11-19). A
+slice has no branch and no worktree while it is planned. `sliceflow run`
+makes the branch `slice/<name>` and its worktree from the base branch
+the first time it starts, after the approval, so the worktree starts
+with the approved documents. During the build, a change to a document
+is made in the worktree, and merges back with the code.
 
 **Outside the repo** (decided, the human). The default is
 `~/.sliceflow/worktrees/<repo>/<slice>/`, with task worktrees under it.
@@ -619,11 +640,14 @@ else.
 - **Check first, then change.** Every check runs before anything is
   created. If a step fails halfway, `sliceflow` undoes what it did (an undo
   list), and says "Nothing was changed".
-- It makes the branch and the slice's worktree (1.15).
-- It adds exactly two files on the slice branch, in one commit: the spec,
-  from the built-in template, and `.events.jsonl`, with `slice.created`.
+- It writes exactly two files in the user's checkout, on the base
+  branch, and commits only them, in one commit: the spec, from the
+  built-in template, and `.events.jsonl`, with `slice.created`. It makes
+  no branch and no worktree (1.15). Changed by the slice `plan-on-base`
+  (2026-11-19); 0001 made both.
 - The base branch comes from `--from`, else `git config sliceflow.base`,
-  else `main`. The title lives only in the event log.
+  else `main`. The checkout must be on it, or `create` refuses. The
+  title lives only in the event log.
 - `sliceflow slice status` shows where a slice is and what comes next.
   `sliceflow slice list` lists local slices. Both only format what a
   shared core returns, so the dashboard calls the same core.
@@ -929,8 +953,10 @@ what replaced it.
   function, under the lock (1.13, 2.1).
 - 2026-11-02, the human: the worktree stays outside the repo by default,
   and the `worktree.dir` setting is built in 0001, not later (1.15).
+  Replaced 2026-11-19: `plan-on-base` moves making the worktree to 0005.
 - 2026-11-02, the human: in 0001 the base branch comes only from `--from`,
   else `main`. The git setting `sliceflow.base` comes later (2.1, 1.14).
+  Replaced 2026-11-19: `plan-on-base` adds the setting.
 - 2026-11-02, the human: when another tool, git first, fails in a way
   `sliceflow` has no message for, `sliceflow` shows the tool's own message
   after one line of its own (1.17).
@@ -962,6 +988,13 @@ what replaced it.
   of numbered requirements and scenarios, which made a reader jump
   between a rule and its proof, and whose numbers said nothing. The 0001
   spec keeps the old format (2.2).
+- 2026-11-19, the human: a slice is planned on its base branch, in the
+  user's own checkout; `slice create` makes no branch and no worktree,
+  and `sliceflow run` makes them when the build starts. A command that
+  changes a slice refuses when the checkout is not on the slice's base,
+  and commits only the slice's folder, once per command. `slice status`
+  and `slice list` read only the checkout. Built by the slice
+  `plan-on-base`, before 0002 (1.1, 1.13, 1.15, 2.1).
 
 ---
 
