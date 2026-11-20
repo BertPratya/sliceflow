@@ -52,6 +52,14 @@ from the template, and an event log that records that the slice was
 created. The event log is the only source of truth, so every later slice
 builds on it.
 
+Changed by `plan-on-base` (2026-11-19): `slice create` now writes the
+slice in the user's checkout, on the base branch, with no branch and no
+worktree, and `status` and `list` read only that checkout. Each rule and
+decision it changes ends with `Replaced by: plan-on-base`. The scenarios
+below still show the old behavior where they mention the slice's
+branch, its worktree, or `main`; `docs/slices/plan-on-base/change.md`
+holds the new behavior.
+
 ## User stories
 
 <!-- What the user does. This is the first thing a reviewer reads.
@@ -810,10 +818,12 @@ command is used the wrong way.
   commit on that branch. The command takes the options `--title`,
   `--description`, and `--from`.
   Check: e2e
+  Replaced by: plan-on-base
 - **R2.** sliceflow adds exactly two files in that commit, both in
   `docs/slices/<name>/` of the worktree: `spec.md` and `.events.jsonl`, the
   event log.
   Check: e2e
+  Replaced by: plan-on-base
 - **R3.** The file `spec.md` is the built-in spec template, with its
   comments, and with this header: the line `slice: <name>`, and the line
   `created: <date>`, where `<date>` is the day the slice was created, in
@@ -828,6 +838,7 @@ command is used the wrong way.
   `  Note:     <file> matches a .gitignore rule, so sliceflow added it anyway.`
   for each such file, where `<file>` is `spec.md` or `.events.jsonl`.
   Check: e2e
+  Replaced by: plan-on-base (in part: the Note: padding)
 - **R6.** sliceflow makes the commit with the user's own git settings, so
   git hooks and commit signing work as the user set them up.
   Check: e2e
@@ -836,6 +847,7 @@ command is used the wrong way.
   exception is a worktree folder that `sliceflow.worktree.dir` puts inside
   the project (R18).
   Check: e2e
+  Replaced by: plan-on-base
 - **R8.** When the slice is created, sliceflow prints these lines to the
   normal output, and exits with code 0: `Created slice <name>.`, then
   `  Branch:   slice/<name> (from <base>, at <commit>)`, where `<commit>` is
@@ -846,6 +858,7 @@ command is used the wrong way.
   line, in that order, when they apply. sliceflow prints nothing else:
   what git prints when a step works is not shown.
   Check: e2e
+  Replaced by: plan-on-base
 - **R9.** Full paths that sliceflow prints use the separator of the
   system, for example `\` on Windows. Paths inside the project, such as
   `docs/slices/<name>/.events.jsonl`, always use `/`.
@@ -858,10 +871,12 @@ command is used the wrong way.
   empty, it starts from `main` (SD32). A tag, a commit, or a remote branch is not a local
   branch, so R12 applies to it.
   Check: e2e
+  Replaced by: plan-on-base
 - **R11.** sliceflow starts the slice from the commit at the tip of the local
   base branch at that moment. It never fetches. Changes that are not
   committed on the base branch are not in the slice.
   Check: e2e
+  Replaced by: plan-on-base (in part: the slice is committed in the user's checkout)
 - **R12.** If the base branch does not exist, sliceflow changes nothing and
   prints this to the error output: the line "Error: base branch <base>
   does not exist. Nothing was changed." Then, when `--from` was left out
@@ -872,6 +887,7 @@ command is used the wrong way.
   and the command `git branch`. Each command is on its own line, indented
   by two spaces.
   Check: e2e
+  Replaced by: plan-on-base
 
 ### The repository
 
@@ -899,11 +915,13 @@ command is used the wrong way.
   it and from inside any of its worktrees. The project name used in a
   worktree's path is the name of the main project's folder.
   Check: e2e
+  Replaced by: plan-on-base (in part)
 - **R17.** When the git setting `sliceflow.worktree.dir` is not set,
   sliceflow makes the worktree in
   `<home>/.sliceflow/worktrees/<project>/<name>`, where `<home>` is the
   user's home folder.
   Check: e2e
+  Replaced by: plan-on-base (moved to 0005: create makes no worktree)
 - **R18.** When the git setting `sliceflow.worktree.dir` is set, sliceflow
   makes the worktree in `<dir>/<project>/<name>`, where `<dir>` is its
   value. sliceflow reads the value through git, so a value set for the
@@ -915,6 +933,7 @@ command is used the wrong way.
   sliceflow does not check the folder beforehand. If git cannot make the
   worktree there, R37 applies.
   Check: e2e
+  Replaced by: plan-on-base (moved to 0005: create makes no worktree)
 
 ### The name
 
@@ -945,6 +964,7 @@ command is used the wrong way.
   `Created` line. Otherwise it prints no `Note:` line. `slice status`
   prints no `Note:` line.
   Check: e2e
+  Replaced by: plan-on-base (in part: the Note: padding)
 
 ### A name that is not free
 
@@ -953,6 +973,7 @@ command is used the wrong way.
   docs/slices/<name>/ in <base>). Nothing was changed." to the error
   output.
   Check: e2e
+  Replaced by: plan-on-base
 - **R24.** If the branch `slice/<name>` exists, sliceflow changes nothing
   and prints "Error: slice <name> already exists (branch slice/<name>).
   Nothing was changed." to the error output.
@@ -961,6 +982,7 @@ command is used the wrong way.
   make the worktree, and sliceflow shows git's message, as in R37. If the
   folder exists and is empty, sliceflow uses it.
   Check: e2e
+  Replaced by: plan-on-base
 - **R26.** sliceflow never looks at branches on a remote when it checks a
   name.
   Check: e2e
@@ -975,6 +997,7 @@ command is used the wrong way.
   in S13. The line is UTF-8 JSON, and the characters `<`, `>`, and `&` are
   written as they are.
   Check: unit, e2e
+  Replaced by: plan-on-base (in part: there is no slice branch while planning)
 - **R28.** The title is the text of `--title`, or the name when `--title`
   is left out or empty. The description is the text of `--description`,
   or an empty string when it is left out. sliceflow stores them only in
@@ -1030,6 +1053,7 @@ command is used the wrong way.
   before, where the worktree was made, is removed with the worktree
   (SD31).
   Check: e2e
+  Replaced by: plan-on-base
 - **R37.** sliceflow takes these steps with git, in this order: create the
   branch, create the worktree, then make the commit, which includes adding
   the two files. When one of them fails and sliceflow has no message of
@@ -1043,17 +1067,20 @@ command is used the wrong way.
   place of "git said:" and the text. sliceflow does not check beforehand
   for what git needs.
   Check: e2e
+  Replaced by: plan-on-base
 - **R38.** If sliceflow cannot write a file of the slice, or take the lock
   of the log, it prints this to the error output: the line "Error: could
   not write <path>. The slice was not created. Nothing was changed.", then
   "The system said:", then the error text of the system, indented by two
   spaces. R36 and R41 apply, as for a git step.
   Check: unit
+  Replaced by: plan-on-base (in part: R36 and R41 became create-undo and create-leftovers)
 - **R39.** If the user stops `slice create` with Ctrl+C, sliceflow removes
   what it made, as in R36, prints "Stopped. The slice was not created.
   Nothing was changed." to the error output, and exits with code 1. When
   something could not be removed, R41 applies.
   Check: e2e
+  Replaced by: plan-on-base (in part: create-undo)
 - **R40.** When more than one problem applies, sliceflow reports only the
   first, in this order: the command line (R70 to R75), where `--help`
   comes before any error, the first wrong word from the left is reported,
@@ -1064,6 +1091,7 @@ command is used the wrong way.
   `slice status` and `slice list` use the same order, for the checks they
   have.
   Check: e2e
+  Replaced by: plan-on-base
 - **R41.** If sliceflow could not remove something it made, its first line
   does not say "Nothing was changed." After git's text, or the system's
   text, it prints the line
@@ -1076,6 +1104,7 @@ command is used the wrong way.
   quotes. An empty folder that could not be removed is not listed
   (SD31).
   Check: e2e
+  Replaced by: plan-on-base
 
 ### Seeing one slice
 
@@ -1089,6 +1118,7 @@ command is used the wrong way.
   one column. The title, the description, the base branch, and the base
   commit come from the `slice.created` event.
   Check: e2e
+  Replaced by: plan-on-base
 - **R44.** When the description is empty, the `Description:` line shows
   `(none)`.
   Check: unit
@@ -1098,14 +1128,17 @@ command is used the wrong way.
 - **R46.** The `Started from:` line shows the base branch and the first
   seven characters of the base commit, written like `main, at 3f9a1c2`.
   Check: unit
+  Replaced by: plan-on-base
 - **R47.** The `Branch:` line shows `slice/<name>`. When that branch does
   not exist, it adds ` (not found)` after it.
   Check: e2e
+  Replaced by: plan-on-base
 - **R48.** The `Worktree:` line shows the full path of the slice's
   worktree. The slice's worktree is the worktree that git lists for the
   branch `slice/<name>`, when its folder exists. When there is none, the
   line shows `(not found)`.
   Check: e2e
+  Replaced by: plan-on-base
 - **R49.** The `Events:` line shows the number of lines of the log that
   can be read, then `(last: <event>)`, where `<event>` is the event name
   of the last line that can be read.
@@ -1115,12 +1148,14 @@ command is used the wrong way.
   from that branch, and `main` when it came from `main`. Otherwise the
   status has no `Read from:` line.
   Check: e2e
+  Replaced by: plan-on-base
 - **R51.** sliceflow finds the log of a slice by looking in these places,
   in this order, and stops at the first place that has it: the log file in
   the slice's worktree (R48), the log committed at the tip of the branch
   `slice/<name>`, and the log committed at the tip of `main`. When `main`
   does not exist, sliceflow treats it as having no log.
   Check: e2e
+  Replaced by: plan-on-base
 - **R52.** If no log is found, sliceflow changes nothing and prints this to
   the error output: the line "Error: no slice named <name>. Nothing was
   changed.", the line "No log was found in any of these places:", then
@@ -1129,6 +1164,7 @@ command is used the wrong way.
   `  main      docs/slices/<name>/.events.jsonl`, then the line "Check
   the name, or run: sliceflow slice list". It exits with code 1.
   Check: e2e
+  Replaced by: plan-on-base
 - **R53.** In `slice status`, when a line of the log cannot be read,
   sliceflow skips it, and prints one warning for the log to the error output: for one line,
   "Warning: line <n> of <path> could not be read, so it was skipped."; for
@@ -1162,9 +1198,11 @@ command is used the wrong way.
   candidate. When `main` does not exist, there are no folders in `main`.
   It never looks at branches on a remote.
   Check: e2e
+  Replaced by: plan-on-base
 - **R58.** For each candidate, sliceflow finds the log in the places of
   R51, in the same order. A candidate is a slice when its log is found.
   Check: e2e
+  Replaced by: plan-on-base
 - **R59.** The table has the header line `NAME`, `TITLE`, `DESCRIPTION`, then
   one row for each slice, sorted by name, by character code. The name column and the title
   column are padded with spaces to the width of their longest value, the
@@ -1193,6 +1231,7 @@ command is used the wrong way.
   character code,
   and they come before the table, or before the line of R62.
   Check: e2e
+  Replaced by: plan-on-base
 - **R64.** A candidate whose name has a capital letter or breaks R19, for
   example from a branch
   `slice/Foo` or `slice/a/b`, is not listed. sliceflow prints one warning
@@ -1200,6 +1239,7 @@ command is used the wrong way.
   a valid slice name.", where `<name>` is the candidate as it was found.
   The exit code stays 0.
   Check: e2e
+  Replaced by: plan-on-base (in part: its example names branches)
 - **R65.** If a log is empty, or its first line cannot be read, or its first
   line is not a `slice.created` event, sliceflow does not list the slice,
   and prints one warning to the error output, in place of the warning of
@@ -1228,11 +1268,13 @@ command is used the wrong way.
   last (SD30). It changes nothing, and exits with code 0. Every command has `--help`. The help of `slice create` is
   shown in S44.
   Check: e2e
+  Replaced by: plan-on-base (in part: the help of create and status)
 - **R69.** The help of `slice status` is shown in S45. The help of
   `slice list` is the same shape, with the sentence "Show all slices in a
   table: name, title, and description." and the usage line
   `sliceflow slice list [options]`.
   Check: e2e
+  Replaced by: plan-on-base (in part: the help of create and status)
 - **R70.** If a user runs a command that does not exist, sliceflow changes
   nothing and prints these two lines to the error output: "Error: unknown
   command "<words>". Nothing was changed." and "To see the commands, run:
@@ -1299,7 +1341,7 @@ command is used the wrong way.
 - Worktree setup: copying files, running setup commands, ports (0005).
 - Cancelling a slice, and cleaning up after a crash during `slice create` (0013).
 - Seeing or checking slices that teammates made on remote branches.
-- A git setting for the base branch (`sliceflow.base`).
+- A git setting for the base branch (`sliceflow.base`). Added by `plan-on-base`.
 - A readable view of the event log, for example as Markdown.
 - JSON output (`--json`).
 
@@ -1356,6 +1398,7 @@ command is used the wrong way.
   Cost: a stale local branch gives a stale start, and uncommitted changes
     are not in the slice.
   Rule: R11
+  Replaced by: plan-on-base (in part)
 
 - **SD3.** A slice's worktree is made outside the project, by default
   under `~/.sliceflow/worktrees/<project>/<slice>`. The git setting
@@ -1369,6 +1412,7 @@ command is used the wrong way.
   Cost: a person opens the worktree in a second editor window, unless
     they set the folder themselves.
   Rule: R17, R18
+  Replaced by: plan-on-base (in part: the worktree is made in 0005)
 
 - **SD4.** Each character of a slice name is a letter, a digit, a hyphen,
   or an underscore. The first character is a letter or a digit. The name
@@ -1418,6 +1462,7 @@ command is used the wrong way.
   Cost: a slice a teammate has made on a remote branch can still get the
     same name here.
   Rule: R23, R24, R25, R26
+  Replaced by: plan-on-base (in part)
 
 - **SD7.** The base branch of a new slice comes from `--from <branch>`. When
   `--from` is left out, it is `main`. sliceflow has no git setting for the
@@ -1430,6 +1475,7 @@ command is used the wrong way.
   Cost: a repo whose main branch is not `main` needs `--from <branch>` on
     every create, until a setting is added.
   Rule: R10
+  Replaced by: plan-on-base
 
 - **SD8.** When git fails in a way sliceflow has no message for, sliceflow
   prints one line of its own and then git's text, word for word. Its line
@@ -1484,6 +1530,7 @@ command is used the wrong way.
     slice name used in both fails on the second `create` with git's
     "already exists" message.
   Rule: R16
+  Replaced by: plan-on-base (in part)
 
 - **SD12.** sliceflow adds every event to a log with one function, under a
   file lock, including the first event, `slice.created`.
@@ -1514,6 +1561,7 @@ command is used the wrong way.
   Cost: three places to look; a slice merged into a branch other than
     `main` is not found.
   Rule: R51
+  Replaced by: plan-on-base
 
 - **SD14.** The names for `list` come from the union of the local branches
   `slice/<name>` and the folders `docs/slices/<name>/` in `main`. A name is a
@@ -1527,6 +1575,7 @@ command is used the wrong way.
     a slice branch, so it adds nothing.
   Cost: a slice merged into a branch other than `main` is not listed.
   Rule: R57, R58
+  Replaced by: plan-on-base
 
 - **SD15.** `list` prints a borderless table with a header row, sorted by
   name.
@@ -1593,6 +1642,7 @@ command is used the wrong way.
   Cost: a worktree inside the project can confuse tools such as ESLint.
     That is the person's own choice.
   Rule: R18
+  Replaced by: plan-on-base (in part: the worktree is made in 0005)
 
 - **SD20.** sliceflow writes each line of a log with `\n` at its end, reads
   lines that end with `\n` or `\r\n`, closes off a cut-off last line before
@@ -1674,6 +1724,7 @@ command is used the wrong way.
   Cost: a script cannot tell a stop by Ctrl+C from another failure by the
     exit code alone.
   Rule: R39
+  Replaced by: plan-on-base (in part: after the commit, the slice is kept)
 
 - **SD27.** When a step works, sliceflow does not show what git printed.
   It shows git's text only when a step fails.
@@ -1743,6 +1794,7 @@ command is used the wrong way.
     worktree may be gone. "Nothing was changed." still holds for
     branches, commits, and files.
   Rule: R36, R41
+  Replaced by: plan-on-base
 - **SD32.** An empty `--from`, e.g. `--from ""`, counts as left out, so
   the slice starts from `main` (decided, the human, 2026-11-16).
   Why: the spec treats other empty values the same way: an empty
@@ -1754,6 +1806,7 @@ command is used the wrong way.
   Cost: a script that passes an empty variable by mistake gets a slice
     from `main`, with no warning.
   Rule: R10, R12
+  Replaced by: plan-on-base (an empty --from now falls to sliceflow.base)
 
 ## Open questions
 
