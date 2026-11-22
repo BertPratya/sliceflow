@@ -8,6 +8,9 @@ import (
 	"github.com/BertPratya/sliceflow/internal/project"
 )
 
+// worktreeSetting is the git setting that chose where worktrees went.
+const worktreeSetting = "sliceflow.worktree.dir"
+
 // StatusResult is what Status found about one slice.
 type StatusResult struct {
 	Name        string                // the slice name, in lowercase

@@ -10,8 +10,8 @@ import (
 )
 
 // runSliceCreate makes a new slice from the name and the options in in,
-// in the project of the current folder. When it works, it prints where
-// the branch, the worktree, and the spec are, and returns 0. Otherwise
+// in the user's checkout of the current folder. When it works, it prints
+// the branch it was made on and where the spec is, and returns 0. Otherwise
 // it prints what went wrong, and returns 2 for a title, a description,
 // or a name that cannot be used, or 1 for any other failure.
 func runSliceCreate(ctx context.Context, in input, stdout, stderr io.Writer) int {
@@ -32,15 +32,13 @@ func runSliceCreate(ctx context.Context, in input, stdout, stderr io.Writer) int
 		return printCreateError(stderr, err)
 	}
 
-	fmt.Fprintf(stdout, createdLine, created.Name)
+	fmt.Fprintf(stdout, createdLine, created.Name, created.Base)
 	if given != created.Name {
 		fmt.Fprintf(stdout, madeLowercaseNote, given)
 	}
 	for _, file := range created.Ignored {
 		fmt.Fprintf(stdout, ignoredFileNote, file)
 	}
-	fmt.Fprintf(stdout, branchLine, created.Name, created.Base, shortCommit(created.BaseCommit))
-	fmt.Fprintf(stdout, worktreeLine, created.Worktree)
 	fmt.Fprintf(stdout, nextLine, created.Spec)
 	return 0
 }

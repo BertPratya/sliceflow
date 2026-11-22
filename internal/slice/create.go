@@ -10,12 +10,8 @@ import (
 
 	"github.com/BertPratya/sliceflow/internal/eventlog"
 	"github.com/BertPratya/sliceflow/internal/git"
-	"github.com/BertPratya/sliceflow/internal/project"
 	"github.com/BertPratya/sliceflow/templates"
 )
-
-// worktreeSetting is the git setting that chooses where worktrees go.
-const worktreeSetting = "sliceflow.worktree.dir"
 
 // baseSetting is the git setting that chooses the base branch of every
 // new slice.
@@ -37,18 +33,18 @@ type CreateOptions struct {
 
 // CreateResult says what Create made, and where.
 type CreateResult struct {
-	Name       string   // the slice name, in lowercase
-	Base       string   // the branch the slice started from
-	BaseCommit string   // the full ID of the commit the slice started from
-	Worktree   string   // the full path of the worktree
-	Spec       string   // the full path of spec.md in the worktree
-	Ignored    []string // the slice's files that an ignore rule matched, e.g. "spec.md"
+	Name    string   // the slice name, in lowercase
+	Base    string   // the base branch, where the slice's commit was made
+	Spec    string   // the full path of spec.md in the user's checkout
+	Ignored []string // the slice's files that an ignore rule matched, e.g. "spec.md"
 }
 
-// Create makes a new slice in the project that dir is in: the branch
-// slice/<name> from the tip of the base branch, a worktree for it, and
-// one commit on it with the spec and the event log. It never changes the
-// user's own checkout.
+// Create makes a new slice in the user's checkout, the checkout that dir
+// is in, which must be on the base branch: it writes the spec and the
+// event log in docs/slices/<name>/, and makes one commit of only those
+// two files on the base branch. It makes no branch and no worktree, and
+// leaves the user's other files, what is staged, and the checked-out
+// branch as they were.
 //
 // It checks, in this order, and stops at the first problem: a control
 // character in the title or the description (*ControlCharacterError),
@@ -109,25 +105,14 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		return CreateResult{}, &CheckError{Check: "check the name", Err: err}
 	}
 
-	setting, err := git.Config(ctx, root, worktreeSetting)
-	if err != nil {
-		return CreateResult{}, &CheckError{Check: "read the setting " + worktreeSetting, Err: err}
-	}
-	worktree, err := project.WorktreePath(root, setting, name)
-	if err != nil {
-		return CreateResult{}, &CheckError{Check: "find the home folder", Err: err}
-	}
-
 	title := opts.Title
 	if title == "" {
 		title = name
 	}
 	result := CreateResult{
-		Name:       name,
-		Base:       base,
-		BaseCommit: baseCommit,
-		Worktree:   worktree,
-		Spec:       filepath.Join(worktree, "docs", "slices", name, "spec.md"),
+		Name: name,
+		Base: base,
+		Spec: filepath.Join(top, "docs", "slices", name, "spec.md"),
 	}
 	created := eventlog.SliceCreated{
 		Name:        name,
@@ -137,7 +122,7 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		BaseCommit:  baseCommit,
 	}
 
-	steps := createSteps(root, worktree, baseCommit, created, &result)
+	steps := createSteps(top, created, &result)
 	if err := runSteps(ctx, steps); err != nil {
 		return CreateResult{}, err
 	}
@@ -163,41 +148,18 @@ func chooseBase(ctx context.Context, root, from string) (string, BaseSource, err
 	return "main", BaseDefault, nil
 }
 
-// createSteps returns the steps that make the slice described by created,
-// in order: the branch at baseCommit, the worktree, the spec, the event
+// createSteps returns the steps that make the slice described by created
+// in the checkout whose top folder is top, in order: the spec, the event
 // log, and the commit. The commit step records in result which files an
 // ignore rule matched.
-func createSteps(root, worktree, baseCommit string, created eventlog.SliceCreated, result *CreateResult) []Step {
+func createSteps(top string, created eventlog.SliceCreated, result *CreateResult) []Step {
 	name := created.Name
-	branch := "slice/" + name
 	folder := "docs/slices/" + name // inside the project, always with /
-	specPath := filepath.Join(worktree, filepath.FromSlash(folder), "spec.md")
-	logPath := filepath.Join(worktree, filepath.FromSlash(folder), ".events.jsonl")
+	specPath := filepath.Join(top, filepath.FromSlash(folder), "spec.md")
+	logPath := filepath.Join(top, filepath.FromSlash(folder), ".events.jsonl")
 
 	return []Step{
 		{
-			Name: "create the branch",
-			Do: func(ctx context.Context) error {
-				return git.CreateBranch(ctx, root, branch, baseCommit)
-			},
-			Undo: func() error {
-				return git.DeleteBranch(context.Background(), root, branch)
-			},
-			Left: Leftover{Kind: "branch", Name: branch},
-		},
-		{
-			Name: "create the worktree",
-			Do: func(ctx context.Context) error {
-				return git.AddWorktree(ctx, root, worktree, branch)
-			},
-			Undo: func() error {
-				return git.RemoveWorktree(context.Background(), root, worktree)
-			},
-			Left: Leftover{Kind: "worktree", Name: worktree},
-		},
-		{
-			// The spec and the log are inside the worktree, so removing
-			// the worktree removes them: these steps need no Undo.
 			Name: "write " + specPath,
 			Do: func(ctx context.Context) error {
 				return writeSpecFile(specPath, name, time.Now())
@@ -214,7 +176,7 @@ func createSteps(root, worktree, baseCommit string, created eventlog.SliceCreate
 			Do: func(ctx context.Context) error {
 				files := []string{folder + "/spec.md", folder + "/.events.jsonl"}
 				for _, file := range files {
-					ignored, err := git.IsIgnored(ctx, worktree, file)
+					ignored, err := git.IsIgnored(ctx, top, file)
 					if err != nil {
 						return err
 					}
@@ -223,7 +185,7 @@ func createSteps(root, worktree, baseCommit string, created eventlog.SliceCreate
 					}
 				}
 				message := name + ": add the spec and the event log"
-				return git.Commit(ctx, worktree, message, files...)
+				return git.Commit(ctx, top, message, files...)
 			},
 		},
 	}

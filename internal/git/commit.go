@@ -36,15 +36,19 @@ func IsIgnored(ctx context.Context, dir, path string) (bool, error) {
 }
 
 // Commit adds the files at paths, relative to dir, even when an ignore
-// rule matches them, and commits them with message. The commit uses the
-// user's own git settings, so hooks and commit signing run as the user
-// set them up. When adding or committing fails, it returns git's error
-// as a *Error, and nothing is committed.
+// rule matches them, and commits only them with message, on the branch
+// checked out in dir. Other changes, staged or not, stay as they were
+// and are not in the commit. The commit uses the user's own git
+// settings, so hooks and commit signing run as the user set them up.
+// When adding or committing fails, it returns git's error as a *Error,
+// and nothing is committed; the files may still be staged. Git refuses
+// to commit only some files during a merge, so Commit fails then.
 func Commit(ctx context.Context, dir, message string, paths ...string) error {
 	add := append([]string{"add", "--force", "--"}, paths...)
 	if _, err := run(ctx, dir, add...); err != nil {
 		return err
 	}
-	_, err := run(ctx, dir, "commit", "--quiet", "-m", message)
+	commit := append([]string{"commit", "--quiet", "--only", "-m", message, "--"}, paths...)
+	_, err := run(ctx, dir, commit...)
 	return err
 }

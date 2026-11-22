@@ -158,6 +158,51 @@ func TestCommitAFileThatDoesNotExist(t *testing.T) {
 	}
 }
 
+// Commit commits only its own files. A change the user staged before
+// stays staged and is not in the commit.
+func TestCommitLeavesOtherStagedChanges(t *testing.T) {
+	useTestIdentity(t)
+	repo := newRepoWithCommit(t)
+	writeFile(t, filepath.Join(repo, "app.go"))
+	gitIn(t, repo, "add", "app.go")
+	writeFile(t, filepath.Join(repo, "spec.md"))
+
+	if err := Commit(context.Background(), repo, "a message", "spec.md"); err != nil {
+		t.Fatalf("Commit returned the error %v, want none", err)
+	}
+
+	if files := gitOutput(t, repo, "show", "--name-only", "--format=", "HEAD"); files != "spec.md" {
+		t.Errorf("the commit has the files:\n%s\nwant only spec.md", files)
+	}
+	if staged := gitOutput(t, repo, "diff", "--cached", "--name-only"); staged != "app.go" {
+		t.Errorf("the staged files are:\n%s\nwant only app.go", staged)
+	}
+}
+
+// During a merge, git refuses to commit only some files. Commit returns
+// git's error, makes no commit, and the merge is still going on.
+func TestCommitDuringAMerge(t *testing.T) {
+	useTestIdentity(t)
+	repo := newRepoWithCommit(t)
+	gitIn(t, repo, "checkout", "--quiet", "-b", "other")
+	writeFile(t, filepath.Join(repo, "other.txt"))
+	gitIn(t, repo, "add", "other.txt")
+	gitIn(t, repo, "commit", "--quiet", "-m", "other")
+	gitIn(t, repo, "checkout", "--quiet", "-")
+	gitIn(t, repo, "merge", "--quiet", "--no-ff", "--no-commit", "other")
+	before := gitOutput(t, repo, "rev-parse", "HEAD")
+	writeFile(t, filepath.Join(repo, "spec.md"))
+
+	err := Commit(context.Background(), repo, "a message", "spec.md")
+	wantGitError(t, err)
+	if after := gitOutput(t, repo, "rev-parse", "HEAD"); after != before {
+		t.Errorf("HEAD moved from %s to %s, want no new commit", before, after)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".git", "MERGE_HEAD")); err != nil {
+		t.Errorf("the merge is not going on any more: %v", err)
+	}
+}
+
 // useTestIdentity gives git a name and an email through the environment,
 // and hides the user's own git settings, such as commit signing, for
 // this test only, so Commit works the same on every machine.
