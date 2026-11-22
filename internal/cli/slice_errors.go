@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"strings"
 
+	"github.com/BertPratya/sliceflow/internal/eventlog"
 	"github.com/BertPratya/sliceflow/internal/git"
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
@@ -76,16 +77,23 @@ func printCreateError(w io.Writer, err error) int {
 
 // printStepError prints the message for a step of slice create that
 // failed: which step, or that the user stopped it, then the tool's own
-// text, then what could not be removed, if anything.
+// text, then what could not be removed, if anything. When the lock of
+// the event log could not be taken, the message names the lock's file,
+// not the log.
 func printStepError(w io.Writer, step *slice.StepError) {
 	ending := notCreated
 	if len(step.Left) == 0 {
 		ending += nothingChanged
 	}
+	what := step.Step
+	var lockErr *eventlog.LockError
+	if errors.As(step.Err, &lockErr) {
+		what = "write " + lockErr.Path
+	}
 	if isStop(step.Err) {
 		fmt.Fprintf(w, stoppedLine, ending)
 	} else {
-		printFailure(w, step.Step, step.Err, ending)
+		printFailure(w, what, step.Err, ending)
 	}
 	printLeftovers(w, step.Left)
 }

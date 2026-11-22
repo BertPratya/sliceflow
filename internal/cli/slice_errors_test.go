@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/BertPratya/sliceflow/internal/eventlog"
 	"github.com/BertPratya/sliceflow/internal/git"
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
@@ -16,6 +17,7 @@ import (
 // make happen with a real repository; the others are tested in e2e.
 func TestPrintCreateError(t *testing.T) {
 	writeFailed := &fs.PathError{Op: "open", Path: "/wt/docs/slices/login/spec.md", Err: fs.ErrPermission}
+	lockFailed := &fs.PathError{Op: "mkdir", Path: "/wt/.git/sliceflow/locks", Err: errors.New("not a directory")}
 	worktree := slice.Leftover{Kind: "worktree", Name: "/wt/shop/login"}
 	branch := slice.Leftover{Kind: "branch", Name: "slice/login"}
 
@@ -30,6 +32,16 @@ func TestPrintCreateError(t *testing.T) {
 			"Error: could not write /wt/docs/slices/login/spec.md. The slice was not created. Nothing was changed.\n" +
 				"The system said:\n" +
 				"  permission denied\n"},
+		{"the lock of the log cannot be taken",
+			&slice.StepError{Step: "write /wt/docs/slices/login/.events.jsonl",
+				Err: &eventlog.LockError{Path: "/wt/.git/sliceflow/locks/login.lock", Err: lockFailed}}, 1,
+			"Error: could not write /wt/.git/sliceflow/locks/login.lock. The slice was not created. Nothing was changed.\n" +
+				"The system said:\n" +
+				"  not a directory\n"},
+		{"stopped while waiting for the lock",
+			&slice.StepError{Step: "write /wt/docs/slices/login/.events.jsonl",
+				Err: &eventlog.LockError{Path: "/wt/.git/sliceflow/locks/login.lock", Err: context.Canceled}}, 1,
+			"Stopped. The slice was not created. Nothing was changed.\n"},
 		{"git printed nothing",
 			&slice.StepError{Step: "make the commit", Err: &git.Error{ExitCode: 1, Stderr: ""}}, 1,
 			"Error: git could not make the commit. The slice was not created. Nothing was changed.\n" +

@@ -5,10 +5,29 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/BertPratya/sliceflow/internal/filelock"
 )
+
+// LockError is returned by Append and Create when the lock of the log
+// cannot be taken: its folder cannot be made, another process held it
+// for the whole wait, or ctx was cancelled while waiting. Nothing was
+// written to the log.
+type LockError struct {
+	Path string // the lock's path, as it was given
+	Err  error  // why: e.g. a *fs.PathError, filelock.ErrBusy, or ctx's error
+}
+
+func (e *LockError) Error() string {
+	return "eventlog: could not take the lock " + e.Path + ": " + e.Err.Error()
+}
+
+// Unwrap returns why the lock could not be taken.
+func (e *LockError) Unwrap() error {
+	return e.Err
+}
 
 // eventToWrite is a line as Append writes it. It is Event with Data as
 // any, so the caller's own value is turned into JSON by the same encoder
@@ -48,9 +67,12 @@ func needsNewline(f *os.File) (bool, error) {
 // already in it.
 //
 // Two processes can append to the same log at the same time: Append
-// holds the lock on logPath + ".lock" while it works, and waits for it up
-// to 10 seconds, or until ctx is cancelled. Both events are kept, each
-// whole and on its own line.
+// holds the lock at lockPath while it works, and waits for it up to 10
+// seconds, or until ctx is cancelled. Both events are kept, each whole
+// and on its own line. This works only when every caller passes the same
+// lockPath for the same log. Append makes the folders above lockPath
+// when they are missing. The lock file stays after the lock is released.
+// When the lock cannot be taken, the error is a *LockError.
 //
 // The new event's seq is the highest seq that can be read in the log,
 // plus one; lines that cannot be read do not count. Its time is now, in
@@ -58,10 +80,13 @@ func needsNewline(f *os.File) (bool, error) {
 // written with one Write, so the log gets the whole line or nothing. When
 // nothing else failed, an error from closing the log is returned: the
 // line may not have been saved.
-func Append(ctx context.Context, logPath string, event string, data any) (err error) {
-	lock, err := filelock.Acquire(ctx, logPath+".lock", 10*time.Second, 50*time.Millisecond)
+func Append(ctx context.Context, logPath, lockPath, event string, data any) (err error) {
+	if err := os.MkdirAll(filepath.Dir(lockPath), 0o755); err != nil {
+		return &LockError{Path: lockPath, Err: err}
+	}
+	lock, err := filelock.Acquire(ctx, lockPath, 10*time.Second, 50*time.Millisecond)
 	if err != nil {
-		return err
+		return &LockError{Path: lockPath, Err: err}
 	}
 	defer lock.Release()
 

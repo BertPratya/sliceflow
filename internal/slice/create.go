@@ -105,6 +105,11 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		return CreateResult{}, &CheckError{Check: "check the name", Err: err}
 	}
 
+	lockPath, err := git.GitPath(ctx, top, "sliceflow/locks/"+name+".lock")
+	if err != nil {
+		return CreateResult{}, &CheckError{Check: "find git's folder", Err: err}
+	}
+
 	title := opts.Title
 	if title == "" {
 		title = name
@@ -122,7 +127,7 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		BaseCommit:  baseCommit,
 	}
 
-	steps := createSteps(top, created, &result)
+	steps := createSteps(top, lockPath, created, &result)
 	if err := runSteps(ctx, steps); err != nil {
 		return CreateResult{}, err
 	}
@@ -150,9 +155,9 @@ func chooseBase(ctx context.Context, root, from string) (string, BaseSource, err
 
 // createSteps returns the steps that make the slice described by created
 // in the checkout whose top folder is top, in order: the spec, the event
-// log, and the commit. The commit step records in result which files an
-// ignore rule matched.
-func createSteps(top string, created eventlog.SliceCreated, result *CreateResult) []Step {
+// log, written while holding the lock at lockPath, and the commit. The
+// commit step records in result which files an ignore rule matched.
+func createSteps(top, lockPath string, created eventlog.SliceCreated, result *CreateResult) []Step {
 	name := created.Name
 	folder := "docs/slices/" + name // inside the project, always with /
 	specPath := filepath.Join(top, filepath.FromSlash(folder), "spec.md")
@@ -168,7 +173,7 @@ func createSteps(top string, created eventlog.SliceCreated, result *CreateResult
 		{
 			Name: "write " + logPath,
 			Do: func(ctx context.Context) error {
-				return eventlog.Create(ctx, logPath, created)
+				return eventlog.Create(ctx, logPath, lockPath, created)
 			},
 		},
 		{

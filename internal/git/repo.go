@@ -40,3 +40,17 @@ func CheckoutTop(ctx context.Context, dir string) (string, error) {
 	}
 	return filepath.FromSlash(strings.TrimRight(out, "\r\n")), nil
 }
+
+// GitPath returns the full path that git uses for path inside git's own
+// folder, for the checkout that dir is in, e.g. .git/sliceflow/x in the
+// main checkout, and .git/worktrees/<name>/sliceflow/x in a worktree.
+// The path does not need to exist. It is in this system's form. A
+// failure is returned as it is: ErrNotFound when git cannot be run, or a
+// *Error, e.g. with exit code 128 outside a repo.
+func GitPath(ctx context.Context, dir, path string) (string, error) {
+	out, err := run(ctx, dir, "rev-parse", "--path-format=absolute", "--git-path", path)
+	if err != nil {
+		return "", err
+	}
+	return filepath.FromSlash(strings.TrimRight(out, "\r\n")), nil
+}

@@ -48,7 +48,7 @@ func runHelper(mode string) int {
 		return 2
 	}
 	for i := 0; i < times; i++ {
-		err := eventlog.Append(context.Background(), os.Getenv(envPath), "test.added", map[string]int{"pid": os.Getpid()})
+		err := eventlog.Append(context.Background(), os.Getenv(envPath), lockPath(os.Getenv(envPath)), "test.added", map[string]int{"pid": os.Getpid()})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "append:", err)
 			return 2
@@ -67,6 +67,13 @@ var created = eventlog.SliceCreated{
 	Description: "Let a customer pay.",
 	Base:        "main",
 	BaseCommit:  "3f9a1c2e8b7d4a6f0c1e5d9b2a7f3c8e4d6b1a09",
+}
+
+// lockPath returns the lock path the tests give for the log at logPath:
+// locks/log.lock in the log's folder. The folder locks/ does not exist
+// at first, so each test also checks that Append makes it.
+func lockPath(logPath string) string {
+	return filepath.Join(filepath.Dir(logPath), "locks", "log.lock")
 }
 
 // newLogPath returns the path of a log in a new temporary folder. The log
@@ -111,16 +118,19 @@ func badLineReasons(bad []eventlog.BadLine) []string {
 // log at path. It fails the test if Append returns an error.
 func mustAppend(t *testing.T, path, event string) {
 	t.Helper()
-	if err := eventlog.Append(context.Background(), path, event, struct{}{}); err != nil {
+	if err := eventlog.Append(context.Background(), path, lockPath(path), event, struct{}{}); err != nil {
 		t.Fatalf("Append returned the error %v, want no error", err)
 	}
 }
 
 // holdLock takes the log's lock in this test, and releases it when the
-// test ends.
+// test ends. It makes the lock's folder first, as Append would.
 func holdLock(t *testing.T, path string) {
 	t.Helper()
-	l, err := filelock.Acquire(context.Background(), path+".lock", time.Second, 50*time.Millisecond)
+	if err := os.MkdirAll(filepath.Dir(lockPath(path)), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	l, err := filelock.Acquire(context.Background(), lockPath(path), time.Second, 50*time.Millisecond)
 	if err != nil {
 		t.Fatalf("take the lock: %v", err)
 	}
@@ -134,7 +144,7 @@ func TestCreateWritesTheFirstLine(t *testing.T) {
 	path := newLogPath(t)
 	before := time.Now().UTC().Truncate(time.Second)
 
-	if err := eventlog.Create(context.Background(), path, created); err != nil {
+	if err := eventlog.Create(context.Background(), path, lockPath(path), created); err != nil {
 		t.Fatalf("Create returned the error %v, want no error", err)
 	}
 	after := time.Now().UTC()
@@ -166,7 +176,7 @@ func TestCreateWhenTheLogExists(t *testing.T) {
 	old := eventLine(1, "x") + "\n"
 	path := writeLog(t, old)
 
-	err := eventlog.Create(context.Background(), path, created)
+	err := eventlog.Create(context.Background(), path, lockPath(path), created)
 	if !errors.Is(err, fs.ErrExist) {
 		t.Errorf("Create returned %v, want an error that matches fs.ErrExist", err)
 	}
@@ -184,7 +194,7 @@ func TestCreateRemovesTheLogWhenAppendFails(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
 
-	if err := eventlog.Create(ctx, path, created); err == nil {
+	if err := eventlog.Create(ctx, path, lockPath(path), created); err == nil {
 		t.Fatal("Create returned no error, want one: the lock is held")
 	}
 	if _, err := os.Stat(path); !errors.Is(err, fs.ErrNotExist) {
@@ -199,7 +209,7 @@ func TestCreateWritesHTMLCharactersAsTheyAre(t *testing.T) {
 	data := created
 	data.Title = "Fish & Chips <3>"
 
-	if err := eventlog.Create(context.Background(), path, data); err != nil {
+	if err := eventlog.Create(context.Background(), path, lockPath(path), data); err != nil {
 		t.Fatalf("Create returned the error %v, want no error", err)
 	}
 	if content := readFile(t, path); !strings.Contains(content, `"title":"Fish & Chips <3>"`) {
@@ -212,7 +222,7 @@ func TestCreateWritesHTMLCharactersAsTheyAre(t *testing.T) {
 func TestAppendToAMissingLog(t *testing.T) {
 	path := newLogPath(t)
 
-	err := eventlog.Append(context.Background(), path, "x", struct{}{})
+	err := eventlog.Append(context.Background(), path, lockPath(path), "x", struct{}{})
 	if !errors.Is(err, fs.ErrNotExist) {
 		t.Errorf("Append returned %v, want an error that matches fs.ErrNotExist", err)
 	}
@@ -225,12 +235,12 @@ func TestAppendToAMissingLog(t *testing.T) {
 // data it was given. Both lines can be read.
 func TestAppendTheSecondEvent(t *testing.T) {
 	path := newLogPath(t)
-	if err := eventlog.Create(context.Background(), path, created); err != nil {
+	if err := eventlog.Create(context.Background(), path, lockPath(path), created); err != nil {
 		t.Fatalf("Create returned the error %v, want no error", err)
 	}
 
 	data := map[string]string{"by": "bert"}
-	if err := eventlog.Append(context.Background(), path, "slice.started", data); err != nil {
+	if err := eventlog.Append(context.Background(), path, lockPath(path), "slice.started", data); err != nil {
 		t.Fatalf("Append returned the error %v, want no error", err)
 	}
 
@@ -346,7 +356,7 @@ func TestAppendWritesNothingWhenReadFails(t *testing.T) {
 	old := longCreatedLine(5<<20) + "\n"
 	path := writeLog(t, old)
 
-	if err := eventlog.Append(context.Background(), path, "y", struct{}{}); err == nil {
+	if err := eventlog.Append(context.Background(), path, lockPath(path), "y", struct{}{}); err == nil {
 		t.Error("Append returned no error, want one: the log has a line over 4 MiB")
 	}
 	if content := readFile(t, path); content != old {
@@ -361,7 +371,7 @@ func TestAppendWritesNothingWhenEncodingFails(t *testing.T) {
 	old := eventLine(1, "x") + "\n" + `{"version":1,"se`
 	path := writeLog(t, old)
 
-	if err := eventlog.Append(context.Background(), path, "y", func() {}); err == nil {
+	if err := eventlog.Append(context.Background(), path, lockPath(path), "y", func() {}); err == nil {
 		t.Error("Append returned no error, want one: a function has no JSON")
 	}
 	if content := readFile(t, path); content != old {
@@ -379,7 +389,7 @@ func TestAppendStopsWhenTheContextRunsOut(t *testing.T) {
 	defer cancel()
 
 	start := time.Now()
-	err := eventlog.Append(ctx, path, "y", struct{}{})
+	err := eventlog.Append(ctx, path, lockPath(path), "y", struct{}{})
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Errorf("Append returned %v, want an error that matches context.DeadlineExceeded", err)
 	}
@@ -442,11 +452,11 @@ func TestAppendFromFourProcessesAtOnce(t *testing.T) {
 func TestAppendReleasesTheLockWhenItFails(t *testing.T) {
 	path := writeLog(t, longCreatedLine(5<<20)+"\n")
 
-	if err := eventlog.Append(context.Background(), path, "y", struct{}{}); err == nil {
+	if err := eventlog.Append(context.Background(), path, lockPath(path), "y", struct{}{}); err == nil {
 		t.Fatal("Append returned no error, want one: the log has a line over 4 MiB")
 	}
 
-	l, err := filelock.Acquire(context.Background(), path+".lock", 500*time.Millisecond, 50*time.Millisecond)
+	l, err := filelock.Acquire(context.Background(), lockPath(path), 500*time.Millisecond, 50*time.Millisecond)
 	if err != nil {
 		t.Fatalf("take the lock after the failed Append: %v, want the lock to be free", err)
 	}
@@ -465,8 +475,50 @@ func TestAppendToAReadOnlyLog(t *testing.T) {
 	// Windows.
 	t.Cleanup(func() { os.Chmod(path, 0o644) })
 
-	if err := eventlog.Append(context.Background(), path, "y", struct{}{}); err == nil {
+	if err := eventlog.Append(context.Background(), path, lockPath(path), "y", struct{}{}); err == nil {
 		t.Error("Append returned no error, want one: the log is read-only")
+	}
+	if content := readFile(t, path); content != old {
+		t.Errorf("the log changed to %q, want %q", content, old)
+	}
+}
+
+// Test 19: Append takes the lock at the path it is given: it makes the
+// lock's folder, and leaves no lock file next to the log.
+func TestAppendTakesTheLockAtTheGivenPath(t *testing.T) {
+	path := writeLog(t, eventLine(1, "x")+"\n")
+	lock := filepath.Join(t.TempDir(), "a", "b", "log.lock")
+
+	if err := eventlog.Append(context.Background(), path, lock, "y", struct{}{}); err != nil {
+		t.Fatalf("Append returned the error %v, want no error", err)
+	}
+	if _, err := os.Stat(lock); err != nil {
+		t.Errorf("the lock file is not at the given path: %v", err)
+	}
+	if _, err := os.Stat(path + ".lock"); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("there is a lock file next to the log (Stat: %v), want none", err)
+	}
+}
+
+// Test 20: when the lock's folder cannot be made, here because a file is
+// in its place, Append returns a *LockError with the lock's path, and
+// writes nothing.
+func TestAppendWhenTheLockFolderCannotBeMade(t *testing.T) {
+	old := eventLine(1, "x") + "\n"
+	path := writeLog(t, old)
+	blocker := filepath.Join(t.TempDir(), "locks")
+	if err := os.WriteFile(blocker, []byte("not a folder\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	lock := filepath.Join(blocker, "log.lock")
+
+	err := eventlog.Append(context.Background(), path, lock, "y", struct{}{})
+	var lockErr *eventlog.LockError
+	if !errors.As(err, &lockErr) {
+		t.Fatalf("Append returned %v, want a *eventlog.LockError", err)
+	}
+	if lockErr.Path != lock {
+		t.Errorf("the error's path is %q, want %q", lockErr.Path, lock)
 	}
 	if content := readFile(t, path); content != old {
 		t.Errorf("the log changed to %q, want %q", content, old)

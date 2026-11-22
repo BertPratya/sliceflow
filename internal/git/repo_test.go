@@ -110,6 +110,45 @@ func TestCheckoutTopFromAWorktree(t *testing.T) {
 	wantSamePath(t, got, worktree)
 }
 
+// Test 8: in the main checkout, GitPath gives the path inside .git.
+func TestGitPathInTheMainCheckout(t *testing.T) {
+	repo := newRepoWithCommit(t)
+
+	got, err := GitPath(context.Background(), repo, "sliceflow/locks/login.lock")
+	if err != nil {
+		t.Fatalf("GitPath returned the error %v, want none", err)
+	}
+	wantSameGitPath(t, got, filepath.Join(repo, ".git"), filepath.Join("sliceflow", "locks", "login.lock"))
+}
+
+// Test 9: in a worktree, GitPath gives the path inside the worktree's own
+// folder in .git, so each checkout has its own.
+func TestGitPathInAWorktree(t *testing.T) {
+	repo := newRepoWithCommit(t)
+	worktree := filepath.Join(t.TempDir(), "second")
+	gitIn(t, repo, "worktree", "add", "--quiet", "-b", "second", worktree)
+
+	got, err := GitPath(context.Background(), worktree, "sliceflow/locks/login.lock")
+	if err != nil {
+		t.Fatalf("GitPath returned the error %v, want none", err)
+	}
+	wantSameGitPath(t, got, filepath.Join(repo, ".git", "worktrees", "second"), filepath.Join("sliceflow", "locks", "login.lock"))
+}
+
+// wantSameGitPath fails the test unless got is the path rest inside the
+// folder gitDir, once links and short names in gitDir are resolved, as
+// in wantSamePath.
+func wantSameGitPath(t *testing.T, got, gitDir, rest string) {
+	t.Helper()
+	real, err := filepath.EvalSymlinks(gitDir)
+	if err != nil {
+		t.Fatalf("resolve %s: %v", gitDir, err)
+	}
+	if want := filepath.Join(real, rest); got != want {
+		t.Errorf("the path is %q, want %q", got, want)
+	}
+}
+
 // newRepoWithCommit makes a repo in a temp folder, with one empty
 // commit, and returns its folder.
 func newRepoWithCommit(t *testing.T) string {
