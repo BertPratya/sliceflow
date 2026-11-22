@@ -18,7 +18,7 @@ asks, at any level.
 
 ## Levels
 
-**Current level: 2: the human designs every piece and writes the core, and you write the rest (restarted from slice 0001 on 2026-11-01)**
+**Current level: 2: the human decides what is new or risky and writes the code of ideas new to them, and you write the rest (rules of 2026-11-23; restarted from slice 0001 on 2026-11-01)**
 
 On 2026-11-01, the human restarted sliceflow in this repo, from slice
 0001. The entries below dated before 2026-11-01 are from the first build,
@@ -124,6 +124,35 @@ and 2026-11-11 above). The rules:
 7. **Fast mode** only for a step with no new decision at all.
 8. **Check the split once a month.** As the human gets better, more
    becomes a repeat.
+
+On 2026-11-23, the human found that writing, designing, and explaining
+back what they already know is slow and teaches little, like doing 100
+sums by hand that differ only in the numbers. A fact about one tool,
+e.g. which git flag prints the current branch, is looked up and
+forgotten, and that is fine. These rules replace "the human designs
+every piece" (2026-11-01), "the first time each new kind of problem
+appears" (2026-11-01, and rule 1 of 2026-10-30), and rules 1 to 3 of
+the co-programming rules of 2026-11-12. The rest of those rules stay,
+and so do debug first, a changed test as a red flag, the monthly
+self-test, and the weekly blank rebuild.
+1. **The human writes code only for an idea that is new to them,** not
+   just new to the project. The test: could the human explain how it
+   works, apart from looking up a name or a flag? If yes, you write
+   it. If no, it is the human's piece, as in "The human's piece" below.
+2. **The human decides only what is new or risky:** a new kind of
+   choice; something the user sees, e.g. a message, an exit code, or
+   what is written or deleted in their repo; or something hard to
+   change later, e.g. a file format. The spec settles most of these.
+   You decide the repeats from the patterns already set, e.g. a
+   helper's name, its file, or how an error is wrapped.
+3. **You report what you decided.** Each task ends with an "I decided"
+   list, one line per choice. The human skims it, and stops you when
+   something looks wrong.
+4. **Review by risk.** The human reads closely: changed tests, code
+   that writes or deletes the user's files, and error paths. Repeats of
+   a pattern the human has already reviewed are skimmed.
+5. **Explain back only what is new or risky.** No questions about lines
+   that repeat a known pattern.
 
 On 2026-10-31, the human chose fast mode (level 3) for the rest of 0002,
 after writing the lock and the event write: what is left is mostly
@@ -246,18 +275,22 @@ Work on one requirement at a time, in this order:
 2. **Show it:** you show the requirement's text in the chat (so the human
    does not switch tabs), and say in plain words what it asks
    (decided 2026-10-29).
-3. **Check what the human knows:** ask 2-3 questions about the concepts
+3. **Check what the human knows,** only for a concept that is new to
+   the human (2026-11-23): ask 2-3 questions about the concepts
    the requirement needs, e.g. "what is a lock, and how could one program
    tell another it is using a file?". Build on the answers.
-4. **Teach the gaps:** how the concept works, and how to call the library:
+4. **Teach the gaps,** only for a new concept: how the concept works, and how to call the library:
    its inputs, its return values, and its errors, with a small made-up
    example. Teach like the docs, so the human never needs another tool to
    look it up. Teach the concept and the library only, never the design
    (decided 2026-10-31).
-5. **The human designs the piece:** the files, the function names, their
-   inputs and outputs, how the files call each other, the steps, the edge
-   cases, and the tests, in plain words. You review the design like a
-   senior Go developer: what to change, and why. You may write the
+5. **The design** (changed 2026-11-23). For the human's piece, the
+   human designs it: the files, the function names, their inputs and
+   outputs, how the files call each other, the steps, the edge cases,
+   and the tests, in plain words. You review the design like a senior
+   Go developer: what to change, and why. For your piece, you decide
+   the design, and ask the human only about the choices that are new or
+   risky (see the rules of 2026-11-23), with your recommendation. You may write the
    boilerplate around it (test repos, command wiring, file setup), and
    explain each new Go concept the first time, one per step.
    **Design from the caller down** (decided 2026-11-16). Start at the
@@ -267,24 +300,21 @@ Work on one requirement at a time, in this order:
    outputs. Then build the missing functions, top to bottom, each with a
    placeholder (`panic("not written yet")`) until it is written. A hard
    new mechanism, e.g. a lock, may be prototyped on its own first.
-6. **Who writes the code** (decided 2026-11-01). When the design is
-   done, say whether the piece is the human's piece or yours (see
-   Levels), and why. The human decides. For the human's piece, follow
-   "The human's piece" below, then go on to step 7. For your piece,
-   **you write the code from the human's design.**
-   **The thinking is the human's, the typing is yours.** The design from
-   step 5 is the contract: the function names, their inputs and outputs,
-   the steps, the edge cases, and the tests. Write the code and the tests
-   to match it:
+6. **Who writes the code** (changed 2026-11-23). Say whether the piece
+   is the human's piece or yours: it is the human's only when its idea
+   is new to the human (see Levels). The human decides. For the human's
+   piece, follow "The human's piece" below, then go on to step 7. For
+   your piece, **you write the code,** and end with an "I decided"
+   list, one line per choice the human did not make:
    - Write the doc comment as the contract (decided 2026-11-15): what
      the function does, its inputs and outputs, its errors, and what it
      promises. No numbered steps, and no spec or plan IDs such as R12:
      the comment must make sense to a reader who has only the code.
      Follow the human's steps in the code, in the same order.
-   - Never change a name, an input, an output, or a step on your own.
-     When the code needs a choice the design does not settle, stop and
-     ask: the options, and your recommendation. The human decides in
-     words; you write it.
+   - Never change a name, an input, an output, or a step that the human
+     decided. When the code needs a choice that is new or risky, stop
+     and ask: the options, and your recommendation. The human decides
+     in words; you write it.
    - **Pitfall pass:** after the code, list the known pitfalls of each
      library call that is new in this step, e.g. an ignored `Close` error
      on a file that was written, a missing `Sync`, or renaming an open
@@ -294,9 +324,10 @@ Work on one requirement at a time, in this order:
    - When a test fails, the human debugs it first, with the hint ladder
      when stuck. Then you change the code.
 7. **Read the diff:** you leave every change uncommitted. The human reads
-   `git diff`, and asks about anything unclear.
-8. **Explain back:** ask 2-3 questions about the most important lines. You
-   correct what is wrong. The step is done when the answers are right.
+   `git diff` by risk (see Levels), and asks about anything unclear.
+8. **Explain back,** only when the change has something new or risky:
+   ask 1-3 questions about those lines. You correct what is wrong. Skip
+   this step for a change that only repeats known patterns.
 9. **Commit:** the human commits.
 
 ## The human's piece (step 6)
