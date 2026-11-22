@@ -3,9 +3,11 @@ package slice
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -50,12 +52,12 @@ func TestCheckNameFreeRemoteBranch(t *testing.T) {
 	wantNameCheck(t, repo, commit, "signup", nil)
 }
 
-// Test 6: a folder on the disk that is not committed does not take the
-// name (R23 asks about the base commit).
+// Test 6: a folder on the disk with a file in it takes the name, even
+// when it was never committed.
 func TestCheckNameFreeFolderNotCommitted(t *testing.T) {
 	repo, commit := newRepoWithSlice(t)
 	writeSpec(t, repo, "signup")
-	wantNameCheck(t, repo, commit, "signup", nil)
+	wantNameCheck(t, repo, commit, "signup", ErrFolderTaken)
 }
 
 // Test 7: outside any repo, CheckNameFree returns git's error as it is:
@@ -65,13 +67,101 @@ func TestCheckNameFreeOutsideARepo(t *testing.T) {
 	// Stop git from looking for a repo in the folders above dir.
 	t.Setenv("GIT_CEILING_DIRECTORIES", filepath.Dir(dir))
 
-	err := CheckNameFree(context.Background(), dir, "HEAD", "login")
+	err := CheckNameFree(context.Background(), dir, dir, "HEAD", "login")
 	var gitErr *git.Error
 	if !errors.As(err, &gitErr) {
 		t.Fatalf("CheckNameFree returned %v, want a *git.Error", err)
 	}
 	if gitErr.ExitCode != 128 {
 		t.Errorf("the exit code is %d, want 128", gitErr.ExitCode)
+	}
+}
+
+// Test 8: an empty folder on the disk does not take the name: a new slice
+// is written into it.
+func TestCheckNameFreeEmptyFolder(t *testing.T) {
+	repo, commit := newRepoWithSlice(t)
+	makeFolder(t, filepath.Join(repo, "docs", "slices", "signup"))
+	wantNameCheck(t, repo, commit, "signup", nil)
+}
+
+// Test 9: a folder that holds only a hidden file takes the name.
+func TestCheckNameFreeHiddenFile(t *testing.T) {
+	repo, commit := newRepoWithSlice(t)
+	folder := filepath.Join(repo, "docs", "slices", "signup")
+	makeFolder(t, folder)
+	writeFile(t, filepath.Join(folder, ".DS_Store"))
+	wantNameCheck(t, repo, commit, "signup", ErrFolderTaken)
+}
+
+// Test 10: a file where the folder would be takes the name.
+func TestCheckNameFreeFileAtThePath(t *testing.T) {
+	repo, commit := newRepoWithSlice(t)
+	makeFolder(t, filepath.Join(repo, "docs", "slices"))
+	writeFile(t, filepath.Join(repo, "docs", "slices", "signup"))
+	wantNameCheck(t, repo, commit, "signup", ErrFolderTaken)
+}
+
+// Test 11: a folder deleted from the disk, but still in the base commit,
+// takes the name.
+func TestCheckNameFreeFolderDeletedNotCommitted(t *testing.T) {
+	repo, commit := newRepoWithSlice(t)
+	if err := os.RemoveAll(filepath.Join(repo, "docs", "slices", "login")); err != nil {
+		t.Fatal(err)
+	}
+	wantNameCheck(t, repo, commit, "login", ErrFolderTaken)
+}
+
+// Test 12: the disk is checked in top, not in dir. In a second worktree
+// of the repo, the main folder's files do not take the name.
+func TestCheckNameFreeInASecondWorktree(t *testing.T) {
+	repo, commit := newRepoWithSlice(t)
+	second := filepath.Join(t.TempDir(), "second")
+	runGit(t, repo, "worktree", "add", "--quiet", "-b", "second", second)
+	writeSpec(t, repo, "signup")
+
+	err := CheckNameFree(context.Background(), repo, second, commit, "signup")
+	if err != nil {
+		t.Errorf("CheckNameFree returned %v, want nil", err)
+	}
+}
+
+// Test 13: when the folder cannot be read, CheckNameFree returns the
+// system's error as it is, not "taken" or "free". It is skipped on
+// Windows, where chmod cannot block reading, and as root, who can read
+// anything.
+func TestCheckNameFreeFolderCannotBeRead(t *testing.T) {
+	if runtime.GOOS == "windows" || os.Geteuid() == 0 {
+		t.Skip("cannot block reading a folder here")
+	}
+	repo, commit := newRepoWithSlice(t)
+	folder := filepath.Join(repo, "docs", "slices", "signup")
+	makeFolder(t, folder)
+	if err := os.Chmod(folder, 0); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { os.Chmod(folder, 0o755) })
+
+	err := CheckNameFree(context.Background(), repo, repo, commit, "signup")
+	var pathErr *fs.PathError
+	if !errors.As(err, &pathErr) {
+		t.Errorf("CheckNameFree returned %v, want a *fs.PathError", err)
+	}
+}
+
+// makeFolder makes the folder path, with the folders above it.
+func makeFolder(t *testing.T, path string) {
+	t.Helper()
+	if err := os.MkdirAll(path, 0o755); err != nil {
+		t.Fatalf("could not make %s: %v", path, err)
+	}
+}
+
+// writeFile writes a short file at path. The folder above it must exist.
+func writeFile(t *testing.T, path string) {
+	t.Helper()
+	if err := os.WriteFile(path, []byte("text\n"), 0o644); err != nil {
+		t.Fatalf("could not write %s: %v", path, err)
 	}
 }
 
@@ -119,11 +209,12 @@ func runGit(t *testing.T, dir string, args ...string) string {
 	return string(out)
 }
 
-// wantNameCheck fails the test unless CheckNameFree gives want for name:
-// nil, ErrFolderTaken, or ErrBranchTaken.
+// wantNameCheck fails the test unless CheckNameFree gives want for name,
+// with repo as both the repo and the checkout's top: nil,
+// ErrFolderTaken, or ErrBranchTaken.
 func wantNameCheck(t *testing.T, repo, commit, name string, want error) {
 	t.Helper()
-	err := CheckNameFree(context.Background(), repo, commit, name)
+	err := CheckNameFree(context.Background(), repo, repo, commit, name)
 	if !errors.Is(err, want) {
 		t.Errorf("CheckNameFree(%q) returned %v, want %v", name, err, want)
 	}

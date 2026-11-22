@@ -80,6 +80,36 @@ func TestRepoRootOutsideARepo(t *testing.T) {
 	}
 }
 
+// Test 6: from a subfolder, CheckoutTop returns the top folder of the
+// checkout.
+func TestCheckoutTopFromASubfolder(t *testing.T) {
+	repo := newRepoWithCommit(t)
+	sub := filepath.Join(repo, "internal", "api")
+	if err := os.MkdirAll(sub, 0o755); err != nil {
+		t.Fatalf("make the subfolder: %v", err)
+	}
+
+	got, err := CheckoutTop(context.Background(), sub)
+	if err != nil {
+		t.Fatalf("CheckoutTop returned the error %v, want none", err)
+	}
+	wantSamePath(t, got, repo)
+}
+
+// Test 7: from inside a worktree, CheckoutTop returns the worktree's
+// folder, not the main repo's: this is where it differs from RepoRoot.
+func TestCheckoutTopFromAWorktree(t *testing.T) {
+	repo := newRepoWithCommit(t)
+	worktree := filepath.Join(t.TempDir(), "second")
+	gitIn(t, repo, "worktree", "add", "--quiet", "-b", "second", worktree)
+
+	got, err := CheckoutTop(context.Background(), worktree)
+	if err != nil {
+		t.Fatalf("CheckoutTop returned the error %v, want none", err)
+	}
+	wantSamePath(t, got, worktree)
+}
+
 // newRepoWithCommit makes a repo in a temp folder, with one empty
 // commit, and returns its folder.
 func newRepoWithCommit(t *testing.T) string {
@@ -117,6 +147,6 @@ func wantSamePath(t *testing.T, got, want string) {
 		t.Fatalf("resolve %s: %v", want, err)
 	}
 	if got != real {
-		t.Errorf("RepoRoot returned %q, want %q", got, real)
+		t.Errorf("the path is %q, want %q", got, real)
 	}
 }

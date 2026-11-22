@@ -76,6 +76,10 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 	if err != nil {
 		return CreateResult{}, err
 	}
+	top, err := git.CheckoutTop(ctx, dir)
+	if err != nil {
+		return CreateResult{}, &CheckError{Check: "find the top of the checkout", Err: err}
+	}
 
 	base, source, err := chooseBase(ctx, root, opts.From)
 	if err != nil {
@@ -89,7 +93,7 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		return CreateResult{}, &CheckError{Check: "read the branch " + base, Err: err}
 	}
 
-	checkedOut, err := git.CheckedOutBranch(ctx, dir)
+	checkedOut, err := git.CheckedOutBranch(ctx, top)
 	if err != nil {
 		return CreateResult{}, &CheckError{Check: "read the current branch", Err: err}
 	}
@@ -97,9 +101,9 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		return CreateResult{}, &WrongBranchError{Base: base, Branch: checkedOut}
 	}
 
-	err = CheckNameFree(ctx, root, baseCommit, name)
+	err = CheckNameFree(ctx, root, top, baseCommit, name)
 	if errors.Is(err, ErrFolderTaken) || errors.Is(err, ErrBranchTaken) {
-		return CreateResult{}, &NameTakenError{Name: name, Base: base, Err: err}
+		return CreateResult{}, &NameTakenError{Name: name, Err: err}
 	}
 	if err != nil {
 		return CreateResult{}, &CheckError{Check: "check the name", Err: err}

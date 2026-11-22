@@ -59,7 +59,6 @@ func (e *NoBaseError) Error() string {
 // ErrFolderTaken or ErrBranchTaken, which says where it was found.
 type NameTakenError struct {
 	Name string // the slice name
-	Base string // the base branch, whose tip was looked in for the folder
 	Err  error
 }
 

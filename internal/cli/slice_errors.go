@@ -62,7 +62,7 @@ func printCreateError(w io.Writer, err error) int {
 		fmt.Fprintf(w, switchToBaseLine, wrong.Base)
 	case errors.As(err, &taken):
 		if errors.Is(taken, slice.ErrFolderTaken) {
-			fmt.Fprintf(w, folderTakenLine, taken.Name, taken.Name, taken.Base)
+			fmt.Fprintf(w, folderTakenLine, taken.Name, taken.Name)
 		} else {
 			fmt.Fprintf(w, branchTakenLine, taken.Name, taken.Name)
 		}

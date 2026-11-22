@@ -56,7 +56,7 @@ const (
 	wrongBranchLine   = "Error: the base branch is %s, but your checkout is on %s. Nothing was changed.\n"
 	noBranchLine      = "Error: the base branch is %s, but your checkout is not on a branch. Nothing was changed.\n"
 	switchToBaseLine  = "Switch to %s, then try again.\n"
-	folderTakenLine   = "Error: slice %s already exists (folder docs/slices/%s/ in %s). Nothing was changed.\n"
+	folderTakenLine   = "Error: slice %s already exists (folder docs/slices/%s/). Nothing was changed.\n"
 	branchTakenLine   = "Error: slice %s already exists (branch slice/%s). Nothing was changed.\n"
 	gitFailedLine     = "Error: git could not %s.%s\n"
 	systemFailedLine  = "Error: could not %s.%s\n"
