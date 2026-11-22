@@ -222,3 +222,32 @@ func TestBranchesWithPrefix(t *testing.T) {
 		t.Errorf("BranchesWithPrefix returned %q, want [a/b login]", got)
 	}
 }
+
+// Tests of CheckedOutBranch.
+
+// On a branch, CheckedOutBranch returns its name, with no error.
+func TestCheckedOutBranchOnABranch(t *testing.T) {
+	repo := newRepoWithMain(t)
+	wantCheckedOutBranch(t, repo, "main")
+}
+
+// On no branch, after git checkout of a commit, CheckedOutBranch returns
+// "", with no error.
+func TestCheckedOutBranchOnNoBranch(t *testing.T) {
+	repo := newRepoWithMain(t)
+	gitIn(t, repo, "checkout", "--quiet", "--detach", "main")
+	wantCheckedOutBranch(t, repo, "")
+}
+
+// wantCheckedOutBranch fails the test unless CheckedOutBranch gives want
+// for the checkout at repo, with no error.
+func wantCheckedOutBranch(t *testing.T, repo, want string) {
+	t.Helper()
+	got, err := CheckedOutBranch(context.Background(), repo)
+	if err != nil {
+		t.Fatalf("CheckedOutBranch returned the error %v, want none", err)
+	}
+	if got != want {
+		t.Errorf("CheckedOutBranch returned %q, want %q", got, want)
+	}
+}

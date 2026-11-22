@@ -113,3 +113,14 @@ type NoCreatedEventError struct {
 func (e *NoCreatedEventError) Error() string {
 	return "slice: no slice.created event could be read for " + e.Name
 }
+
+// WrongBranchError is returned when the user's checkout is not on the
+// base branch, so a slice cannot be made there.
+type WrongBranchError struct {
+	Base   string // the base branch
+	Branch string // the branch the checkout is on, or "" when it is on no branch
+}
+
+func (e *WrongBranchError) Error() string {
+	return fmt.Sprintf("slice: the checkout is on %q, not on the base branch %q", e.Branch, e.Base)
+}

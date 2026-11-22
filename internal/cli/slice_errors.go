@@ -24,6 +24,7 @@ func printCreateError(w io.Writer, err error) int {
 		invalid *slice.InvalidNameError
 		step    *slice.StepError
 		noBase  *slice.NoBaseError
+		wrong   *slice.WrongBranchError
 		taken   *slice.NameTakenError
 		check   *slice.CheckError
 	)
@@ -52,6 +53,13 @@ func printCreateError(w io.Writer, err error) int {
 		default:
 			fmt.Fprintf(w, defaultBaseHint, noBase.Name)
 		}
+	case errors.As(err, &wrong):
+		if wrong.Branch == "" {
+			fmt.Fprintf(w, noBranchLine, wrong.Base)
+		} else {
+			fmt.Fprintf(w, wrongBranchLine, wrong.Base, wrong.Branch)
+		}
+		fmt.Fprintf(w, switchToBaseLine, wrong.Base)
 	case errors.As(err, &taken):
 		if errors.Is(taken, slice.ErrFolderTaken) {
 			fmt.Fprintf(w, folderTakenLine, taken.Name, taken.Name, taken.Base)

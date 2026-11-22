@@ -80,3 +80,16 @@ func BranchesWithPrefix(ctx context.Context, dir, prefix string) ([]string, erro
 	}
 	return names, nil
 }
+
+// CheckedOutBranch returns the name of the branch checked out in the
+// checkout that dir is in, e.g. "main". Each worktree has its own, so the
+// answer depends on dir. It returns "" when the checkout is on no branch,
+// e.g. after git checkout of a commit, or during a rebase. When git
+// fails, it returns git's error as a *Error.
+func CheckedOutBranch(ctx context.Context, dir string) (string, error) {
+	out, err := run(ctx, dir, "branch", "--show-current")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(out), nil
+}

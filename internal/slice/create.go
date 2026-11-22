@@ -53,7 +53,8 @@ type CreateResult struct {
 // It checks, in this order, and stops at the first problem: a control
 // character in the title or the description (*ControlCharacterError),
 // the name (*InvalidNameError), the project (ErrNoCommits), the base
-// branch (*NoBaseError), and a name that is taken (*NameTakenError).
+// branch (*NoBaseError), the user's checkout on the base branch
+// (*WrongBranchError), and a name that is taken (*NameTakenError).
 // When a check cannot be done, e.g. because git fails, the error is a
 // *CheckError. Nothing is made before all the checks pass. When a step
 // that makes the slice fails, what was made is removed, and the error is
@@ -87,6 +88,15 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 	if err != nil {
 		return CreateResult{}, &CheckError{Check: "read the branch " + base, Err: err}
 	}
+
+	checkedOut, err := git.CheckedOutBranch(ctx, dir)
+	if err != nil {
+		return CreateResult{}, &CheckError{Check: "read the current branch", Err: err}
+	}
+	if checkedOut != base {
+		return CreateResult{}, &WrongBranchError{Base: base, Branch: checkedOut}
+	}
+
 	err = CheckNameFree(ctx, root, baseCommit, name)
 	if errors.Is(err, ErrFolderTaken) || errors.Is(err, ErrBranchTaken) {
 		return CreateResult{}, &NameTakenError{Name: name, Base: base, Err: err}
