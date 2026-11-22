@@ -44,9 +44,12 @@ func printCreateError(w io.Writer, err error) int {
 		fmt.Fprint(w, noCommitsLines)
 	case errors.As(err, &noBase):
 		fmt.Fprintf(w, noBaseLine, noBase.Base)
-		if noBase.Chosen {
-			fmt.Fprint(w, chosenBaseHint)
-		} else {
+		switch noBase.Source {
+		case slice.BaseFromFlag:
+			fmt.Fprint(w, flagBaseHint)
+		case slice.BaseFromSetting:
+			fmt.Fprint(w, settingBaseHint)
+		default:
 			fmt.Fprintf(w, defaultBaseHint, noBase.Name)
 		}
 	case errors.As(err, &taken):

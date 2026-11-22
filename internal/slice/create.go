@@ -17,6 +17,10 @@ import (
 // worktreeSetting is the git setting that chooses where worktrees go.
 const worktreeSetting = "sliceflow.worktree.dir"
 
+// baseSetting is the git setting that chooses the base branch of every
+// new slice.
+const baseSetting = "sliceflow.base"
+
 // CreateOptions is what a new slice is made from.
 type CreateOptions struct {
 	// Name is the name as the user gave it. It may have capital letters,
@@ -26,7 +30,8 @@ type CreateOptions struct {
 	Title string
 	// Description is one or two sentences about the slice, or "".
 	Description string
-	// From is the local branch to start from, or "" for main.
+	// From is the base branch, a local branch, or "" for the git setting
+	// sliceflow.base, else main.
 	From string
 }
 
@@ -71,13 +76,13 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		return CreateResult{}, err
 	}
 
-	base := opts.From
-	if base == "" {
-		base = "main"
+	base, source, err := chooseBase(ctx, root, opts.From)
+	if err != nil {
+		return CreateResult{}, err
 	}
 	baseCommit, err := git.BranchCommit(ctx, root, base)
 	if errors.Is(err, git.ErrNoBranch) {
-		return CreateResult{}, &NoBaseError{Name: name, Base: base, Chosen: opts.From != ""}
+		return CreateResult{}, &NoBaseError{Name: name, Base: base, Source: source}
 	}
 	if err != nil {
 		return CreateResult{}, &CheckError{Check: "read the branch " + base, Err: err}
@@ -123,6 +128,25 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		return CreateResult{}, err
 	}
 	return result, nil
+}
+
+// chooseBase returns the base branch of a new slice in the project at
+// root, and where it came from: from when it is not "", else the git
+// setting sliceflow.base when it is not "", else main. It reads the
+// setting only when from is "". It does not check that the branch
+// exists. When the setting cannot be read, the error is a *CheckError.
+func chooseBase(ctx context.Context, root, from string) (string, BaseSource, error) {
+	if from != "" {
+		return from, BaseFromFlag, nil
+	}
+	setting, err := git.Config(ctx, root, baseSetting)
+	if err != nil {
+		return "", BaseDefault, &CheckError{Check: "read the setting " + baseSetting, Err: err}
+	}
+	if setting != "" {
+		return setting, BaseFromSetting, nil
+	}
+	return "main", BaseDefault, nil
 }
 
 // createSteps returns the steps that make the slice described by created,

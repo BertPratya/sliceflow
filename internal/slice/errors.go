@@ -32,11 +32,23 @@ func (e *InvalidNameError) Error() string {
 	return fmt.Sprintf("slice: invalid name %q: %v", e.Given, e.Problem)
 }
 
+// BaseSource says where the base branch of a new slice came from.
+type BaseSource int
+
+const (
+	// BaseDefault is main, used when the user chose no base branch.
+	BaseDefault BaseSource = iota
+	// BaseFromFlag is the branch given with --from.
+	BaseFromFlag
+	// BaseFromSetting is the branch in the git setting sliceflow.base.
+	BaseFromSetting
+)
+
 // NoBaseError is returned when the base branch is not a local branch.
 type NoBaseError struct {
-	Name   string // the slice name
-	Base   string // the base branch that was looked for
-	Chosen bool   // true when the user chose the base; false for the default, main
+	Name   string     // the slice name
+	Base   string     // the base branch that was looked for
+	Source BaseSource // where Base came from
 }
 
 func (e *NoBaseError) Error() string {

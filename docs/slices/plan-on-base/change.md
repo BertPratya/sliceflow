@@ -747,7 +747,7 @@ e2e `TestCreateASlice`, `TestCreateWithAWorktreeSetting`,
 `TestListMergedWithItsBranch`, `TestListSkipsCandidates`,
 `TestCreateFromAnotherBranch`, `TestCreateWithAnEmptyFrom`,
 `TestCreateNotes`, `TestCreateFromASubfolder`, `TestCreateWritesTheSpec`,
-`TestCreateWritesTheFirstEvent`, `TestCreateRunsTheUsersHooks`,
+`TestCreateWritesTheFirstEvent`,
 `TestCreateWhenTheCommitFails`, `TestCreateStopsOnCtrlC`,
 `TestListSlices`, `TestListDamagedLogs`, `TestStatusWithBadLines`,
 `TestStatusWithNoCreatedEvent`, `TestStatusOfAnInvalidName`, and the e2e

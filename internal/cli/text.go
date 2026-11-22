@@ -50,8 +50,9 @@ const (
 	noCommitsLines = "Error: this repository has no commits yet. Nothing was changed.\n" +
 		"Make a first commit, then try again.\n"
 	noBaseLine        = "Error: base branch %s does not exist. Nothing was changed.\n"
-	defaultBaseHint   = "sliceflow starts from main unless you choose another branch. To choose one, run:\n  sliceflow slice create %s --from <branch>\n"
-	chosenBaseHint    = "Check the name. To see your branches, run:\n  git branch\n"
+	defaultBaseHint   = "sliceflow starts from main unless you choose another branch. To choose one for this slice, run:\n  sliceflow slice create %s --from <branch>\nTo choose one for every slice, run:\n  git config sliceflow.base <branch>\n"
+	flagBaseHint      = "Check the name. To see your branches, run:\n  git branch\n"
+	settingBaseHint   = "The base branch comes from the git setting sliceflow.base. To see it, run:\n  git config sliceflow.base\n"
 	folderTakenLine   = "Error: slice %s already exists (folder docs/slices/%s/ in %s). Nothing was changed.\n"
 	branchTakenLine   = "Error: slice %s already exists (branch slice/%s). Nothing was changed.\n"
 	gitFailedLine     = "Error: git could not %s.%s\n"

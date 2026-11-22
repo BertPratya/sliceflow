@@ -11,9 +11,10 @@ import (
 	"github.com/BertPratya/sliceflow/templates"
 )
 
-// slice create makes the branch, the worktree, and one commit with the
-// spec and the event log, prints where they are, and leaves the user's
-// own checkout as it was.
+// slice create writes the spec and the event log in the user's own
+// checkout, on the base branch, and commits only them there, with one
+// commit. It makes no branch and no worktree, and prints where the spec
+// is.
 func TestCreateASlice(t *testing.T) {
 	home := newHome(t)
 	repo := newProject(t, home)
@@ -21,15 +22,10 @@ func TestCreateASlice(t *testing.T) {
 
 	got := runSliceflow(t, repo, home, "slice", "create", "login")
 
-	worktree := filepath.Join(home, ".sliceflow", "worktrees", "shop", "login")
-	spec := filepath.Join(worktree, "docs", "slices", "login", "spec.md")
-	wantStdout := "Created slice login.\n" +
-		"  Branch:   slice/login (from main, at " + base[:7] + ")\n" +
-		"  Worktree: " + worktree + "\n" +
+	spec := filepath.Join(topFolder(t, repo, home), "docs", "slices", "login", "spec.md")
+	wantStdout := "Created slice login on branch main.\n" +
 		"Next: write the spec in " + spec + "\n"
-	if got.code != 0 {
-		t.Fatalf("exit code is %d, want 0; stderr:\n%s", got.code, got.stderr)
-	}
+	wantCode(t, got, 0)
 	if got.stderr != "" {
 		t.Errorf("stderr is %q, want nothing", got.stderr)
 	}
@@ -37,34 +33,30 @@ func TestCreateASlice(t *testing.T) {
 		t.Errorf("stdout is:\n%s\nwant:\n%s", got.stdout, wantStdout)
 	}
 
-	// The branch has one new commit, on top of main.
-	if parent := gitOutput(t, repo, home, "rev-parse", "slice/login^"); parent != base {
-		t.Errorf("the commit before slice/login is %s, want main's %s", parent, base)
+	// main has one new commit, on top of where it was.
+	if parent := gitOutput(t, repo, home, "rev-parse", "main^"); parent != base {
+		t.Errorf("the commit before main is %s, want the old main %s", parent, base)
 	}
 
-	// The worktree has the branch checked out.
-	if branch := gitOutput(t, worktree, home, "branch", "--show-current"); branch != "slice/login" {
-		t.Errorf("the worktree has %q checked out, want slice/login", branch)
-	}
-
-	// The commit has exactly the two files, and the expected message.
-	files := gitOutput(t, repo, home, "show", "--name-only", "--format=", "slice/login")
+	// That commit has exactly the two files, and the expected message.
+	files := gitOutput(t, repo, home, "show", "--name-only", "--format=", "main")
 	wantFiles := "docs/slices/login/.events.jsonl\ndocs/slices/login/spec.md"
 	if files != wantFiles {
 		t.Errorf("the commit has the files:\n%s\nwant:\n%s", files, wantFiles)
 	}
-	message := gitOutput(t, repo, home, "log", "-1", "--format=%s", "slice/login")
+	message := gitOutput(t, repo, home, "log", "-1", "--format=%s", "main")
 	if message != "login: add the spec and the event log" {
 		t.Errorf("the commit message is %q, want %q", message, "login: add the spec and the event log")
 	}
 
-	// The user's checkout is as it was: main, at the same commit, with no
-	// changes.
+	// No branch and no worktree were made.
+	wantNoSlice(t, repo, home)
+	wantNoFolder(t, defaultWorktree(home, "login"))
+
+	// The user's checkout is still on main, with no changes: the commit
+	// holds the files, and no lock file is left in the checkout.
 	if branch := gitOutput(t, repo, home, "branch", "--show-current"); branch != "main" {
 		t.Errorf("the project has %q checked out, want main", branch)
-	}
-	if now := gitOutput(t, repo, home, "rev-parse", "main"); now != base {
-		t.Errorf("main moved from %s to %s, want it unchanged", base, now)
 	}
 	if status := gitOutput(t, repo, home, "status", "--porcelain"); status != "" {
 		t.Errorf("the project has changes:\n%s\nwant none", status)
@@ -82,7 +74,7 @@ func TestCreateWritesTheSpec(t *testing.T) {
 	after := time.Now().UTC().Format("2006-01-02")
 	wantCode(t, got, 0)
 
-	data, err := os.ReadFile(filepath.Join(defaultWorktree(home, "login"), "docs", "slices", "login", "spec.md"))
+	data, err := os.ReadFile(filepath.Join(repo, "docs", "slices", "login", "spec.md"))
 	if err != nil {
 		t.Fatalf("could not read the spec: %v", err)
 	}
@@ -124,7 +116,7 @@ func TestCreateWritesTheFirstEvent(t *testing.T) {
 			args := append([]string{"slice", "create", "login"}, tt.options...)
 			wantCode(t, runSliceflow(t, repo, home, args...), 0)
 
-			data, err := os.ReadFile(filepath.Join(defaultWorktree(home, "login"), "docs", "slices", "login", ".events.jsonl"))
+			data, err := os.ReadFile(filepath.Join(repo, "docs", "slices", "login", ".events.jsonl"))
 			if err != nil {
 				t.Fatalf("could not read the event log: %v", err)
 			}
@@ -148,42 +140,53 @@ func TestCreateWritesTheFirstEvent(t *testing.T) {
 	}
 }
 
-// --from starts the slice from the tip of another local branch.
+// --from chooses the base branch, before the git setting sliceflow.base.
+// The commit goes on that branch, and no other branch moves.
 func TestCreateFromAnotherBranch(t *testing.T) {
 	home := newHome(t)
 	repo := newProject(t, home)
-	gitOutput(t, repo, home, "switch", "--quiet", "-c", "dev")
-	gitOutput(t, repo, home, "commit", "--quiet", "--allow-empty", "-m", "on dev")
-	gitOutput(t, repo, home, "switch", "--quiet", "main")
-	dev := gitOutput(t, repo, home, "rev-parse", "dev")
+	oldMain := gitOutput(t, repo, home, "rev-parse", "main")
+	gitOutput(t, repo, home, "config", "sliceflow.base", "dev/bert")
+	gitOutput(t, repo, home, "switch", "--quiet", "-c", "release")
+	gitOutput(t, repo, home, "commit", "--quiet", "--allow-empty", "-m", "on release")
+	oldRelease := gitOutput(t, repo, home, "rev-parse", "release")
 
-	got := runSliceflow(t, repo, home, "slice", "create", "login", "--from", "dev")
+	got := runSliceflow(t, repo, home, "slice", "create", "login", "--from", "release")
 	wantCode(t, got, 0)
 
-	wantLine := "  Branch:   slice/login (from dev, at " + dev[:7] + ")\n"
-	if !strings.Contains(got.stdout, wantLine) {
-		t.Errorf("stdout is:\n%s\nwant it to have the line:\n%s", got.stdout, wantLine)
+	wantFirst := "Created slice login on branch release.\n"
+	if !strings.HasPrefix(got.stdout, wantFirst) {
+		t.Errorf("stdout is:\n%s\nwant it to start with:\n%s", got.stdout, wantFirst)
 	}
-	if parent := gitOutput(t, repo, home, "rev-parse", "slice/login^"); parent != dev {
-		t.Errorf("the commit before slice/login is %s, want dev's %s", parent, dev)
+	if parent := gitOutput(t, repo, home, "rev-parse", "release^"); parent != oldRelease {
+		t.Errorf("the commit before release is %s, want the old release %s", parent, oldRelease)
 	}
-	if branch := gitOutput(t, repo, home, "branch", "--show-current"); branch != "main" {
-		t.Errorf("the project has %q checked out, want main", branch)
+	if now := gitOutput(t, repo, home, "rev-parse", "main"); now != oldMain {
+		t.Errorf("main is at %s, want it still at %s", now, oldMain)
+	}
+	if branch := gitOutput(t, repo, home, "branch", "--show-current"); branch != "release" {
+		t.Errorf("the project has %q checked out, want release", branch)
 	}
 }
 
-// An empty --from counts as left out: the slice starts from main.
+// An empty --from counts as left out: the base comes from the git
+// setting sliceflow.base.
 func TestCreateWithAnEmptyFrom(t *testing.T) {
 	home := newHome(t)
 	repo := newProject(t, home)
-	base := gitOutput(t, repo, home, "rev-parse", "main")
+	gitOutput(t, repo, home, "config", "sliceflow.base", "dev")
+	gitOutput(t, repo, home, "switch", "--quiet", "-c", "dev")
+	oldDev := gitOutput(t, repo, home, "rev-parse", "dev")
 
 	got := runSliceflow(t, repo, home, "slice", "create", "login", "--from", "")
 	wantCode(t, got, 0)
 
-	wantLine := "  Branch:   slice/login (from main, at " + base[:7] + ")\n"
-	if !strings.Contains(got.stdout, wantLine) {
-		t.Errorf("stdout is:\n%s\nwant it to have the line:\n%s", got.stdout, wantLine)
+	wantFirst := "Created slice login on branch dev.\n"
+	if !strings.HasPrefix(got.stdout, wantFirst) {
+		t.Errorf("stdout is:\n%s\nwant it to start with:\n%s", got.stdout, wantFirst)
+	}
+	if parent := gitOutput(t, repo, home, "rev-parse", "dev^"); parent != oldDev {
+		t.Errorf("the commit before dev is %s, want the old dev %s", parent, oldDev)
 	}
 }
 
@@ -197,30 +200,27 @@ func TestCreateNotes(t *testing.T) {
 	writeText(t, filepath.Join(repo, ".gitignore"), "*.md\n*.jsonl\n")
 	gitOutput(t, repo, home, "add", ".gitignore")
 	gitOutput(t, repo, home, "commit", "--quiet", "-m", "ignore rules")
-	base := gitOutput(t, repo, home, "rev-parse", "main")
 
 	got := runSliceflow(t, repo, home, "slice", "create", "Login")
 	wantCode(t, got, 0)
 
-	worktree := defaultWorktree(home, "login")
-	wantStdout := "Created slice login.\n" +
-		"  Note:     \"Login\" was made lowercase.\n" +
-		"  Note:     spec.md matches a .gitignore rule, so sliceflow added it anyway.\n" +
-		"  Note:     .events.jsonl matches a .gitignore rule, so sliceflow added it anyway.\n" +
-		"  Branch:   slice/login (from main, at " + base[:7] + ")\n" +
-		"  Worktree: " + worktree + "\n" +
-		"Next: write the spec in " + filepath.Join(worktree, "docs", "slices", "login", "spec.md") + "\n"
+	spec := filepath.Join(topFolder(t, repo, home), "docs", "slices", "login", "spec.md")
+	wantStdout := "Created slice login on branch main.\n" +
+		"  Note: \"Login\" was made lowercase.\n" +
+		"  Note: spec.md matches a .gitignore rule, so sliceflow added it anyway.\n" +
+		"  Note: .events.jsonl matches a .gitignore rule, so sliceflow added it anyway.\n" +
+		"Next: write the spec in " + spec + "\n"
 	if got.stdout != wantStdout {
 		t.Errorf("stdout is:\n%s\nwant:\n%s", got.stdout, wantStdout)
 	}
-	files := gitOutput(t, repo, home, "show", "--name-only", "--format=", "slice/login")
+	files := gitOutput(t, repo, home, "show", "--name-only", "--format=", "main")
 	if files != "docs/slices/login/.events.jsonl\ndocs/slices/login/spec.md" {
 		t.Errorf("the commit has the files:\n%s\nwant the spec and the event log", files)
 	}
 }
 
-// slice create works from a subfolder of the project. The worktree's
-// path uses the name of the project's main folder.
+// slice create works from a subfolder of the checkout. The slice is
+// written at the top of the checkout, not in the subfolder.
 func TestCreateFromASubfolder(t *testing.T) {
 	home := newHome(t)
 	repo := newProject(t, home)
@@ -232,48 +232,132 @@ func TestCreateFromASubfolder(t *testing.T) {
 	got := runSliceflow(t, sub, home, "slice", "create", "login")
 	wantCode(t, got, 0)
 
-	wantLine := "  Worktree: " + defaultWorktree(home, "login") + "\n"
+	spec := filepath.Join(topFolder(t, repo, home), "docs", "slices", "login", "spec.md")
+	wantLine := "Next: write the spec in " + spec + "\n"
 	if !strings.Contains(got.stdout, wantLine) {
 		t.Errorf("stdout is:\n%s\nwant it to have the line:\n%s", got.stdout, wantLine)
 	}
+	if _, err := os.Stat(filepath.Join(repo, "docs", "slices", "login", "spec.md")); err != nil {
+		t.Errorf("the spec is not at the top of the checkout: %v", err)
+	}
+	wantNoFolder(t, filepath.Join(sub, "docs"))
 }
 
-// The git setting sliceflow.worktree.dir chooses where worktrees go: a
-// path that starts with ~ is in the home folder, and a relative path is
-// relative to the project's main folder. The path printed has no . or ..
-// parts.
-func TestCreateWithAWorktreeSetting(t *testing.T) {
-	tests := []struct {
-		about   string
-		setting string
-		want    func(home, repo string) string
-	}{
-		{"a path in the home folder", "~/wt", func(home, repo string) string {
-			return filepath.Join(home, "wt", "shop", "login")
-		}},
-		{"a path relative to the project", "../wt", func(home, repo string) string {
-			return filepath.Join(filepath.Dir(realPath(t, repo)), "wt", "shop", "login")
-		}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.about, func(t *testing.T) {
-			home := newHome(t)
-			repo := newProject(t, home)
-			gitOutput(t, repo, home, "config", "sliceflow.worktree.dir", tt.setting)
+// With no --from, the base branch is the git setting sliceflow.base, and
+// the commit goes on that branch.
+func TestCreateWithABaseSetting(t *testing.T) {
+	home := newHome(t)
+	repo := newProject(t, home)
+	oldMain := gitOutput(t, repo, home, "rev-parse", "main")
+	gitOutput(t, repo, home, "config", "sliceflow.base", "dev/bert")
+	gitOutput(t, repo, home, "switch", "--quiet", "-c", "dev/bert")
 
-			got := runSliceflow(t, repo, home, "slice", "create", "login")
-			wantCode(t, got, 0)
+	got := runSliceflow(t, repo, home, "slice", "create", "login")
+	wantCode(t, got, 0)
 
-			worktree := tt.want(home, repo)
-			wantLine := "  Worktree: " + worktree + "\n"
-			if !strings.Contains(got.stdout, wantLine) {
-				t.Errorf("stdout is:\n%s\nwant it to have the line:\n%s", got.stdout, wantLine)
-			}
-			if branch := gitOutput(t, worktree, home, "branch", "--show-current"); branch != "slice/login" {
-				t.Errorf("the worktree has %q checked out, want slice/login", branch)
-			}
-		})
+	wantFirst := "Created slice login on branch dev/bert.\n"
+	if !strings.HasPrefix(got.stdout, wantFirst) {
+		t.Errorf("stdout is:\n%s\nwant it to start with:\n%s", got.stdout, wantFirst)
 	}
+	if parent := gitOutput(t, repo, home, "rev-parse", "dev/bert^"); parent != oldMain {
+		t.Errorf("the commit before dev/bert is %s, want %s, where dev/bert started", parent, oldMain)
+	}
+	if now := gitOutput(t, repo, home, "rev-parse", "main"); now != oldMain {
+		t.Errorf("main is at %s, want it still at %s", now, oldMain)
+	}
+}
+
+// An empty sliceflow.base counts as not set: the base branch is main.
+func TestCreateWithAnEmptyBaseSetting(t *testing.T) {
+	home := newHome(t)
+	repo := newProject(t, home)
+	gitOutput(t, repo, home, "config", "sliceflow.base", "")
+
+	got := runSliceflow(t, repo, home, "slice", "create", "login")
+	wantCode(t, got, 0)
+
+	wantFirst := "Created slice login on branch main.\n"
+	if !strings.HasPrefix(got.stdout, wantFirst) {
+		t.Errorf("stdout is:\n%s\nwant it to start with:\n%s", got.stdout, wantFirst)
+	}
+}
+
+// slice create changes nothing in the checkout but the slice's folder: a
+// staged change and a new file that is not staged are not in its commit,
+// and stay as they were.
+func TestCreateTouchesOnlyItsFolder(t *testing.T) {
+	home := newHome(t)
+	repo := newProject(t, home)
+	writeText(t, filepath.Join(repo, "app.go"), "package app\n")
+	gitOutput(t, repo, home, "add", "app.go")
+	gitOutput(t, repo, home, "commit", "--quiet", "-m", "add app.go")
+	writeText(t, filepath.Join(repo, "app.go"), "package app\n\n// changed\n")
+	gitOutput(t, repo, home, "add", "app.go")
+	writeText(t, filepath.Join(repo, "notes.txt"), "mine\n")
+
+	wantCode(t, runSliceflow(t, repo, home, "slice", "create", "login"), 0)
+
+	files := gitOutput(t, repo, home, "show", "--name-only", "--format=", "main")
+	if files != "docs/slices/login/.events.jsonl\ndocs/slices/login/spec.md" {
+		t.Errorf("the commit has the files:\n%s\nwant only the spec and the event log", files)
+	}
+	// "M " is a staged change; "??" is a file git does not track.
+	if status := gitOutput(t, repo, home, "status", "--porcelain"); status != "M  app.go\n?? notes.txt" {
+		t.Errorf("git status is:\n%s\nwant app.go still staged, and notes.txt still not staged", status)
+	}
+	if branch := gitOutput(t, repo, home, "branch", "--show-current"); branch != "main" {
+		t.Errorf("the project has %q checked out, want main", branch)
+	}
+}
+
+// The lock of the log is kept inside git's folder, at
+// sliceflow/locks/<name>.lock under git's own path for it, and stays
+// there after the create. Nothing is left next to the log.
+func TestCreateKeepsTheLockInGit(t *testing.T) {
+	home := newHome(t)
+	repo := newProject(t, home)
+
+	wantCode(t, runSliceflow(t, repo, home, "slice", "create", "login"), 0)
+
+	if _, err := os.Stat(lockPath(t, repo, home, "login")); err != nil {
+		t.Errorf("the lock file is not inside git's folder: %v", err)
+	}
+	wantNoFolder(t, filepath.Join(repo, "docs", "slices", "login", ".events.jsonl.lock"))
+	if status := gitOutput(t, repo, home, "status", "--porcelain"); status != "" {
+		t.Errorf("the project has changes:\n%s\nwant none", status)
+	}
+}
+
+// In a second worktree that the user made, slice create writes the slice
+// in that worktree, and commits on its branch. The main checkout does not
+// change. The lock is in the second worktree's own git folder.
+func TestCreateInASecondWorktree(t *testing.T) {
+	home := newHome(t)
+	repo := newProject(t, home)
+	oldMain := gitOutput(t, repo, home, "rev-parse", "main")
+	second := addWorktree(t, repo, home, "dev/bert")
+	gitOutput(t, repo, home, "config", "sliceflow.base", "dev/bert")
+
+	got := runSliceflow(t, second, home, "slice", "create", "login")
+	wantCode(t, got, 0)
+
+	spec := filepath.Join(topFolder(t, second, home), "docs", "slices", "login", "spec.md")
+	wantStdout := "Created slice login on branch dev/bert.\n" +
+		"Next: write the spec in " + spec + "\n"
+	if got.stdout != wantStdout {
+		t.Errorf("stdout is:\n%s\nwant:\n%s", got.stdout, wantStdout)
+	}
+	if parent := gitOutput(t, repo, home, "rev-parse", "dev/bert^"); parent != oldMain {
+		t.Errorf("the commit before dev/bert is %s, want %s, where dev/bert started", parent, oldMain)
+	}
+	if now := gitOutput(t, repo, home, "rev-parse", "main"); now != oldMain {
+		t.Errorf("main is at %s, want it still at %s", now, oldMain)
+	}
+	wantNoFolder(t, filepath.Join(repo, "docs", "slices", "login"))
+	if _, err := os.Stat(lockPath(t, second, home, "login")); err != nil {
+		t.Errorf("the lock file is not in the second worktree's git folder: %v", err)
+	}
+	wantNoFolder(t, lockPath(t, repo, home, "login"))
 }
 
 // The commit runs the user's own git hooks.
@@ -291,6 +375,35 @@ func TestCreateRunsTheUsersHooks(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(home, "hook-ran")); err != nil {
 		t.Errorf("the pre-commit hook did not run: %v", err)
 	}
+}
+
+// topFolder returns the top folder of the checkout at dir, as git gives
+// it, written the way this system writes paths. On macOS, the temp
+// folder has two names, and git gives the one with its links resolved,
+// so a test compares printed paths with this, not with the folder it
+// made.
+func topFolder(t *testing.T, dir, home string) string {
+	t.Helper()
+	return filepath.FromSlash(gitOutput(t, dir, home, "rev-parse", "--show-toplevel"))
+}
+
+// lockPath returns the full path of the lock of the slice name's log for
+// the checkout at dir: sliceflow/locks/<name>.lock under the path git
+// gives for it inside its own folder.
+func lockPath(t *testing.T, dir, home, name string) string {
+	t.Helper()
+	path := gitOutput(t, dir, home, "rev-parse", "--path-format=absolute", "--git-path", "sliceflow/locks/"+name+".lock")
+	return filepath.FromSlash(path)
+}
+
+// addWorktree makes a second worktree of the project in repo, the way a
+// user would by hand, on a new branch made from main, in a folder next to
+// the project. It returns the worktree's folder.
+func addWorktree(t *testing.T, repo, home, branch string) string {
+	t.Helper()
+	dir := filepath.Join(filepath.Dir(repo), "second")
+	gitOutput(t, repo, home, "worktree", "add", "--quiet", "-b", branch, dir)
+	return dir
 }
 
 // defaultWorktree returns where the worktree of the slice name in the
@@ -338,17 +451,6 @@ func jsonText(t *testing.T, text string) string {
 		t.Fatal(err)
 	}
 	return strings.TrimSuffix(b.String(), "\n")
-}
-
-// realPath returns path with its links resolved, as git gives it. On
-// macOS, the temp folder is behind a link.
-func realPath(t *testing.T, path string) string {
-	t.Helper()
-	real, err := filepath.EvalSymlinks(path)
-	if err != nil {
-		t.Fatalf("could not resolve %s: %v", path, err)
-	}
-	return real
 }
 
 // writeText makes the file path with text in it, and the folders above
