@@ -738,27 +738,57 @@ Check: e2e
 
 ## Tasks
 
-Existing tests that change, because the behavior they test changes:
-e2e `TestCreateASlice`, `TestCreateWithAWorktreeSetting`,
-`TestCreateWhenTheWorktreeFolderIsNotEmpty`, `TestCreateWithNoBase`,
-`TestCreateWhenTheNameIsTaken`, `TestCreateWhenSomethingCannotBeRemoved`,
-`TestStatusWithItsWorktree`, `TestStatusFromTheBranch`,
-`TestStatusFromMain`, `TestStatusOfNoSlice`,
-`TestListMergedWithItsBranch`, `TestListSkipsCandidates`,
-`TestCreateFromAnotherBranch`, `TestCreateWithAnEmptyFrom`,
-`TestCreateNotes`, `TestCreateFromASubfolder`, `TestCreateWritesTheSpec`,
-`TestCreateWritesTheFirstEvent`,
-`TestCreateWhenTheCommitFails`, `TestCreateStopsOnCtrlC`,
-`TestListSlices`, `TestListDamagedLogs`, `TestStatusWithBadLines`,
-`TestStatusWithNoCreatedEvent`, `TestStatusOfAnInvalidName`, and the e2e
-helpers `createSlice` and `defaultWorktree`; unit tests in
-`internal/cli/slice_status_test.go`, `slice_list_test.go`,
-`slice_errors_test.go`, `run_test.go` (the help),
-`internal/slice/validation_test.go`, `steps_test.go`,
-`internal/git/commit_test.go`, `internal/eventlog/append_test.go` (the
-lock's path), `internal/project/path_test.go`, and the tests of any git
-function that is removed. Each is listed again
-in the pull request, with what changed in it.
+Existing tests that changed, because the behavior they test changed,
+checked against `c5cc50f`, the commit before task 1. Read these
+closely.
+
+- Create writes in the user's checkout, with no branch or worktree:
+  e2e `TestCreateASlice`, `TestCreateWritesTheSpec`,
+  `TestCreateWritesTheFirstEvent`, `TestCreateFromAnotherBranch`,
+  `TestCreateWithAnEmptyFrom`, `TestCreateNotes` (the `Note:` padding),
+  `TestCreateFromASubfolder`.
+- Removed, because create makes no worktree: e2e
+  `TestCreateWithAWorktreeSetting`,
+  `TestCreateWhenTheWorktreeFolderIsNotEmpty`, and the helper
+  `realPath`.
+- The base and its messages: e2e `TestCreateWithNoBase` (three
+  messages, by where the base came from).
+- The folder check also looks at the disk, and its message no longer
+  names the base: e2e `TestCreateWhenTheNameIsTaken`; unit
+  `TestCheckNameFreeFolderNotCommitted` (a folder never committed now
+  takes the name), and `TestCheckNameFreeOutsideARepo` and
+  `wantNameCheck` (the new `top` input).
+- The undo removes files and unstages them, not a worktree and a
+  branch: e2e `TestCreateWhenTheCommitFails`, `TestCreateStopsOnCtrlC`,
+  `TestCreateWhenSomethingCannotBeRemoved` (the `folder` leftover), and
+  the helper `writeHook`; unit `TestPrintCreateError` (the leftover
+  lines), and `TestRunStepsUndoesNewestFirst`,
+  `TestRunStepsFirstStepFails`, `TestRunStepsSkipsANilUndo`,
+  `TestRunStepsKeepsGoingWhenAnUndoFails`, and
+  `TestRunStepsListsEachLeftoverNewestFirst` (the failed step's own Undo
+  now runs too, and the leftover kind is `folder`).
+- The caller gives the lock's path: every Create and Append test in
+  `internal/eventlog/append_test.go` passes one, and so do the helpers
+  `holdLock`, `mustAppend`, and `runHelper`.
+- Status and list read only the checkout: e2e `TestStatusOfNoSlice`,
+  `TestStatusWithBadLines`, `TestStatusWithNoCreatedEvent`,
+  `TestListSlices`, `TestListSkipsCandidates`, `TestListDamagedLogs`,
+  and the helper `createdTime`; unit `TestStatusText` (the new lines).
+- Removed, because nothing reads other branches: e2e
+  `TestStatusWithItsWorktree`, `TestStatusFromTheBranch`,
+  `TestStatusFromMain`, `TestListMergedWithItsBranch`, and the helpers
+  `mergeIntoMain`, `removeWorktree`, and `worktreeLog`; unit
+  `TestFileAtACommittedFile`, `TestFileAtIgnoresChangesNotCommitted`,
+  `TestFileAtNotFound`, `TestFoldersAt`, and `TestBranchesWithPrefix`.
+- The help text: the constants `wantCreateHelp` and `wantStatusHelp` in
+  `internal/cli/run_test.go`.
+- Only a failure message: the helper `wantSamePath` in
+  `internal/git/repo_test.go` no longer names `RepoRoot`.
+
+Listed here before, but not changed: `TestStatusOfAnInvalidName`,
+`TestCreateRunsTheUsersHooks`, the helper `createSlice`,
+`internal/cli/slice_list_test.go`, `internal/project/path_test.go`, and
+`internal/git/commit_test.go`, which only got new tests.
 
 Code that changes, besides the steps below: new git functions for the
 current branch and the top of the current checkout, and `git reset --`
