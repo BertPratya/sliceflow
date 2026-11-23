@@ -133,8 +133,9 @@ forgotten, and that is fine. These rules replace "the human designs
 every piece" (2026-11-01), "the first time each new kind of problem
 appears" (2026-11-01, and rule 1 of 2026-10-30), and rules 1 to 3 of
 the co-programming rules of 2026-11-12. The rest of those rules stay,
-and so do debug first, a changed test as a red flag, the monthly
-self-test, and the weekly blank rebuild.
+and so do debug first and a changed test as a red flag. (The monthly
+self-test and the weekly blank rebuild stayed too, until 2026-11-24,
+below.)
 1. **The human writes code only for an idea that is new to them,** not
    just new to the project. The test: could the human explain how it
    works, apart from looking up a name or a flag? If yes, you write
@@ -153,6 +154,15 @@ self-test, and the weekly blank rebuild.
    a pattern the human has already reviewed are skimmed.
 5. **Explain back only what is new or risky.** No questions about lines
    that repeat a known pattern.
+
+On 2026-11-24, the human dropped the monthly self-test (change 4 of
+2026-11-12) and the weekly blank rebuild (rule 6 of the co-programming
+rules of 2026-11-12). The goal is a remote job, and AI made typing code
+from memory cheap; judging code is what stays scarce. The learning that
+stays: interview practice outside this project, the design decisions
+and the review by risk of each slice, and, when the human reviews a
+core piece, three lines in their notes, in English, as if answering an
+interviewer: what it does, what it guarantees, and how it fails.
 
 On 2026-10-31, the human chose fast mode (level 3) for the rest of 0002,
 after writing the lock and the event write: what is left is mostly
@@ -233,6 +243,18 @@ human's algorithm time, outside this project.
 
 Decided 2026-11-02, the human. The human decides what the feature is. You
 write the spec file, from `templates/default/spec.md`. Work in this order:
+
+**Lighter specs, from slice 0003 on** (decided 2026-11-24, the human, for
+the 12-week timeline in the roadmap). A spec says what the user sees,
+and why: one rule per behavior the user can see, each with one
+example; every message, exit code, and file sliceflow writes or
+deletes, word for word; and the human's decisions. How it is built
+goes to the plan (TD decisions) and the tests: e.g. how lines are
+parsed, line ends, the order of equal items. You decide those details
+and report each in one line; the human decides only what users see.
+Aim for the roadmap's 25-30 rules per slice. The reviewer agent still
+reads each spec; you answer its technical questions in the plan, and
+bring the human only the ones about what users see.
 
 1. **Overview and scope.** The human explains, in their own words: what
    the feature lets a person do, why it is needed, what is in it, and what
@@ -433,6 +455,24 @@ When the human asks you for the answer, offer the next rung first.
   goes on its own branch, which the lead pushes, and the human merges.
 - On level 2, the human commits: leave your changes uncommitted, for the
   human to read. On level 3, you commit each chunk, as in fast mode.
+- **Night runs** (decided 2026-11-24, the human, for the 12-week
+  timeline). In the evening the human gives you the tasks for the night;
+  you build them on the human's computer, in this session, while the
+  human sleeps:
+  - Work only on the slice's own branch, e.g. `slice/spec-build`, never
+    on `main`. Never push, and never merge.
+  - For each task: tests first, then the code, then `gofmt`,
+    `go vet ./...`, and `go test ./...`, then a reviewer subagent checks
+    it against the spec and the plan; fix what it finds, then commit the
+    task on the branch, with a commit message in the style below.
+  - When the spec, the plan, or the tasks do not settle a choice, stop
+    that task, write the question in the report, and go on with the
+    tasks that do not depend on it. Never guess a decision that is the
+    human's (see Levels).
+  - In the morning, leave a report: what is done, what stopped and why,
+    the questions, and the "read closely" list (changed tests, code
+    that writes or deletes files, the core). The human reviews by risk
+    and merges into `main`.
 - **Commit messages** follow Go's own style (decided 2026-11-01), not
   Conventional Commits: never `feat:`, `fix:`, or `chore:`.
   - First line: `<area>: <what the change does>`, e.g.

@@ -38,7 +38,7 @@ Why this order:
   sliceflow is released once, when Part A is done, so the first thing
   people try is the complete product. Renumbered the same day: the
   release moved from 0009 to 0014, and finish (was 0010) moved to
-  Part B.
+  Part B. The date is set in Timeline, below (2026-11-24).
 
 ### Part A: required
 
@@ -59,6 +59,37 @@ Why this order:
 | 0012 | configurable steps | pick and order the built-in steps | 1.10 |
 | 0013 | budgets, cancel, cleanup | budget caps in tokens per task and per slice; cancel and reopen a slice; clean up a slice half made by a crash | 1.9, 2.7 |
 | 0014 | first release | `sliceflow init`, the lead's guide as a skill, `--version`, release binaries for Windows, macOS, and Linux, a README with the pitch, a demo GIF and video, and a website for sliceflow | 1.1, 1.7 |
+
+### Timeline (decided 2026-11-24, the human)
+
+All of Part A is built in 12 weeks from 2026-11-24, so the first public
+release, 0014, is around **2027-02-16**. A month of feedback and fixes
+from the first users follows, until around mid-March 2027.
+
+| Week | From | Slices |
+|---|---|---|
+| 1 | 2026-11-24 | 0002 spec |
+| 2-3 | 2026-12-01 | 0003 agents |
+| 4 | 2026-12-15 | 0004 plan |
+| 5-6 | 2026-12-22 | 0005 the run |
+| 7 | 2027-01-05 | 0006 dashboard |
+| 8 | 2027-01-12 | 0007 web actions, 0012 configurable steps |
+| 9 | 2027-01-19 | 0008 Codex, 0009 cases and the lead |
+| 10 | 2027-01-26 | 0010 reliability, 0013 budgets, cancel, cleanup |
+| 11 | 2027-02-02 | 0011 parallel tasks |
+| 12 | 2027-02-09 | 0014 first release |
+
+- **How:** agents build at night, from the day's spec, plan, and tasks;
+  the human decides in the evening and reviews by risk in the morning
+  (AGENTS.md). The human's hours, not the agents', are the limit.
+- **Estimate when it was set:** about 550-840 hours left (likely about
+  700), more than 12 weeks of the human's own hours; the night runs
+  close the gap.
+- **Checkpoints:** at the end of week 4 (0002 to 0004 done) and week 6
+  (the run works end to end), the human compares the progress with this
+  table, and decides what to do if it is behind: move the date, or move
+  hours. 0010 (processes and restarts) and 0011 (parallel tasks) are the
+  slices most likely to run long.
 
 ### Part B: optional
 
@@ -103,6 +134,8 @@ Numbered when they are picked. No fixed order.
 
 ## After the slices
 
+- **Feedback month.** After the first release, about a month for what
+  the first users find (see Timeline).
 - **Use it for real.** After the first release, run real slices with
   `sliceflow` on this repo and one other project, and fix what hurts.
   Then a write-up with real numbers: time, tokens, and how often the lead
