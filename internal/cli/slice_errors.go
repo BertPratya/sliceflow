@@ -24,12 +24,15 @@ func printCreateError(w io.Writer, err error) int {
 		control *slice.ControlCharacterError
 		invalid *slice.InvalidNameError
 		step    *slice.StepError
+		done    *slice.CommittedError
 		noBase  *slice.NoBaseError
 		wrong   *slice.WrongBranchError
 		taken   *slice.NameTakenError
 		check   *slice.CheckError
 	)
 	switch {
+	case errors.As(err, &done):
+		printCommittedError(w, done)
 	case errors.As(err, &control):
 		fmt.Fprintf(w, controlCharacterLines, control.Option, slice.EscapeControlCharacters(control.Text))
 		return 2
@@ -98,6 +101,16 @@ func printStepError(w io.Writer, step *slice.StepError) {
 	printLeftovers(w, step.Left)
 }
 
+// printCommittedError prints the message for a slice whose commit was
+// made, but git or the user stopped it afterwards: the slice exists.
+func printCommittedError(w io.Writer, done *slice.CommittedError) {
+	if isStop(done.Err) {
+		fmt.Fprintf(w, stoppedAfterLine, done.Name, done.Base)
+		return
+	}
+	printFailure(w, "finish the commit", done.Err, fmt.Sprintf(createdAnyway, done.Name, done.Base))
+}
+
 // printFailure prints that sliceflow could not do what, followed by
 // ending, then why: git's own error output when git failed, or else the
 // system's error text.
@@ -132,26 +145,36 @@ func printGitText(w io.Writer, stderr string) {
 	}
 }
 
-// printLeftovers prints what could not be removed, then a command that
-// removes each thing, the worktree first: git refuses to delete a branch
-// that a worktree has checked out. It prints nothing for an empty list.
+// leftoverKinds is the order in which leftovers are printed.
+var leftoverKinds = []string{"folder", "staged"}
+
+// printLeftovers prints what could not be removed, then how to remove
+// each thing, both in the order of leftoverKinds. It prints nothing for
+// an empty list.
 func printLeftovers(w io.Writer, left []slice.Leftover) {
 	if len(left) == 0 {
 		return
 	}
 	fmt.Fprint(w, leftoversLine)
-	for _, thing := range left {
-		fmt.Fprintf(w, leftoverLine, thing.Kind, thing.Name)
-	}
-	fmt.Fprint(w, cleanUpLine)
-	for _, thing := range left {
-		if thing.Kind == "worktree" {
-			fmt.Fprintf(w, removeWorktreeCmd, thing.Name)
+	for _, kind := range leftoverKinds {
+		for _, thing := range left {
+			if thing.Kind == kind {
+				fmt.Fprintf(w, leftoverLine, thing.Kind, thing.Name)
+			}
 		}
 	}
-	for _, thing := range left {
-		if thing.Kind == "branch" {
-			fmt.Fprintf(w, deleteBranchCmd, thing.Name)
+	fmt.Fprint(w, cleanUpLine)
+	for _, kind := range leftoverKinds {
+		for _, thing := range left {
+			if thing.Kind != kind {
+				continue
+			}
+			switch kind {
+			case "folder":
+				fmt.Fprintf(w, deleteFolderCmd, thing.Name)
+			case "staged":
+				fmt.Fprintf(w, unstageCmd, thing.Top, strings.TrimSuffix(thing.Name, "/"))
+			}
 		}
 	}
 }

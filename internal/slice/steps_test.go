@@ -28,9 +28,9 @@ func TestRunStepsAllWork(t *testing.T) {
 	r.want(t, "do a", "do b", "do c")
 }
 
-// The third step fails: the steps before it are undone, newest first.
-// The failed step's own Undo does not run, and the steps after it do not
-// run at all.
+// The third step fails: it and the steps before it are undone, newest
+// first. The failed step's own Undo runs too, because its Do may have
+// made part of its thing. The steps after it do not run at all.
 func TestRunStepsUndoesNewestFirst(t *testing.T) {
 	var r recorder
 	steps := []Step{
@@ -48,10 +48,10 @@ func TestRunStepsUndoesNewestFirst(t *testing.T) {
 	if len(stepErr.Left) != 0 {
 		t.Errorf("the error lists the leftovers %v, want none", stepErr.Left)
 	}
-	r.want(t, "do a", "do b", "do c", "undo b", "undo a")
+	r.want(t, "do a", "do b", "do c", "undo c", "undo b", "undo a")
 }
 
-// The first step fails: there is nothing to undo.
+// The first step fails: only its own Undo runs.
 func TestRunStepsFirstStepFails(t *testing.T) {
 	var r recorder
 	steps := []Step{r.step("a", errDo, nil), r.step("b", nil, nil)}
@@ -64,7 +64,7 @@ func TestRunStepsFirstStepFails(t *testing.T) {
 	if len(stepErr.Left) != 0 {
 		t.Errorf("the error lists the leftovers %v, want none", stepErr.Left)
 	}
-	r.want(t, "do a")
+	r.want(t, "do a", "undo a")
 }
 
 // A step with no Undo is skipped, and the steps before it are still
@@ -77,7 +77,7 @@ func TestRunStepsSkipsANilUndo(t *testing.T) {
 
 	err := runSteps(context.Background(), steps)
 	wantStepError(t, err)
-	r.want(t, "do a", "do b", "do c", "undo a")
+	r.want(t, "do a", "do b", "do c", "undo c", "undo a")
 }
 
 // An Undo fails: the steps before it are still undone, and its Left is
@@ -88,11 +88,11 @@ func TestRunStepsKeepsGoingWhenAnUndoFails(t *testing.T) {
 
 	err := runSteps(context.Background(), steps)
 	stepErr := wantStepError(t, err)
-	want := []Leftover{{Kind: "branch", Name: "b"}}
+	want := []Leftover{{Kind: "folder", Name: "b"}}
 	if !slices.Equal(stepErr.Left, want) {
 		t.Errorf("the error lists the leftovers %v, want %v", stepErr.Left, want)
 	}
-	r.want(t, "do a", "do b", "do c", "undo b", "undo a")
+	r.want(t, "do a", "do b", "do c", "undo c", "undo b", "undo a")
 }
 
 // Two Undos fail: both are listed, newest first.
@@ -102,7 +102,23 @@ func TestRunStepsListsEachLeftoverNewestFirst(t *testing.T) {
 
 	err := runSteps(context.Background(), steps)
 	stepErr := wantStepError(t, err)
-	want := []Leftover{{Kind: "branch", Name: "b"}, {Kind: "branch", Name: "a"}}
+	want := []Leftover{{Kind: "folder", Name: "b"}, {Kind: "folder", Name: "a"}}
+	if !slices.Equal(stepErr.Left, want) {
+		t.Errorf("the error lists the leftovers %v, want %v", stepErr.Left, want)
+	}
+}
+
+// Two Undos fail with the same Left: it is listed once.
+func TestRunStepsListsTheSameLeftoverOnce(t *testing.T) {
+	var r recorder
+	a := r.step("a", nil, errUndo)
+	b := r.step("b", nil, errUndo)
+	b.Left = a.Left
+	steps := []Step{a, b, r.step("c", errDo, nil)}
+
+	err := runSteps(context.Background(), steps)
+	stepErr := wantStepError(t, err)
+	want := []Leftover{{Kind: "folder", Name: "a"}}
 	if !slices.Equal(stepErr.Left, want) {
 		t.Errorf("the error lists the leftovers %v, want %v", stepErr.Left, want)
 	}
@@ -147,7 +163,7 @@ type recorder struct {
 
 // step returns a fake step called name. Its Do writes "do <name>" and
 // returns doErr; its Undo writes "undo <name>" and returns undoErr. Its
-// Left is a branch called name.
+// Left is a folder called name.
 func (r *recorder) step(name string, doErr, undoErr error) Step {
 	return Step{
 		Name: name,
@@ -159,7 +175,7 @@ func (r *recorder) step(name string, doErr, undoErr error) Step {
 			r.calls = append(r.calls, "undo "+name)
 			return undoErr
 		},
-		Left: Leftover{Kind: "branch", Name: name},
+		Left: Leftover{Kind: "folder", Name: name},
 	}
 }
 

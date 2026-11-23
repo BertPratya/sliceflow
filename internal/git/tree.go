@@ -26,6 +26,21 @@ func DirectoryExists(ctx context.Context, dir, commit, path string) (bool, error
 	return false, err
 }
 
+// PathExists reports whether commit has a file or a folder at path. Any
+// failure other than "no such path" is returned as it is. commit and path
+// are as for DirectoryExists, and commit may also be a name, e.g. HEAD.
+func PathExists(ctx context.Context, dir, commit, path string) (bool, error) {
+	_, err := run(ctx, dir, "rev-parse", "--verify", "--quiet", commit+":"+path)
+	if err == nil {
+		return true, nil
+	}
+	var gitErr *Error
+	if errors.As(err, &gitErr) && gitErr.ExitCode == 1 {
+		return false, nil
+	}
+	return false, err
+}
+
 // FoldersAt returns the names of the folders right inside path, relative
 // to the repo's top folder and written with /, as committed at the tip of
 // the local branch. It returns none when path is not a folder there. The

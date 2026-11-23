@@ -3,7 +3,9 @@ package slice
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -53,8 +55,10 @@ type CreateResult struct {
 // (*WrongBranchError), and a name that is taken (*NameTakenError).
 // When a check cannot be done, e.g. because git fails, the error is a
 // *CheckError. Nothing is made before all the checks pass. When a step
-// that makes the slice fails, what was made is removed, and the error is
-// a *StepError. A failure because git is not found holds
+// that makes the slice fails before the commit is made, what was made
+// is removed, and the error is a *StepError. When the commit was made,
+// but git or the user stopped it afterwards, nothing is removed, and the
+// error is a *CommittedError. A failure because git is not found holds
 // git.ErrNotFound, and a stop through ctx holds ctx's error.
 func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, error) {
 	if HasControlCharacter(opts.Title) {
@@ -127,9 +131,12 @@ func Create(ctx context.Context, dir string, opts CreateOptions) (CreateResult, 
 		BaseCommit:  baseCommit,
 	}
 
-	steps := createSteps(top, lockPath, created, &result)
+	steps := createSteps(top, lockPath, created)
 	if err := runSteps(ctx, steps); err != nil {
 		return CreateResult{}, err
+	}
+	if err := commitSlice(ctx, top, &result); err != nil {
+		return CreateResult{}, commitFailed(top, name, base, steps, err)
 	}
 	return result, nil
 }
@@ -153,47 +160,126 @@ func chooseBase(ctx context.Context, root, from string) (string, BaseSource, err
 	return "main", BaseDefault, nil
 }
 
-// createSteps returns the steps that make the slice described by created
-// in the checkout whose top folder is top, in order: the spec, the event
-// log, written while holding the lock at lockPath, and the commit. The
-// commit step records in result which files an ignore rule matched.
-func createSteps(top, lockPath string, created eventlog.SliceCreated, result *CreateResult) []Step {
+// createSteps returns the steps that write the slice described by
+// created in the checkout whose top folder is top: the spec, then the
+// event log, written while holding the lock at lockPath. Their Undo
+// removes the files they wrote, and the slice's folder when the spec's
+// step made it. A folder that was there before stays, and so do the
+// folders above the slice's folder.
+func createSteps(top, lockPath string, created eventlog.SliceCreated) []Step {
 	name := created.Name
-	folder := "docs/slices/" + name // inside the project, always with /
-	specPath := filepath.Join(top, filepath.FromSlash(folder), "spec.md")
-	logPath := filepath.Join(top, filepath.FromSlash(folder), ".events.jsonl")
+	folder := filepath.Join(top, "docs", "slices", name)
+	specPath := filepath.Join(folder, "spec.md")
+	logPath := filepath.Join(folder, ".events.jsonl")
+	left := Leftover{Kind: "folder", Name: folder}
+	madeFolder := false
 
 	return []Step{
 		{
 			Name: "write " + specPath,
 			Do: func(ctx context.Context) error {
+				_, err := os.Lstat(folder)
+				if err != nil && !errors.Is(err, fs.ErrNotExist) {
+					return err
+				}
+				madeFolder = err != nil
 				return writeSpecFile(specPath, name, time.Now())
 			},
+			Undo: func() error {
+				if err := removeFile(specPath); err != nil {
+					return err
+				}
+				if madeFolder {
+					return removeEmptyFolder(folder)
+				}
+				return nil
+			},
+			Left: left,
 		},
 		{
 			Name: "write " + logPath,
 			Do: func(ctx context.Context) error {
 				return eventlog.Create(ctx, logPath, lockPath, created)
 			},
-		},
-		{
-			Name: "make the commit",
-			Do: func(ctx context.Context) error {
-				files := []string{folder + "/spec.md", folder + "/.events.jsonl"}
-				for _, file := range files {
-					ignored, err := git.IsIgnored(ctx, top, file)
-					if err != nil {
-						return err
-					}
-					if ignored {
-						result.Ignored = append(result.Ignored, filepath.Base(file))
-					}
-				}
-				message := name + ": add the spec and the event log"
-				return git.Commit(ctx, top, message, files...)
+			Undo: func() error {
+				return removeFile(logPath)
 			},
+			Left: left,
 		},
 	}
+}
+
+// commitSlice commits the spec and the event log of the slice in result,
+// and only them, on the branch checked out in the checkout whose top
+// folder is top. It records in result which of the two files an ignore
+// rule matched; they are committed anyway.
+func commitSlice(ctx context.Context, top string, result *CreateResult) error {
+	folder := "docs/slices/" + result.Name // inside the project, always with /
+	files := []string{folder + "/spec.md", folder + "/.events.jsonl"}
+	for _, file := range files {
+		ignored, err := git.IsIgnored(ctx, top, file)
+		if err != nil {
+			return err
+		}
+		if ignored {
+			result.Ignored = append(result.Ignored, path.Base(file))
+		}
+	}
+	message := result.Name + ": add the spec and the event log"
+	return git.Commit(ctx, top, message, files...)
+}
+
+// commitFailed returns the error of Create when the commit of the slice
+// name failed with err, in the checkout whose top folder is top, after
+// steps wrote the slice's files.
+//
+// When the commit was made anyway, the slice's event log is in the
+// commit checked out now, and commitFailed removes nothing and returns a
+// *CommittedError. Otherwise, it unstages the slice's folder, undoes
+// steps, and returns a *StepError for the step "make the commit". When
+// it cannot tell whether the commit was made, it undoes, as if it was
+// not: the files of a commit that was made can be brought back with git.
+// It never waits for the user: ctx may already be cancelled.
+func commitFailed(top, name, base string, steps []Step, err error) error {
+	ctx := context.Background()
+	folder := "docs/slices/" + name // inside the project, always with /
+	made, checkErr := git.PathExists(ctx, top, "HEAD", folder+"/.events.jsonl")
+	if checkErr == nil && made {
+		return &CommittedError{Name: name, Base: base, Err: err}
+	}
+
+	var left []Leftover
+	if unstageErr := git.Unstage(ctx, top, folder); unstageErr != nil {
+		left = append(left, Leftover{Kind: "staged", Name: folder + "/", Top: top})
+	}
+	for _, thing := range undoSteps(steps) {
+		left = addLeftover(left, thing)
+	}
+	return &StepError{Step: "make the commit", Err: err, Left: left}
+}
+
+// removeFile removes the file at path. A file that is not there is not
+// an error.
+func removeFile(path string) error {
+	err := os.Remove(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	return err
+}
+
+// removeEmptyFolder removes the folder at path, which must be empty. A
+// folder that is not there is not an error, and neither is an empty
+// folder that cannot be removed: nothing in it is left behind.
+func removeEmptyFolder(path string) error {
+	err := os.Remove(path)
+	if err == nil || errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	if entries, readErr := os.ReadDir(path); readErr == nil && len(entries) == 0 {
+		return nil
+	}
+	return err
 }
 
 // writeSpecFile writes the spec of the slice name at path: the built-in

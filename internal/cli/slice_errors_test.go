@@ -18,8 +18,8 @@ import (
 func TestPrintCreateError(t *testing.T) {
 	writeFailed := &fs.PathError{Op: "open", Path: "/wt/docs/slices/login/spec.md", Err: fs.ErrPermission}
 	lockFailed := &fs.PathError{Op: "mkdir", Path: "/wt/.git/sliceflow/locks", Err: errors.New("not a directory")}
-	worktree := slice.Leftover{Kind: "worktree", Name: "/wt/shop/login"}
-	branch := slice.Leftover{Kind: "branch", Name: "slice/login"}
+	folder := slice.Leftover{Kind: "folder", Name: "/home/you/shop/docs/slices/login"}
+	staged := slice.Leftover{Kind: "staged", Name: "docs/slices/login/", Top: "/home/you/shop"}
 
 	tests := []struct {
 		about string
@@ -53,25 +53,33 @@ func TestPrintCreateError(t *testing.T) {
 				"  first\n" +
 				"\n" +
 				"  third\n"},
-		{"the worktree's command comes first",
-			&slice.StepError{Step: "make the commit", Err: &git.Error{ExitCode: 1, Stderr: "no\n"},
-				Left: []slice.Leftover{branch, worktree}}, 1,
+		{"the folder comes before the staged files",
+			&slice.StepError{Step: "make the commit", Err: &git.Error{ExitCode: 1, Stderr: "commit refused\n"},
+				Left: []slice.Leftover{staged, folder}}, 1,
 			"Error: git could not make the commit. The slice was not created.\n" +
 				"git said:\n" +
-				"  no\n" +
+				"  commit refused\n" +
 				"Some of what sliceflow made could not be removed:\n" +
-				"  branch    slice/login\n" +
-				"  worktree  /wt/shop/login\n" +
-				"To clean up, run:\n" +
-				"  git worktree remove --force \"/wt/shop/login\"\n" +
-				"  git branch -D \"slice/login\"\n"},
+				"  folder    /home/you/shop/docs/slices/login\n" +
+				"  staged    docs/slices/login/\n" +
+				"To clean up:\n" +
+				"  delete the folder /home/you/shop/docs/slices/login\n" +
+				"  run: git -C \"/home/you/shop\" reset -- \"docs/slices/login\"\n"},
 		{"stopped, with something left",
-			&slice.StepError{Step: "make the commit", Err: context.Canceled, Left: []slice.Leftover{worktree}}, 1,
+			&slice.StepError{Step: "make the commit", Err: context.Canceled, Left: []slice.Leftover{folder}}, 1,
 			"Stopped. The slice was not created.\n" +
 				"Some of what sliceflow made could not be removed:\n" +
-				"  worktree  /wt/shop/login\n" +
-				"To clean up, run:\n" +
-				"  git worktree remove --force \"/wt/shop/login\"\n"},
+				"  folder    /home/you/shop/docs/slices/login\n" +
+				"To clean up:\n" +
+				"  delete the folder /home/you/shop/docs/slices/login\n"},
+		{"stopped after the commit",
+			&slice.CommittedError{Name: "login", Base: "main", Err: context.Canceled}, 1,
+			"Stopped after the commit. Slice login was created on branch main.\n"},
+		{"git failed after the commit",
+			&slice.CommittedError{Name: "login", Base: "main", Err: &git.Error{ExitCode: 1, Stderr: "something broke\n"}}, 1,
+			"Error: git could not finish the commit. Slice login was created on branch main.\n" +
+				"git said:\n" +
+				"  something broke\n"},
 		{"stopped during a check",
 			&slice.CheckError{Check: "find the project", Err: context.Canceled}, 1,
 			"Stopped. The slice was not created. Nothing was changed.\n"},

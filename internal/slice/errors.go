@@ -123,3 +123,22 @@ type WrongBranchError struct {
 func (e *WrongBranchError) Error() string {
 	return fmt.Sprintf("slice: the checkout is on %q, not on the base branch %q", e.Branch, e.Base)
 }
+
+// CommittedError is returned when the slice's commit was made, but git
+// did not end well afterwards, e.g. because the user stopped sliceflow
+// while a post-commit hook ran. The slice exists, so nothing was
+// removed. Err says why git did not end well, e.g. ctx's error.
+type CommittedError struct {
+	Name string // the slice name
+	Base string // the branch that has the commit
+	Err  error
+}
+
+func (e *CommittedError) Error() string {
+	return "slice: " + e.Name + " was committed, but then: " + e.Err.Error()
+}
+
+// Unwrap returns why git did not end well.
+func (e *CommittedError) Unwrap() error {
+	return e.Err
+}

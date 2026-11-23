@@ -2,10 +2,14 @@ package git
 
 import (
 	"context"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 // Test 1: a repo with no commits has none.
@@ -200,6 +204,74 @@ func TestCommitDuringAMerge(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(repo, ".git", "MERGE_HEAD")); err != nil {
 		t.Errorf("the merge is not going on any more: %v", err)
+	}
+}
+
+// Unstage takes the files at its path out of the staging area, keeps
+// them on the disk, and leaves other staged files staged.
+func TestUnstage(t *testing.T) {
+	repo := newRepoWithCommit(t)
+	writeFile(t, filepath.Join(repo, "docs", "slices", "login", "spec.md"))
+	writeFile(t, filepath.Join(repo, "app.go"))
+	gitIn(t, repo, "add", "docs", "app.go")
+
+	if err := Unstage(context.Background(), repo, "docs/slices/login"); err != nil {
+		t.Fatalf("Unstage returned the error %v, want none", err)
+	}
+
+	if staged := gitOutput(t, repo, "diff", "--cached", "--name-only"); staged != "app.go" {
+		t.Errorf("the staged files are:\n%s\nwant only app.go", staged)
+	}
+	if _, err := os.Stat(filepath.Join(repo, "docs", "slices", "login", "spec.md")); err != nil {
+		t.Errorf("the file is gone from the disk: %v", err)
+	}
+}
+
+// Unstage of a path with nothing staged, or nothing there at all, is
+// not an error.
+func TestUnstageWithNothingStaged(t *testing.T) {
+	repo := newRepoWithCommit(t)
+
+	if err := Unstage(context.Background(), repo, "docs/slices/login"); err != nil {
+		t.Errorf("Unstage returned the error %v, want none", err)
+	}
+}
+
+// When the context ends while Commit waits on a hook, git is stopped
+// in a way that lets it clean up: no lock file is left in .git, so the
+// next git command works. It is skipped on Windows, where Go cannot send
+// Ctrl+C to one program.
+func TestCommitStopsWithoutLeavingALock(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Go cannot send Ctrl+C to one program on Windows")
+	}
+	useTestIdentity(t)
+	repo := newRepoWithCommit(t)
+	started := filepath.Join(t.TempDir(), "hook-started")
+	hook := filepath.Join(repo, ".git", "hooks", "pre-commit")
+	writeText(t, hook, "#!/bin/sh\nexec >/dev/null 2>&1\ntouch '"+started+"'\nsleep 10\n")
+	if err := os.Chmod(hook, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, filepath.Join(repo, "spec.md"))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() {
+		for {
+			if _, err := os.Stat(started); err == nil {
+				cancel()
+				return
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
+	}()
+
+	err := Commit(ctx, repo, "a message", "spec.md")
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Commit returned %v, want context.Canceled", err)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".git", "index.lock")); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf(".git/index.lock is left (Stat: %v), want it removed", err)
 	}
 }
 

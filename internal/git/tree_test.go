@@ -133,3 +133,32 @@ func TestFoldersAt(t *testing.T) {
 		t.Errorf("FoldersAt(nosuch) returned %q and the error %v, want none and none", got, err)
 	}
 }
+
+// PathExists finds a file and a folder in a commit, by name or by ID, and
+// not a path that is only on the disk.
+func TestPathExists(t *testing.T) {
+	repo := newRepo(t)
+	writeFile(t, filepath.Join(repo, "docs", "slices", "login", ".events.jsonl"))
+	gitIn(t, repo, "add", ".")
+	gitIn(t, repo, "commit", "--quiet", "-m", "login")
+	writeFile(t, filepath.Join(repo, "docs", "slices", "signup", ".events.jsonl"))
+
+	tests := []struct {
+		path string
+		want bool
+	}{
+		{"docs/slices/login/.events.jsonl", true},
+		{"docs/slices/login", true},
+		{"docs/slices/signup/.events.jsonl", false},
+		{"docs/slices/nosuch", false},
+	}
+	for _, tt := range tests {
+		got, err := PathExists(context.Background(), repo, "HEAD", tt.path)
+		if err != nil {
+			t.Fatalf("PathExists(%q) returned the error %v, want none", tt.path, err)
+		}
+		if got != tt.want {
+			t.Errorf("PathExists(%q) returned %v, want %v", tt.path, got, tt.want)
+		}
+	}
+}

@@ -52,3 +52,14 @@ func Commit(ctx context.Context, dir, message string, paths ...string) error {
 	_, err := run(ctx, dir, commit...)
 	return err
 }
+
+// Unstage puts the files at path, relative to dir, back in git's staging
+// area as they are in the commit checked out in dir: a file that is not
+// in that commit is no longer staged. The files on the disk do not
+// change, and nothing outside path is unstaged. A path with nothing
+// staged is not an error. When git fails, it returns git's error as a
+// *Error.
+func Unstage(ctx context.Context, dir, path string) error {
+	_, err := run(ctx, dir, "reset", "--quiet", "--", path)
+	return err
+}
