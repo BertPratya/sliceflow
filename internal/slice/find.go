@@ -13,67 +13,55 @@ import (
 	"github.com/BertPratya/sliceflow/internal/git"
 )
 
-// Where a log was found.
-const (
-	fromWorktree = "worktree"
-	fromBranch   = "branch"
-	fromMain     = "main"
-)
-
-// foundLog is the log of a slice, and where it was found.
-type foundLog struct {
-	source   string // fromWorktree, fromBranch, or fromMain
-	worktree string // the slice's worktree when its folder exists, or ""
-	data     []byte // the whole log
-}
-
 // logPath returns where the log of the slice name is in the project,
 // written with /.
 func logPath(name string) string {
 	return "docs/slices/" + name + "/.events.jsonl"
 }
 
-// findLog looks for the log of the slice name in the project whose main
-// folder is root, in this order, and stops at the first place that has
-// it: the slice's worktree, the tip of the branch slice/<name>, and the
-// tip of main. found is false when none has it. The slice's worktree is
-// returned in both cases, when git lists one for the branch and its
-// folder exists.
-func findLog(ctx context.Context, root, name string) (log foundLog, found bool, err error) {
-	branch := "slice/" + name
-	worktree, err := git.WorktreeOf(ctx, root, branch)
+// readLog returns the whole log of the slice name in the checkout whose
+// top folder is top. found is false when there is no file there. It
+// never reads another branch, another worktree, or a commit.
+func readLog(top, name string) (data []byte, found bool, err error) {
+	data, err = os.ReadFile(filepath.Join(top, filepath.FromSlash(logPath(name))))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, false, nil
+	}
 	if err != nil {
-		return foundLog{}, false, err
+		return nil, false, err
 	}
-	if worktree != "" {
-		if _, err := os.Stat(worktree); err != nil {
-			worktree = ""
-		}
-	}
-	log.worktree = worktree
+	return data, true, nil
+}
 
-	if worktree != "" {
-		data, err := os.ReadFile(filepath.Join(worktree, filepath.FromSlash(logPath(name))))
-		if err == nil {
-			log.source, log.data = fromWorktree, data
-			return log, true, nil
-		}
-		if !errors.Is(err, fs.ErrNotExist) {
-			return foundLog{}, false, err
-		}
+// findCheckout returns the main folder of the project that dir is in,
+// once it knows the project has a commit, and the top folder of the
+// checkout that dir is in.
+func findCheckout(ctx context.Context, dir string) (root, top string, err error) {
+	root, err = findProject(ctx, dir)
+	if err != nil {
+		return "", "", err
 	}
+	top, err = git.CheckoutTop(ctx, dir)
+	if err != nil {
+		return "", "", &CheckError{Check: "find the top of the checkout", Err: err}
+	}
+	return root, top, nil
+}
 
-	for _, place := range []struct{ source, branch string }{{fromBranch, branch}, {fromMain, "main"}} {
-		data, ok, err := git.FileAt(ctx, root, place.branch, logPath(name))
-		if err != nil {
-			return foundLog{}, false, err
-		}
-		if ok {
-			log.source, log.data = place.source, data
-			return log, true, nil
-		}
+// missesBase reports whether the checkout whose top folder is top lacks
+// a commit of the local branch base, so a log read there may be out of
+// date. It is false when base does not exist. When git cannot answer,
+// the error is git's, as it is.
+func missesBase(ctx context.Context, top, base string) (bool, error) {
+	exists, err := git.BranchExists(ctx, top, base)
+	if err != nil || !exists {
+		return false, err
 	}
-	return log, false, nil
+	holds, err := git.IsAncestor(ctx, top, "refs/heads/"+base, "HEAD")
+	if err != nil {
+		return false, err
+	}
+	return !holds, nil
 }
 
 // readCreated reads data as a log, and returns its slice.created event

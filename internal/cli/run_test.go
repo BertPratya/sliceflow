@@ -37,7 +37,7 @@ Options:
 `
 
 // wantCreateHelp is the help of slice create, word for word.
-const wantCreateHelp = `Make a new slice: a branch, a worktree, a spec, and an event log.
+const wantCreateHelp = `Make a new slice on the base branch: a spec and an event log, in one commit.
 
 Usage:
   sliceflow slice create <name> [options]
@@ -47,13 +47,13 @@ Arguments:
 
 Options:
   --description <text>  One or two sentences about the slice.
-  --from <branch>       The branch to start from. Default: main.
+  --from <branch>       The base branch. Default: the sliceflow.base setting, else main.
   --title <text>        A short title for the slice. Default: the name.
   -h, --help            Show this help.
 `
 
 // wantStatusHelp is the help of slice status, word for word.
-const wantStatusHelp = `Show one slice: its title, description, start, branch, worktree, and events.
+const wantStatusHelp = `Show one slice: its title, description, creation time, base, and events.
 
 Usage:
   sliceflow slice status <name> [options]

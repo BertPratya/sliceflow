@@ -42,12 +42,3 @@ func runSliceCreate(ctx context.Context, in input, stdout, stderr io.Writer) int
 	fmt.Fprintf(stdout, nextLine, created.Spec)
 	return 0
 }
-
-// shortCommit returns the first seven characters of a commit ID, the
-// short form people know from git.
-func shortCommit(commit string) string {
-	if len(commit) < 7 {
-		return commit
-	}
-	return commit[:7]
-}

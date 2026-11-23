@@ -9,9 +9,8 @@ import (
 )
 
 // statusText shows "(none)" for an empty description, the time in UTC to
-// the minute, the first seven characters of the base commit, the number
-// of events with the last one's name, and the place it read the log from
-// when that is not the worktree.
+// the minute, the base branch only, and the number of events with the
+// last one's name.
 func TestStatusText(t *testing.T) {
 	status := slice.StatusResult{
 		Name: "card-payment",
@@ -22,17 +21,13 @@ func TestStatusText(t *testing.T) {
 		CreatedAt: "2026-11-02T09:15:30Z",
 		Events:    3,
 		LastEvent: "plan.approved",
-		ReadFrom:  "main",
 	}
 
 	want := "card-payment: Pay with a card\n" +
 		"  Description:  (none)\n" +
 		"  Created:      2026-11-02 09:15 UTC\n" +
-		"  Started from: main, at 3f9a1c2\n" +
-		"  Branch:       slice/card-payment (not found)\n" +
-		"  Worktree:     (not found)\n" +
-		"  Events:       3 (last: plan.approved)\n" +
-		"  Read from:    main\n"
+		"  Base:         main\n" +
+		"  Events:       3 (last: plan.approved)\n"
 	if got := statusText(status); got != want {
 		t.Errorf("statusText gave:\n%s\nwant:\n%s", got, want)
 	}

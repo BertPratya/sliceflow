@@ -3,7 +3,6 @@ package git
 import (
 	"context"
 	"errors"
-	"strings"
 )
 
 // DirectoryExists reports whether path is a folder in commit. A file at
@@ -41,20 +40,18 @@ func PathExists(ctx context.Context, dir, commit, path string) (bool, error) {
 	return false, err
 }
 
-// FoldersAt returns the names of the folders right inside path, relative
-// to the repo's top folder and written with /, as committed at the tip of
-// the local branch. It returns none when path is not a folder there. The
-// branch must exist.
-func FoldersAt(ctx context.Context, dir, branch, path string) ([]string, error) {
-	out, err := run(ctx, dir, "ls-tree", "-d", "-z", "--name-only", "refs/heads/"+branch, "--", path+"/")
-	if err != nil {
-		return nil, err
+// IsAncestor reports whether commit is one of the commits that of is
+// built on, or of itself: then of holds every commit of commit. Both may
+// be names, e.g. refs/heads/main or HEAD, and must exist. Any failure
+// other than "no" is returned as it is.
+func IsAncestor(ctx context.Context, dir, commit, of string) (bool, error) {
+	_, err := run(ctx, dir, "merge-base", "--is-ancestor", commit, of)
+	if err == nil {
+		return true, nil
 	}
-	var names []string
-	for _, entry := range strings.Split(out, "\x00") {
-		if name, ok := strings.CutPrefix(entry, path+"/"); ok && name != "" {
-			names = append(names, name)
-		}
+	var gitErr *Error
+	if errors.As(err, &gitErr) && gitErr.ExitCode == 1 {
+		return false, nil
 	}
-	return names, nil
+	return false, err
 }

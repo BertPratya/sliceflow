@@ -11,9 +11,10 @@ import (
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
 
-// runSliceList prints the slices of the project of the current folder in
-// a table, and returns 0. A name that looked like a slice but is not
-// listed gets a warning first, on stderr. When the project cannot be
+// runSliceList prints the slices in the user's checkout of the current
+// folder in a table, and returns 0. Warnings come first, on stderr: that
+// some slices may be out of date, then one for each name that looked
+// like a slice but is not listed. When the project cannot be
 // read, it prints why, and returns 1.
 func runSliceList(ctx context.Context, in input, stdout, stderr io.Writer) int {
 	dir, err := os.Getwd()
@@ -24,6 +25,18 @@ func runSliceList(ctx context.Context, in input, stdout, stderr io.Writer) int {
 	list, err := slice.List(ctx, dir)
 	if err != nil {
 		return printSliceError(stderr, err)
+	}
+	if list.OldCopies > 0 {
+		printWarningStart(stderr, list.Branch)
+		if list.OldCopies == 1 {
+			fmt.Fprint(stderr, oneOldCopyEnding)
+		} else {
+			fmt.Fprintf(stderr, oldCopiesEnding, list.OldCopies)
+		}
+	}
+	for _, failed := range list.CheckFailed {
+		fmt.Fprintf(stderr, cannotCheckBase, failed.Base)
+		printToolText(stderr, failed.Err)
 	}
 	for _, skipped := range list.Skipped {
 		printSkipped(stderr, skipped)
@@ -39,17 +52,13 @@ func runSliceList(ctx context.Context, in input, stdout, stderr io.Writer) int {
 // printSkipped prints the warning for a name that is not listed, which
 // says why.
 func printSkipped(w io.Writer, s slice.SkippedCandidate) {
-	switch {
-	case s.Reason == slice.NotValidName:
+	switch s.Reason {
+	case slice.NotValidName:
 		fmt.Fprintf(w, notValidWarning, s.Name)
-	case s.Reason == slice.NoCreatedEvent:
+	case slice.NoCreatedEvent:
 		fmt.Fprintf(w, noCreatedEventWarning, s.Name, s.LogPath)
-	case s.OnBranch && s.InMain:
-		fmt.Fprintf(w, noLogInBothWarning, s.Name, s.Name, s.Name)
-	case s.OnBranch:
-		fmt.Fprintf(w, noLogOnBranchWarning, s.Name, s.Name)
 	default:
-		fmt.Fprintf(w, noLogInMainWarning, s.Name, s.Name)
+		fmt.Fprintf(w, noLogWarning, s.Name, s.Name)
 	}
 }
 

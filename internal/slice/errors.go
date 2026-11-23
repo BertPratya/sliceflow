@@ -89,11 +89,11 @@ func (e *CheckError) Unwrap() error {
 	return e.Err
 }
 
-// NoLogError is returned when no log of the slice is found: not in its
-// worktree, not on its branch, and not in main.
+// NoLogError is returned when the user's checkout has no log of the
+// slice.
 type NoLogError struct {
-	Name     string // the slice name
-	Worktree string // where the slice's worktree would be
+	Name   string // the slice name
+	Branch string // the branch the checkout is on, or "" when it is on no branch
 }
 
 func (e *NoLogError) Error() string {

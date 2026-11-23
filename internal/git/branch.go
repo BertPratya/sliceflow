@@ -64,23 +64,6 @@ func DeleteBranch(ctx context.Context, dir, branch string) error {
 	return err
 }
 
-// BranchesWithPrefix returns the names of the local branches that start
-// with prefix, with the prefix cut off, in git's order: prefix "slice/"
-// gives "login" for the branch slice/login.
-func BranchesWithPrefix(ctx context.Context, dir, prefix string) ([]string, error) {
-	out, err := run(ctx, dir, "for-each-ref", "--format=%(refname)", "refs/heads/"+prefix)
-	if err != nil {
-		return nil, err
-	}
-	var names []string
-	for _, line := range strings.Split(out, "\n") {
-		if name, ok := strings.CutPrefix(line, "refs/heads/"+prefix); ok && name != "" {
-			names = append(names, name)
-		}
-	}
-	return names, nil
-}
-
 // CheckedOutBranch returns the name of the branch checked out in the
 // checkout that dir is in, e.g. "main". Each worktree has its own, so the
 // answer depends on dir. It returns "" when the checkout is on no branch,

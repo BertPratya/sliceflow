@@ -52,12 +52,12 @@ var sliceGroup = CommandGroup{
 	Actions: map[string]CommandAction{
 		"create": {
 			Description:     "Make a new slice",
-			LongDescription: "Make a new slice: a branch, a worktree, a spec, and an event log.",
+			LongDescription: "Make a new slice on the base branch: a spec and an event log, in one commit.",
 			Args:            []CommandArg{{Name: "name", Description: "Up to 40 letters, digits, - and _. Starts with a letter or a digit.", Required: true}},
 			Options: map[string]CommandOption{
 				"title":       {Description: "A short title for the slice. Default: the name.", ValueName: "text", Type: "string"},
 				"description": {Description: "One or two sentences about the slice.", ValueName: "text", Type: "string"},
-				"from":        {Description: "The branch to start from. Default: main.", ValueName: "branch", Type: "string"},
+				"from":        {Description: "The base branch. Default: the sliceflow.base setting, else main.", ValueName: "branch", Type: "string"},
 			},
 			Run: runSliceCreate,
 		},
@@ -68,7 +68,7 @@ var sliceGroup = CommandGroup{
 		},
 		"status": {
 			Description:     "Show one slice",
-			LongDescription: "Show one slice: its title, description, start, branch, worktree, and events.",
+			LongDescription: "Show one slice: its title, description, creation time, base, and events.",
 			Args:            []CommandArg{{Name: "name", Description: "The name of the slice to show.", Required: true}},
 			Run:             runSliceStatus,
 		},

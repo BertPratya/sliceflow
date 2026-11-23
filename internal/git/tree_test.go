@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"slices"
 	"testing"
 )
 
@@ -111,29 +110,6 @@ func wantDirectoryExists(t *testing.T, dir, commit, path string, want bool) {
 	}
 }
 
-// FoldersAt lists the folders right inside a path, and no files; a path
-// that is not there gives none.
-func TestFoldersAt(t *testing.T) {
-	repo, _ := newRepoWithSlices(t)
-	gitIn(t, repo, "branch", "-M", "main")
-	writeFile(t, filepath.Join(repo, "docs", "slices", "signup", "spec.md"))
-	gitIn(t, repo, "add", ".")
-	gitIn(t, repo, "commit", "--quiet", "-m", "signup")
-
-	got, err := FoldersAt(context.Background(), repo, "main", "docs/slices")
-	if err != nil {
-		t.Fatalf("FoldersAt returned the error %v, want none", err)
-	}
-	if !slices.Equal(got, []string{"login", "signup"}) {
-		t.Errorf("FoldersAt returned %q, want [login signup]", got)
-	}
-
-	got, err = FoldersAt(context.Background(), repo, "main", "nosuch")
-	if err != nil || len(got) != 0 {
-		t.Errorf("FoldersAt(nosuch) returned %q and the error %v, want none and none", got, err)
-	}
-}
-
 // PathExists finds a file and a folder in a commit, by name or by ID, and
 // not a path that is only on the disk.
 func TestPathExists(t *testing.T) {
@@ -161,4 +137,41 @@ func TestPathExists(t *testing.T) {
 			t.Errorf("PathExists(%q) returned %v, want %v", tt.path, got, tt.want)
 		}
 	}
+}
+
+// IsAncestor is true for an older commit of the same branch and for the
+// commit itself, and false for a commit that the other does not hold.
+func TestIsAncestor(t *testing.T) {
+	repo := newRepoWithCommit(t)
+	gitIn(t, repo, "branch", "old")
+	gitIn(t, repo, "commit", "--quiet", "--allow-empty", "-m", "second")
+	gitIn(t, repo, "switch", "--quiet", "-c", "side", "old")
+	gitIn(t, repo, "commit", "--quiet", "--allow-empty", "-m", "on the side")
+	main := gitOutput(t, repo, "rev-parse", "HEAD@{2}")
+
+	tests := []struct {
+		commit, of string
+		want       bool
+	}{
+		{"refs/heads/old", "HEAD", true},
+		{"HEAD", "HEAD", true},
+		{main, "HEAD", false},
+	}
+	for _, tt := range tests {
+		got, err := IsAncestor(context.Background(), repo, tt.commit, tt.of)
+		if err != nil {
+			t.Fatalf("IsAncestor(%q, %q) returned the error %v, want none", tt.commit, tt.of, err)
+		}
+		if got != tt.want {
+			t.Errorf("IsAncestor(%q, %q) returned %v, want %v", tt.commit, tt.of, got, tt.want)
+		}
+	}
+}
+
+// IsAncestor returns git's error for a commit that does not exist.
+func TestIsAncestorOfNoSuchCommit(t *testing.T) {
+	repo := newRepoWithCommit(t)
+
+	_, err := IsAncestor(context.Background(), repo, "refs/heads/nosuch", "HEAD")
+	wantGitError(t, err)
 }

@@ -78,23 +78,34 @@ const (
 	statusFirstLine     = "%s: %s\n"
 	statusLine          = "  %-13s %s\n"
 	noneValue           = "(none)"
-	notFoundValue       = "(not found)"
 	createdTimeLayout   = "2006-01-02 15:04 UTC"
-	startedFromValue    = "%s, at %s"
 	eventsValue         = "%d (last: %s)"
 	oneBadLineWarning   = "Warning: line %d of %s could not be read, so it was skipped.\n"
 	badLinesWarning     = "Warning: lines %s of %s could not be read, so they were skipped.\n"
 	moreBadLines        = " (%d more not listed)"
-	noSliceLines        = "Error: no slice named %s. Nothing was changed.\nNo log was found in any of these places:\n  worktree  %s\n  branch    slice/%s\n  main      docs/slices/%s/.events.jsonl\nCheck the name, or run: sliceflow slice list\n"
+	noSliceLine         = "Error: no slice named %s. Nothing was changed.\nNo log was found at docs/slices/%s/.events.jsonl.\n"
+	noSliceOnBranchLine = "Your checkout is on branch %s. Check the name, or switch to the branch the slice is planned on.\n"
+	noSliceNoBranchLine = "Your checkout is not on a branch. Check the name, or switch to the branch the slice is planned on.\n"
 	noCreatedEventLines = "Error: no slice.created event could be read for %s. Nothing was changed.\nFix or restore the log, then try again.\n"
+)
+
+// The warnings of slice status and slice list for a log that may be out
+// of date. A warning starts with onBranchStart or noBranchStart, and
+// ends with one of the endings.
+const (
+	onBranchStart    = "Warning: your checkout is on branch %s, but "
+	noBranchStart    = "Warning: your checkout is not on a branch, but "
+	oldCopyEnding    = "slice %s is planned on branch %s, so this may be out of date.\n"
+	oldCopiesEnding  = "%d slices are planned on other branches, so they may be out of date.\n"
+	oneOldCopyEnding = "1 slice is planned on another branch, so it may be out of date.\n"
+	cannotCheckSlice = "Warning: sliceflow could not check whether slice %s is out of date.\n"
+	cannotCheckBase  = "Warning: sliceflow could not check whether the slices planned on branch %s are out of date.\n"
 )
 
 // The lines of slice list.
 const (
 	notValidWarning       = "Warning: %s is not listed as a slice. It is not a valid slice name.\n"
-	noLogOnBranchWarning  = "Warning: %s is not listed as a slice. The branch slice/%s has no event log.\n"
-	noLogInMainWarning    = "Warning: %s is not listed as a slice. The folder docs/slices/%s/ in main has no event log.\n"
-	noLogInBothWarning    = "Warning: %s is not listed as a slice. Neither the branch slice/%s nor the folder docs/slices/%s/ in main has an event log.\n"
+	noLogWarning          = "Warning: %s is not listed as a slice. The folder docs/slices/%s/ has no event log.\n"
 	noCreatedEventWarning = "Warning: %s is not listed as a slice. No slice.created event could be read from %s.\n"
 	noSlicesLine          = "No slices yet. To make one, run: sliceflow slice create <name>\n"
 )
