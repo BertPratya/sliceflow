@@ -2,7 +2,6 @@ package slice
 
 import (
 	"context"
-	"errors"
 
 	"github.com/BertPratya/sliceflow/internal/eventlog"
 	"github.com/BertPratya/sliceflow/internal/git"
@@ -17,30 +16,19 @@ type StatusResult struct {
 	LastEvent string                // the event name of the last of them
 	LogPath   string                // where the log is in the project, written with /
 	BadLines  []int                 // the numbers of the lines that could not be read, from 1
-	// OldCopy is whether the user's checkout lacks a commit of the
-	// slice's base branch, so the log may be out of date. It is false
-	// when the base branch does not exist.
-	OldCopy bool
-	// OldCopyErr is git's error, a *git.Error, when git could not tell
-	// whether the log is an old copy; OldCopy is then false.
-	OldCopyErr error
-	// Branch is the branch the user's checkout is on, or "" when it is
-	// on no branch. It is read only when OldCopy is true.
-	Branch string
 }
 
 // Status reads the slice with the given name from the user's checkout,
 // the checkout that dir is in, and returns what its log says. It reads
 // only docs/slices/<name>/.events.jsonl in that checkout, never another
-// branch, another worktree, or a commit. It changes nothing.
+// branch, another worktree, or a commit, and it does not check whether
+// another branch has a newer copy. It changes nothing.
 //
 // It checks, in this order, and stops at the first problem: the name
 // (*InvalidNameError), and the project (ErrNoCommits, or a *CheckError
 // when git fails, which holds git.ErrNotFound when git is not found).
 // When the checkout has no log, the error is a *NoLogError; when the log
 // has no slice.created event as its first line, a *NoCreatedEventError.
-// When git cannot tell whether the log is an old copy, Status still
-// returns the status, with OldCopyErr set.
 func Status(ctx context.Context, dir, given string) (StatusResult, error) {
 	name, err := ParseName(given)
 	if err != nil {
@@ -71,7 +59,7 @@ func Status(ctx context.Context, dir, given string) (StatusResult, error) {
 	if !ok {
 		return StatusResult{}, &NoCreatedEventError{Name: name, LogPath: logPath(name), BadLines: badLines}
 	}
-	result := StatusResult{
+	return StatusResult{
 		Name:      name,
 		Created:   created,
 		CreatedAt: at,
@@ -79,22 +67,7 @@ func Status(ctx context.Context, dir, given string) (StatusResult, error) {
 		LastEvent: events[len(events)-1].Event,
 		LogPath:   logPath(name),
 		BadLines:  badLines,
-	}
-
-	result.OldCopy, err = missesBase(ctx, top, created.Base)
-	var gitErr *git.Error
-	if errors.As(err, &gitErr) {
-		result.OldCopyErr = err
-	} else if err != nil {
-		return StatusResult{}, &CheckError{Check: "check whether " + name + " is out of date", Err: err}
-	}
-	if result.OldCopy {
-		result.Branch, err = git.CheckedOutBranch(ctx, top)
-		if err != nil {
-			return StatusResult{}, &CheckError{Check: "read the current branch", Err: err}
-		}
-	}
-	return result, nil
+	}, nil
 }
 
 // findProject returns the main folder of the project that dir is in,

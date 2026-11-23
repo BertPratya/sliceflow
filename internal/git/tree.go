@@ -39,19 +39,3 @@ func PathExists(ctx context.Context, dir, commit, path string) (bool, error) {
 	}
 	return false, err
 }
-
-// IsAncestor reports whether commit is one of the commits that of is
-// built on, or of itself: then of holds every commit of commit. Both may
-// be names, e.g. refs/heads/main or HEAD, and must exist. Any failure
-// other than "no" is returned as it is.
-func IsAncestor(ctx context.Context, dir, commit, of string) (bool, error) {
-	_, err := run(ctx, dir, "merge-base", "--is-ancestor", commit, of)
-	if err == nil {
-		return true, nil
-	}
-	var gitErr *Error
-	if errors.As(err, &gitErr) && gitErr.ExitCode == 1 {
-		return false, nil
-	}
-	return false, err
-}

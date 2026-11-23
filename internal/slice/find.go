@@ -48,22 +48,6 @@ func findCheckout(ctx context.Context, dir string) (root, top string, err error)
 	return root, top, nil
 }
 
-// missesBase reports whether the checkout whose top folder is top lacks
-// a commit of the local branch base, so a log read there may be out of
-// date. It is false when base does not exist. When git cannot answer,
-// the error is git's, as it is.
-func missesBase(ctx context.Context, top, base string) (bool, error) {
-	exists, err := git.BranchExists(ctx, top, base)
-	if err != nil || !exists {
-		return false, err
-	}
-	holds, err := git.IsAncestor(ctx, top, "refs/heads/"+base, "HEAD")
-	if err != nil {
-		return false, err
-	}
-	return !holds, nil
-}
-
 // readCreated reads data as a log, and returns its slice.created event
 // and when it happened. ok is false when the log is empty, its first line
 // cannot be read, or its first line is not a slice.created event. The

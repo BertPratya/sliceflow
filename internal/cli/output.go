@@ -64,15 +64,3 @@ func systemText(err error) string {
 func isStop(err error) bool {
 	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
 }
-
-// printToolText prints what git said, word for word, when err is a
-// *git.Error, or else the system's text.
-func printToolText(w io.Writer, err error) {
-	var gitErr *git.Error
-	if errors.As(err, &gitErr) {
-		printGitText(w, gitErr.Stderr)
-		return
-	}
-	fmt.Fprint(w, systemSaid)
-	fmt.Fprintf(w, "  %s\n", systemText(err))
-}

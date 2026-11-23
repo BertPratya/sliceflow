@@ -88,38 +88,14 @@ func TestListDamagedLogs(t *testing.T) {
 	wantOutput(t, got, "NAME      TITLE                 DESCRIPTION\nlogin-v2  Login with a passkey\n", wantStderr)
 }
 
-// When the checkout does not hold every commit of the base branch of some
-// slices, slice list gives one warning before the table, which says how
-// many slices.
+// When the checkout holds old copies of slices, slice list shows them as
+// they are, with no warning about other branches: the user decides which
+// branch to look at.
 func TestListOldCopies(t *testing.T) {
-	tests := []struct {
-		about      string
-		names      []string
-		detach     bool
-		wantStdout string
-		wantStderr string
-	}{
-		{"two slices", []string{"login", "report"}, false,
-			"NAME    TITLE   DESCRIPTION\nlogin   login\nreport  report\n",
-			"Warning: your checkout is on branch fix/new, but 2 slices are planned on other branches, so they may be out of date.\n"},
-		{"one slice", []string{"login"}, false,
-			"NAME   TITLE  DESCRIPTION\nlogin  login\n",
-			"Warning: your checkout is on branch fix/new, but 1 slice is planned on another branch, so it may be out of date.\n"},
-		{"on no branch", []string{"login"}, true,
-			"NAME   TITLE  DESCRIPTION\nlogin  login\n",
-			"Warning: your checkout is not on a branch, but 1 slice is planned on another branch, so it may be out of date.\n"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.about, func(t *testing.T) {
-			home := newHome(t)
-			repo := newProject(t, home)
-			newOldCopy(t, repo, home, tt.names...)
-			if tt.detach {
-				gitOutput(t, repo, home, "checkout", "--quiet", "--detach", "fix/new")
-			}
+	home := newHome(t)
+	repo := newProject(t, home)
+	newOldCopy(t, repo, home, "login", "report")
 
-			got := runSliceflow(t, repo, home, "slice", "list")
-			wantOutput(t, got, tt.wantStdout, tt.wantStderr)
-		})
-	}
+	got := runSliceflow(t, repo, home, "slice", "list")
+	wantOutput(t, got, "NAME    TITLE   DESCRIPTION\nlogin   login\nreport  report\n", "")
 }

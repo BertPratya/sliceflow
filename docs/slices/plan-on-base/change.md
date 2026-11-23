@@ -20,7 +20,7 @@ needed to write code.
 - `slice create` refuses when the user's checkout is not on the base
   branch.
 - `slice status` and `slice list` read the log only from the user's
-  checkout, and warn when it may be out of date.
+  checkout, and show it as it is, with no warning about other branches.
 
 ## Changed rules
 
@@ -340,8 +340,8 @@ the error output "Warning: <name> is not listed as a slice. The folder
 docs/slices/<name>/ has no event log.", and the exit code stays 0.
 All warnings of `list` about a single name (this one, and those of
 slice-and-events/R64 and R65) are sorted by name, by character code.
-They come after the warning of `list-old-copies`, and before the table,
-or before the line of slice-and-events/R62 when there are no slices.
+They come before the table, or before the line of slice-and-events/R62
+when there are no slices.
 Check: e2e
 
 - **Example:** **Given** my checkout has `docs/slices/login/` with a
@@ -352,29 +352,6 @@ Check: e2e
   Warning: notes is not listed as a slice. The folder docs/slices/notes/ has no event log.
   ```
   then the table, with one row, for `login`, and exits with code 0.
-
-### Rule `list-old-copies`: one warning for slices planned on other branches
-
-When the user's checkout does not hold every commit of the base branch
-of one or more slices in the list (as in `old-copy-warning`),
-`slice list` prints to the error output, before the table, one line:
-"Warning: your checkout is on branch <branch>, but <n> slices are
-planned on other branches, so they may be out of date." For one slice,
-the line ends "but 1 slice is planned on another branch, so it may be
-out of date." When the checkout is on no branch, the line starts
-"Warning: your checkout is not on a branch, but". The warning does not
-change the exit code.
-Check: e2e
-
-- **Example:** **Given** my checkout is on `fix/new`, and has the slices
-  `login` and `report`, both planned on `dev/bert`, and `dev/bert` got
-  one more commit after `fix/new` was made from it,
-  **When** I run `sliceflow slice list`,
-  **Then** sliceflow prints to the error output:
-  ```
-  Warning: your checkout is on branch fix/new, but 2 slices are planned on other branches, so they may be out of date.
-  ```
-  then the table, and exits with code 0.
 
 ### Rule `create-on-the-base`: the user's checkout must be on the base branch
 
@@ -474,38 +451,21 @@ Check: e2e
   ```
   and exits with code 1.
 
-### Rule `old-copy-warning`: a log from another branch may be out of date
+### Rule `old-copy-shown-as-is`: no warning about other branches
 
-When the user's checkout does not hold every commit of the base branch
-that the log's `slice.created` event names (git: `git merge-base
---is-ancestor <base> HEAD` fails), `slice status` prints to the error
-output "Warning: your checkout is on branch <branch>, but slice <name>
-is planned on branch <base>, so this may be out of date.", then the
-status as usual. It comes before the warning about lines that cannot be
-read (slice-and-events/R53). When the checkout is on no branch, the
-warning starts "Warning: your checkout is not on a branch, but". When
-the base branch does not exist, there is no warning. When git cannot
-answer (an error, not "no"), sliceflow prints instead "Warning:
-sliceflow could not check whether slice <name> is out of date.", then
-"git said:" and git's text, indented by two spaces, and goes on; `list`
-does the same once per base branch. The warning does not change the
-exit code.
+`slice status` and `slice list` show what the log in the user's
+checkout says, and never check whether another branch has a newer copy
+of it. The user decides which branch to look at. (Changed 2026-11-23:
+this rule replaces the rules `old-copy-warning` and `list-old-copies`,
+which were built in task 8, then dropped; see SD6.)
 Check: e2e
 
 - **Example:** **Given** the slice `login` is planned on `dev/bert`, and
   my checkout is on `fix/new`, a branch made from `dev/bert` after
   `login` was created, and `dev/bert` got one more commit after that,
   **When** I run `sliceflow slice status login`,
-  **Then** sliceflow prints to the error output:
-  ```
-  Warning: your checkout is on branch fix/new, but slice login is planned on branch dev/bert, so this may be out of date.
-  ```
-  then prints the status, and exits with code 0.
-- **Example:** **Given** the slice `login` was planned on `dev/bert`,
-  and `dev/bert` was merged into `main`, and my checkout is on `main`,
-  **When** I run `sliceflow slice status login`,
-  **Then** sliceflow prints no warning, because `main` holds every
-  commit of `dev/bert`.
+  **Then** sliceflow prints the status of the copy in my checkout,
+  prints nothing to the error output, and exits with code 0.
 
 ### Rule `status-lines`: the lines of the status
 
@@ -641,23 +601,28 @@ Check: e2e
   without the log; keeping logs in git refs outside the files, as
   git-bug does, because a normal clone does not copy them.
   Cost: on another branch, a slice is not found, or an old copy is
-  shown, with a warning.
+  shown, with no warning (SD6).
   Rule: status-reads-your-checkout, no-slice, list-finds-slices
   Replaces: slice-and-events/SD13, slice-and-events/SD14
 
-- **SD6.** When the checkout does not hold every commit of a log's base
-  branch, `status` warns once for the slice, and `list` warns once for
-  all such slices.
-  Why: a branch made after a slice holds an old copy of its log, which
-  may be out of date. Comparing commits, not branch names, keeps the
-  warning away after the base is merged, e.g. on `main` after
-  `dev/bert` was merged into it.
-  Not chosen: comparing branch names, because every finished slice
-  would warn forever after a merge; a warning on every row of `list`,
-  because it is noisy; no warning, because an old copy would show
-  silently.
-  Cost: one more git call per base branch.
-  Rule: old-copy-warning, list-old-copies
+- **SD6.** `status` and `list` give no warning when the checkout may
+  hold an old copy of a slice's log. They show the copy as it is. (Changed
+  2026-11-23, the human: the first version warned when the checkout did
+  not hold every commit of the log's base branch. It was built in task
+  8, then dropped.)
+  Why: no other spec tool warns when it reads an old copy (spec-kit,
+  OpenSpec; spec-kitty blocks changes, not reads), and `spec validate`
+  (0002) gives no such warning either, so every command that reads a
+  slice works the same way. The harmful case is already blocked: a
+  command that changes a slice refuses off its base branch, so an old
+  copy can mislead, but never be written over the newer one. The
+  warning also fired for any new commit on the base, even one that did
+  not touch the slice.
+  Not chosen: the warning, for the reasons above; comparing branch
+  names, because every finished slice would warn forever after a merge.
+  Cost: a user on another branch can read an old copy without being
+  told; they must know which branch a slice is planned on.
+  Rule: old-copy-shown-as-is
 
 - **SD7.** The slice's folder is taken when it is not empty in the
   checkout, or exists in the base commit. An empty folder is free.
@@ -839,4 +804,6 @@ design. Every existing test that changes is listed, with its reason.
    `list-finds-slices`. Human.
 8. `status` and `list`: the new lines, the two warnings for old
    copies, and the help text. Rules: `status-lines`,
-   `old-copy-warning`, `list-old-copies`, `help-text`. Agent.
+   `old-copy-warning`, `list-old-copies`, `help-text`. Agent. The two
+   warnings were dropped afterwards (SD6), and `old-copy-shown-as-is`
+   replaces their rules.

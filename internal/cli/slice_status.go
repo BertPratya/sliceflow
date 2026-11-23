@@ -14,9 +14,8 @@ import (
 )
 
 // runSliceStatus prints the status of the slice named in in, from the
-// user's checkout of the current folder, and returns 0. Warnings come
-// first, on stderr: that the log may be out of date, then the lines of
-// the log that cannot be read. When the slice
+// user's checkout of the current folder, and returns 0. Lines of its log
+// that cannot be read are named in a warning first, on stderr. When the slice
 // cannot be shown, it prints why, and returns 2 for a name that cannot
 // be used, or 1 for any other failure.
 func runSliceStatus(ctx context.Context, in input, stdout, stderr io.Writer) int {
@@ -29,28 +28,9 @@ func runSliceStatus(ctx context.Context, in input, stdout, stderr io.Writer) int
 	if err != nil {
 		return printSliceError(stderr, err)
 	}
-	switch {
-	case status.OldCopyErr != nil:
-		fmt.Fprintf(stderr, cannotCheckSlice, status.Name)
-		printToolText(stderr, status.OldCopyErr)
-	case status.OldCopy:
-		printWarningStart(stderr, status.Branch)
-		fmt.Fprintf(stderr, oldCopyEnding, status.Name, status.Created.Base)
-	}
 	printBadLines(stderr, status.LogPath, status.BadLines)
 	fmt.Fprint(stdout, statusText(status))
 	return 0
-}
-
-// printWarningStart prints the start of a warning about a log that may
-// be out of date: the branch the checkout is on, or that it is on no
-// branch when branch is "".
-func printWarningStart(w io.Writer, branch string) {
-	if branch == "" {
-		fmt.Fprint(w, noBranchStart)
-		return
-	}
-	fmt.Fprintf(w, onBranchStart, branch)
 }
 
 // statusText returns the status of a slice as it is printed.

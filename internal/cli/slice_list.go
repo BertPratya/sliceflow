@@ -12,9 +12,8 @@ import (
 )
 
 // runSliceList prints the slices in the user's checkout of the current
-// folder in a table, and returns 0. Warnings come first, on stderr: that
-// some slices may be out of date, then one for each name that looked
-// like a slice but is not listed. When the project cannot be
+// folder in a table, and returns 0. A name that looked like a slice but
+// is not listed gets a warning first, on stderr. When the project cannot be
 // read, it prints why, and returns 1.
 func runSliceList(ctx context.Context, in input, stdout, stderr io.Writer) int {
 	dir, err := os.Getwd()
@@ -25,18 +24,6 @@ func runSliceList(ctx context.Context, in input, stdout, stderr io.Writer) int {
 	list, err := slice.List(ctx, dir)
 	if err != nil {
 		return printSliceError(stderr, err)
-	}
-	if list.OldCopies > 0 {
-		printWarningStart(stderr, list.Branch)
-		if list.OldCopies == 1 {
-			fmt.Fprint(stderr, oneOldCopyEnding)
-		} else {
-			fmt.Fprintf(stderr, oldCopiesEnding, list.OldCopies)
-		}
-	}
-	for _, failed := range list.CheckFailed {
-		fmt.Fprintf(stderr, cannotCheckBase, failed.Base)
-		printToolText(stderr, failed.Err)
 	}
 	for _, skipped := range list.Skipped {
 		printSkipped(stderr, skipped)

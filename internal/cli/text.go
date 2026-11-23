@@ -89,19 +89,6 @@ const (
 	noCreatedEventLines = "Error: no slice.created event could be read for %s. Nothing was changed.\nFix or restore the log, then try again.\n"
 )
 
-// The warnings of slice status and slice list for a log that may be out
-// of date. A warning starts with onBranchStart or noBranchStart, and
-// ends with one of the endings.
-const (
-	onBranchStart    = "Warning: your checkout is on branch %s, but "
-	noBranchStart    = "Warning: your checkout is not on a branch, but "
-	oldCopyEnding    = "slice %s is planned on branch %s, so this may be out of date.\n"
-	oldCopiesEnding  = "%d slices are planned on other branches, so they may be out of date.\n"
-	oneOldCopyEnding = "1 slice is planned on another branch, so it may be out of date.\n"
-	cannotCheckSlice = "Warning: sliceflow could not check whether slice %s is out of date.\n"
-	cannotCheckBase  = "Warning: sliceflow could not check whether the slices planned on branch %s are out of date.\n"
-)
-
 // The lines of slice list.
 const (
 	notValidWarning       = "Warning: %s is not listed as a slice. It is not a valid slice name.\n"

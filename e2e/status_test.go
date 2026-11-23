@@ -102,10 +102,11 @@ func TestStatusOfNoSlice(t *testing.T) {
 	})
 }
 
-// When the checkout does not hold every commit of the slice's base
-// branch, slice status warns that it may be out of date, then prints the
-// status, with exit code 0. The warning comes before the one for lines
-// that cannot be read.
+// When the checkout holds an old copy of a slice, here from fix/new made
+// before dev/bert, the base, got one more commit, slice status shows that
+// copy as it is, with no warning about other branches: the user decides
+// which branch to look at. The only warning is the one for lines that
+// cannot be read.
 func TestStatusOfAnOldCopy(t *testing.T) {
 	home := newHome(t)
 	repo := newProject(t, home)
@@ -119,42 +120,8 @@ func TestStatusOfAnOldCopy(t *testing.T) {
 		"  Created:      " + createdTime(t, repo, "login") + "\n" +
 		"  Base:         dev/bert\n" +
 		"  Events:       1 (last: slice.created)\n"
-	wantStderr := "Warning: your checkout is on branch fix/new, but slice login is planned on branch dev/bert, so this may be out of date.\n" +
-		"Warning: line 2 of docs/slices/login/.events.jsonl could not be read, so it was skipped.\n"
+	wantStderr := "Warning: line 2 of docs/slices/login/.events.jsonl could not be read, so it was skipped.\n"
 	wantOutput(t, got, wantStdout, wantStderr)
-}
-
-// slice status gives no warning when the checkout holds every commit of
-// the base branch, e.g. after the base was merged into main, or when the
-// base branch is gone.
-func TestStatusWithNoOldCopyWarning(t *testing.T) {
-	t.Run("the base was merged", func(t *testing.T) {
-		home := newHome(t)
-		repo := newProject(t, home)
-		gitOutput(t, repo, home, "config", "sliceflow.base", "dev/bert")
-		gitOutput(t, repo, home, "switch", "--quiet", "-c", "dev/bert")
-		createSlice(t, repo, home, "login")
-		gitOutput(t, repo, home, "switch", "--quiet", "main")
-		gitOutput(t, repo, home, "merge", "--quiet", "--no-ff", "-m", "merge dev/bert", "dev/bert")
-
-		got := runSliceflow(t, repo, home, "slice", "status", "login")
-		wantCode(t, got, 0)
-		if got.stderr != "" {
-			t.Errorf("stderr is %q, want nothing", got.stderr)
-		}
-	})
-	t.Run("the base branch is gone", func(t *testing.T) {
-		home := newHome(t)
-		repo := newProject(t, home)
-		newOldCopy(t, repo, home, "login")
-		gitOutput(t, repo, home, "branch", "--quiet", "-D", "dev/bert")
-
-		got := runSliceflow(t, repo, home, "slice", "status", "login")
-		wantCode(t, got, 0)
-		if got.stderr != "" {
-			t.Errorf("stderr is %q, want nothing", got.stderr)
-		}
-	})
 }
 
 // Lines of the log that cannot be read are skipped, with one warning.
