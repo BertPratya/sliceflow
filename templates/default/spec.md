@@ -37,9 +37,9 @@ created: {{date}}
      - A required section with nothing to say gets one line: None.
      - When you are done, delete every comment and check that no {{ is
        left. A spec with a comment or a {{ left in it is not finished.
-       Every placeholder of this template counts, even inside code. A {{
-       or a comment marker you write yourself inside a code block or
-       `inline code` is real content.
+       This template puts no placeholder inside a code block, so the check
+       finds every one that is left. A {{ or a comment marker inside a
+       code block or `inline code` is real content, and is not checked.
      - To change a spec later, read this template again first. The
        finished spec no longer has these rules in it. -->
 
@@ -216,9 +216,7 @@ Check: {{unit, api, e2e, or manual}}
 
 - **Example:** **When** {{what the user does}},
   **Then** {{what the user sees}}:
-  ```
-  {{real output}}
-  ```
+  {{the exact output, in a code block}}
 - **Example:** **Given** {{the starting state}},
   **When** {{what the user does}},
   **Then** {{what the user sees}}.

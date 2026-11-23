@@ -16,10 +16,12 @@ before it is submitted and moves on to the next round.
 
 ### Rule `damaged-line-skipped`: a line that cannot be read does not hide the state
 
-If a line of a slice's log cannot be read, sliceflow skips it with the
-warning from slice-and-events ("Warning: line <n> of <log> could not be
-read, so it was skipped."), and works out the state from the other
-events.
+If lines of a slice's log cannot be read, sliceflow skips them with the
+one warning for the log of slice-and-events/R53 and R54, and works out
+the state from the other events. When a command also prints the warning
+of `unknown-event` or `event-not-allowed`, the warning for the lines
+that cannot be read comes first, whatever their line numbers. A first
+line that cannot be read is still an error, as in slice-and-events/R55.
 Check: e2e
 
 - **Example:** **Given** a slice `login`, made with `slice create`,
@@ -30,6 +32,15 @@ Check: e2e
   Warning: line 2 of docs/slices/login/.events.jsonl could not be read, so it was skipped.
   ```
   and its State: line is `  State:        spec (draft)`.
+- **Example:** **Given** a slice `login` whose log has a third line
+  that can be read, with the event `spec.submitted`, and a fifth line
+  `cut off`,
+  **When** I run `sliceflow slice status login`,
+  **Then** sliceflow prints to stderr:
+  ```
+  Warning: line 5 of docs/slices/login/.events.jsonl could not be read, so it was skipped.
+  Warning: line 3 of docs/slices/login/.events.jsonl has the event spec.submitted, which this version of sliceflow does not know, so the state cannot be worked out.
+  ```
 
 ### Rule `unknown-event`: an event this version of sliceflow does not know
 
@@ -77,21 +88,23 @@ Uses: damaged-line-skipped, unknown-event, event-not-allowed
 
 ### Rule `state-and-next`: the state, and the next step
 
-When a user runs `sliceflow slice status <name>` and the slice's
-worktree is found, sliceflow prints its lines as in slice-and-events,
-with the line "  State:        <state>" right after the first line.
-After its last line it prints an empty line, then "Next: write the spec
-in <path>", where <path> is the spec's full path in the worktree, then
-"Then run: sliceflow spec validate <name>", and exits with code 0. A
-state is written as its phase, then the state inside the phase in
-brackets, e.g. spec (draft). `sliceflow slice status --help` describes
-the command as "Show one slice: its state, the next step, its title,
-description, start, branch, worktree, and events."
+When a user runs `sliceflow slice status <name>`, the user's checkout
+has the slice's log, and its state can be worked out, sliceflow prints
+its lines as in plan-on-base, with the line "  State:        <state>"
+right after the first line. After its last line it prints an empty
+line, then the next step, which for spec (draft), the only state of
+this slice, is "Next: write the spec in <path>", where <path> is the full path of
+`docs/slices/<name>/spec.md` in the user's checkout, then "Then run:
+sliceflow spec validate <name>", and exits with code 0. A state is
+written as its phase, then the state inside the phase in brackets, e.g.
+spec (draft). `sliceflow slice status --help` describes the command as
+"Show one slice: its state, the next step, its title, description,
+creation time, base, and events."
 Check: e2e
 
-- **Example:** **Given** a slice `login`, made with
+- **Example:** **Given** my checkout `/home/you/projects/shop` is on
+  `main`, and I made a slice `login` there with
   `sliceflow slice create login --title "Log in" --description "Lets a user log in."`,
-  with its worktree,
   **When** I run `sliceflow slice status login`,
   **Then** sliceflow prints:
   ```
@@ -99,12 +112,10 @@ Check: e2e
     State:        spec (draft)
     Description:  Lets a user log in.
     Created:      2026-11-18 10:00 UTC
-    Started from: main, at a1b2c3d
-    Branch:       slice/login
-    Worktree:     /home/you/.sliceflow/worktrees/shop/login
+    Base:         main
     Events:       1 (last: slice.created)
 
-  Next: write the spec in /home/you/.sliceflow/worktrees/shop/login/docs/slices/login/spec.md
+  Next: write the spec in /home/you/projects/shop/docs/slices/login/spec.md
   Then run: sliceflow spec validate login
   ```
   and exits with code 0.
@@ -121,29 +132,6 @@ The event `slice.edited` is allowed in every state, and leaves the
 state as it is.
 Check: unit
 
-### Rule `no-next-without-worktree`: no next step while the worktree is gone
-
-While the slice's worktree is not found, `slice status` prints no empty
-line, and no Next: or Then run: line, after its last line.
-Check: e2e
-
-- **Example:** **Given** a slice `login`, made with
-  `sliceflow slice create login --title "Log in"`, whose worktree was
-  removed,
-  **When** I run `sliceflow slice status login`,
-  **Then** sliceflow prints:
-  ```
-  login: Log in
-    State:        spec (draft)
-    Description:  (none)
-    Created:      2026-11-18 10:00 UTC
-    Started from: main, at a1b2c3d
-    Branch:       slice/login
-    Worktree:     (not found)
-    Events:       1 (last: slice.created)
-    Read from:    branch slice/login
-  ```
-
 ### Rule `status-of-unknown-state`: status still shows what it knows
 
 If the state of a slice cannot be worked out, `slice status` prints
@@ -153,11 +141,11 @@ exits with code 0. The Events: line counts every event that could be
 read, including the one that made the state unknown.
 Check: e2e
 
-- **Example:** **Given** a slice `login`, made with
-  `sliceflow slice create login --title "Log in"`, with its worktree,
-  whose log has a second line that can be read, with the event
-  `spec.submitted`,
-  **When** I run `sliceflow slice status login`,
+- **Example:** **Given** a slice `login`, made on `main` with
+  `sliceflow slice create login --title "Log in"`, whose log has a
+  second line that can be read, with the event `spec.submitted`,
+  **When** I run `sliceflow slice status login` with my checkout on
+  `main`,
   **Then** sliceflow prints to stderr the warning of `unknown-event`,
   then prints:
   ```
@@ -165,9 +153,7 @@ Check: e2e
     State:        unknown
     Description:  (none)
     Created:      2026-11-18 10:00 UTC
-    Started from: main, at a1b2c3d
-    Branch:       slice/login
-    Worktree:     /home/you/.sliceflow/worktrees/shop/login
+    Base:         main
     Events:       2 (last: spec.submitted)
   ```
   and exits with code 0.
@@ -194,6 +180,26 @@ Check: e2e
   slice: {{slice}}
   created: {{date}}
   ---
+  ```
+  and exits with code 0.
+
+### Rule `template-help`: the help of spec template
+
+`sliceflow spec template --help` prints the help of the command, and
+exits with code 0. `spec template` takes no argument: one is refused
+as an unexpected argument, as in every command (exit code 2).
+Check: e2e
+
+- **Example:** **When** I run `sliceflow spec template --help`,
+  **Then** sliceflow prints:
+  ```
+  Print the spec template built into sliceflow, with its guidance comments.
+
+  Usage:
+    sliceflow spec template [options]
+
+  Options:
+    -h, --help  Show this help.
   ```
   and exits with code 0.
 
@@ -243,18 +249,18 @@ Uses: none
 ### Rule `spec-has-no-problems`: a spec with no problems
 
 When a user runs `sliceflow spec validate <name>` and the spec in the
-slice's worktree, `docs/slices/<name>/spec.md`, has no problems,
+user's checkout, `docs/slices/<name>/spec.md`, has no problems,
 sliceflow prints to stdout "<full path of the spec>: no problems
 found." and exits with code 0. It reads the file as it is now,
 including changes that are not committed yet.
 Check: e2e
 
-- **Example:** **Given** a slice `login` whose spec in its worktree has
-  no problems,
+- **Example:** **Given** my checkout `/home/you/projects/shop` has a
+  slice `login` whose spec has no problems,
   **When** I run `sliceflow spec validate login`,
   **Then** sliceflow prints to stdout:
   ```
-  /home/you/.sliceflow/worktrees/shop/login/docs/slices/login/spec.md: no problems found.
+  /home/you/projects/shop/docs/slices/login/spec.md: no problems found.
   ```
   and exits with code 0.
 
@@ -263,7 +269,8 @@ Check: e2e
 When the spec has one or more problems, sliceflow prints to stdout, for
 each problem, the line "<full path>:<line>: error: <what is wrong>",
 then a hint on how to fix it, indented by two spaces. The problems are
-in the order of their line numbers. Then it prints "1 problem found."
+in the order of their line numbers. Problems on the same line are in
+the order of their rules in this story. Then it prints "1 problem found."
 or "<n> problems found.", and exits with code 1. It reports every
 problem it finds, not only the first.
 Check: e2e
@@ -274,9 +281,9 @@ Check: e2e
   **When** I run `sliceflow spec validate login`,
   **Then** sliceflow prints to stdout:
   ```
-  /home/you/.sliceflow/worktrees/shop/login/docs/slices/login/spec.md:12: error: shared rule unknown-event is not used by any story.
+  /home/you/projects/shop/docs/slices/login/spec.md:12: error: shared rule unknown-event is not used by any story.
     Name it in a story's Uses: line, or delete it.
-  /home/you/.sliceflow/worktrees/shop/login/docs/slices/login/spec.md:40: error: rule edit-empty-values has no Check: line.
+  /home/you/projects/shop/docs/slices/login/spec.md:40: error: rule edit-empty-values has no Check: line.
     Add a line like "Check: e2e" under the rule's heading.
   2 problems found.
   ```
@@ -308,12 +315,16 @@ Check: unit
 
 ### Rule `story-heading-shape`: a story heading is `## Story <n>: <title>`
 
-If a `##` heading starts with `Story` but is not in the shape
-`## Story <n>: <title>`, where `<n>` is a number and the title is not
-empty, `spec validate` reports on the heading's line "the heading
-\"<heading>\" is not in the shape \"## Story <n>: <title>\"." with the
-hint "Write it as \"## Story <n>: <title>\", e.g. \"## Story 2: Print
-the template\".".
+If the first word of a `##` heading is `Story`, but the heading is not
+in the shape `## Story <n>: <title>`, where `<n>` is a number and the
+title is not empty, `spec validate` reports on the heading's line "the
+heading \"<heading>\" is not in the shape \"## Story <n>: <title>\"."
+with the hint "Write it as \"## Story <n>: <title>\", e.g. \"## Story
+2: Print the template\".". Such a heading still counts as a story: the
+rules under it belong to it, and in `stories-numbered-in-order` it
+counts as the number after the story before it, so one typo gives one
+problem. A heading whose first word is not `Story`, e.g.
+`## Storyboard`, is not a story.
 Check: unit
 
 - **Example:** **Given** a spec whose line 30 is `## Story two: Print`,
@@ -323,6 +334,8 @@ Check: unit
   error: the heading "## Story two: Print" is not in the shape "## Story <n>: <title>".
     Write it as "## Story <n>: <title>", e.g. "## Story 2: Print the template".
   ```
+  and, when the next story is Story 3 and the rules under line 30 are
+  in shape, no other problem.
 
 ### Rule `stories-numbered-in-order`: stories are numbered 1, 2, 3, ...
 
@@ -369,7 +382,10 @@ Check: unit
 If a story has no `Uses:` line, `spec validate` reports on its
 heading's line "Story <n> has no Uses: line." with the hint "Add
 \"Uses: none\", or name the shared rules it needs, e.g. \"Uses:
-unknown-event\".".
+unknown-event\".". The line may be anywhere in its story. If a story
+has a second `Uses:` line, it reports on that line "Story <n> has a
+second Uses: line." with the hint "Merge the two into one line.", and
+reads only the first.
 Check: unit
 
 - **Example:** **Given** a spec whose Story 1, on line 20, has no
@@ -418,11 +434,14 @@ Check: unit
 ### Rule `rule-in-unknown-section`: a rule belongs to a story or Shared rules
 
 A spec may have sections that are not in the template. If a rule is in
-such a section, `spec validate` reports on the rule's heading line
-"rule <name> is in the section \"<heading>\", which is not a story or
-Shared rules." with the hint "If the section is a story, write its
-heading as \"## Story <n>: <title>\". If not, move the rule into a
-story or Shared rules.".
+any section that is not a story or Shared rules, one from the template,
+e.g. `## Out of scope`, or not, `spec validate` reports on the rule's
+heading line "rule <name> is in the section \"<heading>\", which is
+not a story or Shared rules." with the hint "If the section is a story,
+write its heading as \"## Story <n>: <title>\". If not, move the rule
+into a story or Shared rules.". If a rule comes before the first `##`
+heading, it reports instead "rule <name> is not in any section." with
+the hint "Move it into a story or Shared rules.".
 Check: unit
 
 - **Example:** **Given** a spec with a section `## Stroy 2: Print`, and
@@ -433,20 +452,70 @@ Check: unit
   error: rule template-printed is in the section "Stroy 2: Print", which is not a story or Shared rules.
     If the section is a story, write its heading as "## Story <n>: <title>". If not, move the rule into a story or Shared rules.
   ```
+- **Example:** **Given** a spec whose `## Out of scope` section holds,
+  on line 300, the rule `edit-needs-a-name`,
+  **When** I run `sliceflow spec validate login`,
+  **Then** sliceflow reports on line 300:
+  ```
+  error: rule edit-needs-a-name is in the section "Out of scope", which is not a story or Shared rules.
+    If the section is a story, write its heading as "## Story <n>: <title>". If not, move the rule into a story or Shared rules.
+  ```
+- **Example:** **Given** a spec with the rule `password-min-length` on
+  line 8, before its first `##` heading,
+  **When** I run `sliceflow spec validate login`,
+  **Then** sliceflow reports on line 8:
+  ```
+  error: rule password-min-length is not in any section.
+    Move it into a story or Shared rules.
+  ```
 - **Example:** **Given** a spec with a section `## Notes` that holds no
   rule,
   **When** I run `sliceflow spec validate login`,
   **Then** sliceflow reports no problem for it.
 
+### Rule `section-heading-exact`: a template section is written exactly once
+
+The sections of the template that are not stories are `## Summary`,
+`## Shared rules`, `## Out of scope`, `## Decisions`, and
+`## Open questions`. sliceflow finds each one only by its exact
+heading, with spaces at the end ignored. If a `##` heading is one of
+them when capital letters are ignored, but not exactly, `spec validate`
+reports on that line "section \"<heading>\" looks like \"<name>\"."
+with the hint "Write the heading as \"## <name>\".". If one of them is
+in the spec a second time, it reports on the second heading "section
+\"<name>\" is here a second time. The first is on line <n>." with the
+hint "Merge the two into one.".
+Check: unit
+
+- **Example:** **Given** a spec with the heading `## Open Questions` on
+  line 118, and under it the items Q1 and Q2,
+  **When** I run `sliceflow spec validate login`,
+  **Then** sliceflow reports on line 118:
+  ```
+  error: section "Open Questions" looks like "Open questions".
+    Write the heading as "## Open questions".
+  ```
+- **Example:** **Given** a spec with `## Open questions` on line 118
+  and again on line 140,
+  **When** I run `sliceflow spec validate login`,
+  **Then** sliceflow reports on line 140:
+  ```
+  error: section "Open questions" is here a second time. The first is on line 118.
+    Merge the two into one.
+  ```
+
 ### Rule `rule-heading-shape`: a rule heading is ``### Rule `<name>`: <one line>``
 
-If a `###` heading starts with `Rule` but is not in the shape
-``### Rule `<name>`: <one line>``, with the name in backticks and a
-line after the colon that is not empty, `spec validate` reports on the
+If the first word of a `###` heading is `Rule`, but the heading is not
+in the shape ``### Rule `<name>`: <one line>``, with the name in
+backticks and a line after the colon that is not empty, `spec validate` reports on the
 heading's line "the heading \"<heading>\" is not in the shape \"###
 Rule `<name>`: <one line>\"." with the hint "Write it as \"### Rule
 `<name>`: <one line>\", e.g. \"### Rule `title-required`: a slice
-needs a title\".".
+needs a title\".". Such a heading still counts as a rule: the lines
+under it belong to it, and the checks of its name are skipped. A
+heading whose first word is not `Rule`, e.g. `### Rules of thumb`, is
+not a rule.
 Check: unit
 
 - **Example:** **Given** a spec whose line 33 is
@@ -526,8 +595,11 @@ Check: unit
 
 ### Rule `check-values`: a `Check:` value is unit, api, e2e, or manual
 
-A `Check:` line holds one or more values, separated by commas. If a
-value is not `unit`, `api`, `e2e`, or `manual`, `spec validate` reports
+A `Check:` line holds one or more values, separated by commas. Spaces
+around a value are ignored, and so is an empty value, e.g. after a
+final comma in `Check: unit,`. Values are written in lowercase:
+`Unit` is not `unit`. If a value is not `unit`, `api`, `e2e`, or
+`manual`, `spec validate` reports
 on the `Check:` line "rule <name> has the Check: value <value>, which
 is not unit, api, e2e, or manual." with the hint "Fix the value.".
 Check: unit
@@ -553,7 +625,8 @@ than `unit`, `spec validate` reports on the rule's heading line "rule
 as \"- **Example:** **When** ... **Then** ...\".". If the first rule of
 a story has no example, it reports on the rule's heading line "rule
 <name> is the first rule of Story <n>, so it needs an example." with
-the same hint, whatever its `Check:` line says.
+the same hint, whatever its `Check:` line says. When both apply to one
+rule, it reports only the second, so a missing example is one problem.
 Check: unit
 
 - **Example:** **Given** a spec whose rule `nothing-to-change`, on line
@@ -583,7 +656,8 @@ If an example has no `**When**`, or no `**Then**`, `spec validate`
 reports on the example's first line "an example of rule <name> has no
 **When**." with the hint "Say what is done, starting with **When**.",
 or "an example of rule <name> has no **Then**." with the hint "Say what
-happens, starting with **Then**.". `**Given**` is not needed.
+happens, starting with **Then**.". When both are missing, it reports
+both, the one for **When** first. `**Given**` is not needed.
 Check: unit
 
 - **Example:** **Given** a spec whose rule `template-printed` has, on
@@ -606,7 +680,10 @@ placeholder from the template is still here: <placeholder>." with the
 hint "Write the real text in its place. If you mean the characters
 themselves, put them in backticks.". The placeholder is the text from
 `{{` to the next `}}` on the same line, or to the end of the line. It
-reports each placeholder once.
+reports each placeholder once. No other problem is reported on a line
+that has a placeholder, e.g. none from `check-values` for
+`Check: {{unit, api, e2e, or manual}}`. The line is still read, so a
+heading with a placeholder still starts its section.
 Check: unit
 
 - **Example:** **Given** a spec whose line 30 is
@@ -628,31 +705,46 @@ If an HTML comment (`<!--` to `-->`) is outside backticks,
 `spec validate` reports on the line where it starts "an HTML comment
 is still here. It is hidden when the spec is shown, but an agent reads
 it." with the hint "Delete it. Write what the reader needs as plain
-text.". It reports each comment once, and does not report a
-placeholder inside it.
+text.". It reports each comment once. Every other check of
+`spec validate` skips the text inside a comment, so a comment gives
+this one problem and no other. Reading from the top, whichever starts
+first wins: inside a comment, a line of three backticks is plain text,
+and the comment ends at the first `-->`, even on that line; inside a
+code block, `<!--` is plain text.
 Check: unit
 
 - **Example:** **Given** a spec with the template's comment under
   `## Open questions`, from line 120 to line 124, with `{{` inside it,
+  and the line `None` after it,
   **When** I run `sliceflow spec validate login`,
   **Then** sliceflow reports one problem, on line 120:
   ```
   error: an HTML comment is still here. It is hidden when the spec is shown, but an agent reads it.
     Delete it. Write what the reader needs as plain text.
   ```
+- **Example:** **Given** a spec that still has the template's comment
+  under `## Shared rules`, which holds a code block that closes on the
+  same line as the comment, and the lines
+  `## Story 1: Start a new slice`, `Uses: not-in-a-repo`, and
+  `Check: e2e`,
+  **When** I run `sliceflow spec validate login`,
+  **Then** sliceflow reports that comment once, reports nothing for the
+  lines inside it, and reads the spec after the comment as usual.
 
 ### Rule `open-questions-left`: no open question is left
 
 A question is a list item that starts with `- **Q<n>.**` in the Open
-questions section. If the section has one or more questions,
-`spec validate` reports on the section's heading line "<n> questions
-are still open." ("1 question is still open." for one) with the hint
-"Answer each one in the spec, then remove it. When none are left, write
-None.". If the section holds text that is neither `None` nor a
-question, it reports on the same line "Open questions must say None, or
-list questions as \"- **Q1.** ...\"." with the hint "Write each open
-question as a Q item, or write None.". A spec with no Open questions
-section has no such problem.
+questions section; its lines that are indented belong to it. If the
+section has one or more questions, `spec validate` reports on the
+section's heading line "<n> questions are still open." ("1 question is
+still open." for one) with the hint "Answer each one in the spec, then
+remove it. When none are left, write None.", and nothing else about the
+section. If it has no question, and does not hold only the word `None`,
+capital letters and a final period ignored, e.g. `none.`, it reports on
+the same line "Open questions must say None, or list questions as
+\"- **Q1.** ...\"." with the hint "Write each open question as a Q
+item, or write None.". An empty section is reported the same way. A
+spec with no Open questions section has no such problem.
 Check: unit
 
 - **Example:** **Given** a spec whose `## Open questions`, on line 118,
@@ -694,6 +786,27 @@ Check: unit
     Renumber the decisions from SD1, in the order they appear.
   ```
 
+### Rule `item-shape`: a decision or a question in the wrong shape
+
+If a list item in the Decisions section starts with `- SD` or
+`- **SD`, but not in the shape `- **SD<n>.**`, `spec validate` reports
+on its line "this looks like a decision, but is not written as
+\"- **SD<n>.** ...\"." with the hint "Write it as \"- **SD<n>.** ...\",
+with the number and the period inside the stars.". It does the same
+for an item in Open questions that starts with `- Q` or `- **Q`, with
+"question" and `Q<n>`. Such an item is not a decision or a question for
+any other check.
+Check: unit
+
+- **Example:** **Given** a spec whose Decisions section has, on line
+  700, the item `- SD5. Edits commit only the log.`,
+  **When** I run `sliceflow spec validate login`,
+  **Then** sliceflow reports on line 700:
+  ```
+  error: this looks like a decision, but is not written as "- **SD<n>.** ...".
+    Write it as "- **SD<n>.** ...", with the number and the period inside the stars.
+  ```
+
 ### Rule `decision-needs-rule-line`: every decision has a `Rule:` line
 
 If a decision has no `Rule:` line, `spec validate` reports on the
@@ -719,12 +832,11 @@ is not a rule in this spec, `spec validate` reports on the `Rule:` line
 Check: unit
 
 - **Example:** **Given** a spec whose SD5 has, on line 790, the line
-  `Rule: edit-needs-worktree`, and whose rule is named
-  `edit-needs-the-worktree`,
+  `Rule: edit-on-base`, and whose rule is named `edit-on-the-base`,
   **When** I run `sliceflow spec validate login`,
   **Then** sliceflow reports on line 790:
   ```
-  error: SD5 names rule edit-needs-worktree, which is not in this spec.
+  error: SD5 names rule edit-on-base, which is not in this spec.
     Fix the name, or write none.
   ```
 
@@ -733,19 +845,54 @@ Check: unit
 Every check of `spec validate` skips the lines inside a code block:
 from a line that starts with ```, after any spaces, to the next such
 line. A code block inside a list item, e.g. in an example, is indented,
-so the spaces are allowed.
+so the spaces are allowed. Where a rule says "outside backticks", text
+is inside backticks from a run of one or more backticks to the next run
+of the same number of backticks on the same line. A run with no such
+partner on its line is plain text, so backticks never hide text on
+other lines.
 Check: unit
 
 - **Example:** **Given** a rule whose example holds a code block with
   the lines `## Story 1: {{short title}}` and `<!-- note -->`,
   **When** I run `sliceflow spec validate login`,
   **Then** sliceflow reports no problem for those lines.
+- **Example:** **Given** a spec with a line that holds three backticks
+  in the middle and no others, and `## Story 2: {{short title}}` on the
+  next line,
+  **When** I run `sliceflow spec validate login`,
+  **Then** sliceflow reports the placeholder on the next line.
+
+### Rule `spec-lines-read`: how the lines of a spec are read
+
+A `Check:` or `Uses:` line starts at the first column, with no spaces
+before it; a decision's `Rule:` line starts with exactly two spaces,
+inside its `- **SD<n>.**` item. A line that starts otherwise is plain
+text, e.g. `Check: e2e` inside an indented example. Each of these
+lines is read alone: its values do not go on to the next line. An
+example runs from its `- **Example:**` line to the next line that is
+not blank and starts at the first column, and **When** and **Then**
+are looked for only inside it. `spec validate` reads a spec with
+`\n` or `\r\n` line ends, and skips a UTF-8 byte order mark at the start
+of the file.
+Check: unit
+
+- **Example:** **Given** a spec with no problems, saved with `\r\n`
+  line ends and a byte order mark,
+  **When** I run `sliceflow spec validate login`,
+  **Then** sliceflow prints that it found no problems, and exits with
+  code 0.
+- **Example:** **Given** a rule with no `Check:` line, whose example
+  holds the indented line `Check: e2e`,
+  **When** I run `sliceflow spec validate login`,
+  **Then** sliceflow reports that the rule has no `Check:` line.
 
 ### Rule `validate-errors-as-before`: the same mistakes, the same messages
 
 `spec validate` reports a missing name, an invalid name, and a name
-with no slice exactly as `slice status` does, to stderr (exit codes 2,
-2, and 1).
+with no log in the user's checkout exactly as `slice status` does, to
+stderr (exit codes 2, 2, and 1). It needs the log only to exist: it
+does not read it, so a log whose first line cannot be read does not
+stop it.
 Check: e2e
 
 - **Example:** **When** I run `sliceflow spec validate a.b`,
@@ -756,36 +903,21 @@ Check: e2e
   ```
   and exits with code 2.
 
-### Rule `validate-needs-the-worktree`: no worktree, no spec to read
-
-If the slice's worktree is not found, `spec validate` prints to stderr
-"Error: the worktree of slice <name> was not found, so its spec cannot
-be validated. Nothing was changed.", and exits with code 1. It never
-reads the spec from the slice's branch instead.
-Check: e2e
-
-- **Example:** **Given** a slice `login` whose worktree was removed,
-  **When** I run `sliceflow spec validate login`,
-  **Then** sliceflow prints to stderr:
-  ```
-  Error: the worktree of slice login was not found, so its spec cannot be validated. Nothing was changed.
-  ```
-  and exits with code 1.
-
 ### Rule `validate-needs-the-spec`: no spec file, nothing to check
 
-If the worktree has no file `docs/slices/<name>/spec.md`,
+If the user's checkout has the slice's log, but no file
+`docs/slices/<name>/spec.md`,
 `spec validate` prints to stderr "Error: the spec of slice <name> was
 not found at <full path>. Nothing was changed.", then "To start from
 the template, run: sliceflow spec template", and exits with code 1.
 Check: e2e
 
-- **Example:** **Given** a slice `login` whose spec was deleted from its
-  worktree,
+- **Example:** **Given** my checkout `/home/you/projects/shop` has a
+  slice `login` whose spec was deleted,
   **When** I run `sliceflow spec validate login`,
   **Then** sliceflow prints to stderr:
   ```
-  Error: the spec of slice login was not found at /home/you/.sliceflow/worktrees/shop/login/docs/slices/login/spec.md. Nothing was changed.
+  Error: the spec of slice login was not found at /home/you/projects/shop/docs/slices/login/spec.md. Nothing was changed.
   To start from the template, run: sliceflow spec template
   ```
   and exits with code 1.
@@ -794,7 +926,9 @@ Check: e2e
 
 `spec validate` works in every state of the slice, including an unknown
 one. It does not work out the state, so it prints no warning about the
-log.
+log. Like `slice status` (plan-on-base `old-copy-shown-as-is`), it
+prints no warning about an old copy either: it checks the spec as it is
+in the user's checkout.
 Check: e2e
 
 - **Example:** **Given** a slice `login` whose log has a second line
@@ -803,7 +937,7 @@ Check: e2e
   **When** I run `sliceflow spec validate login`,
   **Then** sliceflow prints only:
   ```
-  /home/you/.sliceflow/worktrees/shop/login/docs/slices/login/spec.md: no problems found.
+  /home/you/projects/shop/docs/slices/login/spec.md: no problems found.
   ```
   and exits with code 0.
 
@@ -840,13 +974,15 @@ Uses: damaged-line-skipped, unknown-event, event-not-allowed
 
 When a user runs `sliceflow slice edit <name>` with `--title`,
 `--description`, or both, and a value differs from the slice's current
-one, sliceflow adds one event to the log in the slice's worktree, makes
-no commit, prints "Edited slice <name>.", then the lines
+one, sliceflow adds one event to the log in the user's checkout,
+commits it as in `edit-commits-the-log`, prints "Edited slice <name>.",
+then the lines
 "  Title:        <title>" and "  Description:  <description>" with the
 values the slice has now (the description as (none) when it has none),
 and exits with code 0. A slice's current title and description are the
 ones from its `slice.created` event, changed by each `slice.edited`
-event after it, in order.
+event after it that can be read, in order, even after an event that
+makes the state unknown.
 Check: e2e
 
 - **Example:** **Given** a slice `login` with the title "Log in" and the
@@ -873,7 +1009,10 @@ Check: e2e
 
 The event `slice edit` adds is `slice.edited`. Its data holds `title`
 when the title differs from the current one, and `description` when
-the description differs, and nothing else.
+the description differs, and nothing else. A `slice.edited` line can
+be read only when its data holds `title`, `description`, or both, each
+a string, and no other key (design 1.13); otherwise it is a line that
+cannot be read, as in `damaged-line-skipped`.
 Check: e2e
 
 - **Example:** **Given** a slice `login` with the title "Log in" and the
@@ -918,7 +1057,7 @@ Check: e2e
 ### Rule `edit-needs-an-option`: nothing to edit
 
 If `slice edit` gets neither `--title` nor `--description`, sliceflow
-changes nothing, prints "Error: slice edit needs --title,
+changes nothing, prints to stderr "Error: slice edit needs --title,
 --description, or both. Nothing was changed.", then "To see the
 options, run: sliceflow slice edit --help", and exits with code 2.
 Check: e2e
@@ -931,25 +1070,81 @@ Check: e2e
   ```
   and exits with code 2.
 
-### Rule `edit-needs-the-worktree`: no worktree, no edit
+### Rule `edit-commits-the-log`: one commit of only the log
 
-If the slice's worktree is not found, `slice edit` changes nothing,
-prints "Error: the worktree of slice <name> was not found, so it cannot
-be edited. Nothing was changed.", and exits with code 1.
+`slice edit` makes one commit, on the base branch, of only the slice's
+log, `docs/slices/<name>/.events.jsonl`. Its message is "<name>: edit
+the title", "<name>: edit the description", or "<name>: edit the title
+and description", after what the event holds. The user's other files,
+in the slice's folder too, what is staged, and which branch is checked
+out stay as they were.
 Check: e2e
 
-- **Example:** **Given** a slice `login` whose worktree was removed,
+- **Example:** **Given** a slice `login` on `main`, and my checkout on
+  `main` with changes to `docs/slices/login/spec.md` that are not
+  committed,
   **When** I run `sliceflow slice edit login --title "Sign in"`,
-  **Then** sliceflow prints:
+  **Then** `main` has one new commit, "login: edit the title", that
+  holds only `docs/slices/login/.events.jsonl`, and my changes to
+  `spec.md` are still not committed.
+
+### Rule `edit-on-the-base`: the user's checkout must be on the slice's base branch
+
+If the user's checkout is not on the slice's base branch, the one its
+`slice.created` event names, `slice edit` changes nothing, prints to
+stderr "Error: slice <name> is planned on branch <base>, but your
+checkout is on <branch>. Nothing was changed.", then "Switch to <base>,
+then try again.", and exits with code 1. When the checkout is on no
+branch, the first line is "Error: slice <name> is planned on branch
+<base>, but your checkout is not on a branch. Nothing was changed.".
+Check: e2e
+
+- **Example:** **Given** a slice `login` planned on `dev/bert`, and my
+  checkout on `fix/typo`, which also has the slice's log,
+  **When** I run `sliceflow slice edit login --title "Sign in"`,
+  **Then** sliceflow prints to stderr:
   ```
-  Error: the worktree of slice login was not found, so it cannot be edited. Nothing was changed.
+  Error: slice login is planned on branch dev/bert, but your checkout is on fix/typo. Nothing was changed.
+  Switch to dev/bert, then try again.
   ```
-  and exits with code 1.
+  adds no line to the log, and exits with code 1.
+
+### Rule `edit-undo`: a failed edit leaves the log as it was
+
+If the commit fails, or the user stops `slice edit` with Ctrl+C before
+the commit is made, sliceflow puts the log back as it was: it removes
+the line it added, and takes the log out of git's staging area. It
+prints "Error: git could not make the commit. Nothing was changed.",
+then git's text as in plan-on-base `create-git-step-fails`, or
+"Stopped. Nothing was changed." for Ctrl+C, and exits with code 1. Once
+the commit is made, sliceflow removes nothing, even when the user stops
+it, prints to stderr "Stopped after the commit. Slice <name> was edited
+on branch <base>.", and exits with code 1. When the log cannot be put
+back, the first line does not say "Nothing was changed.", and
+sliceflow prints what is left and how to clean it up, as in
+plan-on-base `create-leftovers`. The leftover lines are
+"  log       <full path>", when the added line is still in the log, and
+"  staged    docs/slices/<name>/.events.jsonl", when the log is still
+staged. The clean-up line, for both, is
+"  run: git -C "<top folder>" restore --staged --worktree -- "docs/slices/<name>/.events.jsonl"".
+Check: e2e
+
+- **Example:** **Given** a git hook that refuses every commit and
+  prints `commit refused`,
+  **When** I run `sliceflow slice edit login --title "Sign in"`,
+  **Then** sliceflow prints to stderr:
+  ```
+  Error: git could not make the commit. Nothing was changed.
+  git said:
+    commit refused
+  ```
+  the log is as it was before, `git status` shows nothing for it, and
+  sliceflow exits with code 1.
 
 ### Rule `no-edit-without-state`: an unknown state blocks an edit
 
 If the state of the slice cannot be worked out, `slice edit` changes
-nothing, prints after the warning "Error: the state of slice <name>
+nothing, prints to stderr, after the warning, "Error: the state of slice <name>
 cannot be worked out, so it cannot be changed. Nothing was changed.",
 then a hint, and exits with code 1. When the state is unknown because
 of an unknown event, the hint is "Update sliceflow, then try again."
@@ -980,7 +1175,13 @@ Check: e2e
 
 `slice edit` reports a title or description with a control character
 exactly as `slice create` does (exit code 2), and an invalid name or a
-name with no slice exactly as `slice status` does (exit codes 2 and 1).
+name with no slice exactly as `slice status` does (exit codes 2 and 1),
+all to stderr. It checks in this order, and stops at the first
+problem: a control character in the title, then in the description;
+no option (`edit-needs-an-option`); the name; the project; the log in
+the user's checkout; the log's first line (slice-and-events/R55); the
+base branch (`edit-on-the-base`); the state (`no-edit-without-state`).
+Only then does it compare the values (`nothing-to-change`).
 Check: e2e
 
 - **Example:** **When** I run `sliceflow slice edit a.b --title "x"`,
@@ -991,10 +1192,54 @@ Check: e2e
   ```
   and exits with code 2.
 
+### Rule `edit-help`: the help of slice edit
+
+`sliceflow slice edit --help` prints the help of the command, in the
+same layout as `sliceflow slice create --help`, and exits with code 0.
+Check: e2e
+
+- **Example:** **When** I run `sliceflow slice edit --help`,
+  **Then** sliceflow prints:
+  ```
+  Change a slice's title, its description, or both, in one commit on its base branch.
+
+  Usage:
+    sliceflow slice edit <name> [options]
+
+  Arguments:
+    <name>  The name of the slice to change.
+
+  Options:
+    --description <text>  The new description. Empty removes it.
+    --title <text>        The new title. Empty sets it back to the name.
+    -h, --help            Show this help.
+  ```
+  and exits with code 0.
+
+### Rule `status-shows-edits`: slice status shows the current title and description
+
+`slice status` shows the slice's current title and description, as in
+`edit-changes-the-slice`, not the ones from `slice.created`. This holds
+when the state is unknown too.
+Check: e2e
+
+- **Example:** **Given** a slice `login` made on `main` with the title
+  "Log in", then edited with `--title "Sign in"`,
+  **When** I run `sliceflow slice status login`,
+  **Then** its first line is `login: Sign in`.
+- **Example:** **Given** a slice `login` made with the title "Log in",
+  whose log has a second line with the event `spec.submitted`, which
+  this version does not know, and a third line with the event
+  `slice.edited` and the data `{"title":"Sign in"}`,
+  **When** I run `sliceflow slice status login`,
+  **Then** its first line is `login: Sign in`, and its State: line is
+  `  State:        unknown`.
+
 ### Rule `list-shows-edits`: slice list shows the current title and description
 
-`slice list` shows each slice's current title and description, after
-every `slice.edited` event in its log.
+`slice list` shows each slice's current title and description, as in
+`edit-changes-the-slice`. It prints no warning about the state, because
+it does not show the state.
 Check: e2e
 
 - **Example:** **Given** a slice `login` made with the title "Log in",
@@ -1030,6 +1275,10 @@ Check: e2e
 - Approval: 0004.
 - How `spec validate` treats a rule or decision marked removed after the first approval.
 - Warnings in `spec validate`, e.g. for a rule with only one example.
+- Marks that sit on top of any phase, e.g. blocked (design 1.4): the
+  state machine of this slice has phases only.
+- An optional slice name in every command, from a bound session
+  (design 1.7): 0003.
 
 ## Decisions
 
@@ -1087,20 +1336,25 @@ Check: e2e
     written.
   Rule: nothing-to-change
 
-- **SD5.** `slice edit` adds its event to the log in the slice's
-  worktree, and makes no commit. If the worktree is not found, it
-  changes nothing, prints "Error: the worktree of slice <name> was not
-  found, so it cannot be edited. Nothing was changed.", and exits with
-  code 1.
-  Why: design 1.13 writes each event to the file at once, and commits
-    the log only when a step ends. Without a worktree there is no file
-    to write to, and changing the branch would need a commit.
-  Not chosen: writing the event to the branch with a commit when the
-    worktree is gone, because `slice edit` would then commit in one
-    case and not in the other.
-  Cost: a slice whose worktree was removed cannot be edited until the
-    worktree is back.
-  Rule: edit-needs-the-worktree
+- **SD5.** `slice edit` adds its event to the log in the user's
+  checkout, and commits only the log, on the slice's base branch. It
+  refuses when the checkout is not on that branch. A failed commit puts
+  the log back as it was.
+  Why: a slice is planned on its base branch, in the user's checkout
+    (plan-on-base). An uncommitted log blocks `git switch` or travels
+    with it, so each command that changes a slice commits once, and
+    the log is never left uncommitted between commands. Only the log
+    is committed, because that is all `slice edit` changed: a spec the
+    user is still writing stays theirs.
+  Not chosen: committing the whole slice folder, because a half-written
+    `spec.md` would end up in a commit named "edit the title"; making
+    no commit, because the log would then block or follow a branch
+    switch; editing on any branch, because two copies of one log would
+    then change apart.
+  Cost: one commit per edit, so a few small commits per slice.
+  Rule: edit-changes-the-slice, edit-commits-the-log, edit-on-the-base, edit-undo
+  Replaces: plan-on-base/SD4 (in part: `slice edit` commits only the
+    log, not the whole slice folder)
 
 - **SD6.** `slice list` reads each slice's whole log, and shows the
   current title and description: the ones from `slice.created`, changed
@@ -1117,16 +1371,17 @@ Check: e2e
   Replaces: slice-and-events/SD16 (only its first part: a damaged line
     after the first still gives no warning in `list`)
 
-- **SD7.** While the worktree is not found, `slice status` prints no
-  next step.
-  Why: the spec cannot be written in a worktree that does not exist,
-    and the Worktree: (not found) line already shows the problem.
-  Not chosen: a next step that says how to bring the worktree back with
-    git, because sliceflow would tell the user to run a git command it
-    does not manage. Bringing a worktree back is a feature of its own,
-    in the backlog.
-  Cost: the user must find out alone how to get the worktree back.
-  Rule: no-next-without-worktree
+- **SD7.** The Next: line of `slice status` names the spec in the
+  user's checkout, the folder the user runs the command in.
+  Why: a slice is planned on its base branch, in the user's own
+    checkout (plan-on-base), so that is where its spec is written. A
+    slice has no worktree while it is planned, and `slice status` reads
+    only the user's checkout, so there is no other place to name.
+  Not chosen: a path relative to the checkout, e.g.
+    `docs/slices/login/spec.md`, because the user may run the command
+    in a subfolder, where that path does not work.
+  Cost: a long line when the checkout is deep in the disk.
+  Rule: state-and-next
 
 - **SD8.** A line of the log that cannot be read is skipped with the
   warning from slice-and-events, and the state is worked out from the
@@ -1170,17 +1425,23 @@ Check: e2e
     sliceflow can read a slice but not change it.
   Rule: no-edit-without-state, validate-in-any-state
 
-- **SD11.** `spec validate` reads the spec in the slice's worktree, and
-  prints its full path.
-  Why: the worktree is where the spec is edited, so the check sees the
-  latest changes, even ones not committed yet. A full path can be
-  clicked in an editor or a terminal, from any folder.
-  Not chosen: reading the last committed spec on the slice's branch,
-  because it misses the changes the person just made; falling back to
-  it when the worktree is gone, because "no problems found" for an old
-  spec looks like the latest edits passed.
-  Cost: with no worktree, there is no spec to read, so it is an error.
-  Rule: spec-has-no-problems, validate-needs-the-worktree
+- **SD11.** `spec validate` reads the spec in the user's checkout, as
+  the file is now, and prints its full path. It gives no warning when
+  the checkout may hold an old copy of the slice.
+  Why: the user's checkout is where the spec is edited while the slice
+  is planned (plan-on-base), so the check sees the latest changes, even
+  ones not committed yet. A full path can be clicked in an editor or a
+  terminal, from any folder. Other spec tools (spec-kit, OpenSpec,
+  spec-kitty) check only the shape of the file they are given, and
+  leave it to the user to know which copy is the latest. `slice status`
+  and `slice list` give no such warning either (plan-on-base SD6).
+  Not chosen: reading the last committed spec on the base branch,
+  because it misses the changes the person just made; a warning when
+  the checkout may hold an old copy, because it makes a shape check
+  depend on branches, and no other tool does it.
+  Cost: "no problems found" for an old copy of a spec can look like the
+  latest version passed.
+  Rule: spec-has-no-problems, validate-in-any-state
 
 - **SD12.** `spec validate` prints every problem it finds, each as a
   line `<path>:<line>: error: <what is wrong>` and an indented hint on
@@ -1234,11 +1495,14 @@ Check: e2e
   Rule: spec-needs-a-story
 
 - **SD16.** A spec may have sections that are not in the template,
-  e.g. `## Notes`. A rule inside such a section is an error.
+  e.g. `## Notes`. A rule in any section that is not a story or Shared
+  rules is an error, and so is a rule before the first section.
   Why: no code reads extra sections, so they break nothing. But a story
   with a typo in its heading, e.g. `## Stroy 2`, becomes an unknown
   section, and its rules would be lost from the plan and the review.
-  It still has rules under it, so the error catches it.
+  It still has rules under it, so the error catches it. The same holds
+  for a rule put under a template section such as `## Out of scope` by
+  mistake: no story owns it, so it would never be built.
   Not chosen: allowing extra sections with no check, because a typo
   hides rules; allowing no extra sections, because they do no harm.
   Cost: a person who wants rules in a section of their own must make
@@ -1334,17 +1598,23 @@ Check: e2e
   that breaks each time the template changes; no check, because some
   leftovers would pass.
   Cost: a spec that means the characters `{{` in plain text must put
-  them in backticks.
+  them in backticks. A placeholder left inside a code block passes, so
+  the template puts none of its placeholders in a code block: its
+  example output is the placeholder "the exact output, in a code
+  block", outside one.
   Rule: placeholder-left
 
 - **SD25.** An HTML comment (`<!-- ... -->`) outside backticks and
   code blocks is an error, one per comment, on the line where it
-  starts. A placeholder inside a comment is not reported again.
+  starts. No other check reads the text inside a comment, and inside a
+  comment, three backticks do not start a code block.
   Why: a comment is hidden when the Markdown is shown, but an agent
   reads the raw file. So a comment can give an agent an instruction
   the human never sees. A finished spec has no hidden text, so the
   template's guidance comments are deleted before the spec is
-  submitted.
+  submitted. Skipping the inside means a leftover comment gives one
+  problem, not a pile of false ones from the example lines that the
+  template's comments hold, e.g. a second `## Story 1`.
   Not chosen: allowing comments and skipping what is inside them,
   because the hidden text would still reach the agent.
   Cost: notes to oneself while writing must be deleted, or written as
@@ -1398,7 +1668,7 @@ Check: e2e
   deleted.
   Rule: decisions-numbered-in-order
 
-- **SD30.** The four stories stay in one slice, with 50 rules, far
+- **SD30.** The four stories stay in one slice, with 56 rules, far
   more than the template's limit of about 25-30.
   Why: the human's choice.
   Not chosen: moving Story 3 (`spec validate`) into a slice of its own;
@@ -1419,7 +1689,7 @@ Check: e2e
 
 - **SD32.** The problems in a spec, the count line, and "no problems
   found" go to stdout. An error that stops `spec validate` from reading
-  the spec, e.g. no slice or no worktree, goes to stderr, as in every
+  the spec, e.g. no slice or no spec file, goes to stderr, as in every
   other command.
   Why: the problems are the result that was asked for, not a failure of
   sliceflow, so a script or an agent can save them with `>`. When the
@@ -1449,6 +1719,140 @@ Check: e2e
   nothing breaks when it does not.
   Cost: a wrong `slice:` or `created:` passes.
   Rule: none
+
+- **SD35.** Backticks that mark code in a line end on the same line, at
+  the next run of the same number of backticks. A run with no partner
+  on its line is plain text.
+  Why: one stray backtick, e.g. in text about code fences, cannot then
+  hide the rest of the spec from every check. The rule is short enough
+  to explain in one line of a hint.
+  Not chosen: full Markdown (CommonMark), where code can run across
+  lines, because it is harder to build and to explain, and one stray
+  backtick could hide many lines.
+  Cost: code that really runs across lines in plain text is checked as
+  text, so a `{{` in it is reported. The writer puts such code in a
+  code block instead.
+  Rule: code-blocks-skipped
+
+- **SD36.** `slice status` and `slice list` show a slice's current title
+  and description: the ones from `slice.created`, changed by each
+  readable `slice.edited` after it, in order. They follow every such
+  event, even after an event that makes the state unknown.
+  Why: after `slice edit`, both commands must show the new title, or
+    they would disagree with what the user just did. The title and the
+    description have nothing to do with the state, so an event that
+    stops the state from being worked out does not stop them. A newer
+    sliceflow wrote that `slice.edited` on purpose.
+  Not chosen: stopping at the same line as the state, because it shows
+    a title the user already changed.
+  Cost: `slice status` reads the whole log to the end, even when the
+    state stops early. Logs are small, so this is cheap.
+  Rule: edit-changes-the-slice, status-shows-edits, list-shows-edits
+  Replaces: plan-on-base/status-lines (in part: the title and the
+    description no longer come only from `slice.created`)
+
+- **SD37.** When a command prints both the warning for lines that
+  cannot be read and a warning about the state, the lines warning
+  comes first, whatever the line numbers.
+  Why: the lines warning is one message for many lines (as in
+    slice-and-events/R53), so it has no single place in line order. A
+    fixed order is one sentence to explain and to test.
+  Not chosen: line order, with each warning placed by the first line it
+    names, as Go's parser and most linters sort their messages, because
+    the combined warning would still break that order, e.g. lines 2
+    and 5 printed before line 3.
+  Cost: when every bad line comes after the event that stops the state,
+    the warnings are not in line order.
+  Rule: damaged-line-skipped
+
+- **SD38.** A template section that is not a story is found only by
+  its exact heading. A heading that matches one when capital letters
+  are ignored is an error, and so is a template section written twice.
+  Why: with an exact match only, `## Open Questions` would be an
+  unknown section with no rules, so its open questions would pass
+  silently, and the check for them would miss the mistake it exists
+  for. A second copy of a section would be read by no check, or by
+  only some.
+  Not chosen: an exact match with no other check, for the reason
+  above; ignoring capital letters when finding a section, because then
+  two spellings of one heading would both work, and specs would drift
+  apart.
+  Cost: two more problems to build and test.
+  Rule: section-heading-exact
+
+- **SD39.** Problems on the same line come in the order of their rules
+  in Story 3. A rule with no example that is also the first rule of its
+  story gives one problem, the one about the first rule.
+  Why: the output must be the same on every run, so a test can compare
+    it, and the order of the rules is fixed and easy to look up. Go's
+    parser also orders by position first, then by a fixed tie-breaker.
+    Two messages for one missing example would both ask for the same
+    fix.
+  Not chosen: alphabetical by message, because it changes when a
+    message is reworded; both messages for a missing example, because
+    it is noise.
+  Cost: moving a rule in Story 3 changes the order of the output.
+  Rule: problems-listed, rule-needs-an-example
+
+- **SD40.** A `##` heading whose first word is `Story`, or a `###`
+  heading whose first word is `Rule`, is a story or a rule even when its
+  shape is wrong. It gets one problem for its shape, and nothing more.
+  Why: one typo in a heading should give one problem. Otherwise its
+  rules would also be "not in a story", and the stories after it would
+  be numbered wrong. A first word, not the start of the heading, keeps
+  `## Storyboard` and `### Rules of thumb` out.
+  Not chosen: treating a wrong heading as an unknown section, because
+  one typo would give many problems that all point away from it.
+  Cost: a section that really is not a story, but whose first word is
+  `Story`, must be renamed.
+  Rule: story-heading-shape, rule-heading-shape, stories-numbered-in-order
+
+- **SD41.** A line with a placeholder left gets only the placeholder
+  problem. An example with neither **When** nor **Then** gets two
+  problems, **When** first.
+  Why: a placeholder makes the other checks of its line report text
+    that is not real, e.g. a `Check:` value `{{unit`. Once the
+    placeholder is replaced, the next run shows any real problem. The
+    two problems of an example each have their own hint, in the order
+    an example is read.
+  Not chosen: every problem of the line, because the extra ones point
+    at text the writer never wrote; one combined problem for an
+    example, because it needs a third message.
+  Cost: a real mistake on a line with a placeholder shows only after
+    the placeholder is fixed.
+  Rule: placeholder-left, example-has-when-then
+
+- **SD42.** How `spec validate` reads lines: `Check:` and `Uses:` at
+  the first column, a decision's `Rule:` after two spaces, each on one
+  line; an example ends at the next line that is not blank and starts
+  at the first column; `\r\n` line ends and a byte order mark are
+  accepted. `slice edit` checks in a fixed order, like `slice create`,
+  and a `slice.edited` line with other keys or values that are not
+  strings cannot be read.
+  Why: these settle what a builder would otherwise guess, in the
+    simplest way that reads this spec and the template right. Windows
+    editors save `\r\n` and sometimes a byte order mark (AGENTS.md:
+    line ends work on every system). Design 1.13 refuses unknown keys.
+  Not chosen: values that go on to the next line, because a parser
+    then needs a rule for where they stop.
+  Cost: a `Uses:` list too long for one line must stay on one line.
+  Rule: spec-lines-read, edit-errors-as-before, edited-event
+
+- **SD43.** Small forms that break nothing are accepted: an empty
+  `Check:` value after a final comma, and `None` in Open questions with
+  any capital letters and a final period. Forms that hide a mistake are
+  errors: a `Check:` value with capital letters, a second `Uses:` line,
+  an empty Open questions section, and a decision or a question item
+  in the wrong shape.
+  Why: a check refuses a form only when allowing it would let a
+    mistake through, e.g. a decision written `- SD5.` would skip the
+    numbering and `Rule:` checks with no word.
+  Not chosen: exact forms everywhere, because a writer would fix
+    harmless typing; any form everywhere, because some forms hide
+    mistakes.
+  Cost: two more problems to build, for the second `Uses:` line and
+    the item shape.
+  Rule: check-values, story-needs-uses, open-questions-left, item-shape
 
 ## Open questions
 
