@@ -1,7 +1,9 @@
 package slice
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -176,32 +178,78 @@ func editMessage(name string, edited eventlog.SliceEdited) string {
 
 // editSteps returns the one step of Edit: append edited to the log at
 // logFile, in the checkout whose top folder is top, under the lock at
-// lockPath. Its Undo cuts the log back to the
-// size it has now, which removes the line the step added, and the line
-// break it may have added before it. The Undo never makes the log longer.
+// lockPath.
+//
+// Its Undo removes the line the step added, and the line break it may
+// have added before it, by cutting the log back to the size it has now.
+// It cuts only when what follows that size is exactly one line, the
+// event this step wrote. When the lock was never taken, Append wrote
+// nothing, so the Undo does nothing. When anything else follows, e.g. a
+// line another process added under the lock, the Undo cuts nothing and
+// fails, so the log is reported as left over: it never removes a line
+// that is not its own, and never makes the log longer.
 func editSteps(top, logFile, lockPath string, edited eventlog.SliceEdited) ([]Step, error) {
 	info, err := os.Stat(logFile)
 	if err != nil {
 		return nil, err
 	}
 	size := info.Size()
+	locked := false
 	return []Step{{
 		Name: "write " + logFile,
 		Do: func(ctx context.Context) error {
-			return eventlog.Append(ctx, logFile, lockPath, eventlog.SliceEditedEvent, edited)
+			err := eventlog.Append(ctx, logFile, lockPath, eventlog.SliceEditedEvent, edited)
+			var lockErr *eventlog.LockError
+			locked = !errors.As(err, &lockErr)
+			return err
 		},
 		Undo: func() error {
-			info, err := os.Stat(logFile)
+			if !locked {
+				return nil
+			}
+			data, err := os.ReadFile(logFile)
 			if err != nil {
 				return err
 			}
-			if info.Size() <= size {
-				return nil // nothing was added: a cut must never make the log longer
+			if int64(len(data)) <= size {
+				return nil
+			}
+			if !onlyOurLine(data[size:], edited) {
+				return errNotOurLine
 			}
 			return os.Truncate(logFile, size)
 		},
 		Left: Leftover{Kind: "log", Name: logFile, Top: top},
 	}}, nil
+}
+
+// errNotOurLine is the Undo's error when the log holds more than the one
+// line the step added, so it cannot be cut back safely.
+var errNotOurLine = errors.New("slice: the log holds lines that this edit did not add")
+
+// onlyOurLine reports whether tail, what follows the log's old size, is
+// one whole line, after the line break Append may add first, holding a
+// slice.edited event with exactly the data edited.
+func onlyOurLine(tail []byte, edited eventlog.SliceEdited) bool {
+	tail = bytes.TrimPrefix(tail, []byte("\n"))
+	if bytes.Count(tail, []byte("\n")) != 1 || !bytes.HasSuffix(tail, []byte("\n")) {
+		return false
+	}
+	events, bad, err := eventlog.ReadFrom(bytes.NewReader(tail))
+	if err != nil || len(bad) != 0 || len(events) != 1 || events[0].Event != eventlog.SliceEditedEvent {
+		return false
+	}
+	got, ok := events[0].Payload.(eventlog.SliceEdited)
+	return ok && sameText(got.Title, edited.Title) && sameText(got.Description, edited.Description)
+}
+
+// sameText reports whether a and b are both nil, or point to the same
+// text.
+func sameText(a, b *string) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return *a == *b
 }
 
 // editCommitFailed returns the error of Edit when the commit of the log

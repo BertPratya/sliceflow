@@ -204,7 +204,10 @@ None
   some 60 files by 0006 (backlog row, 2026-11-23); putting the shared
   part in `internal/cli` itself, because Go refuses the import cycle.
   Cost: the types and helpers that groups share become exported, e.g.
-  `command.PrintFailure`.
+  `command.PrintFailure`. `speccmd` prints the errors of finding a slice
+  with `slicecmd.PrintSliceError`, so `spec validate` gives exactly the
+  messages of `slice status`; moving that printer into `command` is left
+  for when a third group needs it.
 
 - **TD2.** The state machine is its own package, `internal/state`, that
   knows only events and states. It reads no file and runs no git. The
@@ -260,17 +263,26 @@ None
 
 - **TD5.** `slice edit`'s undo cuts the log back to the size it had
   before the event was added, then unstages the log. It reuses
-  `runSteps` and the "was the commit made" check of `create`.
-  `CommittedError` gets the word for what was done ("created" or
-  "edited"), so one message form serves both commands.
+  `runSteps`, and checks whether the commit was made by whether the base
+  branch moved. `CommittedError` gets the word for what was done
+  ("created" or "edited"), so one message form serves both commands.
+  The undo cuts only when what follows the old size is exactly the one
+  line it wrote; when the lock was never taken, `Append` wrote nothing,
+  so it cuts nothing. When anything else follows, it cuts nothing, and
+  the log is reported as left over, with the command that restores it.
   Why: the log is only ever added to, so its old size is exactly where
-  the new line starts. Reusing the steps keeps one undo pattern.
+  the new line starts. Reusing the steps keeps one undo pattern. The
+  old size is read before the lock is taken, so another process may
+  append while `edit` waits; checking the tail keeps the undo from ever
+  removing a line that is not its own.
   Not chosen: restoring the log from git (`git restore`), because it
   would also throw away a line another process added under the lock in
-  the meantime.
-  Cost: when another process appends after `edit` and before its
-  commit fails, cutting back removes that line too. The lock makes this
-  rare: `edit` holds it only while it appends.
+  the meantime; reading the size under the lock, because it needs a
+  change to `eventlog.Append`, the event log's core.
+  Cost: when another process appends during an edit that then fails,
+  the edit's line is not removed: the user runs the printed command. The
+  "commit was made" check counts any move of the base branch, e.g. a
+  hook that commits too, as the edit's commit.
 
 ## Risks and rollout
 
