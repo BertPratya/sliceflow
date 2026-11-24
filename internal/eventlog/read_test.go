@@ -295,3 +295,150 @@ func TestReadCreatedMissingAField(t *testing.T) {
 		})
 	}
 }
+
+// editedLine is a slice.edited line on line 2, with data as its data.
+func editedLine(data string) string {
+	return `{"version":1,"seq":2,"event":"slice.edited","at":"2026-11-02T10:00:00Z","data":` + data + `}`
+}
+
+// Test 14: a slice.created line is read with its data decoded into a
+// SliceCreated, with every field.
+func TestReadCreatedPayload(t *testing.T) {
+	events, bad := readLog(t, createdLine+"\n")
+	if len(bad) != 0 || len(events) != 1 {
+		t.Fatalf("got %d events and bad lines %v, want 1 event and none", len(events), badLineNumbers(bad))
+	}
+
+	got, ok := events[0].Payload.(eventlog.SliceCreated)
+	if !ok {
+		t.Fatalf("Payload is %T, want eventlog.SliceCreated", events[0].Payload)
+	}
+	want := eventlog.SliceCreated{
+		Name:        "login",
+		Title:       "Log in",
+		Description: "",
+		Base:        "main",
+		BaseCommit:  "3f9a1c2e8b7d4a6f0c1e5d9b2a7f3c8e4d6b1a09",
+	}
+	if got != want {
+		t.Errorf("Payload is %+v, want %+v", got, want)
+	}
+}
+
+// Test 15: a slice.edited line is read with its data decoded into a
+// SliceEdited. A field the event does not hold is nil, and a field set
+// to "" is not nil, so "not changed" and "changed to empty" differ.
+func TestReadEditedPayload(t *testing.T) {
+	tests := []struct {
+		name            string
+		data            string
+		wantTitle       *string
+		wantDescription *string
+	}{
+		{"title only", `{"title":"Sign in"}`, ptr("Sign in"), nil},
+		{"description only", `{"description":"Lets a user sign in."}`, nil, ptr("Lets a user sign in.")},
+		{"both", `{"title":"Sign in","description":"Lets a user sign in."}`, ptr("Sign in"), ptr("Lets a user sign in.")},
+		{"description set to empty", `{"description":""}`, nil, ptr("")},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			events, bad := readLog(t, createdLine+"\n"+editedLine(tt.data)+"\n")
+			if len(bad) != 0 || len(events) != 2 {
+				t.Fatalf("got %d events and bad lines %v, want 2 events and none", len(events), badLineNumbers(bad))
+			}
+
+			got, ok := events[1].Payload.(eventlog.SliceEdited)
+			if !ok {
+				t.Fatalf("Payload is %T, want eventlog.SliceEdited", events[1].Payload)
+			}
+			if !samePtr(got.Title, tt.wantTitle) {
+				t.Errorf("Title is %s, want %s", show(got.Title), show(tt.wantTitle))
+			}
+			if !samePtr(got.Description, tt.wantDescription) {
+				t.Errorf("Description is %s, want %s", show(got.Description), show(tt.wantDescription))
+			}
+		})
+	}
+}
+
+// Test 16: a slice.edited line is bad when its data holds neither
+// field, a field that is not a string, or any other key.
+func TestReadEditedBadData(t *testing.T) {
+	tests := []struct {
+		name string
+		data string
+	}{
+		{"no field", `{}`},
+		{"title is null", `{"title":null}`},
+		{"title is a number", `{"title":5}`},
+		{"description is null", `{"description":null}`},
+		{"description is an object", `{"description":{}}`},
+		{"another key", `{"title":"Sign in","base":"main"}`},
+		{"only another key", `{"base":"main"}`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			events, bad := readLog(t, createdLine+"\n"+editedLine(tt.data)+"\n")
+
+			if len(events) != 1 {
+				t.Errorf("got %d events, want 1 (only slice.created)", len(events))
+			}
+			if len(bad) != 1 || bad[0].Line != 2 || bad[0].Err == nil {
+				t.Fatalf("bad lines: %v, want [2] with a reason", badLineNumbers(bad))
+			}
+		})
+	}
+}
+
+// Test 17: an event this version does not know is read, with its data
+// kept and no Payload.
+func TestReadUnknownEventHasNoPayload(t *testing.T) {
+	events, bad := readLog(t, createdLine+"\n"+eventLine(2, "spec.submitted")+"\n")
+	if len(bad) != 0 || len(events) != 2 {
+		t.Fatalf("got %d events and bad lines %v, want 2 events and none", len(events), badLineNumbers(bad))
+	}
+	if events[1].Payload != nil {
+		t.Errorf("Payload is %#v, want nil", events[1].Payload)
+	}
+	if string(events[1].Data) != "{}" {
+		t.Errorf("Data is %s, want {}", events[1].Data)
+	}
+}
+
+// ptr returns a pointer to s.
+func ptr(s string) *string { return &s }
+
+// samePtr reports whether a and b are both nil, or both point to the
+// same text.
+func samePtr(a, b *string) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return *a == *b
+}
+
+// show writes p for a test message: nil, or the text in quotes.
+func show(p *string) string {
+	if p == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("%q", *p)
+}
+
+// Test 18: each event has the number of the line it was read from, which
+// differs from its seq when a line before it was skipped.
+func TestReadEventsHaveTheirLineNumbers(t *testing.T) {
+	content := createdLine + "\n" + "not json\n" + eventLine(2, "spec.submitted") + "\n"
+
+	events, bad := readLog(t, content)
+
+	if len(events) != 2 || len(bad) != 1 {
+		t.Fatalf("got %d events and bad lines %v, want 2 events and [2]", len(events), badLineNumbers(bad))
+	}
+	if events[0].Line != 1 {
+		t.Errorf("first event has Line %d, want 1", events[0].Line)
+	}
+	if events[1].Line != 3 || events[1].Seq != 2 {
+		t.Errorf("second event has Line %d and Seq %d, want Line 3 and Seq 2", events[1].Line, events[1].Seq)
+	}
+}

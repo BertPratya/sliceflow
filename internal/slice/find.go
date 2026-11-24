@@ -3,7 +3,6 @@ package slice
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"io/fs"
 	"os"
@@ -61,7 +60,8 @@ func readCreated(data []byte) (created eventlog.SliceCreated, at string, events 
 	if len(events) == 0 || firstIsBad || events[0].Event != eventlog.SliceCreatedEvent {
 		return created, "", events, bad, false, nil
 	}
-	if err := json.Unmarshal(events[0].Data, &created); err != nil {
+	created, ok = events[0].Payload.(eventlog.SliceCreated)
+	if !ok {
 		return created, "", events, bad, false, nil
 	}
 	return created, events[0].At, events, bad, true, nil

@@ -39,7 +39,7 @@ type BadLine struct {
 //  6. data is missing, or is not an object.
 //  7. at is not written exactly like timeLayout: UTC, to the second.
 //
-// It does not check the fields inside data; see validateEvent.
+// It does not check the fields inside data; see decodeEvent.
 func jsonlLineToEvent(line []byte) (Event, error) {
 	var r rawEvent
 
@@ -75,24 +75,24 @@ func jsonlLineToEvent(line []byte) (Event, error) {
 
 }
 
-// validationRouter maps an event name to the function that checks its
-// data. An event with no entry has no extra checks.
-var validationRouter = map[string]func(json.RawMessage) error{
-	SliceCreatedEvent: validateSliceCreated,
+// decoders maps an event name to the function that checks its data and
+// decodes it into the event's own type. An event with no entry is not
+// decoded.
+var decoders = map[string]func(json.RawMessage) (any, error){
+	SliceCreatedEvent: decodeSliceCreated,
+	SliceEditedEvent:  decodeSliceEdited,
 }
 
-// validateEvent checks the data of one event, with the function that
-// validationRouter has for its name. An event name that is not in
-// validationRouter is not an error: a newer sliceflow may have written
-// it.
-func validateEvent(event string, data json.RawMessage) error {
-	check, ok := validationRouter[event]
+// decodeEvent checks the data of one event and decodes it, with the
+// function that decoders has for its name. For an event name that is
+// not in decoders it returns nil and no error: a newer sliceflow may
+// have written it.
+func decodeEvent(event string, data json.RawMessage) (any, error) {
+	decode, ok := decoders[event]
 	if !ok {
-		return nil
+		return nil, nil
 	}
-
-	return check(data)
-
+	return decode(data)
 }
 
 // Read reads the log at path. It returns the readable lines as events, in
@@ -136,7 +136,9 @@ func ReadFrom(r io.Reader) ([]Event, []BadLine, error) {
 			continue
 		}
 
-		if err = validateEvent(event.Event, event.Data); err != nil {
+		event.Line = c
+		event.Payload, err = decodeEvent(event.Event, event.Data)
+		if err != nil {
 			badLine := BadLine{Line: c, Err: err}
 			badLines = append(badLines, badLine)
 			continue
