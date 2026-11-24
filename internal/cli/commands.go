@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/BertPratya/sliceflow/internal/cli/command"
 	"github.com/BertPratya/sliceflow/internal/cli/slicecmd"
+	"github.com/BertPratya/sliceflow/internal/cli/speccmd"
 )
 
 // CommandRegistry is the command table: every command group by name.
@@ -16,5 +17,6 @@ type CommandRegistry struct {
 var commands = CommandRegistry{
 	Groups: map[string]command.Group{
 		"slice": slicecmd.Group,
+		"spec":  speccmd.Group,
 	},
 }

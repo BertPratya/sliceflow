@@ -15,6 +15,7 @@ Usage:
 
 Commands:
   slice  Make and see slices
+  spec   Print the spec template, and find problems in specs
 
 Options:
   -h, --help  Show this help.
