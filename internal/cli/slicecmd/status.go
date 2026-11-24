@@ -1,4 +1,4 @@
-package cli
+package slicecmd
 
 import (
 	"context"
@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/BertPratya/sliceflow/internal/cli/command"
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
 
@@ -18,17 +18,17 @@ import (
 // that cannot be read are named in a warning first, on stderr. When the slice
 // cannot be shown, it prints why, and returns 2 for a name that cannot
 // be used, or 1 for any other failure.
-func runSliceStatus(ctx context.Context, in input, stdout, stderr io.Writer) int {
+func runSliceStatus(ctx context.Context, in command.Input, stdout, stderr io.Writer) int {
 	dir, err := os.Getwd()
 	if err != nil {
-		printFailure(stderr, "find the current folder", err, nothingChanged)
+		command.PrintFailure(stderr, "find the current folder", err, command.NothingChanged)
 		return 1
 	}
-	status, err := slice.Status(ctx, dir, in.args["name"])
+	status, err := slice.Status(ctx, dir, in.Args["name"])
 	if err != nil {
 		return printSliceError(stderr, err)
 	}
-	printBadLines(stderr, status.LogPath, status.BadLines)
+	command.PrintBadLines(stderr, status.LogPath, status.BadLines)
 	fmt.Fprint(stdout, statusText(status))
 	return 0
 }
@@ -54,29 +54,6 @@ func statusText(s slice.StatusResult) string {
 	return b.String()
 }
 
-// printBadLines prints one warning that names the lines of the log at
-// path that could not be read, the first 10 of them at most. It prints
-// nothing when there are none.
-func printBadLines(w io.Writer, path string, lines []int) {
-	switch {
-	case len(lines) == 0:
-		return
-	case len(lines) == 1:
-		fmt.Fprintf(w, oneBadLineWarning, lines[0], path)
-		return
-	}
-	shown := lines[:min(len(lines), 10)]
-	numbers := make([]string, len(shown))
-	for i, line := range shown {
-		numbers[i] = strconv.Itoa(line)
-	}
-	list := strings.Join(numbers, ", ")
-	if len(lines) > 10 {
-		list += fmt.Sprintf(moreBadLines, len(lines)-10)
-	}
-	fmt.Fprintf(w, badLinesWarning, list, path)
-}
-
 // printSliceError prints the message for err, an error of slice.Status,
 // slice.List, or slice.Create, and returns the exit code.
 func printSliceError(w io.Writer, err error) int {
@@ -94,7 +71,7 @@ func printSliceError(w io.Writer, err error) int {
 		}
 		return 1
 	case errors.As(err, &noEvent):
-		printBadLines(w, noEvent.LogPath, noEvent.BadLines)
+		command.PrintBadLines(w, noEvent.LogPath, noEvent.BadLines)
 		fmt.Fprintf(w, noCreatedEventLines, noEvent.Name)
 		return 1
 	}

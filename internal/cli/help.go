@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/BertPratya/sliceflow/internal/cli/command"
 	"maps"
 	"slices"
 	"strings"
@@ -36,7 +37,7 @@ func guideText(registry CommandRegistry) string {
 // sliceflow slice --help shows: the group's description, its usage line,
 // one line for each of its commands in alphabetical order, with their
 // arguments, and the help option.
-func groupHelpText(name string, group CommandGroup) string {
+func groupHelpText(name string, group command.Group) string {
 	var rows []row
 	for _, actionName := range slices.Sorted(maps.Keys(group.Actions)) {
 		action := group.Actions[actionName]
@@ -57,7 +58,7 @@ func groupHelpText(name string, group CommandGroup) string {
 // argsUsage returns the arguments of a command as they appear in a usage
 // line, each after a space, e.g. " <name>". It returns "" for a command
 // with no arguments.
-func argsUsage(args []CommandArg) string {
+func argsUsage(args []command.Arg) string {
 	var b strings.Builder
 	for _, arg := range args {
 		b.WriteString(" ")
@@ -68,7 +69,7 @@ func argsUsage(args []CommandArg) string {
 
 // argUsage returns one argument as it appears in help: <name> when it is
 // required, [name] when it is not.
-func argUsage(arg CommandArg) string {
+func argUsage(arg command.Arg) string {
 	if arg.Required {
 		return "<" + arg.Name + ">"
 	}
@@ -91,7 +92,7 @@ func writeRows(b *strings.Builder, rows []row) {
 // sliceflow slice create --help shows: its long description, its usage
 // line, its arguments in their order on the command line, when it has
 // any, and its options in alphabetical order, with -h, --help last.
-func commandHelpText(groupName, actionName string, action CommandAction) string {
+func commandHelpText(groupName, actionName string, action command.Action) string {
 	var rows []row
 	for _, name := range slices.Sorted(maps.Keys(action.Options)) {
 		rows = append(rows, row{optionUsage(name, action.Options[name]), action.Options[name].Description})
@@ -114,7 +115,7 @@ func commandHelpText(groupName, actionName string, action CommandAction) string 
 
 // optionUsage returns an option as it appears in help: --name, then
 // <value> when the option takes a value, e.g. --title <text>.
-func optionUsage(name string, option CommandOption) string {
+func optionUsage(name string, option command.Option) string {
 	if option.ValueName == "" {
 		return "--" + name
 	}
@@ -123,7 +124,7 @@ func optionUsage(name string, option CommandOption) string {
 
 // argRows returns one help row for each argument, in their order on the
 // command line: <name> or [name], and its description.
-func argRows(args []CommandArg) []row {
+func argRows(args []command.Arg) []row {
 	var rows []row
 	for _, arg := range args {
 		rows = append(rows, row{argUsage(arg), arg.Description})
@@ -133,6 +134,6 @@ func argRows(args []CommandArg) []row {
 
 // usageLine returns how a command is typed, e.g.
 // "sliceflow slice create <name> [options]". Help and some errors show it.
-func usageLine(groupName, actionName string, action CommandAction) string {
+func usageLine(groupName, actionName string, action command.Action) string {
 	return "sliceflow " + groupName + " " + actionName + argsUsage(action.Args) + " [options]"
 }

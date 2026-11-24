@@ -1,13 +1,16 @@
 package cli
 
-import "strings"
+import (
+	"github.com/BertPratya/sliceflow/internal/cli/command"
+	"strings"
+)
 
 // found is what resolveCommand finds in the words of a command line.
 type found struct {
 	groupName  string
-	group      CommandGroup
+	group      command.Group
 	actionName string // "" when the words name only a group
-	action     CommandAction
+	action     command.Action
 	rest       []string // the words after the command words
 }
 

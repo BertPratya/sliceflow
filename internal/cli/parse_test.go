@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"github.com/BertPratya/sliceflow/internal/cli/slicecmd"
 	"maps"
 	"testing"
 )
@@ -11,9 +12,9 @@ import (
 func sliceCommand(actionName string, words ...string) found {
 	return found{
 		groupName:  "slice",
-		group:      sliceGroup,
+		group:      slicecmd.Group,
 		actionName: actionName,
-		action:     sliceGroup.Actions[actionName],
+		action:     slicecmd.Group.Actions[actionName],
 		rest:       words,
 	}
 }
@@ -55,11 +56,11 @@ func TestParseWordsWorks(t *testing.T) {
 			if err != nil {
 				t.Fatalf("parseWords(%q) returned the error %v, want none", words, err)
 			}
-			if !maps.Equal(got.args, tt.wantArgs) {
-				t.Errorf("parseWords(%q) gave the arguments %v, want %v", words, got.args, tt.wantArgs)
+			if !maps.Equal(got.Args, tt.wantArgs) {
+				t.Errorf("parseWords(%q) gave the arguments %v, want %v", words, got.Args, tt.wantArgs)
 			}
-			if !maps.Equal(got.options, tt.wantOptions) {
-				t.Errorf("parseWords(%q) gave the options %v, want %v", words, got.options, tt.wantOptions)
+			if !maps.Equal(got.Options, tt.wantOptions) {
+				t.Errorf("parseWords(%q) gave the options %v, want %v", words, got.Options, tt.wantOptions)
 			}
 		})
 	}

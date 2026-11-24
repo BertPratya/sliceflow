@@ -1,4 +1,4 @@
-package cli
+package slicecmd
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/BertPratya/sliceflow/internal/cli/command"
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
 
@@ -15,10 +16,10 @@ import (
 // folder in a table, and returns 0. A name that looked like a slice but
 // is not listed gets a warning first, on stderr. When the project cannot be
 // read, it prints why, and returns 1.
-func runSliceList(ctx context.Context, in input, stdout, stderr io.Writer) int {
+func runSliceList(ctx context.Context, in command.Input, stdout, stderr io.Writer) int {
 	dir, err := os.Getwd()
 	if err != nil {
-		printFailure(stderr, "find the current folder", err, nothingChanged)
+		command.PrintFailure(stderr, "find the current folder", err, command.NothingChanged)
 		return 1
 	}
 	list, err := slice.List(ctx, dir)

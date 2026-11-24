@@ -1,4 +1,4 @@
-package cli
+package slicecmd
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/BertPratya/sliceflow/internal/cli/command"
 	"github.com/BertPratya/sliceflow/internal/eventlog"
 	"github.com/BertPratya/sliceflow/internal/git"
 	"github.com/BertPratya/sliceflow/internal/slice"
@@ -39,8 +40,8 @@ func printCreateError(w io.Writer, err error) int {
 		return 2
 	case errors.As(err, &step):
 		printStepError(w, step)
-	case isStop(err):
-		fmt.Fprintf(w, stoppedLine, notCreated+nothingChanged)
+	case command.IsStop(err):
+		fmt.Fprintf(w, stoppedLine, notCreated+command.NothingChanged)
 	case errors.Is(err, git.ErrNotFound):
 		fmt.Fprint(w, gitNotFoundLines)
 	case errors.Is(err, slice.ErrNoCommits):
@@ -69,7 +70,7 @@ func printCreateError(w io.Writer, err error) int {
 			fmt.Fprintf(w, branchTakenLine, taken.Name, taken.Name)
 		}
 	case errors.As(err, &check):
-		printFailure(w, check.Check, check.Err, nothingChanged)
+		command.PrintFailure(w, check.Check, check.Err, command.NothingChanged)
 	default:
 		fmt.Fprintf(w, "Error: %v\n", err)
 	}
@@ -84,17 +85,17 @@ func printCreateError(w io.Writer, err error) int {
 func printStepError(w io.Writer, step *slice.StepError) {
 	ending := notCreated
 	if len(step.Left) == 0 {
-		ending += nothingChanged
+		ending += command.NothingChanged
 	}
 	what := step.Step
 	var lockErr *eventlog.LockError
 	if errors.As(step.Err, &lockErr) {
 		what = "write " + lockErr.Path
 	}
-	if isStop(step.Err) {
+	if command.IsStop(step.Err) {
 		fmt.Fprintf(w, stoppedLine, ending)
 	} else {
-		printFailure(w, what, step.Err, ending)
+		command.PrintFailure(w, what, step.Err, ending)
 	}
 	printLeftovers(w, step.Left)
 }
@@ -102,11 +103,11 @@ func printStepError(w io.Writer, step *slice.StepError) {
 // printCommittedError prints the message for a slice whose commit was
 // made, but git or the user stopped it afterwards: the slice exists.
 func printCommittedError(w io.Writer, done *slice.CommittedError) {
-	if isStop(done.Err) {
+	if command.IsStop(done.Err) {
 		fmt.Fprintf(w, stoppedAfterLine, done.Name, done.Base)
 		return
 	}
-	printFailure(w, "finish the commit", done.Err, fmt.Sprintf(createdAnyway, done.Name, done.Base))
+	command.PrintFailure(w, "finish the commit", done.Err, fmt.Sprintf(createdAnyway, done.Name, done.Base))
 }
 
 // leftoverKinds is the order in which leftovers are printed.
