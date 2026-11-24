@@ -20,6 +20,16 @@ var Group = command.Group{
 			},
 			Run: runSliceCreate,
 		},
+		"edit": {
+			Description:     "Change a slice's title or description",
+			LongDescription: "Change a slice's title, its description, or both, in one commit on its base branch.",
+			Args:            []command.Arg{{Name: "name", Description: "The name of the slice to change.", Required: true}},
+			Options: map[string]command.Option{
+				"title":       {Description: "The new title. Empty sets it back to the name.", ValueName: "text", Type: "string"},
+				"description": {Description: "The new description. Empty removes it.", ValueName: "text", Type: "string"},
+			},
+			Run: runSliceEdit,
+		},
 		"list": {
 			Description:     "Show all slices",
 			LongDescription: "Show all slices in a table: name, title, and description.",

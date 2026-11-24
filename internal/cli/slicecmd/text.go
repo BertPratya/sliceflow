@@ -37,8 +37,8 @@ const (
 	cleanUpLine      = "To clean up:\n"
 	deleteFolderCmd  = "  delete the folder %s\n"
 	unstageCmd       = "  run: git -C \"%s\" reset -- \"%s\"\n"
-	stoppedAfterLine = "Stopped after the commit. Slice %s was created on branch %s.\n"
-	createdAnyway    = " Slice %s was created on branch %s."
+	stoppedAfterLine = "Stopped after the commit. Slice %s was %s on branch %s.\n"
+	doneAnyway       = " Slice %s was %s on branch %s."
 )
 
 // The lines of slice status. Each label line has its value in one column.
@@ -66,3 +66,20 @@ const (
 
 // listHeader is the header line of the table of slice list.
 var listHeader = [3]string{"NAME", "TITLE", "DESCRIPTION"}
+
+// The lines of slice edit.
+const (
+	editedLine         = "Edited slice %s.\n"
+	editValueLine      = "  %-13s %s\n"
+	nothingToChange    = "Nothing to change: slice %s already has this title and description.\n"
+	needsAnOptionLines = "Error: slice edit needs --title, --description, or both. Nothing was changed.\n" +
+		"To see the options, run: sliceflow slice edit --help\n"
+	notOnBaseLine   = "Error: slice %s is planned on branch %s, but your checkout is on %s. Nothing was changed.\n"
+	notOnBranchLine = "Error: slice %s is planned on branch %s, but your checkout is not on a branch. Nothing was changed.\n"
+	noStateLine     = "Error: the state of slice %s cannot be worked out, so it cannot be changed. Nothing was changed.\n"
+	updateHint      = "Update sliceflow, then try again.\n"
+	logHistoryHint  = "To see how the log changed, run: git log -p -- %s\n"
+	logLeftoverLine = "  log       %s\n"
+	logStagedLine   = "  staged    %s\n"
+	restoreLogCmd   = "  run: git -C \"%s\" restore --staged --worktree -- \"%s\"\n"
+)

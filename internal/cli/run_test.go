@@ -30,6 +30,7 @@ Usage:
 
 Commands:
   create <name>  Make a new slice
+  edit <name>    Change a slice's title or description
   list           Show all slices
   status <name>  Show one slice
 

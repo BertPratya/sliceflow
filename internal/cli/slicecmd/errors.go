@@ -101,13 +101,14 @@ func printStepError(w io.Writer, step *slice.StepError) {
 }
 
 // printCommittedError prints the message for a slice whose commit was
-// made, but git or the user stopped it afterwards: the slice exists.
+// made, but git or the user stopped it afterwards: the change is in the
+// commit.
 func printCommittedError(w io.Writer, done *slice.CommittedError) {
 	if command.IsStop(done.Err) {
-		fmt.Fprintf(w, stoppedAfterLine, done.Name, done.Base)
+		fmt.Fprintf(w, stoppedAfterLine, done.Name, done.Done, done.Base)
 		return
 	}
-	command.PrintFailure(w, "finish the commit", done.Err, fmt.Sprintf(createdAnyway, done.Name, done.Base))
+	command.PrintFailure(w, "finish the commit", done.Err, fmt.Sprintf(doneAnyway, done.Name, done.Done, done.Base))
 }
 
 // leftoverKinds is the order in which leftovers are printed.
