@@ -69,7 +69,7 @@ func TestSliceHelp(t *testing.T) {
 
 	status := runSliceflow(t, t.TempDir(), home, "slice", "status", "--help")
 	wantCode(t, status, 0)
-	wantFirst = "Show one slice: its title, description, creation time, base, and events.\n"
+	wantFirst = "Show one slice: its state, the next step, its title, description, creation time, base, and events.\n"
 	if !strings.HasPrefix(status.stdout, wantFirst) {
 		t.Errorf("stdout is:\n%s\nwant it to start with:\n%s", status.stdout, wantFirst)
 	}

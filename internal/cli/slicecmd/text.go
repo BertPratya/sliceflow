@@ -46,6 +46,8 @@ const (
 	statusFirstLine     = "%s: %s\n"
 	statusLine          = "  %-13s %s\n"
 	noneValue           = "(none)"
+	unknownValue        = "unknown"
+	nextWriteSpecLines  = "Next: write the spec in %s\nThen run: sliceflow spec validate %s\n"
 	createdTimeLayout   = "2006-01-02 15:04 UTC"
 	eventsValue         = "%d (last: %s)"
 	noSliceLine         = "Error: no slice named %s. Nothing was changed.\nNo log was found at docs/slices/%s/.events.jsonl.\n"

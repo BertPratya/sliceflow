@@ -19,3 +19,10 @@ const (
 	badLinesWarning   = "Warning: lines %s of %s could not be read, so they were skipped.\n"
 	moreBadLines      = " (%d more not listed)"
 )
+
+// The warnings for a state that cannot be worked out. Each names the
+// line of the log, the log, and the event.
+const (
+	unknownEventWarning = "Warning: line %d of %s has the event %s, which this version of sliceflow does not know, so the state cannot be worked out.\n"
+	notAllowedWarning   = "Warning: line %d of %s has the event %s, which is not allowed while the slice is in %s, so the state cannot be worked out.\n"
+)

@@ -53,7 +53,7 @@ Options:
 `
 
 // wantStatusHelp is the help of slice status, word for word.
-const wantStatusHelp = `Show one slice: its title, description, creation time, base, and events.
+const wantStatusHelp = `Show one slice: its state, the next step, its title, description, creation time, base, and events.
 
 Usage:
   sliceflow slice status <name> [options]

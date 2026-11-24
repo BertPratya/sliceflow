@@ -27,7 +27,7 @@ var Group = command.Group{
 		},
 		"status": {
 			Description:     "Show one slice",
-			LongDescription: "Show one slice: its title, description, creation time, base, and events.",
+			LongDescription: "Show one slice: its state, the next step, its title, description, creation time, base, and events.",
 			Args:            []command.Arg{{Name: "name", Description: "The name of the slice to show.", Required: true}},
 			Run:             runSliceStatus,
 		},
