@@ -1,5 +1,5 @@
-// Package slicecmd holds the slice commands of sliceflow: create, list,
-// and status. Each reads what the command line gave it, calls the slice
+// Package slicecmd holds the slice commands of sliceflow: create, edit,
+// list, and status. Each reads what the command line gave it, calls the slice
 // package, and prints the result or the error.
 package slicecmd
 

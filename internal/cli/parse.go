@@ -2,9 +2,10 @@ package cli
 
 import (
 	"errors"
-	"github.com/BertPratya/sliceflow/internal/cli/command"
 	"slices"
 	"strings"
+
+	"github.com/BertPratya/sliceflow/internal/cli/command"
 )
 
 // commandLine is what parseCommandLine read from a command line: either

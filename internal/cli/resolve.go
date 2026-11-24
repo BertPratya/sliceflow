@@ -1,8 +1,9 @@
 package cli
 
 import (
-	"github.com/BertPratya/sliceflow/internal/cli/command"
 	"strings"
+
+	"github.com/BertPratya/sliceflow/internal/cli/command"
 )
 
 // found is what resolveCommand finds in the words of a command line.

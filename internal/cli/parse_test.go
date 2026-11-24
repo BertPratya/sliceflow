@@ -2,9 +2,10 @@ package cli
 
 import (
 	"errors"
-	"github.com/BertPratya/sliceflow/internal/cli/slicecmd"
 	"maps"
 	"testing"
+
+	"github.com/BertPratya/sliceflow/internal/cli/slicecmd"
 )
 
 // sliceCommand returns the command actionName of the group slice, as

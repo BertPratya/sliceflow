@@ -72,8 +72,7 @@ func TestListSkipsCandidates(t *testing.T) {
 }
 
 // A log whose first line cannot be read leaves its slice out, with a
-// warning. A bad line later in a log is not mentioned: the list reads
-// only the first line.
+// warning. A bad line later in a log is skipped with no warning.
 func TestListDamagedLogs(t *testing.T) {
 	home := newHome(t)
 	repo := newProject(t, home)

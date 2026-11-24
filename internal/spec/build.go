@@ -202,8 +202,10 @@ func (b *builder) add(line Line) {
 	}
 
 	if b.section == nil || b.section.First != 0 {
-		// A second copy of a template section is read by no check: its
-		// heading gets the one problem.
+		// The decisions and questions of a second copy of a template
+		// section are read by no check: its heading gets the one
+		// problem. Rules under a second Shared rules are still read, as
+		// shared rules, so they do not also get a problem each.
 		return
 	}
 	switch b.section.Kind {

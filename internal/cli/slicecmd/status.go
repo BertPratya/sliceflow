@@ -81,9 +81,9 @@ func nextStep(s slice.StatusResult) string {
 }
 
 // PrintSliceError prints the message for err, an error of slice.Status,
-// slice.List, slice.SpecPath, or slice.Create, and returns the exit
-// code. Every command that finds a slice by its name prints its errors
-// with it, so the same mistake gets the same message.
+// slice.List, slice.SpecPath, slice.Edit, or slice.Create, and returns
+// the exit code. Every command that finds a slice by its name prints its
+// errors with it, so the same mistake gets the same message.
 func PrintSliceError(w io.Writer, err error) int {
 	var (
 		noLog   *slice.NoLogError

@@ -309,12 +309,16 @@ func TestEditWithoutState(t *testing.T) {
 		home := newHome(t)
 		repo := newLoginSlice(t, home)
 		appendText(t, sliceLog(repo, "login"), secondCreatedLine(t, repo))
+		log := readLog(t, repo)
 
 		got := runSliceflow(t, repo, home, "slice", "edit", "login", "--title", "Sign in")
 
 		wantError(t, got, 1, notAllowedLine2+
 			"Error: the state of slice login cannot be worked out, so it cannot be changed. Nothing was changed.\n"+
 			"To see how the log changed, run: git log -p -- docs/slices/login/.events.jsonl\n")
+		if after := readLog(t, repo); after != log {
+			t.Errorf("the log changed from:\n%s\nto:\n%s", log, after)
+		}
 	})
 }
 
@@ -376,4 +380,27 @@ func TestEditHelp(t *testing.T) {
 		"  --description <text>  The new description. Empty removes it.\n"+
 		"  --title <text>        The new title. Empty sets it back to the name.\n"+
 		"  -h, --help            Show this help.\n", "")
+}
+
+// slice edit checks in a fixed order, and stops at the first problem: a
+// control character in the title before one in the description, no
+// option before the name, and the base branch before the state.
+func TestEditErrorOrder(t *testing.T) {
+	home := newHome(t)
+	repo := newLoginSlice(t, home)
+
+	got := runSliceflow(t, repo, home, "slice", "edit", "login", "--title", "a\tb", "--description", "c\nd")
+	wantError(t, got, 2, "Error: --title has a control character. Nothing was changed.\n"+
+		"Received: \"a\\tb\"\n"+
+		"Write it as plain text on one line, with no control characters.\n")
+
+	got = runSliceflow(t, repo, home, "slice", "edit", "a.b")
+	wantError(t, got, 2, "Error: slice edit needs --title, --description, or both. Nothing was changed.\n"+
+		"To see the options, run: sliceflow slice edit --help\n")
+
+	appendText(t, sliceLog(repo, "login"), eventLine(2, "spec.submitted", `{}`))
+	gitOutput(t, repo, home, "switch", "--quiet", "-c", "fix/typo")
+	got = runSliceflow(t, repo, home, "slice", "edit", "login", "--title", "Sign in")
+	wantError(t, got, 1, "Error: slice login is planned on branch main, but your checkout is on fix/typo. Nothing was changed.\n"+
+		"Switch to main, then try again.\n")
 }
