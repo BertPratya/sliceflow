@@ -27,8 +27,8 @@ is written. Then it goes from the core up: the state machine, then
 | Shared command types and printing helpers | internal/cli/command/ | new |
 | The slice commands | internal/cli/slicecmd/ | new (moved from internal/cli/) |
 | The spec commands | internal/cli/speccmd/ | new |
-| The state machine | internal/state/ | new |
-| Edit, current title and description, status with the state | internal/slice/ | changed |
+| The state machine, and the current title and description | internal/state/ | new |
+| Edit, and status and list with the state | internal/slice/ | changed |
 | Reading a spec and finding its problems | internal/spec/ | new |
 | The template, without a placeholder in code | templates/default/spec.md | changed |
 | End-to-end tests | e2e/ | changed |
@@ -71,8 +71,8 @@ internal/cli/speccmd  --> internal/spec  (reads a file, knows nothing of git)
 2. Read the log. No log gives the no-slice error.
 3. Read the events. A damaged first line is an error
    (slice-and-events/R55).
-4. Replay the events into a state (`internal/state`), and into the
-   current title and description (`internal/slice`), in one pass.
+4. Replay the events into a state (`internal/state`): the position,
+   and the current title and description, in one pass.
 5. Print the warnings in their order (SD37): damaged lines, then the
    state warning.
 6. Print the lines; for a known state, the next step.
@@ -207,18 +207,43 @@ None
   `command.PrintFailure`.
 
 - **TD2.** The state machine is its own package, `internal/state`, that
-  knows only event names and states. It reads no file and runs no git.
-  The current title and description are replayed in `internal/slice`,
-  in the same pass over the events.
+  knows only events and states. It reads no file and runs no git. The
+  current title and description are worked out in the same package, in
+  the same pass over the events, as `State.Detail`.
   Why: the state machine is the core that 0003 to 0005 grow, and a
   package with no files or git is tested with plain lists of events.
-  The title is not a state (SD36), so it stays out.
+  The title is not a state (SD36), but it is replayed from the same
+  events in the same loop, so one `Replay` gives both, and `status`,
+  `list`, and `edit` all get them from one call.
   Not chosen: the state inside `internal/slice`, because that package
-  already does files and git, so its tests need repos.
+  already does files and git, so its tests need repos; the title in
+  `internal/slice`, because it would need a second loop over the same
+  events.
   Cost: one more package.
 
-- **TD3.** How the state machine is shaped: see Q1.
-  Plan only: decided by the human in Q1; the tasks follow the answer.
+- **TD3.** The state machine is a table of moves. `Replay(events)`
+  returns the whole `State`: the `Position` (phase and step), the
+  `Detail` (title and description), and `Unknown`. Each row of
+  `transitions` has `From`, `Event`, `To`, and an optional `Guard`;
+  `allowedEverywhere` lists the events allowed in every position that do
+  not move the slice (`slice.edited`). An event is known when a row or
+  `allowedEverywhere` names it. Replay reads every event: the detail
+  follows each one, and the position freezes at the first event that is
+  unknown or not allowed, where `Unknown` records its line, its name,
+  and the reason. `eventlog` decodes each event's data once, into
+  `Event.Payload`, and records `Event.Line`, so `state` never reads
+  JSON.
+  Why: a new event or step is one new row (roadmap rule 4). Returning
+  the whole state is simple, and the state is small. Freezing only the
+  position keeps SD9 and SD36 apart: the title still follows edits after
+  the state became unknown.
+  Not chosen: a switch per event, because each new event would touch
+  the code, not the data; choosing which fields to replay, because the
+  state is small and the saving cannot be measured (0.84 ms for 100
+  events); stopping the loop at the first problem, because the title
+  would stop too.
+  Cost: a guard is a function, so the table cannot be printed or saved
+  as data.
 
 - **TD4.** The spec reader works in two passes: first it marks each
   line as plain, in a code block, or in a comment, and finds its code
@@ -261,5 +286,4 @@ None
 
 ## Open questions
 
-- **Q1.** How is the state machine shaped? Options, with how each can
-  fail, are in the chat; the answer becomes TD3.
+None
