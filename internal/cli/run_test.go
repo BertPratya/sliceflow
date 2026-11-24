@@ -14,7 +14,7 @@ Usage:
   sliceflow <command> [options]
 
 Commands:
-  slice  Make and see slices
+  slice  Make, see, and change slices
   spec   Print the spec template, and find problems in specs
 
 Options:
@@ -23,7 +23,7 @@ Options:
 
 // wantSliceHelp is the help of the group slice, word for word. Its
 // commands are in alphabetical order.
-const wantSliceHelp = `Make and see slices.
+const wantSliceHelp = `Make, see, and change slices.
 
 Usage:
   sliceflow slice <command> [options]

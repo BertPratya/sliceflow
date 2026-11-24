@@ -1,13 +1,14 @@
 package slice
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
+
+	"github.com/BertPratya/sliceflow/internal/state"
 )
 
 // The reasons a candidate is not listed.
@@ -40,7 +41,10 @@ type SkippedCandidate struct {
 // in. The candidates are the folders docs/slices/<name>/ in that
 // checkout. A candidate is listed when its name is valid, its folder has
 // the log .events.jsonl, and the log's first line is a slice.created
-// event. Only that line is used. It never looks at other branches, other
+// event. A listed slice has its current title and description: the ones
+// from slice.created, changed by each slice.edited after it that can be
+// read. Other lines that cannot be read are skipped with no warning, and
+// the state is not worked out. It never looks at other branches, other
 // worktrees, or commits, and does not check whether another branch has
 // newer copies. It changes nothing.
 //
@@ -71,16 +75,16 @@ func List(ctx context.Context, dir string) (ListResult, error) {
 			result.Skipped = append(result.Skipped, SkippedCandidate{Name: name, Reason: NoLog})
 			continue
 		}
-		first, _, _ := bytes.Cut(data, []byte("\n"))
-		created, _, _, _, ok, err := readCreated(first)
+		_, _, events, _, ok, err := readCreated(data)
 		if err != nil || !ok {
 			result.Skipped = append(result.Skipped, SkippedCandidate{Name: name, Reason: NoCreatedEvent, LogPath: logPath(name)})
 			continue
 		}
+		detail := state.Replay(events).Detail
 		result.Slices = append(result.Slices, ListedSlice{
 			Name:        name,
-			Title:       created.Title,
-			Description: created.Description,
+			Title:       detail.Title,
+			Description: detail.Description,
 		})
 	}
 	return result, nil

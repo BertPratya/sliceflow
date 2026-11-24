@@ -99,3 +99,18 @@ func TestListOldCopies(t *testing.T) {
 	got := runSliceflow(t, repo, home, "slice", "list")
 	wantOutput(t, got, "NAME    TITLE   DESCRIPTION\nlogin   login\nreport  report\n", "")
 }
+
+// slice list shows the current title and description, after edits, and
+// gives no warning about a damaged line after the first.
+func TestListShowsEdits(t *testing.T) {
+	home := newHome(t)
+	repo := newProject(t, home)
+	createSlice(t, repo, home, "login", "--title", "Log in")
+	wantCode(t, runSliceflow(t, repo, home, "slice", "edit", "login", "--title", "Sign in"), 0)
+	appendText(t, sliceLog(repo, "login"), "cut off\n")
+
+	got := runSliceflow(t, repo, home, "slice", "list")
+
+	wantOutput(t, got, "NAME   TITLE    DESCRIPTION\n"+
+		"login  Sign in\n", "")
+}

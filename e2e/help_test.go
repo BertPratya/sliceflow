@@ -74,3 +74,24 @@ func TestSliceHelp(t *testing.T) {
 		t.Errorf("stdout is:\n%s\nwant it to start with:\n%s", status.stdout, wantFirst)
 	}
 }
+
+// sliceflow --help describes the slice group, and sliceflow slice --help
+// lists edit between create and list.
+func TestSliceHelpListsEdit(t *testing.T) {
+	home := newHome(t)
+
+	got := runSliceflow(t, t.TempDir(), home, "--help")
+	if !strings.Contains(got.stdout, "\n  slice  Make, see, and change slices\n") {
+		t.Errorf("the guide is:\n%s\nwant the slice group's new description", got.stdout)
+	}
+
+	got = runSliceflow(t, t.TempDir(), home, "slice", "--help")
+	wantCommands := "Commands:\n" +
+		"  create <name>  Make a new slice\n" +
+		"  edit <name>    Change a slice's title or description\n" +
+		"  list           Show all slices\n" +
+		"  status <name>  Show one slice\n"
+	if !strings.Contains(got.stdout, wantCommands) {
+		t.Errorf("stdout is:\n%s\nwant:\n%s", got.stdout, wantCommands)
+	}
+}

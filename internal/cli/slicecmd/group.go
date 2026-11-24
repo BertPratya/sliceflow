@@ -5,9 +5,9 @@ package slicecmd
 
 import "github.com/BertPratya/sliceflow/internal/cli/command"
 
-// Group holds the commands that make and show slices.
+// Group holds the commands that make, show, and change slices.
 var Group = command.Group{
-	Description: "Make and see slices",
+	Description: "Make, see, and change slices",
 	Actions: map[string]command.Action{
 		"create": {
 			Description:     "Make a new slice",
