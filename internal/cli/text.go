@@ -14,9 +14,9 @@ const (
 	unknownOptionMessage      = "unknown option \"%s\""
 	missingValueMessage       = "option \"%s\" needs a value"
 	unexpectedArgumentMessage = "unexpected argument \"%s\""
-	// missingArgumentMessage gets the group and the argument's name, as
-	// in "missing slice name".
-	missingArgumentMessage = "missing %s %s"
+	// missingArgumentMessage gets what is missing, as in "missing slice
+	// name".
+	missingArgumentMessage = "missing %s"
 
 	seeCommandsHint = "To see the commands, run: sliceflow --help"
 	// seeOptionsHint gets the command the user ran, e.g. "slice create".

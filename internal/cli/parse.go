@@ -125,7 +125,7 @@ func parseWords(f found) (command.Input, error) {
 	}
 	for _, arg := range f.action.Args {
 		if arg.Required && in.Args[arg.Name] == "" {
-			return command.Input{}, missingArgumentError(f.groupName, arg.Name, usage)
+			return command.Input{}, missingArgumentError(f.groupName, arg, usage)
 		}
 	}
 	return in, nil

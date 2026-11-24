@@ -24,7 +24,7 @@ func runSliceList(ctx context.Context, in command.Input, stdout, stderr io.Write
 	}
 	list, err := slice.List(ctx, dir)
 	if err != nil {
-		return printSliceError(stderr, err)
+		return PrintSliceError(stderr, err)
 	}
 	for _, skipped := range list.Skipped {
 		printSkipped(stderr, skipped)

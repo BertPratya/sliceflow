@@ -201,7 +201,9 @@ func (b *builder) add(line Line) {
 		b.example.Then = b.example.Then || strings.Contains(plain, "**Then**")
 	}
 
-	if b.section == nil {
+	if b.section == nil || b.section.First != 0 {
+		// A second copy of a template section is read by no check: its
+		// heading gets the one problem.
 		return
 	}
 	switch b.section.Kind {

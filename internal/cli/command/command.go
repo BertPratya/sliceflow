@@ -31,6 +31,9 @@ type Arg struct {
 	Name        string
 	Description string
 	Required    bool
+	// Missing is what the error for a missing argument calls it, as in
+	// "missing slice name". "" means the group's name, then Name.
+	Missing string
 }
 
 // Option is one option of a command. An option with a ValueName takes a

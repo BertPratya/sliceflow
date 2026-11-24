@@ -28,7 +28,7 @@ func runSliceStatus(ctx context.Context, in command.Input, stdout, stderr io.Wri
 	}
 	status, err := slice.Status(ctx, dir, in.Args["name"])
 	if err != nil {
-		return printSliceError(stderr, err)
+		return PrintSliceError(stderr, err)
 	}
 	command.PrintBadLines(stderr, status.LogPath, status.BadLines)
 	command.PrintStateWarning(stderr, status.LogPath, status.State)
@@ -80,9 +80,11 @@ func nextStep(s slice.StatusResult) string {
 	return ""
 }
 
-// printSliceError prints the message for err, an error of slice.Status,
-// slice.List, or slice.Create, and returns the exit code.
-func printSliceError(w io.Writer, err error) int {
+// PrintSliceError prints the message for err, an error of slice.Status,
+// slice.List, slice.SpecPath, or slice.Create, and returns the exit
+// code. Every command that finds a slice by its name prints its errors
+// with it, so the same mistake gets the same message.
+func PrintSliceError(w io.Writer, err error) int {
 	var (
 		noLog   *slice.NoLogError
 		noEvent *slice.NoCreatedEventError

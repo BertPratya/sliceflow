@@ -14,5 +14,11 @@ var Group = command.Group{
 			LongDescription: "Print the spec template built into sliceflow, with its guidance comments.",
 			Run:             runTemplate,
 		},
+		"validate": {
+			Description:     "Find the problems in a spec",
+			LongDescription: "Find the problems in a slice's spec, each with its line and a hint on how to fix it.",
+			Args:            []command.Arg{{Name: "name", Description: "The name of the slice whose spec to read.", Required: true, Missing: "slice name"}},
+			Run:             runValidate,
+		},
 	},
 }
