@@ -891,7 +891,7 @@ their source (e.g. "slice due-dates, review task-04-1, F3"). Low findings
 never fixed are not copied: they were optional. The slice's worktrees are
 removed when it is done.
 
-### 2.6 Design ahead: stacked slices (Part B)
+### 2.6 Design ahead: stacked slices (0011a)
 
 The human wants to design the next slice while one is being built
 (dual-track agile). **Decided (the human):**
@@ -908,6 +908,13 @@ The human wants to design the next slice while one is being built
    human first, instead of starting by itself.
 5. Building on top of an unmerged slice (restacking) only if waiting turns
    out to be too slow.
+
+**Moved to Part A, as 0011a** (2026-11-25, the human): a group of
+slices, planned and approved once, that `sliceflow` builds one after
+another by itself. **Open,** decided when 0011a starts: whether points 4
+and 5 change, so that a slice builds on the finished branch of the one
+below it before that one is merged, with later changes merged in and
+never rebased.
 
 ### 2.7 Cancel a slice (0013)
 
