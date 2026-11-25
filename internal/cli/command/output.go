@@ -1,4 +1,4 @@
-package cli
+package command
 
 // The printing helpers that every command uses: for a tool or the
 // system that failed, and for a stop with Ctrl+C.
@@ -9,15 +9,16 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"strconv"
 	"strings"
 
 	"github.com/BertPratya/sliceflow/internal/git"
 )
 
-// printFailure prints that sliceflow could not do what, followed by
+// PrintFailure prints that sliceflow could not do what, followed by
 // ending, then why: git's own error output when git failed, or else the
 // system's error text.
-func printFailure(w io.Writer, what string, err error, ending string) {
+func PrintFailure(w io.Writer, what string, err error, ending string) {
 	var gitErr *git.Error
 	if errors.As(err, &gitErr) {
 		fmt.Fprintf(w, gitFailedLine, what, ending)
@@ -59,8 +60,31 @@ func systemText(err error) string {
 	return err.Error()
 }
 
-// isStop reports whether err comes from the user stopping sliceflow,
+// IsStop reports whether err comes from the user stopping sliceflow,
 // e.g. with Ctrl+C.
-func isStop(err error) bool {
+func IsStop(err error) bool {
 	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
+}
+
+// PrintBadLines prints one warning that names the lines of the log at
+// path that could not be read, the first 10 of them at most. It prints
+// nothing when there are none.
+func PrintBadLines(w io.Writer, path string, lines []int) {
+	switch {
+	case len(lines) == 0:
+		return
+	case len(lines) == 1:
+		fmt.Fprintf(w, oneBadLineWarning, lines[0], path)
+		return
+	}
+	shown := lines[:min(len(lines), 10)]
+	numbers := make([]string, len(shown))
+	for i, line := range shown {
+		numbers[i] = strconv.Itoa(line)
+	}
+	list := strings.Join(numbers, ", ")
+	if len(lines) > 10 {
+		list += fmt.Sprintf(moreBadLines, len(lines)-10)
+	}
+	fmt.Fprintf(w, badLinesWarning, list, path)
 }

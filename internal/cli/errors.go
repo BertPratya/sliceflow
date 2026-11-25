@@ -3,6 +3,8 @@ package cli
 import (
 	"errors"
 	"fmt"
+
+	"github.com/BertPratya/sliceflow/internal/cli/command"
 )
 
 // usageError is a wrong command line: an unknown command or option, a
@@ -59,12 +61,16 @@ func unexpectedArgumentError(word, usage string) *usageError {
 	}
 }
 
-// missingArgumentError returns the error for the required argument name
-// of a command in groupName, as in "missing slice name". The hint is the
-// usage line.
-func missingArgumentError(groupName, name, usage string) *usageError {
+// missingArgumentError returns the error for the required argument arg
+// of a command in groupName, as in "missing slice name": arg.Missing, or
+// else the group and the argument's name. The hint is the usage line.
+func missingArgumentError(groupName string, arg command.Arg, usage string) *usageError {
+	what := arg.Missing
+	if what == "" {
+		what = groupName + " " + arg.Name
+	}
 	return &usageError{
-		message: fmt.Sprintf(missingArgumentMessage, groupName, name),
+		message: fmt.Sprintf(missingArgumentMessage, what),
 		hint:    fmt.Sprintf(usageHint, usage),
 	}
 }

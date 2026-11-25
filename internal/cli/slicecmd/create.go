@@ -1,4 +1,4 @@
-package cli
+package slicecmd
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/BertPratya/sliceflow/internal/cli/command"
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
 
@@ -14,19 +15,19 @@ import (
 // the branch it was made on and where the spec is, and returns 0. Otherwise
 // it prints what went wrong, and returns 2 for a title, a description,
 // or a name that cannot be used, or 1 for any other failure.
-func runSliceCreate(ctx context.Context, in input, stdout, stderr io.Writer) int {
+func runSliceCreate(ctx context.Context, in command.Input, stdout, stderr io.Writer) int {
 	dir, err := os.Getwd()
 	if err != nil {
-		printFailure(stderr, "find the current folder", err, nothingChanged)
+		command.PrintFailure(stderr, "find the current folder", err, command.NothingChanged)
 		return 1
 	}
 
-	given := in.args["name"]
+	given := in.Args["name"]
 	created, err := slice.Create(ctx, dir, slice.CreateOptions{
 		Name:        given,
-		Title:       in.options["title"],
-		Description: in.options["description"],
-		From:        in.options["from"],
+		Title:       in.Options["title"],
+		Description: in.Options["description"],
+		From:        in.Options["from"],
 	})
 	if err != nil {
 		return printCreateError(stderr, err)

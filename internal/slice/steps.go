@@ -23,13 +23,16 @@ type Step struct {
 
 // Leftover is one thing that was made but could not be removed.
 type Leftover struct {
-	Kind string // "folder" or "staged"
-	// Name is the folder's full path for "folder", and the folder's
-	// path in the project, written with / and ending in /, for "staged",
-	// e.g. "docs/slices/login/".
+	Kind string // "folder", "staged", or "log"
+	// Name is the folder's full path for "folder"; for "staged", the
+	// path in the project of what is staged, written with /, e.g.
+	// "docs/slices/login/" (a folder ends in /) or
+	// "docs/slices/login/.events.jsonl"; and the log's full path for
+	// "log", a log that still holds a line sliceflow added.
 	Name string
 	// Top is the full path of the top folder of the user's checkout,
-	// where a "staged" thing can be unstaged. It is "" for "folder".
+	// where a "staged" or "log" thing can be put back. It is "" for
+	// "folder".
 	Top string
 }
 

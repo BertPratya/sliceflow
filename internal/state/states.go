@@ -26,6 +26,15 @@ type Position struct {
 	Step  Step
 }
 
+// String returns the position as users see it: the phase, then the step
+// in brackets, e.g. "spec (draft)". The start position gives "".
+func (p Position) String() string {
+	if p == start {
+		return ""
+	}
+	return string(p.Phase) + " (" + string(p.Step) + ")"
+}
+
 // start is the position before the first event: no phase, no step.
 var start = Position{}
 

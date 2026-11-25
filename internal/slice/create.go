@@ -245,7 +245,7 @@ func commitFailed(top, name, base string, steps []Step, err error) error {
 	folder := "docs/slices/" + name // inside the project, always with /
 	made, checkErr := git.PathExists(ctx, top, "HEAD", folder+"/.events.jsonl")
 	if checkErr == nil && made {
-		return &CommittedError{Name: name, Base: base, Err: err}
+		return &CommittedError{Name: name, Base: base, Done: "created", Err: err}
 	}
 
 	var left []Leftover

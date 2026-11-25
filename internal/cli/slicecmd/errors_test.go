@@ -1,4 +1,4 @@
-package cli
+package slicecmd
 
 import (
 	"context"
@@ -73,10 +73,10 @@ func TestPrintCreateError(t *testing.T) {
 				"To clean up:\n" +
 				"  delete the folder /home/you/shop/docs/slices/login\n"},
 		{"stopped after the commit",
-			&slice.CommittedError{Name: "login", Base: "main", Err: context.Canceled}, 1,
+			&slice.CommittedError{Name: "login", Base: "main", Done: "created", Err: context.Canceled}, 1,
 			"Stopped after the commit. Slice login was created on branch main.\n"},
 		{"git failed after the commit",
-			&slice.CommittedError{Name: "login", Base: "main", Err: &git.Error{ExitCode: 1, Stderr: "something broke\n"}}, 1,
+			&slice.CommittedError{Name: "login", Base: "main", Done: "created", Err: &git.Error{ExitCode: 1, Stderr: "something broke\n"}}, 1,
 			"Error: git could not finish the commit. Slice login was created on branch main.\n" +
 				"git said:\n" +
 				"  something broke\n"},

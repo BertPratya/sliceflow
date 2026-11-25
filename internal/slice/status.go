@@ -2,15 +2,19 @@ package slice
 
 import (
 	"context"
+	"path/filepath"
 
 	"github.com/BertPratya/sliceflow/internal/eventlog"
 	"github.com/BertPratya/sliceflow/internal/git"
+	"github.com/BertPratya/sliceflow/internal/state"
 )
 
 // StatusResult is what Status found about one slice.
 type StatusResult struct {
 	Name      string                // the slice name, in lowercase
 	Created   eventlog.SliceCreated // the data of the slice.created event
+	State     state.State           // the state, worked out from every event that can be read
+	Spec      string                // the full path of the slice's spec in the user's checkout
 	CreatedAt string                // when it happened, in UTC, written like 2026-11-02T09:15:30Z
 	Events    int                   // the number of lines of the log that can be read
 	LastEvent string                // the event name of the last of them
@@ -19,7 +23,9 @@ type StatusResult struct {
 }
 
 // Status reads the slice with the given name from the user's checkout,
-// the checkout that dir is in, and returns what its log says. It reads
+// the checkout that dir is in, and returns what its log says, with the
+// state worked out from its events. A state that cannot be worked out
+// is not an error: State.Unknown says where and why. It reads
 // only docs/slices/<name>/.events.jsonl in that checkout, never another
 // branch, another worktree, or a commit, and it does not check whether
 // another branch has a newer copy. It changes nothing.
@@ -62,6 +68,8 @@ func Status(ctx context.Context, dir, given string) (StatusResult, error) {
 	return StatusResult{
 		Name:      name,
 		Created:   created,
+		State:     state.Replay(events),
+		Spec:      filepath.Join(top, "docs", "slices", name, "spec.md"),
 		CreatedAt: at,
 		Events:    len(events),
 		LastEvent: events[len(events)-1].Event,

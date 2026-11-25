@@ -19,10 +19,12 @@ func TestStatusOfASlice(t *testing.T) {
 	got := runSliceflow(t, repo, home, "slice", "status", "Login")
 
 	want := "login: Log in\n" +
+		"  State:        spec (draft)\n" +
 		"  Description:  Lets a user log in.\n" +
 		"  Created:      " + createdTime(t, repo, "login") + "\n" +
 		"  Base:         main\n" +
-		"  Events:       1 (last: slice.created)\n"
+		"  Events:       1 (last: slice.created)\n" +
+		nextSteps(t, repo, home, "login")
 	wantOutput(t, got, want, "")
 }
 
@@ -40,10 +42,12 @@ func TestStatusFromASubfolder(t *testing.T) {
 	got := runSliceflow(t, sub, home, "slice", "status", "login")
 
 	want := "login: Log in\n" +
+		"  State:        spec (draft)\n" +
 		"  Description:  (none)\n" +
 		"  Created:      " + createdTime(t, repo, "login") + "\n" +
 		"  Base:         main\n" +
-		"  Events:       1 (last: slice.created)\n"
+		"  Events:       1 (last: slice.created)\n" +
+		nextSteps(t, repo, home, "login")
 	wantOutput(t, got, want, "")
 }
 
@@ -59,10 +63,12 @@ func TestStatusInASecondWorktree(t *testing.T) {
 
 	got := runSliceflow(t, second, home, "slice", "status", "login")
 	want := "login: Log in\n" +
+		"  State:        spec (draft)\n" +
 		"  Description:  (none)\n" +
 		"  Created:      " + createdTime(t, second, "login") + "\n" +
 		"  Base:         dev/bert\n" +
-		"  Events:       1 (last: slice.created)\n"
+		"  Events:       1 (last: slice.created)\n" +
+		nextSteps(t, second, home, "login")
 	wantOutput(t, got, want, "")
 
 	got = runSliceflow(t, repo, home, "slice", "status", "login")
@@ -116,10 +122,12 @@ func TestStatusOfAnOldCopy(t *testing.T) {
 	got := runSliceflow(t, repo, home, "slice", "status", "login")
 
 	wantStdout := "login: login\n" +
+		"  State:        spec (draft)\n" +
 		"  Description:  (none)\n" +
 		"  Created:      " + createdTime(t, repo, "login") + "\n" +
 		"  Base:         dev/bert\n" +
-		"  Events:       1 (last: slice.created)\n"
+		"  Events:       1 (last: slice.created)\n" +
+		nextSteps(t, repo, home, "login")
 	wantStderr := "Warning: line 2 of docs/slices/login/.events.jsonl could not be read, so it was skipped.\n"
 	wantOutput(t, got, wantStdout, wantStderr)
 }
@@ -187,6 +195,15 @@ func newOldCopy(t *testing.T, repo, home string, names ...string) {
 	gitOutput(t, repo, home, "branch", "fix/new")
 	gitOutput(t, repo, home, "commit", "--quiet", "--allow-empty", "-m", "more on dev/bert")
 	gitOutput(t, repo, home, "switch", "--quiet", "fix/new")
+}
+
+// nextSteps returns the empty line and the next step that slice status
+// prints for the slice name in spec (draft), in the checkout at repo.
+func nextSteps(t *testing.T, repo, home, name string) string {
+	t.Helper()
+	return "\n" +
+		"Next: write the spec in " + specFile(t, repo, home, name) + "\n" +
+		"Then run: sliceflow spec validate " + name + "\n"
 }
 
 // sliceLog returns the path of the log of the slice name in the checkout

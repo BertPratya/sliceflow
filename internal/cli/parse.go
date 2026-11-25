@@ -4,27 +4,16 @@ import (
 	"errors"
 	"slices"
 	"strings"
+
+	"github.com/BertPratya/sliceflow/internal/cli/command"
 )
 
 // commandLine is what parseCommandLine read from a command line: either
 // help to show, or a command to run with its input.
 type commandLine struct {
-	help   string        // the help text to show, or "" for none
-	action CommandAction // the command to run, when help is ""
-	input  input         // what was parsed for the command
-}
-
-// input is what was read from the words after a command. A command's
-// Run gets it, so it never reads the words itself.
-type input struct {
-	// args holds each argument by its name in the command table, e.g.
-	// args["name"] is "login".
-	args map[string]string
-	// options holds each option that was given, by its name without
-	// "--", e.g. options["title"] is "Log in". An option that was not
-	// given is not in it, so v, ok := options["title"] tells "not given"
-	// from "given as an empty text".
-	options map[string]string
+	help   string         // the help text to show, or "" for none
+	action command.Action // the command to run, when help is ""
+	input  command.Input  // what was parsed for the command
 }
 
 // parseCommandLine reads args, the words after the program's name,
@@ -79,12 +68,12 @@ func parseCommandLine(registry CommandRegistry, args []string) (commandLine, err
 // the left: an unknown option, an option with no value, or an unexpected
 // word. A missing argument is checked last; an empty word counts as
 // missing.
-func parseWords(f found) (input, error) {
-	command := f.groupName + " " + f.actionName
+func parseWords(f found) (command.Input, error) {
+	ran := f.groupName + " " + f.actionName
 	usage := usageLine(f.groupName, f.actionName, f.action)
 	words := f.rest
 
-	in := input{args: map[string]string{}, options: map[string]string{}}
+	in := command.Input{Args: map[string]string{}, Options: map[string]string{}}
 	var firstErr error
 	keep := func(err error) {
 		if firstErr == nil {
@@ -99,7 +88,7 @@ func parseWords(f found) (input, error) {
 
 		if !isOption(word) {
 			if nextArg < len(f.action.Args) {
-				in.args[f.action.Args[nextArg].Name] = word
+				in.Args[f.action.Args[nextArg].Name] = word
 				nextArg++
 			} else {
 				keep(unexpectedArgumentError(word, usage))
@@ -115,29 +104,29 @@ func parseWords(f found) (input, error) {
 		name, value, hasValue := strings.Cut(strings.TrimPrefix(word, "--"), "=")
 		option, known := f.action.Options[name]
 		if !strings.HasPrefix(word, "--") || !known || option.ValueName == "" {
-			keep(unknownOptionError(optionWord(word), command))
+			keep(unknownOptionError(optionWord(word), ran))
 			continue
 		}
 		if !hasValue {
 			if i+1 == len(words) {
-				keep(missingValueError(word, command))
+				keep(missingValueError(word, ran))
 				continue
 			}
 			i++
 			value = words[i]
 		}
-		in.options[name] = value
+		in.Options[name] = value
 	}
 
 	if help {
-		return input{}, errHelp
+		return command.Input{}, errHelp
 	}
 	if firstErr != nil {
-		return input{}, firstErr
+		return command.Input{}, firstErr
 	}
 	for _, arg := range f.action.Args {
-		if arg.Required && in.args[arg.Name] == "" {
-			return input{}, missingArgumentError(f.groupName, arg.Name, usage)
+		if arg.Required && in.Args[arg.Name] == "" {
+			return command.Input{}, missingArgumentError(f.groupName, arg, usage)
 		}
 	}
 	return in, nil

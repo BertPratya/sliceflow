@@ -3,6 +3,8 @@ package slice
 import (
 	"errors"
 	"fmt"
+
+	"github.com/BertPratya/sliceflow/internal/state"
 )
 
 // ErrNoCommits is returned when the project's repository has no commit
@@ -126,11 +128,12 @@ func (e *WrongBranchError) Error() string {
 
 // CommittedError is returned when the slice's commit was made, but git
 // did not end well afterwards, e.g. because the user stopped sliceflow
-// while a post-commit hook ran. The slice exists, so nothing was
-// removed. Err says why git did not end well, e.g. ctx's error.
+// while a post-commit hook ran. The change is in the commit, so nothing
+// was removed. Err says why git did not end well, e.g. ctx's error.
 type CommittedError struct {
 	Name string // the slice name
 	Base string // the branch that has the commit
+	Done string // what the commit did to the slice: "created" or "edited"
 	Err  error
 }
 
@@ -141,4 +144,32 @@ func (e *CommittedError) Error() string {
 // Unwrap returns why git did not end well.
 func (e *CommittedError) Unwrap() error {
 	return e.Err
+}
+
+// ErrNothingToEdit is returned by Edit when it is given neither a title
+// nor a description.
+var ErrNothingToEdit = errors.New("slice: no title or description to edit")
+
+// NotOnBaseError is returned when the user's checkout is not on the
+// slice's base branch, so the slice cannot be changed there.
+type NotOnBaseError struct {
+	Name   string // the slice name
+	Base   string // the slice's base branch, from its slice.created event
+	Branch string // the branch the checkout is on, or "" when it is on no branch
+}
+
+func (e *NotOnBaseError) Error() string {
+	return fmt.Sprintf("slice: %s is planned on %q, but the checkout is on %q", e.Name, e.Base, e.Branch)
+}
+
+// NoStateError is returned when the state of a slice cannot be worked
+// out, so the slice cannot be changed. State says where and why.
+type NoStateError struct {
+	Name    string      // the slice name
+	LogPath string      // where the log is in the project, written with /
+	State   state.State // the state as far as it could be worked out; State.Unknown is not nil
+}
+
+func (e *NoStateError) Error() string {
+	return "slice: the state of " + e.Name + " cannot be worked out"
 }
