@@ -22,7 +22,7 @@ created: {{date}}
      headings (## Shared rules, ## Story 1: ..., ### Rule `name`: ...),
      the bold labels (**Example:**, **SD1.**, **Q1.**), and the labeled
      lines (Uses:, Check:, Why:, Not chosen:, Cost:, Rule:, Replaces:).
-     Don't rename or reorder them. A labeled line may go on over more
+     Don't rename them. A labeled line may go on over more
      lines: indent the extra lines 2 spaces more than the label.
 
      - Replace every {{...}} with real text. The text inside says what
@@ -31,10 +31,11 @@ created: {{date}}
      - The title of the slice lives only in its event log. Don't repeat
        it in a heading or in other files.
      - Each section has a comment like this one with its rules. Follow it.
-     - Keep the sections in this order. Don't rename them.
+     - The sections may come in any order. Don't rename them.
      - Repeat a block as often as needed: stories, rules, examples,
        decisions.
-     - A required section with nothing to say gets one line: None.
+     - Only a story is required. A section you don't need can be left
+       out, or say one line: None.
      - When you are done, delete every comment and check that no {{ is
        left. A spec with a comment or a {{ left in it is not finished.
        This template puts no placeholder inside a code block, so the check
