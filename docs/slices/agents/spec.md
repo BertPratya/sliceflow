@@ -52,7 +52,16 @@ created: 2026-11-25
      and why it is needed. The why helps a worker guess right when a
      rule leaves something open. -->
 
-{{Two or three sentences: what this feature lets someone do, and why.}}
+sliceflow starts a Claude Code agent on a slice with one command, and
+the agent works in the background, even after the terminal is closed.
+The user sees every agent run of a slice: whether it is running, done,
+stuck, or stopped, its model, its time, its tokens, and how close the
+user is to their plan's limits; they read what an agent said and did,
+and stop it so that nothing it started keeps running. Today agents are
+started by hand in separate chats, and nothing records which run
+belongs to which slice, what it used, or whether it is still alive;
+every later step (the spec review, the run, the dashboard) needs one
+reliable way to start, watch, and stop an agent.
 
 ## Shared rules
 
@@ -232,7 +241,18 @@ Check: {{unit, api, e2e, or manual}}
      - Reminders and notifications.
      - Repeating tasks. -->
 
-- {{What this slice does not do.}}
+- A review of the spec by an agent, and answers in JSON: slice 0003a.
+- A page in the browser that shows a running agent live: slice 0003b.
+- Sending a message to an agent while it runs: the chat page.
+- Codex, or any agent tool other than Claude Code: slice 0008.
+- Settings per role, and a settings file: slice 0005.
+- A worktree for an agent; an agent that may edit works in the user's checkout.
+- Binding a chat or a lead to a slice, and listing a slice's chats: slice 0009a.
+- Bringing back runs after sliceflow itself was killed, and retrying a run: slice 0010.
+- Limits on tokens or cost per run or per slice: slice 0013.
+- A copy of an agent's conversation saved by sliceflow.
+- Bringing back a lost run by itself; the user continues its conversation instead: slice 0010.
+- Agent commands on Windows, beyond an error that says they do not work there yet: slice 0013a.
 
 ## Decisions
 
@@ -263,12 +283,62 @@ Check: {{unit, api, e2e, or manual}}
          day.
        Rule: overdue-task -->
 
-- **SD1.** {{The choice.}}
-  Why: {{the reason}}
-  Not chosen: {{the main other option, and why not}}
-  Cost: {{the downside we accept, or None}}
-  Rule: {{the rule that states it, e.g. lowercase-name, or none}}
-  Replaces: {{an earlier decision, e.g. device-pairing/SD3}}
+- **SD1.** A record of each agent run stays on the user's computer, inside
+  git's own folder (`.git/sliceflow/`), and is never committed.
+  Why: a run is like a process: it lives on one machine. Committing
+  would add two bookkeeping commits per run to the base branch. Inside
+  `.git/`, nothing shows in `git status`, and the user's `.gitignore`
+  is never touched, as with the lock (plan-on-base SD10).
+  Not chosen: committing each event, as `slice edit` does, because the
+  history would fill with noise; a `.sliceflow/` folder in the project,
+  because git would show it as untracked.
+  Cost: teammates who pull the repo do not see the user's runs, and a
+  fresh clone starts with none.
+  Rule: {{named when this story's rules are drafted}}
+- **SD2.** sliceflow saves no copy of an agent's conversation. It reads
+  the agent tool's own session files.
+  Why: one source of truth; a copy would only repeat what the tool keeps.
+  Not chosen: a copy in sliceflow's own format, because it duplicates
+  every conversation.
+  Cost: when the tool deletes an old session (Claude Code does after 30
+  days by default), its conversation can no longer be shown.
+  Rule: {{named when this story's rules are drafted}}
+- **SD3.** Agent commands work on Linux and macOS first. On Windows they
+  print an error and change nothing, until slice 0013a.
+  Why: the human develops on Linux, and Linux and macOS share one way to
+  start and stop processes; Windows needs different work.
+  Not chosen: all three systems now, because it doubles the hardest part
+  of the slice.
+  Cost: Windows users cannot use agents until 0013a.
+  Rule: {{named when this story's rules are drafted}}
+- **SD4.** If the part of sliceflow that watches a run stops, the agent
+  stops too, and the run shows as lost.
+  Why: an agent must never run with nobody enforcing its time limit or
+  recording how it ended.
+  Not chosen: the agent keeps running alone, because it could run all
+  night, unwatched, using the user's plan limits.
+  Cost: the work in progress stops; the user continues the conversation
+  with `sliceflow agent continue`.
+  Rule: {{named when this story's rules are drafted}}
+- **SD5.** Continuing a conversation starts a new run on the same
+  session. Each run is one start and one end of the agent.
+  Why: Claude Code continues a session in a new process, with the same
+  session, so one conversation can span several runs.
+  Not chosen: reopening the old run, because a run that ended would
+  start again and its times and usage would mix.
+  Cost: one conversation shows as several lines in `agent list`.
+  Rule: {{named when this story's rules are drafted}}
+- **SD6.** A run the user starts has full capability by default: the
+  user's own Claude Code setup, as when they run `claude` themselves.
+  `--allow read` or `--allow edit` narrows it. Runs sliceflow starts for
+  a role, e.g. the reviewer, get a fixed list that the user cannot widen.
+  Why: who drives the agent decides its permissions; the user wants the
+  same power as the official app.
+  Not chosen: read-only by default, because it caps what the user can do
+  with their own agent.
+  Cost: a run with full capability works in the user's own checkout,
+  limited only by their own settings.
+  Rule: {{named when this story's rules are drafted}}
 
 ## Open questions
 
@@ -277,4 +347,6 @@ Check: {{unit, api, e2e, or manual}}
      that does not block the build moves to Out of scope and the backlog.
      The spec review starts only when this section says None. -->
 
-- **Q1.** {{A question for the human.}}
+- **Q1.** How is a run named in `agent show`, `agent stop`, and
+  `agent continue`: a number per slice, or a short ID unique in the
+  project? The human decides later, after more thought.
