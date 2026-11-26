@@ -45,5 +45,23 @@ jobs:
       - name: Vet
         run: go vet ./...
 
+      # Finds suspicious code that vet misses, e.g. an ignored error or
+      # code that can never run. It runs on every system, because some
+      # files are built only for one system.
+      - name: Staticcheck
+        env:
+          GOTOOLCHAIN: auto
+        run: go run honnef.co/go/tools/cmd/staticcheck@v0.8.2 ./...
+
+      # Warns when the code calls a function of a library, or of Go
+      # itself, that has a known security hole.
+      - name: Govulncheck
+        if: runner.os == 'Linux'
+        env:
+          GOTOOLCHAIN: auto
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
+
+      # -race finds two goroutines that touch the same value at the same
+      # time without a lock.
       - name: Test
-        run: go test ./...
+        run: go test -race ./...
