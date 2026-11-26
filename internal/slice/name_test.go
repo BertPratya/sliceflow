@@ -1,19 +1,16 @@
 package slice_test
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
 
-// The second lines of R20. ParseName's error text is the line itself, so
-// the command can print it as it is.
-const (
-	msgCharacters = "Allowed characters: letters, digits, hyphens, underscores. Start with a letter or a digit."
-	msgTooLong    = "A name has at most 40 characters."
-	msgReserved   = "Windows reserves this name. Choose another."
-)
+// The three problems of R20 are slice.ErrNameCharacters,
+// slice.ErrNameTooLong, and slice.ErrNameReserved. The sentence the
+// command prints for each is checked by the e2e tests.
 
 // kelvin is the Kelvin sign, U+212A. It looks like K, but it is not one
 // of A to Z. strings.ToLower and unicode.ToLower turn it into a plain k.
@@ -61,7 +58,7 @@ func TestParseNameGoodNames(t *testing.T) {
 }
 
 // Test 2: a character or a start that R19 does not allow gives the
-// first message of R20. A capital outside A to Z is not made lowercase,
+// first problem of R20. A capital outside A to Z is not made lowercase,
 // so it is rejected too.
 func TestParseNameRejectsCharacters(t *testing.T) {
 	names := []string{
@@ -82,16 +79,16 @@ func TestParseNameRejectsCharacters(t *testing.T) {
 	}
 	for _, name := range names {
 		t.Run(name, func(t *testing.T) {
-			checkError(t, name, msgCharacters)
+			checkError(t, name, slice.ErrNameCharacters)
 		})
 	}
 }
 
-// Test 3: a name over 40 characters gives the second message of R20.
+// Test 3: a name over 40 characters gives the second problem of R20.
 func TestParseNameRejectsTooLong(t *testing.T) {
-	checkError(t, strings.Repeat("a", 41), msgTooLong)
-	checkError(t, strings.Repeat("A", 41), msgTooLong)
-	checkError(t, strings.Repeat("ab-", 20), msgTooLong) // 60
+	checkError(t, strings.Repeat("a", 41), slice.ErrNameTooLong)
+	checkError(t, strings.Repeat("A", 41), slice.ErrNameTooLong)
+	checkError(t, strings.Repeat("ab-", 20), slice.ErrNameTooLong) // 60
 }
 
 // Test 4: every name that Windows reserves gives the third message of
@@ -104,7 +101,7 @@ func TestParseNameRejectsReserved(t *testing.T) {
 	}
 	for _, name := range names {
 		t.Run(name, func(t *testing.T) {
-			checkError(t, name, msgReserved)
+			checkError(t, name, slice.ErrNameReserved)
 		})
 	}
 }
@@ -115,11 +112,11 @@ func TestParseNameRejectsReserved(t *testing.T) {
 // characters with é in it is 41 bytes long, and must be rejected for the
 // é, not for its length.
 func TestParseNameReportsTheFirstProblem(t *testing.T) {
-	checkError(t, "café"+strings.Repeat("a", 40), msgTooLong)
-	checkError(t, "-"+strings.Repeat("a", 45), msgTooLong)
-	checkError(t, "é"+strings.Repeat("a", 39), msgCharacters)
-	checkError(t, strings.Repeat("é", 40), msgCharacters)
-	checkError(t, strings.Repeat("é", 41), msgTooLong)
+	checkError(t, "café"+strings.Repeat("a", 40), slice.ErrNameTooLong)
+	checkError(t, "-"+strings.Repeat("a", 45), slice.ErrNameTooLong)
+	checkError(t, "é"+strings.Repeat("a", 39), slice.ErrNameCharacters)
+	checkError(t, strings.Repeat("é", 40), slice.ErrNameCharacters)
+	checkError(t, strings.Repeat("é", 41), slice.ErrNameTooLong)
 }
 
 // Test 6: an empty name is not valid. The commands report it as a
@@ -131,16 +128,16 @@ func TestParseNameRejectsEmpty(t *testing.T) {
 	}
 }
 
-// checkError fails the test unless ParseName(given) returns an error
-// whose text is want, and an empty name.
-func checkError(t *testing.T, given, want string) {
+// checkError fails the test unless ParseName(given) returns the error
+// want, and an empty name.
+func checkError(t *testing.T, given string, want error) {
 	t.Helper()
 	got, err := slice.ParseName(given)
 	if err == nil {
 		t.Errorf("ParseName(%q) = %q and no error, want the error %q", given, got, want)
 		return
 	}
-	if err.Error() != want {
+	if !errors.Is(err, want) {
 		t.Errorf("ParseName(%q) returned the error %q, want %q", given, err, want)
 	}
 	if got != "" {

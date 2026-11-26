@@ -17,7 +17,11 @@ const (
 		"Received: \"%s\"\n" +
 		"Write it as plain text on one line, with no control characters.\n"
 	invalidNameLines = "Error: invalid slice name \"%s\". Nothing was changed.\n%s\n"
-	gitNotFoundLines = "Error: git was not found. Nothing was changed.\n" +
+	// The second line of invalidNameLines: which rule the name breaks.
+	nameTooLongLine    = "A name has at most 40 characters."
+	nameReservedLine   = "Windows reserves this name. Choose another."
+	nameCharactersLine = "Allowed characters: letters, digits, hyphens, underscores. Start with a letter or a digit."
+	gitNotFoundLines   = "Error: git was not found. Nothing was changed.\n" +
 		"Install git, then try again.\n"
 	noCommitsLines = "Error: this repository has no commits yet. Nothing was changed.\n" +
 		"Make a first commit, then try again.\n"

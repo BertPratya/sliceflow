@@ -19,7 +19,7 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("exit code %d: %s", e.ExitCode, e.Stderr)
 }
 
-var ErrNotFound = errors.New("git not found.")
+var ErrNotFound = errors.New("git not found")
 
 func run(ctx context.Context, dir string, args ...string) (string, error) {
 

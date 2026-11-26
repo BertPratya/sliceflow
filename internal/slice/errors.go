@@ -23,8 +23,8 @@ func (e *ControlCharacterError) Error() string {
 }
 
 // InvalidNameError is returned when the given name cannot be a slice
-// name. The text of Problem says which rule it breaks, as one sentence
-// for the user.
+// name. Problem says which rule it breaks: ErrNameTooLong,
+// ErrNameReserved, or ErrNameCharacters.
 type InvalidNameError struct {
 	Given   string // the name as it was given
 	Problem error

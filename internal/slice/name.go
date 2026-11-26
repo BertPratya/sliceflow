@@ -8,12 +8,11 @@ import (
 )
 
 // The three problems a name can have, in the order they are checked: when
-// a name has more than one, the first is reported. The text of each error
-// is the second line that the command prints.
+// a name has more than one, the first is reported.
 var (
-	errTooLong    = errors.New("A name has at most 40 characters.")
-	errReserved   = errors.New("Windows reserves this name. Choose another.")
-	errCharacters = errors.New("Allowed characters: letters, digits, hyphens, underscores. Start with a letter or a digit.")
+	ErrNameTooLong    = errors.New("name has more than 40 characters")
+	ErrNameReserved   = errors.New("name is reserved by Windows")
+	ErrNameCharacters = errors.New("name has a character that is not allowed")
 )
 
 // reservedNames are the names Windows does not allow for a file or a
@@ -57,26 +56,26 @@ func lowercaseAZ(given string) string {
 // Windows reserves, such as con or lpt1; and has only letters a to z,
 // digits, hyphens, and underscores, starting with a letter or a digit.
 // When the name breaks more than one rule, the error is the first of
-// errTooLong, errReserved, and errCharacters. On an error, the name is
-// "".
+// ErrNameTooLong, ErrNameReserved, and ErrNameCharacters. On an error,
+// the name is "".
 func ParseName(given string) (string, error) {
 	if utf8.RuneCountInString(given) > 40 {
-		return "", errTooLong
+		return "", ErrNameTooLong
 	}
 
 	name := lowercaseAZ(given)
 
 	if _, isReserved := reservedNames[name]; isReserved {
-		return "", errReserved
+		return "", ErrNameReserved
 	}
 
 	if name == "" {
-		return "", errCharacters
+		return "", ErrNameCharacters
 	}
 	for i, r := range name {
 		allowed := isAlphaNum(r) || (i > 0 && (r == '-' || r == '_'))
 		if !allowed {
-			return "", errCharacters
+			return "", ErrNameCharacters
 		}
 	}
 

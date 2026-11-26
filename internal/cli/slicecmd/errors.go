@@ -12,6 +12,22 @@ import (
 	"github.com/BertPratya/sliceflow/internal/slice"
 )
 
+// nameProblemLine returns the sentence that tells the user which rule a
+// slice name breaks, for problem, the Problem of a
+// *slice.InvalidNameError. A problem it does not know gives the
+// problem's own text.
+func nameProblemLine(problem error) string {
+	switch {
+	case errors.Is(problem, slice.ErrNameTooLong):
+		return nameTooLongLine
+	case errors.Is(problem, slice.ErrNameReserved):
+		return nameReservedLine
+	case errors.Is(problem, slice.ErrNameCharacters):
+		return nameCharactersLine
+	}
+	return problem.Error()
+}
+
 // printCreateError prints the message for err, an error of slice.Create,
 // to w, and returns the exit code: 2 for a title, a description, or a
 // name that cannot be used, and 1 for any other failure. When a tool
@@ -36,7 +52,7 @@ func printCreateError(w io.Writer, err error) int {
 		fmt.Fprintf(w, controlCharacterLines, control.Option, slice.EscapeControlCharacters(control.Text))
 		return 2
 	case errors.As(err, &invalid):
-		fmt.Fprintf(w, invalidNameLines, invalid.Given, invalid.Problem)
+		fmt.Fprintf(w, invalidNameLines, invalid.Given, nameProblemLine(invalid.Problem))
 		return 2
 	case errors.As(err, &step):
 		printStepError(w, step)
